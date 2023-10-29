@@ -49,6 +49,10 @@ class ReflectionEditor {
         RenderScalarRflParamEditor<T>(obj, member, dtype, n, nullptr);
     }
 
+    static int64_t ReadPrimitiveInt(void* obj, const hh::fnd::RflClassMember::Type type);
+    static void WritePrimitiveInt(void* obj, int64_t value, const hh::fnd::RflClassMember::Type type);
+    static void RenderEnumEditor(void* obj, const hh::fnd::RflClassMember* member);
+
     static void RenderStubRflParamEditor(const hh::fnd::RflClassMember* member);
     static void RenderStructRflParamEditor(void* obj, const char* name, const hh::fnd::RflClass* rflClass);
     static void RflClassMembersEditor(void* obj, const hh::fnd::RflClass* rflClass);

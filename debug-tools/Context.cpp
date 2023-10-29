@@ -8,7 +8,7 @@ static ID3D11RenderTargetView* renderTargetView;
 static ID3D11Texture2D* backBuffer;
 static ImFont* font;
 
-bool Context::visible = true;
+bool Context::visible = false;
 bool Context::passThroughMouse = false;
 bool Context::inited = false;
 

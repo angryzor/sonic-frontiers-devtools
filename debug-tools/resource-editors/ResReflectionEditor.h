@@ -1,6 +1,7 @@
 #pragma once
 #include "../common/ReflectionEditor.h"
 #include "../serialization/ReflectionSerializer.h"
+#include "../imgui/ImGuiFileDialog.h"
 
 class ResReflectionEditor {
 public:
@@ -30,9 +31,19 @@ public:
 		ImGui::Unindent();
 
 		if (clicked_export) {
-			auto rflClass = rangerssdk::bootstrap::GetAddress(&T::rflClass);
+			ImGuiFileDialog::Instance()->OpenDialog("ResReflectionExportDialog", "Choose File", ".rfl", ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite);
+		}
 
-			ReflectionSerializer::SerializeToFile(L"angry-test.rfl", resource.reflectionData, *rflClass);
+		if (ImGuiFileDialog::Instance()->Display("ResReflectionExportDialog")) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				std::wstring wFilePath(filePath.begin(), filePath.end());
+
+				auto rflClass = rangerssdk::bootstrap::GetAddress(&T::rflClass);
+
+				ReflectionSerializer::SerializeToFile(wFilePath.c_str(), resource.reflectionData, *rflClass);
+			}
+			ImGuiFileDialog::Instance()->Close();
 		}
 	}
 };
