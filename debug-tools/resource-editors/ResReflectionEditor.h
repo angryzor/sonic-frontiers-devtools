@@ -34,7 +34,7 @@ public:
 			ImGuiFileDialog::Instance()->OpenDialog("ResReflectionExportDialog", "Choose File", ".rfl", ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite);
 		}
 
-		if (ImGuiFileDialog::Instance()->Display("ResReflectionExportDialog")) {
+		if (ImGuiFileDialog::Instance()->Display("ResReflectionExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
 				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 				std::wstring wFilePath(filePath.begin(), filePath.end());

@@ -130,7 +130,7 @@
       <Command>copy /Y "$(MSBuildProjectDirectory)\Mod.ini" "$(MSBuildProjectDirectory)\bin\$(Platform)\$(Configuration)\mod.ini"</Command>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>copy "$(OutDir)debug-tools.dll" "C:\Program Files (x86)\Steam\steamapps\common\SonicFrontiers\Mods\debugtools"</Command>
+      <Command>copy "$(OutDir)debug-tools.dll" "C:\Program Files (x86)\Steam\steamapps\common\SonicFrontiers\Mods\devtools"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>amod</Outputs>
@@ -168,18 +168,19 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\Detours\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\Detours\include;C:\Users\Ruben Tytgat\source\repos\rangers-sdk\include;C:\Users\Ruben Tytgat\Documents\HedgeLib\HedgeLib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>Pch.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
+      <PreprocessorDefinitions>_WINDLL;USE_STD_FILESYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
-      <AdditionalDependencies>detours.lib;syelog.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Detours\lib\x64</AdditionalLibraryDirectories>
+      <AdditionalDependencies>detours.lib;syelog.lib;rangers-sdk.lib;HedgeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Detours\lib\x64;C:\Users\Ruben Tytgat\source\repos\devtools\x64\Release;C:\Users\Ruben Tytgat\Documents\HedgeLib\build\HedgeLib\Release</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(MSBuildProjectDirectory)\Mod.ini" "$(MSBuildProjectDirectory)\bin\$(Platform)\$(Configuration)\mod.ini"</Command>
@@ -190,6 +191,7 @@
     <ClInclude Include="Context.h" />
     <ClInclude Include="Desktop.h" />
     <ClInclude Include="Helpers.h" />
+    <ClInclude Include="icons.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialogConfig.h" />
     <ClInclude Include="Library.h" />
@@ -210,6 +212,7 @@
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="Desktop.cpp" />
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="Icons.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />

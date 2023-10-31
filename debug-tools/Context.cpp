@@ -11,6 +11,7 @@ static ImFont* font;
 bool Context::visible = false;
 bool Context::passThroughMouse = false;
 bool Context::inited = false;
+bool Context::alreadyRendering = false;
 
 static Desktop* desktop{};
 
@@ -63,16 +64,14 @@ static void createBackBuffer(IDXGISwapChain* This)
 
 VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, Present, UINT SyncInterval, UINT Flags)
 {
-	if (Context::visible) {
+	if (Context::visible && !Context::alreadyRendering) {
+		Context::alreadyRendering = true;
 		ShowCursor(true);
-
 		if (!renderTargetView) {
 			createBackBuffer(This);
 		}
-
 		Context::update();
-		deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
-		ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+		Context::alreadyRendering = false;
 	}
 
 	return originalIDXGISwapChainPresent(This, SyncInterval, Flags);
@@ -129,6 +128,7 @@ void Context::init() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
 	desktop = new (allocator) Desktop(allocator);
@@ -148,8 +148,15 @@ void Context::update()
 	ImGui::NewFrame();
 	ImGui::ShowDemoWindow();
 	desktop->Render();
-	//ImGui::EndFrame();
-
 	ImGui::Render();
+
+	deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
+	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
+
+	//if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	//{
+	//	ImGui::UpdatePlatformWindows();
+	//	ImGui::RenderPlatformWindowsDefault();
+	//}
 }
 

@@ -31,5 +31,4 @@ void ToolBar::Render() {
 		ImGui::EndMenuBar();
 	}
 	ImGui::End();
-
 }

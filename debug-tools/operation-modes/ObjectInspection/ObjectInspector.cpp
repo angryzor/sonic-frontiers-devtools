@@ -30,7 +30,7 @@ void ObjectInspector::Render() {
 
 						char buf[200];
 						snprintf(buf, sizeof(buf), "%s (#%d)", component->pStaticClass->dynamicName, idx);
-						
+
 						if (ImGui::CollapsingHeader(buf)) {
 							RenderComponentInspector(*component);
 						}
@@ -40,16 +40,16 @@ void ObjectInspector::Render() {
 				ImGui::EndTabBar();
 			}
 		}
-		ImGui::End();
 	}
+	ImGui::End();
 }
 
 void ObjectInspector::RenderComponentInspector(GOComponent& component) {
 	if (component.pStaticClass == hh::game::GOCTransform::GetClass()) {
 		RenderGOCTransformInspector(static_cast<GOCTransform&>(component));
-	} else if(component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
+	} else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
 		RenderGOCPlayerParameterInspector(static_cast<app::player::GOCPlayerParameter&>(component));
-	} {
+	} else {
 		RenderUnknownComponentInspector(component);
 	}
 }

@@ -123,15 +123,13 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 
 			switch (member.GetType()) {
 			case RflClassMember::TYPE_POINTER:
-				offTable.push_back(writer.tell());
-
+				writer.add_offset(writer.tell());
 				writer.write_obj(EnqueueChunk({ address, &member, 1 })); 
 				break;
 			case RflClassMember::TYPE_ARRAY: {
 				auto arr = static_cast<csl::ut::MoveArray<void*>*>(address);
 
-				offTable.push_back(writer.tell());
-
+				writer.add_offset(writer.tell());
 				hl::csl::move_array64<void*> offsetarr{
 					EnqueueChunk({ address, &member, arr->size() }),
 					arr->size(),
@@ -157,15 +155,21 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 				WritePrimitive(address, member.GetSubType());
 				break;
 			case RflClassMember::TYPE_CSTRING: {
-				auto loc = writer.tell();
-				strTable.push_back({ static_cast<const char*>(address), loc });
-				writer.write_obj(loc);
+				auto str = *static_cast<const char**>(address);
+
+				if (str != nullptr)
+					writer.add_string(str, writer.tell());
+
+				writer.write_obj(hl::off64<const char>{ nullptr });
 				break;
 			}
 			case RflClassMember::TYPE_STRING: {
-				auto loc = writer.tell();
-				strTable.push_back({ static_cast<const char*>(address), loc });
-				writer.write_obj(OffsetVarStr{ loc, 0ui64 });
+				auto str = *static_cast<const char**>(address);
+
+				if (str != nullptr)
+					writer.add_string(str, writer.tell());
+
+				writer.write_obj(OffsetVarStr{ nullptr, nullptr });
 				break;
 			}
 			default:

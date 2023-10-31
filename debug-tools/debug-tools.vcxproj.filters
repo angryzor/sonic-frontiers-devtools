@@ -19,6 +19,7 @@
     <ClInclude Include="serialization\EndianSwaps.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="icons.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -43,6 +44,7 @@
     <ClCompile Include="serialization\ReflectionSerializer.cpp" />
     <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
+    <ClCompile Include="Icons.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

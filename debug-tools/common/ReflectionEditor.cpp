@@ -178,20 +178,16 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 				RenderStructRflParamEditor(address, GetRflMemberName(member), member->m_pClass);
 				break;
 			case RflClassMember::TYPE_FLAGS:
-				ImGui::Text(GetRflMemberName(member));
-				ImGui::Text("Coming soon!");
+				RenderStubRflParamEditor(member);
 				break;
 			case RflClassMember::TYPE_CSTRING:
-				ImGui::Text(GetRflMemberName(member));
-				ImGui::Text("Coming soon!");
+				RenderStubRflParamEditor(member);
 				break;
 			case RflClassMember::TYPE_STRING:
-				ImGui::Text(GetRflMemberName(member));
-				ImGui::Text("Coming soon!");
+				RenderStubRflParamEditor(member);
 				break;
 			case RflClassMember::TYPE_OBJECT_ID:
-				ImGui::Text(GetRflMemberName(member));
-				ImGui::Text("Coming soon!");
+				RenderStubRflParamEditor(member);
 				break;
 			case RflClassMember::TYPE_POSITION:
 				RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(address, member, ImGuiDataType_Float, 3, "RangeFloat");

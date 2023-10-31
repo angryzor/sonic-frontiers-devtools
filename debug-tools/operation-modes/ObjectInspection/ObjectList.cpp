@@ -1,6 +1,7 @@
 #include "../../Pch.h"
 #include "ObjectList.h"
 #include "ObjectInspection.h"
+#include "../../icons.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -27,6 +28,7 @@ void ObjectList::Render() {
 					if (objectInspection.focusedObject == obj)
 						nodeflags |= ImGuiTreeNodeFlags_Selected;
 
+					//RenderIcon(IconId::OBJECT, objectInspection.desktop);
 					ImGui::TreeNodeEx(obj, nodeflags, objName == nullptr ? "" : objName);
 
 					if (ImGui::IsItemClicked())
@@ -38,7 +40,6 @@ void ObjectList::Render() {
 
 		if (objectClicked)
 			objectInspection.focusedObject = objectClicked;
-
-		ImGui::End();
 	}
+	ImGui::End();
 }
