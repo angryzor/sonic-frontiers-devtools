@@ -101,53 +101,111 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 	ResReflectionEditor::Render(*component.cameraSetParameters);
 }
 
+struct EuclidianTransform {
+	csl::math::Vector3 position;
+	csl::math::Vector3 rotation;
+	csl::math::Vector3 scale;
+
+	EuclidianTransform(const csl::math::Transform& transform) : position{ transform.position }, rotation{ transform.rotation.toRotationMatrix().eulerAngles(0, 1, 2) }, scale{transform.scale} {}
+
+	operator csl::math::Transform() {
+		return {
+			position,
+			csl::math::Quaternion(
+				Eigen::AngleAxisf(rotation[0], Eigen::Vector3f::UnitX()) *
+				Eigen::AngleAxisf(rotation[1], Eigen::Vector3f::UnitY()) *
+				Eigen::AngleAxisf(rotation[2], Eigen::Vector3f::UnitZ())
+			),
+			scale,
+		};
+	}
+
+	bool operator==(const EuclidianTransform& other) const {
+		return position == other.position && rotation == other.rotation && scale == other.scale;
+	}
+
+	bool operator!=(const EuclidianTransform& other) const {
+		return !operator==(other);
+	}
+};
+
 void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {
-	if (ImGui::BeginTable("Transform", 5))
+	EuclidianTransform localTransform{ component.transform };
+
+	ImGui::SeparatorText("Main local transform (editable form)");
+
+	ImGui::DragFloat3("Position", reinterpret_cast<float*>(&localTransform.position), 0.05f);
+	ImGui::DragFloat3("Rotation", reinterpret_cast<float*>(&localTransform.rotation), 0.005f);
+	ImGui::DragFloat3("Scale", reinterpret_cast<float*>(&localTransform.scale), 0.05f);
+
+	ImGui::SeparatorText("Main local transform (internal representation)");
+	RenderTransformViewer("GOCTransformTransform", component.transform);
+
+	ImGui::SeparatorText("HFrame full transform");
+	RenderTransformViewer("HFrameTransformFull", component.frame->fullTransform);
+
+	ImGui::SeparatorText("HFrame full transform");
+	RenderTransformViewer("HFrameTransformLocal", component.frame->localTransform);
+
+	if (localTransform != component.transform) {
+		component.SetLocalTransform(localTransform);
+	}
+}
+
+void ObjectInspector::RenderTransformViewer(const char* name, const csl::math::Transform& transform) {
+	if (ImGui::BeginTable(name, 5))
 	{
-		ImGui::TableSetupColumn("");
 		ImGui::TableSetupColumn("X");
 		ImGui::TableSetupColumn("Y");
 		ImGui::TableSetupColumn("Z");
 		ImGui::TableSetupColumn("W");
+		ImGui::TableSetupColumn("");
 
 		ImGui::TableHeadersRow();
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.position.x());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.position.y());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.position.z());
+		ImGui::TableNextColumn();
+		ImGui::TableNextColumn();
 		ImGui::Text("Position");
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.position.x());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.position.y());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.position.z());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.position.w());
 
 		ImGui::TableNextRow();
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.rotation.x());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.rotation.y());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.rotation.z());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.rotation.w());
 		ImGui::TableNextColumn();
 		ImGui::Text("Rotation");
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.rotation.x());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.rotation.y());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.rotation.z());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.rotation.w());
 
 		ImGui::TableNextRow();
 		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.scale.x());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.scale.y());
+		ImGui::TableNextColumn();
+		ImGui::Text("%f", transform.scale.z());
+		ImGui::TableNextColumn();
+		ImGui::TableNextColumn();
 		ImGui::Text("Scale");
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.scale.x());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.scale.y());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.scale.z());
-		ImGui::TableNextColumn();
-		ImGui::Text("%f", component.scale.w());
 
 		ImGui::EndTable();
 	}
 }
+
+//void ObjectInspector::RenderGOCInputInspector(GOCInput& component) {
+//	auto inputComponent = component.GetInputComponent();
+//
+//	ImGui::Text("Internal player input id: %d", component.GetInternalPlayerInputId());
+//	ImGui::SeparatorText("Action monitors (%d):", inputComponent->actionMonitors.size());
+//	ImGui::SeparatorText("Axis monitors (%d):", inputComponent->axisMonitors.size());
+//
+//}

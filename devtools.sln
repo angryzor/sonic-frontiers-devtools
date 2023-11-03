@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 17
 VisualStudioVersion = 17.7.34009.444
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "debug-tools", "debug-tools\debug-tools.vcxproj", "{3B1FACDC-2FB9-4CE7-ABF7-9F88E9F9501E}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "devtools", "devtools\devtools.vcxproj", "{3B1FACDC-2FB9-4CE7-ABF7-9F88E9F9501E}"
 	ProjectSection(ProjectDependencies) = postProject
 		{D692677A-2F96-475C-B56C-2E4586D2EF80} = {D692677A-2F96-475C-B56C-2E4586D2EF80}
 	EndProjectSection

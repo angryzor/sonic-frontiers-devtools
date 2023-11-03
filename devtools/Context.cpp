@@ -1,6 +1,8 @@
 #include "Pch.h"
+#include "Inter.h"
 #include "Context.h"
 #include "Desktop.h"
+#include "imgui/imgui_freetype.h"
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -45,7 +47,7 @@ HOOK(LRESULT, __fastcall, WndProcHook, 0x140D66440, HWND hWnd, UINT msg, WPARAM 
 		Context::passThroughMouse = !Context::passThroughMouse;
 		return true;
 	}
-	if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+	if (Context::visible && ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 		return true;
 
 	return originalWndProcHook(hWnd, msg, wParam, lParam);
@@ -130,6 +132,15 @@ void Context::init() {
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
+	ImFontConfig fontConfig;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoHinting;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
+	ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, 14, &fontConfig);// , ranges);
+	io.Fonts->Build();
+
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
 	desktop = new (allocator) Desktop(allocator);
 
@@ -146,9 +157,11 @@ void Context::update()
 	ImGui_ImplWin32_NewFrame();
 
 	ImGui::NewFrame();
+	//ImGui::PushFont(firaCode);
 	ImGui::ShowDemoWindow();
 	desktop->Render();
 	ImGui::Render();
+	//ImGui::PopFont();
 
 	deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());

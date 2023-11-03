@@ -20,6 +20,8 @@
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialogConfig.h" />
     <ClInclude Include="icons.h" />
+    <ClInclude Include="Inter.h" />
+    <ClInclude Include="resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -45,8 +47,12 @@
     <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
     <ClCompile Include="Icons.cpp" />
+    <ClCompile Include="FiraCode.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="devtools.rc" />
   </ItemGroup>
 </Project>

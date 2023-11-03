@@ -87,6 +87,7 @@
   <PropertyGroup Label="UserMacros" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <CustomBuildAfterTargets>Build</CustomBuildAfterTargets>
+    <Linkage-freetype_static>static</Linkage-freetype_static>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <ClCompile>
@@ -114,23 +115,23 @@
       <Optimization>Disabled</Optimization>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\Detours\include;%SONIC_FRONTIERS_SDK%\include;C:\Users\Ruben Tytgat\Documents\HedgeLib\HedgeLib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\Detours\include;%SONIC_FRONTIERS_SDK%\include;C:\Users\Ruben Tytgat\Documents\HedgeLib\HedgeLib\include;%FREETYPE_SDK%\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>Pch.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WINDLL;USE_STD_FILESYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;USE_STD_FILESYSTEM;MGUI_ENABLE_FREETYPE;_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
-      <AdditionalDependencies>detours.lib;syelog.lib;rangers-sdk.lib;HedgeLibd.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Detours\lib\x64;$(SolutionDir)x64\Debug;C:\Users\Ruben Tytgat\Documents\HedgeLib\build\HedgeLib\Debug</AdditionalLibraryDirectories>
+      <AdditionalDependencies>detours.lib;syelog.lib;rangers-sdk.lib;HedgeLibd.lib;freetype.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Detours\lib\x64;$(SolutionDir)x64\Debug;C:\Users\Ruben Tytgat\Documents\HedgeLib\build\HedgeLib\Debug;%FREETYPE_SDK%\objs\x64\Debug Static</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(MSBuildProjectDirectory)\Mod.ini" "$(MSBuildProjectDirectory)\bin\$(Platform)\$(Configuration)\mod.ini"</Command>
     </PostBuildEvent>
     <CustomBuildStep>
-      <Command>copy "$(OutDir)debug-tools.dll" "C:\Program Files (x86)\Steam\steamapps\common\SonicFrontiers\Mods\devtools"</Command>
+      <Command>copy "$(OutDir)devtools.dll" "C:\Program Files (x86)\Steam\steamapps\common\SonicFrontiers\Mods\devtools"</Command>
     </CustomBuildStep>
     <CustomBuildStep>
       <Outputs>amod</Outputs>
@@ -168,19 +169,21 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <SDLCheck>true</SDLCheck>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\Detours\include;C:\Users\Ruben Tytgat\source\repos\rangers-sdk\include;C:\Users\Ruben Tytgat\Documents\HedgeLib\HedgeLib\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>$(SolutionDir)Dependencies;$(SolutionDir)Dependencies\Detours\include;C:\Users\Ruben Tytgat\source\repos\rangers-sdk\include;C:\Users\Ruben Tytgat\Documents\HedgeLib\HedgeLib\include;%FREETYPE_SDK%\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
       <PrecompiledHeader>Use</PrecompiledHeader>
       <PrecompiledHeaderFile>Pch.h</PrecompiledHeaderFile>
       <ForcedIncludeFiles>Pch.h</ForcedIncludeFiles>
       <LanguageStandard>stdcpp17</LanguageStandard>
-      <PreprocessorDefinitions>_WINDLL;USE_STD_FILESYSTEM;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_WINDLL;USE_STD_FILESYSTEM;_SILENCE_CXX17_ADAPTOR_TYPEDEFS_DEPRECATION_WARNING;%(PreprocessorDefinitions)</PreprocessorDefinitions>
     </ClCompile>
     <Link>
       <SubSystem>Console</SubSystem>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <OptimizeReferences>true</OptimizeReferences>
       <AdditionalDependencies>detours.lib;syelog.lib;rangers-sdk.lib;HedgeLib.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Detours\lib\x64;C:\Users\Ruben Tytgat\source\repos\devtools\x64\Release;C:\Users\Ruben Tytgat\Documents\HedgeLib\build\HedgeLib\Release</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>$(SolutionDir)Dependencies\Detours\lib\x64;C:\Users\Ruben Tytgat\source\repos\devtools\x64\Release;C:\Users\Ruben Tytgat\Documents\HedgeLib\build\HedgeLib\Release;%FREETYPE_SDK%\objs\x64\Release Static</AdditionalLibraryDirectories>
+      <Version>
+      </Version>
     </Link>
     <PostBuildEvent>
       <Command>copy /Y "$(MSBuildProjectDirectory)\Mod.ini" "$(MSBuildProjectDirectory)\bin\$(Platform)\$(Configuration)\mod.ini"</Command>
@@ -194,6 +197,7 @@
     <ClInclude Include="icons.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialogConfig.h" />
+    <ClInclude Include="Inter.h" />
     <ClInclude Include="Library.h" />
     <ClInclude Include="Mod.ini" />
     <ClInclude Include="operation-modes\ObjectInspection\ObjectInspection.h" />
@@ -202,6 +206,7 @@
     <ClInclude Include="operation-modes\OperationMode.h" />
     <ClInclude Include="Pch.h" />
     <ClInclude Include="resource-editors\ResReflectionEditor.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="serialization\EndianSwaps.h" />
     <ClInclude Include="serialization\ReflectionSerializer.h" />
     <ClInclude Include="ToolBar.h" />
@@ -212,6 +217,7 @@
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="Desktop.cpp" />
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="FiraCode.h" />
     <ClCompile Include="Icons.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
@@ -240,10 +246,15 @@
   <ItemGroup>
     <None Include="packages.config" />
   </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="devtools.rc" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
     <Import Project="..\packages\Detours.4.0.1\build\native\Detours.targets" Condition="Exists('..\packages\Detours.4.0.1\build\native\Detours.targets')" />
     <Import Project="..\packages\lua.5.4.6\build\native\Lua.targets" Condition="Exists('..\packages\lua.5.4.6\build\native\Lua.targets')" />
+    <Import Project="..\packages\libpng-msvc-x64.1.6.33.8807\build\native\libpng-msvc-x64.targets" Condition="Exists('..\packages\libpng-msvc-x64.1.6.33.8807\build\native\libpng-msvc-x64.targets')" />
+    <Import Project="..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets" Condition="Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" />
   </ImportGroup>
   <Target Name="EnsureNuGetPackageBuildImports" BeforeTargets="PrepareForBuild">
     <PropertyGroup>
@@ -251,5 +262,7 @@
     </PropertyGroup>
     <Error Condition="!Exists('..\packages\Detours.4.0.1\build\native\Detours.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\Detours.4.0.1\build\native\Detours.targets'))" />
     <Error Condition="!Exists('..\packages\lua.5.4.6\build\native\Lua.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\lua.5.4.6\build\native\Lua.targets'))" />
+    <Error Condition="!Exists('..\packages\libpng-msvc-x64.1.6.33.8807\build\native\libpng-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\libpng-msvc-x64.1.6.33.8807\build\native\libpng-msvc-x64.targets'))" />
+    <Error Condition="!Exists('..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets')" Text="$([System.String]::Format('$(ErrorText)', '..\packages\zlib-msvc-x64.1.2.11.8900\build\native\zlib-msvc-x64.targets'))" />
   </Target>
 </Project>

@@ -29,6 +29,7 @@ void ObjectList::Render() {
 						nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 					//RenderIcon(IconId::OBJECT, objectInspection.desktop);
+					//ImGui::SameLine();
 					ImGui::TreeNodeEx(obj, nodeflags, objName == nullptr ? "" : objName);
 
 					if (ImGui::IsItemClicked())
