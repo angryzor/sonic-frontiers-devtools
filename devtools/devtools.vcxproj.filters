@@ -22,6 +22,7 @@
     <ClInclude Include="icons.h" />
     <ClInclude Include="Inter.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="GameServiceInspector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -48,6 +49,7 @@
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
     <ClCompile Include="Icons.cpp" />
     <ClCompile Include="FiraCode.h" />
+    <ClCompile Include="GameServiceInspector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -104,9 +104,11 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 		size_t constArrSizeOrZero = member->GetCstyleArraySize();
 		size_t constArrSize = constArrSizeOrZero == 0 ? 1 : constArrSizeOrZero;
 
+		ImGui::PushID(static_cast<int>(i));
 		for (size_t j = 0; j < constArrSize; j++) {
 			void* address = reinterpret_cast<void*>(reinterpret_cast<size_t>(obj) + member->m_Offset + j * member->GetSingleSizeInBytes());
 
+			ImGui::PushID(static_cast<int>(j));
 			switch (member->m_Type) {
 			case RflClassMember::TYPE_BOOL:
 				ImGui::Checkbox(GetRflMemberName(member), static_cast<bool*>(address));
@@ -200,7 +202,9 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 				ImGui::ColorEdit4(GetRflMemberName(member), static_cast<float*>(address), ImGuiColorEditFlags_Uint8);
 				break;
 			}
+			ImGui::PopID();
 		}
+		ImGui::PopID();
 	}
 }
 

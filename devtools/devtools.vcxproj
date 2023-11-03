@@ -193,6 +193,7 @@
     <ClInclude Include="common\ReflectionEditor.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="Desktop.h" />
+    <ClInclude Include="GameServiceInspector.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="icons.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
@@ -218,6 +219,7 @@
     <ClCompile Include="Desktop.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="FiraCode.h" />
+    <ClCompile Include="GameServiceInspector.cpp" />
     <ClCompile Include="Icons.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />

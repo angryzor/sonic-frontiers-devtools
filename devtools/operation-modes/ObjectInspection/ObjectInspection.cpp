@@ -1,5 +1,6 @@
 #include "../../Pch.h"
 #include "ObjectInspection.h"
+#include "../../GameServiceInspector.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -15,4 +16,5 @@ void ObjectInspection::Render() {
 
 	objectList.Render();
 	objectInspector.Render();
+	GameServiceInspector::Render();
 }
