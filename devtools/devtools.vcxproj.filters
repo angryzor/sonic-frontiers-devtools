@@ -23,6 +23,11 @@
     <ClInclude Include="Inter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="GameServiceInspector.h" />
+    <ClInclude Include="ResourceBrowser.h" />
+    <ClInclude Include="StandaloneWindow.h" />
+    <ClInclude Include="ResReflectionEditorWindow.h" />
+    <ClInclude Include="Theme.h" />
+    <ClInclude Include="Textures.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -50,6 +55,11 @@
     <ClCompile Include="Icons.cpp" />
     <ClCompile Include="FiraCode.h" />
     <ClCompile Include="GameServiceInspector.cpp" />
+    <ClCompile Include="ResourceBrowser.cpp" />
+    <ClCompile Include="StandaloneWindow.cpp" />
+    <ClCompile Include="ResReflectionEditorWindow.cpp" />
+    <ClCompile Include="Theme.cpp" />
+    <ClCompile Include="Textures.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

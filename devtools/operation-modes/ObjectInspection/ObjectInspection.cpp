@@ -1,6 +1,7 @@
 #include "../../Pch.h"
 #include "ObjectInspection.h"
 #include "../../GameServiceInspector.h"
+#include "../../ResourceBrowser.h"
 
 using namespace hh::fnd;
 using namespace hh::game;

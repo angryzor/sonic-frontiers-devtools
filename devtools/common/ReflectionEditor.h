@@ -58,9 +58,11 @@ class ReflectionEditor {
     static void RflClassMembersEditor(void* obj, const hh::fnd::RflClass* rflClass);
 
 public:
-    template<typename T> static void Render(T& reflectionData) {
-        auto rflClass = rangerssdk::bootstrap::GetAddress(&T::rflClass);
+    static void Render(void* reflectionData, const hh::fnd::RflClass* rflClass) {
+        RenderStructRflParamEditor(reflectionData, rflClass->m_pName, rflClass);
+    }
 
-        RenderStructRflParamEditor(&reflectionData, rflClass->m_pName, rflClass);
+    template<typename T> static void Render(T& reflectionData) {
+        Render(&reflectionData, rangerssdk::bootstrap::GetAddress(&T::rflClass));
     }
 };

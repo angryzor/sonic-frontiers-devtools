@@ -1,7 +1,9 @@
 #include "Pch.h"
 #include "ToolBar.h"
+#include "Theme.h"
+#include "Desktop.h"
 
-void ToolBar::Render() {
+void ToolBar::Render(Desktop* desktop) {
 	ImGuiWindowFlags flags
 		= ImGuiWindowFlags_MenuBar
 		| ImGuiWindowFlags_NoResize
@@ -23,9 +25,27 @@ void ToolBar::Render() {
 			ImGui::MenuItem("Load Level...");
 			ImGui::EndMenu();
 		}
-		ImGui::MenuItem("Open Library");
+
+		bool openResourceBrowser{ false };
+		ImGui::MenuItem("Resource Browser", nullptr, &openResourceBrowser);
+
+		if (openResourceBrowser)
+			desktop->OpenResourceBrowser();
+
 		if (ImGui::BeginMenu("Mode")) {
 			ImGui::MenuItem("Object Inspection");
+			ImGui::EndMenu();
+		}
+		if (ImGui::BeginMenu("Theme")) {
+			for (size_t i = 0; i < 3; i++) {
+				bool selected{ false };
+
+				ImGui::MenuItem(Theme::themes[i].name, nullptr, &selected);
+
+				if (selected) {
+					Theme::themes[i].Load();
+				}
+			}
 			ImGui::EndMenu();
 		}
 		ImGui::EndMenuBar();

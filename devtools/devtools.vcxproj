@@ -194,6 +194,7 @@
     <ClInclude Include="Context.h" />
     <ClInclude Include="Desktop.h" />
     <ClInclude Include="GameServiceInspector.h" />
+    <ClInclude Include="Textures.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="icons.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
@@ -208,8 +209,12 @@
     <ClInclude Include="Pch.h" />
     <ClInclude Include="resource-editors\ResReflectionEditor.h" />
     <ClInclude Include="resource.h" />
+    <ClInclude Include="ResourceBrowser.h" />
+    <ClInclude Include="ResReflectionEditorWindow.h" />
     <ClInclude Include="serialization\EndianSwaps.h" />
     <ClInclude Include="serialization\ReflectionSerializer.h" />
+    <ClInclude Include="StandaloneWindow.h" />
+    <ClInclude Include="Theme.h" />
     <ClInclude Include="ToolBar.h" />
     <ClInclude Include="utilities\LuaInterface.h" />
   </ItemGroup>
@@ -242,7 +247,12 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="resource-editors\ResReflectionEditor.cpp" />
+    <ClCompile Include="ResourceBrowser.cpp" />
+    <ClCompile Include="ResReflectionEditorWindow.cpp" />
     <ClCompile Include="serialization\ReflectionSerializer.cpp" />
+    <ClCompile Include="StandaloneWindow.cpp" />
+    <ClCompile Include="Textures.cpp" />
+    <ClCompile Include="Theme.cpp" />
     <ClCompile Include="ToolBar.cpp" />
   </ItemGroup>
   <ItemGroup>

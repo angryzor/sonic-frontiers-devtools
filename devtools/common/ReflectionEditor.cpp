@@ -194,12 +194,29 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 			case RflClassMember::TYPE_POSITION:
 				RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(address, member, ImGuiDataType_Float, 3, "RangeFloat");
 				break;
-			case RflClassMember::TYPE_COLOR_BYTE:
-				RenderStubRflParamEditor(member);
-				//ImGui::ColorEdit4(GetRflMemberName(member), static_cast<float*>(address), ImGuiColorEditFlags_Uint8);
+			case RflClassMember::TYPE_COLOR_BYTE: {
+				auto originalColor{ static_cast<csl::ut::Color<uint8_t>*>(address) };
+				float colorAsFloat[]{
+					static_cast<float>(originalColor->r) / 255,
+					static_cast<float>(originalColor->g) / 255,
+					static_cast<float>(originalColor->b) / 255,
+					static_cast<float>(originalColor->a) / 255,
+				};
+				float editableColor[4]{ colorAsFloat[0], colorAsFloat[1], colorAsFloat[2], colorAsFloat[3] };
+
+				ImGui::ColorEdit4(GetRflMemberName(member), editableColor, ImGuiColorEditFlags_Uint8);
+
+				if (colorAsFloat[0] != editableColor[0] || colorAsFloat[1] != editableColor[1] || colorAsFloat[2] != editableColor[2] || colorAsFloat[3] != editableColor[3]) {
+					originalColor->r = static_cast<uint8_t>(editableColor[0] * 255);
+					originalColor->g = static_cast<uint8_t>(editableColor[1] * 255);
+					originalColor->b = static_cast<uint8_t>(editableColor[2] * 255);
+					originalColor->a = static_cast<uint8_t>(editableColor[3] * 255);
+				}
+
 				break;
+			}
 			case RflClassMember::TYPE_COLOR_FLOAT:
-				ImGui::ColorEdit4(GetRflMemberName(member), static_cast<float*>(address), ImGuiColorEditFlags_Uint8);
+				ImGui::ColorEdit4(GetRflMemberName(member), static_cast<float*>(address), ImGuiColorEditFlags_Float);
 				break;
 			}
 			ImGui::PopID();
