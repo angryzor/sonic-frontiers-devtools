@@ -9,10 +9,12 @@ class ResourceBrowser : public StandaloneWindow
 public:
     ResourceBrowser(csl::fnd::IAllocator* allocator);
 
-    virtual void Render() override;
+    virtual void PreRender() override;
+    virtual void RenderContents() override;
     void RenderMainArea();
     void RenderResource(hh::fnd::ManagedResource* resource);
     void RenderContainerContents(const hh::fnd::ResourceContainer * container);
+    static void RenderPreview(const hh::fnd::ManagedResource* resource, float size);
     //void RenderResources();
 };
 

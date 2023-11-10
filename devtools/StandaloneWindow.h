@@ -1,8 +1,13 @@
 #pragma once
 class StandaloneWindow : public hh::fnd::ReferencedObject
 {
+	csl::ut::VariableString title{ GetAllocator()};
+protected:
+	void SetTitle(const char* title);
 public:
 	StandaloneWindow(csl::fnd::IAllocator* allocator);
-	virtual void Render() = 0;
+	void Render();
+	virtual void PreRender();
+	virtual void RenderContents() = 0;
 };
 

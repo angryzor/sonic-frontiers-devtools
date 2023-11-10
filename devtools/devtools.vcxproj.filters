@@ -28,6 +28,11 @@
     <ClInclude Include="ResReflectionEditorWindow.h" />
     <ClInclude Include="Theme.h" />
     <ClInclude Include="Textures.h" />
+    <ClInclude Include="resource-editors\ResEffectEditor.h" />
+    <ClInclude Include="core-services\GameUpdaterInspector.h" />
+    <ClInclude Include="common\SimpleWidgets.h" />
+    <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="EulerTransform.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -60,6 +65,11 @@
     <ClCompile Include="ResReflectionEditorWindow.cpp" />
     <ClCompile Include="Theme.cpp" />
     <ClCompile Include="Textures.cpp" />
+    <ClCompile Include="resource-editors\ResEffectEditor.cpp" />
+    <ClCompile Include="core-services\GameUpdaterInspector.cpp" />
+    <ClCompile Include="common\SimpleWidgets.cpp" />
+    <ClCompile Include="imgui\ImGuizmo.cpp" />
+    <ClCompile Include="EulerTransform.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

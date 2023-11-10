@@ -2,11 +2,13 @@
 #include "../OperationMode.h"
 #include "ObjectList.h"
 #include "ObjectInspector.h"
+#include "../../imgui/ImGuizmo.h"
 
 class Desktop;
 class ObjectInspection : public OperationMode {
     ObjectList objectList{ GetAllocator(), *this };
     ObjectInspector objectInspector{ GetAllocator(), *this };
+    ImGuizmo::OPERATION gizmoOperation{ ImGuizmo::TRANSLATE };
 
 public:
     Desktop& desktop;

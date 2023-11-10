@@ -15,8 +15,6 @@ bool Context::passThroughMouse = false;
 bool Context::inited = false;
 bool Context::alreadyRendering = false;
 
-static Desktop* desktop{};
-
 //SIG_SCAN
 //(
 //    sigSwapChainHook,
@@ -142,7 +140,7 @@ void Context::init() {
 	io.Fonts->Build();
 
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
-	desktop = new (allocator) Desktop(allocator);
+	Desktop::instance = new (allocator) Desktop(allocator);
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
@@ -157,9 +155,10 @@ void Context::update()
 	ImGui_ImplWin32_NewFrame();
 
 	ImGui::NewFrame();
+	ImGuizmo::BeginFrame();
 	//ImGui::PushFont(firaCode);
 	ImGui::ShowDemoWindow();
-	desktop->Render();
+	Desktop::instance->Render();
 	ImGui::Render();
 	//ImGui::PopFont();
 

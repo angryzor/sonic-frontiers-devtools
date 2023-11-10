@@ -1,3 +1,3 @@
 #pragma once
 
-ImTextureID GetTextureIDFromResTexture(hh::gfnd::ResTexture* resTexture);
+ImTextureID GetTextureIDFromResTexture(const hh::gfnd::ResTexture* resTexture);

@@ -10,8 +10,11 @@ class Desktop : public hh::fnd::BaseObject {
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
 
 public:
+    static Desktop* instance;
+
     ID3D11ShaderResourceView* iconView;
     Desktop(csl::fnd::IAllocator* allocator);
     void Render();
-    void OpenResourceBrowser();
+    void AddStandaloneWindow(StandaloneWindow* window);
+    void RemoveStandaloneWindow(StandaloneWindow* window);
 };

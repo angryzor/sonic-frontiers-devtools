@@ -2,6 +2,7 @@
 #include "ObjectInspector.h"
 #include "ObjectInspection.h"
 #include "../../resource-editors/ResReflectionEditor.h"
+#include "../../EulerTransform.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -81,56 +82,28 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 		break;
 	}
 
-	ImGui::Text("Character parameters:");
-	switch (component.characterId) {
-	case app::player::CharacterId::SONIC:
-		ResReflectionEditor::Render(component.characterParameters->sonic);
-		break;
-	case app::player::CharacterId::AMY:
-		ResReflectionEditor::Render(component.characterParameters->amy);
-		break;
-	case app::player::CharacterId::KNUCKLES:
-		ResReflectionEditor::Render(component.characterParameters->knuckles);
-		break;
-	case app::player::CharacterId::TAILS:
-		ResReflectionEditor::Render(component.characterParameters->tails);
-		break;
-	}
+	//ImGui::Text("Character parameters:");
+	//switch (component.characterId) {
+	//case app::player::CharacterId::SONIC:
+	//	ResReflectionEditor::Render(component.characterParameters->sonic);
+	//	break;
+	//case app::player::CharacterId::AMY:
+	//	ResReflectionEditor::Render(component.characterParameters->amy);
+	//	break;
+	//case app::player::CharacterId::KNUCKLES:
+	//	ResReflectionEditor::Render(component.characterParameters->knuckles);
+	//	break;
+	//case app::player::CharacterId::TAILS:
+	//	ResReflectionEditor::Render(component.characterParameters->tails);
+	//	break;
+	//}
 
-	ImGui::Text("Camera Set Parameters:");
-	ResReflectionEditor::Render(*component.cameraSetParameters);
+	//ImGui::Text("Camera Set Parameters:");
+	//ResReflectionEditor::Render(*component.cameraSetParameters);
 }
 
-struct EuclidianTransform {
-	csl::math::Vector3 position;
-	csl::math::Vector3 rotation;
-	csl::math::Vector3 scale;
-
-	EuclidianTransform(const csl::math::Transform& transform) : position{ transform.position }, rotation{ transform.rotation.toRotationMatrix().eulerAngles(0, 1, 2) }, scale{transform.scale} {}
-
-	operator csl::math::Transform() {
-		return {
-			position,
-			csl::math::Quaternion(
-				Eigen::AngleAxisf(rotation[0], Eigen::Vector3f::UnitX()) *
-				Eigen::AngleAxisf(rotation[1], Eigen::Vector3f::UnitY()) *
-				Eigen::AngleAxisf(rotation[2], Eigen::Vector3f::UnitZ())
-			),
-			scale,
-		};
-	}
-
-	bool operator==(const EuclidianTransform& other) const {
-		return position == other.position && rotation == other.rotation && scale == other.scale;
-	}
-
-	bool operator!=(const EuclidianTransform& other) const {
-		return !operator==(other);
-	}
-};
-
 void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {
-	EuclidianTransform localTransform{ component.transform };
+	EulerTransform localTransform{ component.transform };
 
 	ImGui::SeparatorText("Main local transform (editable form)");
 

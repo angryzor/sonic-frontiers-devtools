@@ -61,29 +61,28 @@ AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
 	return AssetIconId::MODEL;
 }
 
-ResourceBrowser::ResourceBrowser(csl::fnd::IAllocator* allocator) : StandaloneWindow{allocator} {}
+ResourceBrowser::ResourceBrowser(csl::fnd::IAllocator* allocator) : StandaloneWindow{ allocator } {
+	SetTitle("Resource browser");
+}
 
-void ResourceBrowser::Render() {
-	const ImGuiWindowFlags windowFlags
-		= ImGuiWindowFlags_MenuBar;
-
+void ResourceBrowser::PreRender() {
 	ImGui::SetNextWindowPos(ImVec2(250 + ImGui::GetStyle().ItemSpacing.x + ImGui::GetStyle().DisplaySafeAreaPadding.x + 2, ImGui::GetMainViewport()->WorkSize.y - 40), ImGuiCond_Once, ImVec2(0, 1));
 	ImGui::SetNextWindowSize(ImVec2(ImGui::GetMainViewport()->WorkSize.x - 250 - 800 - ImGui::GetStyle().ItemSpacing.x * 2, 300), ImGuiCond_Once);
 	ImGui::SetNextWindowCollapsed(false, ImGuiCond_Once);
-	if (ImGui::Begin("Resource browser", NULL, windowFlags)) {
-		if (ImGui::Button("ROOT"))
-			currentPath.clear();
+}
 
-		for (size_t i = 0; i < currentPath.size(); i++) {
-			ImGui::SameLine();
-			if (ImGui::Button(currentPath[i]->GetName()))
-				for (size_t j = currentPath.size() - 1; i <= j; j--)
-					currentPath.remove(j);
-		}
+void ResourceBrowser::RenderContents() {
+	if (ImGui::Button("ROOT"))
+		currentPath.clear();
 
-		RenderMainArea();
+	for (size_t i = 0; i < currentPath.size(); i++) {
+		ImGui::SameLine();
+		if (ImGui::Button(currentPath[i]->GetName()))
+			for (size_t j = currentPath.size() - 1; i < j; j--)
+				currentPath.remove(j);
 	}
-	ImGui::End();
+
+	RenderMainArea();
 }
 
 void ResourceBrowser::RenderMainArea() {
@@ -122,35 +121,63 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 	auto cursor = ImGui::GetCursorPos();
 
 	ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 1.0f));
+
 	if (ImGui::Selectable(resource->GetName(), selectedResource == resource, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 100 + ImGui::GetFontSize()))) {
-		if (ImGui::IsMouseDoubleClicked(0) && &resource->GetClass() == Packfile::GetTypeInfo()) {
-			selectedResource = nullptr;
-			currentPath.push_back(static_cast<Packfile*>(resource));
+		if (ImGui::IsMouseDoubleClicked(0)) {
+			const ResourceTypeInfo* typeInfo = &resource->GetClass();
+
+			if (typeInfo == Packfile::GetTypeInfo()) {
+				selectedResource = nullptr;
+				currentPath.push_back(static_cast<Packfile*>(resource));
+			}
+			else if (typeInfo == ResReflection<void>::GetTypeInfo()) {
+				new (Desktop::instance->GetAllocator()) ResReflectionEditor(Desktop::instance->GetAllocator(), static_cast<ResReflection<void>*>(resource));
+			}
 		}
 		else
 			selectedResource = resource;
 	}
 
-	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
-		ImGui::SetCursorPos(cursor);
-		auto texture = static_cast<hh::gfnd::ResTexture*>(resource);
-		ImGui::Image(GetTextureIDFromResTexture(texture), ImVec2(100, 100));
-		ImGui::SetCursorPos(cursor + ImVec2(0, 68));
-		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
-	}
-	else {
-		ImGui::SetCursorPos(cursor + ImVec2(18, 18));
-		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()));
-	}
+	ImGui::SetCursorPos(cursor);
+	RenderPreview(resource, 100);
 
 	ImGui::PopStyleVar();
 	ImGui::EndGroup();
+
+	if (ImGui::BeginItemTooltip()) {
+		ImGui::PushTextWrapPos(300);
+		ImGui::Text("Name: %s", resource->GetName());
+		ImGui::Text("Type: %s", resource->GetClass().pName);
+		ImGui::PopTextWrapPos();
+		ImGui::Separator();
+		RenderPreview(resource, 300);
+		ImGui::EndTooltip();
+	}
 
 	float lastButtonX = ImGui::GetItemRectMax().x;
 	float nextButtonX = lastButtonX + ImGui::GetStyle().ItemSpacing.x + 100;
 
 	if (nextButtonX < ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x)
 		ImGui::SameLine();
+}
+
+void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, float size)
+{
+	auto cursor = ImGui::GetCursorPos();
+	
+	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
+		auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource);
+		ImGui::Image(GetTextureIDFromResTexture(texture), ImVec2(size, size));
+		ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
+		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
+	}
+	else {
+		ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
+		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()));
+	}
+
+	ImGui::SetCursorPos(cursor);
+	ImGui::Dummy(ImVec2(size, size));
 }
 
 //void ResourceBrowser::RenderResources() {

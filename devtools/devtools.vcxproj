@@ -191,9 +191,14 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="common\ReflectionEditor.h" />
+    <ClInclude Include="common\SimpleWidgets.h" />
     <ClInclude Include="Context.h" />
+    <ClInclude Include="core-services\GameUpdaterInspector.h" />
     <ClInclude Include="Desktop.h" />
+    <ClInclude Include="EulerTransform.h" />
     <ClInclude Include="GameServiceInspector.h" />
+    <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="resource-editors\ResEffectEditor.h" />
     <ClInclude Include="Textures.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="icons.h" />
@@ -220,14 +225,18 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\ReflectionEditor.cpp" />
+    <ClCompile Include="common\SimpleWidgets.cpp" />
     <ClCompile Include="Context.cpp" />
+    <ClCompile Include="core-services\GameUpdaterInspector.cpp" />
     <ClCompile Include="Desktop.cpp" />
     <ClCompile Include="DllMain.cpp" />
+    <ClCompile Include="EulerTransform.cpp" />
     <ClCompile Include="FiraCode.h" />
     <ClCompile Include="GameServiceInspector.cpp" />
     <ClCompile Include="Icons.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
+    <ClCompile Include="imgui\ImGuizmo.cpp" />
     <ClCompile Include="imgui\imgui_demo.cpp" />
     <ClCompile Include="imgui\imgui_draw.cpp" />
     <ClCompile Include="imgui\imgui_impl_dx11.cpp" />
@@ -246,6 +255,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="resource-editors\ResEffectEditor.cpp" />
     <ClCompile Include="resource-editors\ResReflectionEditor.cpp" />
     <ClCompile Include="ResourceBrowser.cpp" />
     <ClCompile Include="ResReflectionEditorWindow.cpp" />

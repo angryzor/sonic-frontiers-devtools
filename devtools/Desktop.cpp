@@ -4,6 +4,8 @@
 #include "icons.h"
 #include "ResourceBrowser.h"
 
+Desktop* Desktop::instance{};
+
 Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 {
 	resourceLoader = hh::fnd::ResourceLoader::Instantiate(allocator);
@@ -15,14 +17,17 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 }
 
 void Desktop::Render() {
-	ToolBar::Render(this);
+	ToolBar::Render();
 	operationMode.Render();
 	for (auto& window : windows) {
 		window->Render();
 	}
 }
 
-void Desktop::OpenResourceBrowser() {
-	StandaloneWindow* resourceBrowser = new (GetAllocator()) ResourceBrowser(GetAllocator());
-	this->windows.push_back(hh::fnd::Reference<StandaloneWindow>{ resourceBrowser });
+void Desktop::AddStandaloneWindow(StandaloneWindow* window) {
+	this->windows.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
+}
+
+void Desktop::RemoveStandaloneWindow(StandaloneWindow* window) {
+	this->windows.remove(this->windows.find(window));
 }
