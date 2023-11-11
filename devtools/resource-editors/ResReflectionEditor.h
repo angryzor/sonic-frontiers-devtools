@@ -9,8 +9,17 @@ class ResReflectionEditor : public StandaloneWindow {
 	const hh::fnd::RflClass* rflClass;
 	char namebuf[500];
 	bool forcedRflClass{ false };
-public:
+
 	ResReflectionEditor(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource, const hh::fnd::RflClass* rflClass);
 	ResReflectionEditor(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource);
+
+public:
+	template<typename T>
+	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<T>* resource) {
+		return Create(allocator, reinterpret_cast<hh::fnd::ResReflection<void>*>(resource), rangerssdk::bootstrap::GetAddress(&T::rflClass));
+	}
+	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource, const hh::fnd::RflClass* rflClass);
+	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource);
+	
 	virtual void RenderContents(); 
 };

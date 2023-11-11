@@ -2,6 +2,7 @@
 #include "Inter.h"
 #include "Context.h"
 #include "Desktop.h"
+#include "Theme.h"
 #include "imgui/imgui_freetype.h"
 
 static ID3D11Device* device;
@@ -139,6 +140,8 @@ void Context::init() {
 	ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, 14, &fontConfig);// , ranges);
 	io.Fonts->Build();
 
+	Theme::themes[0].Load();
+
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
 	Desktop::instance = new (allocator) Desktop(allocator);
 
@@ -157,7 +160,7 @@ void Context::update()
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
 	//ImGui::PushFont(firaCode);
-	ImGui::ShowDemoWindow();
+	//ImGui::ShowDemoWindow();
 	Desktop::instance->Render();
 	ImGui::Render();
 	//ImGui::PopFont();

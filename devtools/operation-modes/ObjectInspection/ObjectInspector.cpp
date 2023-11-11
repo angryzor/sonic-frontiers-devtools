@@ -15,8 +15,8 @@ void ObjectInspector::Render() {
 	const ImGuiWindowFlags windowFlags
 		= ImGuiWindowFlags_MenuBar;
 
-	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 60), ImGuiCond_Once, ImVec2(1, 0));
-	ImGui::SetNextWindowSize(ImVec2(800, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
+	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_Once, ImVec2(1, 0));
+	ImGui::SetNextWindowSize(ImVec2(800, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_Once);
 	if (ImGui::Begin("Object inspector", NULL, windowFlags)) {
 		if (objectInspection.focusedObject == nullptr) {
 			ImGui::Text("Select an object in the left pane.");
@@ -82,24 +82,24 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 		break;
 	}
 
-	//ImGui::Text("Character parameters:");
-	//switch (component.characterId) {
-	//case app::player::CharacterId::SONIC:
-	//	ResReflectionEditor::Render(component.characterParameters->sonic);
-	//	break;
-	//case app::player::CharacterId::AMY:
-	//	ResReflectionEditor::Render(component.characterParameters->amy);
-	//	break;
-	//case app::player::CharacterId::KNUCKLES:
-	//	ResReflectionEditor::Render(component.characterParameters->knuckles);
-	//	break;
-	//case app::player::CharacterId::TAILS:
-	//	ResReflectionEditor::Render(component.characterParameters->tails);
-	//	break;
-	//}
+	if (ImGui::Button("Edit character parameters..."))
+		switch (component.characterId) {
+		case app::player::CharacterId::SONIC:
+			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->sonic);
+			break;
+		case app::player::CharacterId::AMY:
+			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->amy);
+			break;
+		case app::player::CharacterId::KNUCKLES:
+			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->knuckles);
+			break;
+		case app::player::CharacterId::TAILS:
+			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->tails);
+			break;
+		}
 
-	//ImGui::Text("Camera Set Parameters:");
-	//ResReflectionEditor::Render(*component.cameraSetParameters);
+	if (ImGui::Button("Edit Camera Set parameters..."))
+		ResReflectionEditor::Create(GetAllocator(), &*component.cameraSetParameters);
 }
 
 void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {

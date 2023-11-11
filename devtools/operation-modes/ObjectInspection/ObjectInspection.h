@@ -9,6 +9,7 @@ class ObjectInspection : public OperationMode {
     ObjectList objectList{ GetAllocator(), *this };
     ObjectInspector objectInspector{ GetAllocator(), *this };
     ImGuizmo::OPERATION gizmoOperation{ ImGuizmo::TRANSLATE };
+    ImGuizmo::MODE gizmoMode{ ImGuizmo::LOCAL };
 
 public:
     Desktop& desktop;

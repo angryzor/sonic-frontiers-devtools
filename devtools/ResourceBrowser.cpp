@@ -131,7 +131,7 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 				currentPath.push_back(static_cast<Packfile*>(resource));
 			}
 			else if (typeInfo == ResReflection<void>::GetTypeInfo()) {
-				new (Desktop::instance->GetAllocator()) ResReflectionEditor(Desktop::instance->GetAllocator(), static_cast<ResReflection<void>*>(resource));
+				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection<void>*>(resource));
 			}
 		}
 		else

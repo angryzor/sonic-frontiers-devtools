@@ -87,30 +87,88 @@ LRESULT WndProcDetour(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam) {
 //	//return res;
 //}
 
-//typedef void(*BindMapsPtr)(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2);
-//
-//BindMapsPtr pBindMaps;
-//
-//void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
-//	pBindMaps(a1, a2);
-//
-//	//a2->BindActionMapping("DmenuFastStep", 0x10000u, -1);
-//	//a2->BindActionMapping("DmenuFastStep", 0x10004u, -1);
-//	a2->BindActionMapping("DmenuCursorUp", 0x10001u, -1);
-//	a2->BindActionMapping("DmenuCursorDown", 0x10003u, -1);
-//	a2->BindActionMapping("DmenuCursorLeft", 0x10000u, -1);
-//	a2->BindActionMapping("DmenuCursorRight", 0x10002u, -1);
-//	a2->BindActionMapping("DmenuCursorUp", 0x20052u, -1);
-//	a2->BindActionMapping("DmenuCursorDown", 0x20051u, -1);
-//	a2->BindActionMapping("DmenuCursorLeft", 0x20050u, -1);
-//	a2->BindActionMapping("DmenuCursorRight", 0x2004Fu, -1);
-//	a2->BindActionMapping("DmenuDecide", 0x10004u, -1);
-//	a2->BindActionMapping("DmenuDecide", 0x20028u, -1);
-//	//a2->BindActionMapping("DmenuDecide", 0x20058u, -1);
-//	//a2->BindActionMapping("DmenuDecide", 0x10005u, -1);
-//	a2->BindActionMapping("DmenuCancel", 0x20029u, -1);
-//	a2->BindActionMapping("DmenuCancel", 0x40003u, -1);
-//}
+typedef void(*BindMapsPtr)(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2);
+
+BindMapsPtr pBindMaps;
+
+void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
+	pBindMaps(a1, a2);
+
+	//a2->BindActionMapping("DmenuFastStep", 0x10000u, -1);
+	//a2->BindActionMapping("DmenuFastStep", 0x10004u, -1);
+	//a2->BindActionMapping("DmenuCursorUp", 0x10001u, -1);
+	//a2->BindActionMapping("DmenuCursorDown", 0x10003u, -1);
+	//a2->BindActionMapping("DmenuCursorLeft", 0x10000u, -1);
+	//a2->BindActionMapping("DmenuCursorRight", 0x10002u, -1);
+	//a2->BindActionMapping("DmenuCursorUp", 0x20052u, -1);
+	//a2->BindActionMapping("DmenuCursorDown", 0x20051u, -1);
+	//a2->BindActionMapping("DmenuCursorLeft", 0x20050u, -1);
+	//a2->BindActionMapping("DmenuCursorRight", 0x2004Fu, -1);
+	//a2->BindActionMapping("DmenuDecide", 0x10004u, -1);
+	//a2->BindActionMapping("DmenuDecide", 0x20028u, -1);
+	//a2->BindActionMapping("DmenuDecide", 0x20058u, -1);
+	//a2->BindActionMapping("DmenuDecide", 0x10005u, -1);
+	//a2->BindActionMapping("DmenuCancel", 0x20029u, -1);
+	//a2->BindActionMapping("DmenuCancel", 0x40003u, -1);
+
+	// Debug camera, gamepad bindings
+	//a2->BindActionMapping("HHFreeCameraSwitchArcballCamera", 0x10007u, -1);
+
+	a2->BindActionMapping("HHFreeCameraSpeedChange", 0x10005u, -1);
+	a2->BindActionMapping("HHFreeCameraReset", 0x10004u, -1);
+	a2->BindActionMapping("HHFreeCameraRoll", 0x1000cu, -1);
+	a2->BindActionMapping("HHFreeCameraDistance", 0x1000du, -1);
+	a2->BindActionMapping("HHFreeCameraFovy", 0x1000fu, -1);
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x1000du, -1);
+	a2->BindActionMapping("HHFreeCameraSwitchViewport", 0x10006u, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x10001u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x10003u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x10000u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x10002u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x10009u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x10008u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x1000bu, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x1000au, 1.0, -1);
+
+	//a2->BindActionMapping("HHFreeCameraArcballCameraRotate", 0x2001fu, -1);
+	//a2->BindActionMapping("HHFreeCameraArcballCameraTransXY", 0x20020u, -1);
+	//a2->BindActionMapping("HHFreeCameraArcballCameraTransZ", 0x20021u, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20052u, 1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20051u, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x20050u, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x2004fu, 1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002du, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002eu, 1.0, -1);
+
+	// Debug camera, keyboard bindings
+	//a2->BindActionMapping("HHFreeCameraSwitchArcballCamera", 0x2001eu, -1);
+
+	a2->BindActionMapping("HHFreeCameraSpeedChange", 0x20020u, -1);
+	a2->BindActionMapping("HHFreeCameraReset", 0x2001fu, -1);
+	a2->BindActionMapping("HHFreeCameraRoll", 0x20021u, -1);
+	a2->BindActionMapping("HHFreeCameraDistance", 0x20022u, -1);
+	a2->BindActionMapping("HHFreeCameraFovy", 0x20023u, -1);
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x20022u, -1);
+	a2->BindActionMapping("HHFreeCameraSwitchViewport", 0x20024u, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x20052u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x20051u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20050u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x2004fu, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20060u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2005au, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005cu, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005eu, 1.0, -1);
+
+	//a2->BindActionMapping("HHFreeCameraArcballCameraRotate", 0x2001fu, -1);
+	//a2->BindActionMapping("HHFreeCameraArcballCameraTransXY", 0x20020u, -1);
+	//a2->BindActionMapping("HHFreeCameraArcballCameraTransZ", 0x20021u, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20052u, 1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20051u, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x20050u, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x2004fu, 1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002du, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002eu, 1.0, -1);
+}
 BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID reserved)
 {
 	switch (reason)
@@ -123,7 +181,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID res
 
 			//pGameModeStageRebuildLevel = reinterpret_cast<GameModeStageRebuildLevelPtr>(reinterpret_cast<size_t>(baseAddress) + 0x01F5B90);
 			pGameModeBootInit = reinterpret_cast<GameModeBootInitPtr>(reinterpret_cast<size_t>(baseAddress) + 0x76832E0);
-			//pBindMaps = reinterpret_cast<BindMapsPtr>(reinterpret_cast<size_t>(baseAddress) + 0x25E0F0);
+			pBindMaps = reinterpret_cast<BindMapsPtr>(reinterpret_cast<size_t>(baseAddress) + 0x25E0F0);
 		}
 
 		Context::install_hooks();
@@ -131,7 +189,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID res
 		DetourUpdateThread(GetCurrentThread());
 		//DetourAttach(&(PVOID&)pGameModeStageRebuildLevel, &GameModeStageRebuildLevelDetour);
 		DetourAttach(&(PVOID&)pGameModeBootInit, &GameModeBootInitDetour);
-		//DetourAttach(&(PVOID&)pBindMaps, &BindMapsDetour);
+		DetourAttach(&(PVOID&)pBindMaps, &BindMapsDetour);
 		DetourTransactionCommit();
 	break;
 	case DLL_PROCESS_DETACH:
@@ -143,7 +201,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID res
 		DetourUpdateThread(GetCurrentThread());
 		//DetourDetach(&(PVOID&)pGameModeStageRebuildLevel, &GameModeStageRebuildLevelDetour);
 		DetourDetach(&(PVOID&)pGameModeBootInit, &GameModeBootInitDetour);
-		//DetourDetach(&(PVOID&)pBindMaps, &BindMapsDetour);
+		DetourDetach(&(PVOID&)pBindMaps, &BindMapsDetour);
 		DetourTransactionCommit();
 		break;
 	case DLL_THREAD_ATTACH:

@@ -15,6 +15,14 @@ ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResRef
 	SetTitle(namebuf);
 }
 
+ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource, const hh::fnd::RflClass* rflClass) {
+	return new (allocator) ResReflectionEditor(allocator, resource, rflClass);
+}
+
+ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource) {
+	return new (allocator) ResReflectionEditor(allocator, resource);
+}
+
 void ResReflectionEditor::RenderContents() {
 	bool clicked_export = false;
 

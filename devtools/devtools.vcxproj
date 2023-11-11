@@ -194,6 +194,7 @@
     <ClInclude Include="common\SimpleWidgets.h" />
     <ClInclude Include="Context.h" />
     <ClInclude Include="core-services\GameUpdaterInspector.h" />
+    <ClInclude Include="core-services\GraphicsContextInspector.h" />
     <ClInclude Include="Desktop.h" />
     <ClInclude Include="EulerTransform.h" />
     <ClInclude Include="GameServiceInspector.h" />
@@ -228,6 +229,7 @@
     <ClCompile Include="common\SimpleWidgets.cpp" />
     <ClCompile Include="Context.cpp" />
     <ClCompile Include="core-services\GameUpdaterInspector.cpp" />
+    <ClCompile Include="core-services\GraphicsContextInspector.cpp" />
     <ClCompile Include="Desktop.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="EulerTransform.cpp" />

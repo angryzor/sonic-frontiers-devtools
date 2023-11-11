@@ -3,24 +3,10 @@
 #include "../../GameServiceInspector.h"
 #include "../../ResourceBrowser.h"
 #include "../../EulerTransform.h"
+#include "../../common/SimpleWidgets.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
-
-namespace heur::services {
-	class CameraManager : public GameService {
-	public:
-		class SomeCameraClass {
-		public:
-			void* unk1[6];
-			csl::math::Matrix44 viewMatrix;
-		};
-
-		SomeCameraClass* GetCamera(int id);
-		
-		static GameServiceClass* GetClass();
-	};
-}
 
 ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator, Desktop& desktop) : OperationMode{ allocator }, desktop{ desktop }
 {
@@ -37,22 +23,28 @@ void ObjectInspection::Render() {
 
 	if (focusedObject) {
 		auto* gocTransform = focusedObject->GetComponent<GOCTransform>();
-		auto* camera = gameManager->GetService<heur::services::CameraManager>()->GetCamera(0);
+		auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetComponent(0);
 
 		if (gocTransform && camera) {
 			hh::gfnd::GraphicsContext* gctx = *rangerssdk::bootstrap::GetAddress(&hh::gfnd::GraphicsContext::instance);
 
-			EulerTransform localTransform{ gocTransform->transform };
-
-			csl::math::Matrix44 mat;
 			ImGuiIO& io = ImGui::GetIO();
 
-			ImGuizmo::RecomposeMatrixFromComponents(reinterpret_cast<float*>(&localTransform.position), reinterpret_cast<float*>(&localTransform.rotation), reinterpret_cast<float*>(&localTransform.scale), reinterpret_cast<float*>(&mat));
-			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-			ImGuizmo::Manipulate(camera->viewMatrix.data(), gctx->viewportData.projMatrix.data(), gizmoOperation, ImGuizmo::WORLD, reinterpret_cast<float*>(&mat), NULL, NULL);
-			ImGuizmo::DecomposeMatrixToComponents(reinterpret_cast<float*>(&mat), reinterpret_cast<float*>(&localTransform.position), reinterpret_cast<float*>(&localTransform.rotation), reinterpret_cast<float*>(&localTransform.scale));
+			Eigen::Transform<float, 3, Eigen::Affine> transform{};
+			transform.fromPositionOrientationScale(gocTransform->transform.position, gocTransform->transform.rotation, gocTransform->transform.scale);
 
-			gocTransform->SetLocalTransform(localTransform);
+			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
+			ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), gctx->defaultViewportData.projMatrix.data(), gizmoOperation, gizmoMode, reinterpret_cast<float*>(&transform), NULL, NULL);
+
+			Eigen::Matrix3f rotation;
+			Eigen::Matrix3f scaling;
+
+			transform.computeRotationScaling(&rotation, &scaling);
+
+			gocTransform->SetLocalTransform({ { transform.translation() }, { Eigen::Quaternionf{ rotation } }, { Eigen::Vector3f{ scaling.diagonal() } } });
+
+			if ((ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) && ImGui::IsKeyPressed(ImGuiKey_Space))
+				gizmoMode = gizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 
 			if (ImGui::IsKeyPressed(ImGuiKey_G))
 				gizmoOperation = ImGuizmo::TRANSLATE;
@@ -63,26 +55,37 @@ void ObjectInspection::Render() {
 			if (ImGui::IsKeyPressed(ImGuiKey_S))
 				gizmoOperation = ImGuizmo::SCALE;
 
-			if (gizmoOperation == ImGuizmo::TRANSLATE) {
+			if (gizmoOperation & ImGuizmo::TRANSLATE) {
 				if (ImGui::IsKeyPressed(ImGuiKey_X))
-					gizmoOperation = ImGuizmo::TRANSLATE_X;
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::TRANSLATE_Y | ImGuizmo::TRANSLATE_Z : ImGuizmo::TRANSLATE_X;
 
 				if (ImGui::IsKeyPressed(ImGuiKey_Y))
-					gizmoOperation = ImGuizmo::TRANSLATE_Y;
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::TRANSLATE_X | ImGuizmo::TRANSLATE_Z : ImGuizmo::TRANSLATE_Y;
 
 				if (ImGui::IsKeyPressed(ImGuiKey_Z))
-					gizmoOperation = ImGuizmo::TRANSLATE_Z;
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::TRANSLATE_X | ImGuizmo::TRANSLATE_Y : ImGuizmo::TRANSLATE_Z;
 			}
 
-			if (gizmoOperation == ImGuizmo::ROTATE) {
+			if (gizmoOperation & ImGuizmo::ROTATE) {
 				if (ImGui::IsKeyPressed(ImGuiKey_X))
-					gizmoOperation = ImGuizmo::ROTATE_X;
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::ROTATE_Y | ImGuizmo::ROTATE_Z : ImGuizmo::ROTATE_X;
 
 				if (ImGui::IsKeyPressed(ImGuiKey_Y))
-					gizmoOperation = ImGuizmo::ROTATE_Y;
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::ROTATE_X | ImGuizmo::ROTATE_Z : ImGuizmo::ROTATE_Y;
 
 				if (ImGui::IsKeyPressed(ImGuiKey_Z))
-					gizmoOperation = ImGuizmo::ROTATE_Z;
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::ROTATE_X | ImGuizmo::ROTATE_Y : ImGuizmo::ROTATE_Z;
+			}
+
+			if (gizmoOperation & ImGuizmo::SCALE) {
+				if (ImGui::IsKeyPressed(ImGuiKey_X))
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::SCALE_Y | ImGuizmo::SCALE_Z : ImGuizmo::SCALE_X;
+
+				if (ImGui::IsKeyPressed(ImGuiKey_Y))
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::SCALE_X | ImGuizmo::SCALE_Z : ImGuizmo::SCALE_Y;
+
+				if (ImGui::IsKeyPressed(ImGuiKey_Z))
+					gizmoOperation = ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift) ? ImGuizmo::SCALE_X | ImGuizmo::SCALE_Y : ImGuizmo::SCALE_Z;
 			}
 		}
 	}

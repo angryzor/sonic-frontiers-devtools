@@ -6,7 +6,7 @@ protected:
 	void SetTitle(const char* title);
 public:
 	StandaloneWindow(csl::fnd::IAllocator* allocator);
-	void Render();
+	bool Render();
 	virtual void PreRender();
 	virtual void RenderContents() = 0;
 };

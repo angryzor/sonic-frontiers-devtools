@@ -19,8 +19,16 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 void Desktop::Render() {
 	ToolBar::Render();
 	operationMode.Render();
+
+	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
+
 	for (auto& window : windows) {
-		window->Render();
+		if (!window->Render())
+			windowsThatWantToClose.push_back(window);
+	}
+
+	for (auto* window : windowsThatWantToClose) {
+		RemoveStandaloneWindow(window);
 	}
 }
 

@@ -33,6 +33,7 @@
     <ClInclude Include="common\SimpleWidgets.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
     <ClInclude Include="EulerTransform.h" />
+    <ClInclude Include="core-services\GraphicsContextInspector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -50,7 +51,6 @@
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="common\ReflectionEditor.cpp" />
     <ClCompile Include="operation-modes\ObjectInspection\ObjectInspection.cpp" />
-    <ClCompile Include="operation-modes\ObjectInspection\ObjectInspector.cpp" />
     <ClCompile Include="operation-modes\ObjectInspection\ObjectList.cpp" />
     <ClCompile Include="operation-modes\OperationMode.cpp" />
     <ClCompile Include="resource-editors\ResReflectionEditor.cpp" />
@@ -70,6 +70,8 @@
     <ClCompile Include="common\SimpleWidgets.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />
     <ClCompile Include="EulerTransform.cpp" />
+    <ClCompile Include="operation-modes\ObjectInspection\ObjectInspector.cpp" />
+    <ClCompile Include="core-services\GraphicsContextInspector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
