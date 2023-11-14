@@ -222,6 +222,7 @@
     <ClInclude Include="StandaloneWindow.h" />
     <ClInclude Include="ToolBar.h" />
     <ClInclude Include="utilities\EulerTransform.h" />
+    <ClInclude Include="utilities\FileWatch.hpp" />
     <ClInclude Include="utilities\LuaInterface.h" />
   </ItemGroup>
   <ItemGroup>

@@ -46,6 +46,55 @@ int MyResizeCallback(ImGuiInputTextCallbackData* data)
 	return 0;
 }
 
-void InputText(const char* label, csl::ut::VariableString str, ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr) {
-	
+// This is completely nonstandard hack around the fact that these things don't have resizeable buffers
+// (instead they are always allocated to the exact string length) but it shouldn't cause issues.
+class ResizeableVariableString : public csl::ut::VariableString {
+	static char dummy[1];
+public:
+	void resize(size_t newSize) {
+		size_t allocatorAddr = reinterpret_cast<size_t>(m_pAllocator);
+		csl::fnd::IAllocator* allocator = m_pAllocator == nullptr ? app::fnd::AppHeapManager::GetResidentAllocator() : reinterpret_cast<csl::fnd::IAllocator*>(allocatorAddr & ~1);
+
+		char* oldStr = m_pStr;
+		m_pStr = (char*)allocator->Alloc(newSize, 1);
+		m_pAllocator = reinterpret_cast<csl::fnd::IAllocator*>(reinterpret_cast<size_t>(allocator) | 1);
+
+		if (oldStr) {
+			strcpy_s(m_pStr, newSize, oldStr);
+
+			if (allocatorAddr & 1)
+				allocator->Free(oldStr);
+		}
+		else {
+			m_pStr[0] = '\0';
+		}
+	}
+
+	size_t size() {
+		return m_pStr == nullptr ? 0 : strlen(m_pStr);
+	}
+
+	char* c_str() {
+		return m_pStr == nullptr ? dummy : m_pStr;
+	}
+};
+
+char ResizeableVariableString::dummy[] = {'\0'};
+
+static int VariableStringResizeCallback(ImGuiInputTextCallbackData* data)
+{
+	if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+	{
+		auto my_str = static_cast<ResizeableVariableString*>(data->UserData);
+		//IM_ASSERT(my_str->c_str() == data->Buf);
+		my_str->resize(data->BufSize);
+		data->Buf = my_str->c_str();
+	}
+	return 0;
+}
+
+void InputText(const char* label, csl::ut::VariableString *str, ImGuiInputTextFlags flags) {
+	auto* rstr = static_cast<ResizeableVariableString*>(str);
+
+	ImGui::InputText(label, rstr->c_str(), rstr->size() + 1, flags | ImGuiInputTextFlags_CallbackResize, VariableStringResizeCallback, rstr);
 }

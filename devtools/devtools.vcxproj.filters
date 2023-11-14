@@ -34,6 +34,7 @@
     <ClInclude Include="common\Theme.h" />
     <ClInclude Include="utilities\EulerTransform.h" />
     <ClInclude Include="core-services\CameraManagerInspector.h" />
+    <ClInclude Include="utilities\FileWatch.hpp" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />

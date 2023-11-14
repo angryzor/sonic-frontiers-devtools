@@ -1,7 +1,10 @@
 #include "../Pch.h"
 #include "ReflectionEditor.h"
+#include "../common/SimpleWidgets.h"
+#include "../imgui/imgui_internal.h"
 
 using namespace hh::fnd;
+
 
 const char* ReflectionEditor::GetRflMemberName(const RflClassMember* member) {
 	const char* caption = *reinterpret_cast<const char* const*>(member->GetAttribute("Caption")->GetData());
@@ -61,13 +64,13 @@ void ReflectionEditor::WritePrimitiveInt(void* obj, int64_t value, const hh::fnd
 	}
 }
 
-void ReflectionEditor::RenderStubRflParamEditor(const RflClassMember* member) {
-	ImGui::Text(GetRflMemberName(member));
+void ReflectionEditor::RenderStubRflParamEditor(const char* name, const RflClassMember* member) {
+	ImGui::Text(name);
 	ImGui::SameLine();
 	ImGui::Text("Coming soon!");
 }
 
-void ReflectionEditor::RenderEnumEditor(void* obj, const RflClassMember* member) {
+void ReflectionEditor::RenderEnumEditor(const char* name, void* obj, const RflClassMember* member) {
 	const RflClassEnum* enumClass = member->GetEnumClass();
 	
 	static const char* invalid = "<INVALID VALUE>";
@@ -75,7 +78,7 @@ void ReflectionEditor::RenderEnumEditor(void* obj, const RflClassMember* member)
 	int64_t currentValue = ReadPrimitiveInt(obj, member->GetSubType());
 	enumClass->GetEnglishNameOfValue(currentValue, previewValue);
 
-	if (ImGui::BeginCombo(GetRflMemberName(member), *previewValue)) {
+	if (ImGui::BeginCombo(name, *previewValue)) {
 		auto* values = enumClass->GetValues();
 
 		for (size_t i = 0; i < enumClass->GetValueCount(); i++) {
@@ -92,6 +95,134 @@ void ReflectionEditor::RenderEnumEditor(void* obj, const RflClassMember* member)
 	}
 }
 
+void ReflectionEditor::RenderFlagsEditor(const char* name, void* obj, const RflClassMember* member) {
+	auto* enumEntries = reinterpret_cast<const RflArray<RflClassEnumMember>*>(member->GetAttribute("DisplayIndex")->GetData());
+	int64_t currentValue = ReadPrimitiveInt(obj, member->GetSubType());
+
+	if (ImGui::TreeNode(name)) {
+		auto* values = enumEntries->items;
+
+		for (size_t i = 0; i < enumEntries->count; i++) {
+			ImGui::CheckboxFlags(values[i].GetEnglishName(), &currentValue, static_cast<size_t>(1) << values[i].GetIndex());
+		}
+
+		ImGui::TreePop();
+	}
+}
+
+void ReflectionEditor::RflClassMemberEditor(const char* name, void* obj, const RflClassMember* member) {
+	switch (member->m_Type) {
+	case RflClassMember::TYPE_BOOL:
+		ImGui::Checkbox(name, static_cast<bool*>(obj));
+		break;
+	case RflClassMember::TYPE_SINT8:
+		RenderScalarRflParamEditor<int8_t>(name, obj, member, ImGuiDataType_S8, 1);
+		break;
+	case RflClassMember::TYPE_UINT8:
+		RenderScalarRflParamEditor<uint8_t>(name, obj, member, ImGuiDataType_U8, 1);
+		break;
+	case RflClassMember::TYPE_SINT16:
+		RenderScalarRflParamEditor<int16_t>(name, obj, member, ImGuiDataType_S16, 1);
+		break;
+	case RflClassMember::TYPE_UINT16:
+		RenderScalarRflParamEditor<uint16_t>(name, obj, member, ImGuiDataType_U16, 1);
+		break;
+	case RflClassMember::TYPE_SINT32:
+		RenderScalarRflParamEditor<int32_t>(name, obj, member, ImGuiDataType_S32, 1, "RangeSint32");
+		break;
+	case RflClassMember::TYPE_UINT32:
+		RenderScalarRflParamEditor<uint32_t>(name, obj, member, ImGuiDataType_U32, 1);
+		break;
+	case RflClassMember::TYPE_SINT64:
+		RenderScalarRflParamEditor<int64_t>(name, obj, member, ImGuiDataType_S64, 1);
+		break;
+	case RflClassMember::TYPE_UINT64:
+		RenderScalarRflParamEditor<uint64_t>(name, obj, member, ImGuiDataType_U64, 1);
+		break;
+	case RflClassMember::TYPE_FLOAT:
+		RenderScalarRflParamEditor<float>(name, obj, member, ImGuiDataType_Float, 1, "RangeFloat");
+		break;
+	case RflClassMember::TYPE_VECTOR2:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector2>(name, obj, member, ImGuiDataType_Float, 2, "RangeFloat");
+		break;
+	case RflClassMember::TYPE_VECTOR3:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(name, obj, member, ImGuiDataType_Float, 3, "RangeFloat");
+		break;
+	case RflClassMember::TYPE_VECTOR4:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4, "RangeFloat");
+		break;
+	case RflClassMember::TYPE_QUATERNION:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4, "RangeFloat");
+		break;
+	case RflClassMember::TYPE_MATRIX34:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		break;
+	case RflClassMember::TYPE_MATRIX44:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		break;
+	case RflClassMember::TYPE_POINTER:
+		RenderStubRflParamEditor(name, member);
+		break;
+	case RflClassMember::TYPE_ARRAY:
+		RenderStubRflParamEditor(name, member);
+		break;
+	case RflClassMember::TYPE_SIMPLE_ARRAY:
+		RenderStubRflParamEditor(name, member);
+		break;
+	case RflClassMember::TYPE_ENUM:
+		RenderEnumEditor(name, obj, member);
+		break;
+	case RflClassMember::TYPE_STRUCT:
+		RenderStructRflParamEditor(name, obj, member->m_pClass);
+		break;
+	case RflClassMember::TYPE_FLAGS:
+		RenderFlagsEditor(name, obj, member);
+		break;
+	case RflClassMember::TYPE_CSTRING:
+		ImGui::Text("%s: %s", name, static_cast<const char*>(obj));
+		break;
+	case RflClassMember::TYPE_STRING:
+		InputText(name, static_cast<csl::ut::VariableString*>(obj));
+		break;
+	case RflClassMember::TYPE_OBJECT_ID:
+		RenderStubRflParamEditor(name, member);
+		break;
+	case RflClassMember::TYPE_POSITION:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(name, obj, member, ImGuiDataType_Float, 3, "RangeFloat");
+		break;
+	case RflClassMember::TYPE_COLOR_BYTE: {
+		auto originalColor{ static_cast<csl::ut::Color<uint8_t>*>(obj) };
+		float colorAsFloat[]{
+			static_cast<float>(originalColor->r) / 255,
+			static_cast<float>(originalColor->g) / 255,
+			static_cast<float>(originalColor->b) / 255,
+			static_cast<float>(originalColor->a) / 255,
+		};
+		float editableColor[4]{ colorAsFloat[0], colorAsFloat[1], colorAsFloat[2], colorAsFloat[3] };
+
+		ImGui::ColorEdit4(name, editableColor, ImGuiColorEditFlags_Uint8);
+
+		if (colorAsFloat[0] != editableColor[0] || colorAsFloat[1] != editableColor[1] || colorAsFloat[2] != editableColor[2] || colorAsFloat[3] != editableColor[3]) {
+			originalColor->r = static_cast<uint8_t>(editableColor[0] * 255);
+			originalColor->g = static_cast<uint8_t>(editableColor[1] * 255);
+			originalColor->b = static_cast<uint8_t>(editableColor[2] * 255);
+			originalColor->a = static_cast<uint8_t>(editableColor[3] * 255);
+		}
+
+		break;
+	}
+	case RflClassMember::TYPE_COLOR_FLOAT:
+		ImGui::ColorEdit4(name, static_cast<float*>(obj), ImGuiColorEditFlags_Float);
+		break;
+	}
+}
+
 void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass) {
 	const RflClass* parent = rflClass->GetBaseType();
 
@@ -103,131 +234,31 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 		const RflClassMember* member = &rflClass->m_pMembers.items[i];
 		size_t constArrSizeOrZero = member->GetCstyleArraySize();
 		size_t constArrSize = constArrSizeOrZero == 0 ? 1 : constArrSizeOrZero;
+		size_t baseAddr = reinterpret_cast<size_t>(obj) + member->m_Offset;
+		auto memberName = GetRflMemberName(member);
 
 		ImGui::PushID(static_cast<int>(i));
-		for (size_t j = 0; j < constArrSize; j++) {
-			void* address = reinterpret_cast<void*>(reinterpret_cast<size_t>(obj) + member->m_Offset + j * member->GetSingleSizeInBytes());
+		if (constArrSize == 1) {
+			RflClassMemberEditor(memberName, reinterpret_cast<void*>(baseAddr), member);
+		}
+		else {
+			if (ImGui::TreeNode("Array", "%s[]", memberName)) {
+				for (size_t j = 0; j < constArrSize; j++) {
+					char name[200] = "";
+					snprintf(name, 200, "%s[%zd]", memberName, j);
 
-			ImGui::PushID(static_cast<int>(j));
-			switch (member->m_Type) {
-			case RflClassMember::TYPE_BOOL:
-				ImGui::Checkbox(GetRflMemberName(member), static_cast<bool*>(address));
-				break;
-			case RflClassMember::TYPE_SINT8:
-				RenderScalarRflParamEditor<int8_t>(address, member, ImGuiDataType_S8, 1);
-				break;
-			case RflClassMember::TYPE_UINT8:
-				RenderScalarRflParamEditor<uint8_t>(address, member, ImGuiDataType_U8, 1);
-				break;
-			case RflClassMember::TYPE_SINT16:
-				RenderScalarRflParamEditor<int16_t>(address, member, ImGuiDataType_S16, 1);
-				break;
-			case RflClassMember::TYPE_UINT16:
-				RenderScalarRflParamEditor<uint16_t>(address, member, ImGuiDataType_U16, 1);
-				break;
-			case RflClassMember::TYPE_SINT32:
-				RenderScalarRflParamEditor<int32_t>(address, member, ImGuiDataType_S32, 1, "RangeSint32");
-				break;
-			case RflClassMember::TYPE_UINT32:
-				RenderScalarRflParamEditor<uint32_t>(address, member, ImGuiDataType_U32, 1);
-				break;
-			case RflClassMember::TYPE_SINT64:
-				RenderScalarRflParamEditor<int64_t>(address, member, ImGuiDataType_S64, 1);
-				break;
-			case RflClassMember::TYPE_UINT64:
-				RenderScalarRflParamEditor<uint64_t>(address, member, ImGuiDataType_U64, 1);
-				break;
-			case RflClassMember::TYPE_FLOAT:
-				RenderScalarRflParamEditor<float>(address, member, ImGuiDataType_Float, 1, "RangeFloat");
-				break;
-			case RflClassMember::TYPE_VECTOR2:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector2>(address, member, ImGuiDataType_Float, 2, "RangeFloat");
-				break;
-			case RflClassMember::TYPE_VECTOR3:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(address, member, ImGuiDataType_Float, 3, "RangeFloat");
-				break;
-			case RflClassMember::TYPE_VECTOR4:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4, "RangeFloat");
-				break;
-			case RflClassMember::TYPE_QUATERNION:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4, "RangeFloat");
-				break;
-			case RflClassMember::TYPE_MATRIX34:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				break;
-			case RflClassMember::TYPE_MATRIX44:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(address, member, ImGuiDataType_Float, 4);
-				break;
-			case RflClassMember::TYPE_POINTER:
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_ARRAY:
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_SIMPLE_ARRAY:
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_ENUM:
-				RenderEnumEditor(address, member);
-				break;
-			case RflClassMember::TYPE_STRUCT:
-				RenderStructRflParamEditor(address, GetRflMemberName(member), member->m_pClass);
-				break;
-			case RflClassMember::TYPE_FLAGS:
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_CSTRING:
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_STRING:
-				//auto str = static_cast<csl::ut::VariableString*>(address);
-				//ImGui::InputText(GetRflMemberName(member), reinterpret, (size_t)my_str->size(), size, flags | ImGuiInputTextFlags_CallbackResize, Funcs::MyResizeCallback, (void*)my_str);
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_OBJECT_ID:
-				RenderStubRflParamEditor(member);
-				break;
-			case RflClassMember::TYPE_POSITION:
-				RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(address, member, ImGuiDataType_Float, 3, "RangeFloat");
-				break;
-			case RflClassMember::TYPE_COLOR_BYTE: {
-				auto originalColor{ static_cast<csl::ut::Color<uint8_t>*>(address) };
-				float colorAsFloat[]{
-					static_cast<float>(originalColor->r) / 255,
-					static_cast<float>(originalColor->g) / 255,
-					static_cast<float>(originalColor->b) / 255,
-					static_cast<float>(originalColor->a) / 255,
-				};
-				float editableColor[4]{ colorAsFloat[0], colorAsFloat[1], colorAsFloat[2], colorAsFloat[3] };
-
-				ImGui::ColorEdit4(GetRflMemberName(member), editableColor, ImGuiColorEditFlags_Uint8);
-
-				if (colorAsFloat[0] != editableColor[0] || colorAsFloat[1] != editableColor[1] || colorAsFloat[2] != editableColor[2] || colorAsFloat[3] != editableColor[3]) {
-					originalColor->r = static_cast<uint8_t>(editableColor[0] * 255);
-					originalColor->g = static_cast<uint8_t>(editableColor[1] * 255);
-					originalColor->b = static_cast<uint8_t>(editableColor[2] * 255);
-					originalColor->a = static_cast<uint8_t>(editableColor[3] * 255);
+					ImGui::PushID(static_cast<int>(j));
+					RflClassMemberEditor(name, reinterpret_cast<void*>(baseAddr + j * member->GetSingleSizeInBytes()), member);
+					ImGui::PopID();
 				}
-
-				break;
+				ImGui::TreePop();
 			}
-			case RflClassMember::TYPE_COLOR_FLOAT:
-				ImGui::ColorEdit4(GetRflMemberName(member), static_cast<float*>(address), ImGuiColorEditFlags_Float);
-				break;
-			}
-			ImGui::PopID();
 		}
 		ImGui::PopID();
 	}
 }
 
-void ReflectionEditor::RenderStructRflParamEditor(void* obj, const char* name, const RflClass* rflClass) {
+void ReflectionEditor::RenderStructRflParamEditor(const char* name, void* obj, const RflClass* rflClass) {
 	if (ImGui::TreeNode(name)) {
 		ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
 		RflClassMembersEditor(obj, rflClass);

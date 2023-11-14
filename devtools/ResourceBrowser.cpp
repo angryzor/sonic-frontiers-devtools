@@ -73,30 +73,30 @@ void ResourceBrowser::PreRender() {
 
 void ResourceBrowser::RenderContents() {
 	if (ImGui::BeginMenuBar()) {
-		if (ImGui::MenuItem("Load file...")) {
-			//ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", ".*", ".", ImGuiFileDialogFlags_Modal);
+		//if (ImGui::MenuItem("Load file...")) {
+		//	//ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", ".*", ".", ImGuiFileDialogFlags_Modal);
 
 
-			//auto* fileLoader = FileLoader::GetInstance();
+		//	//auto* fileLoader = FileLoader::GetInstance();
 
-			//fileLoader->UnkFunc8(foo);
+		//	//fileLoader->UnkFunc8(foo);
 
-			//InplaceTempUri<128> uri{ foo, sizeof(foo) };
-			//ResourceLoader::Unk1 unk{ 1, "" };
-			//Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo(), 0, 1, unk);
-		}
+		//	//InplaceTempUri<128> uri{ foo, sizeof(foo) };
+		//	//ResourceLoader::Unk1 unk{ 1, "" };
+		//	//Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo(), 0, 1, unk);
+		//}
+		if (ImGui::MenuItem("Watch directory..."))
+			ImGuiFileDialog::Instance()->OpenDialog("ResourceBrowserWatchDirectory", "Choose directory", nullptr, ".", ImGuiFileDialogFlags_Modal);
+
 		ImGui::EndMenuBar();
 	}
 
-	//if (ImGuiFileDialog::Instance()->Display("ResourceLoadFromFileDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
-	//	if (ImGuiFileDialog::Instance()->IsOk()) {
-	//		std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-	//		InplaceTempUri<128> uri{ filePath.c_str(), filePath.size() };
+	if (ImGuiFileDialog::Instance()->Display("ResourceBrowserWatchDirectory", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk())
+			WatchDirectory(ImGuiFileDialog::Instance()->GetFilePathName());
 
-	//		Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo());
-	//	}
-	//	ImGuiFileDialog::Instance()->Close();
-	//}
+		ImGuiFileDialog::Instance()->Close();
+	}
 
 	if (ImGui::Button("ROOT"))
 		currentPath.clear();
@@ -139,7 +139,10 @@ void ResourceBrowser::RenderContainerContents(const ResourceContainer* container
 		RenderResource(resource);
 		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
 			if (ImGui::MenuItem("Load from file")) {
-				ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", ".*", ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite, resource);
+				char extbuf[20];
+				snprintf(extbuf, 20, ".%s", ResourceTypeRegistry::GetInstance()->GetExtensionByTypeInfo(&resource->GetClass()));
+
+				ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", extbuf, ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite, resource);
 			}
 			ImGui::EndPopup();
 		}
@@ -150,18 +153,9 @@ void ResourceBrowser::RenderContainerContents(const ResourceContainer* container
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			ManagedResource* resource = static_cast<ManagedResource*>(ImGuiFileDialog::Instance()->GetUserDatas());
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+			std::wstring wFilePath(filePath.begin(), filePath.end());
 
-			HANDLE file = CreateFileA(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-			DWORD fileSize = GetFileSize(file, NULL);
-
-			void* buffer = new char[fileSize];
-
-			ReadFile(file, buffer, fileSize, NULL, NULL);
-			CloseHandle(file);
-
-			resource->Reload(buffer, fileSize);
-
-			delete[] buffer;
+			ReloadResource(wFilePath.c_str(), resource);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}
@@ -232,11 +226,68 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 	ImGui::Dummy(ImVec2(size, size));
 }
 
-//void ResourceBrowser::RenderResources() {
-//	if (ImGui::BeginChild("Resources")) {
-//		if (selectedResourceContainer != nullptr) {
-//			for (auto* resource : selectedResourceContainer->GetResources()) {
-//				ImGui::Text();
-//		}
-//	}
-//}
+void ResourceBrowser::ReloadResource(const wchar_t* filePath, ManagedResource* resource) {
+	HANDLE file = CreateFileW(filePath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+	if (file == INVALID_HANDLE_VALUE)
+		return;
+
+	DWORD fileSize = GetFileSize(file, NULL);
+
+	void* buffer = new char[fileSize];
+
+	bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
+	CloseHandle(file);
+
+	if (result)
+		resource->Reload(buffer, fileSize);
+
+	delete[] buffer;
+}
+
+filewatch::FileWatch<std::string>* ResourceBrowser::fileWatcher = nullptr;
+
+void ResourceBrowser::WatchDirectory(const std::string& path) {
+	auto* allocator = app::fnd::AppHeapManager::GetResidentAllocator();
+
+	if (fileWatcher != nullptr) {
+		fileWatcher->~FileWatch();
+		allocator->Free(fileWatcher);
+	}
+
+	fileWatcher = new (allocator) filewatch::FileWatch<std::string>(path, [path](const std::string& subpath, const filewatch::Event changeType) {
+		switch (changeType) {
+		case filewatch::Event::added:
+		case filewatch::Event::modified:
+			{
+				std::filesystem::path fspath{ path };
+				fspath /= subpath;
+
+				if (!std::filesystem::exists(fspath))
+					return;
+
+				std::wstring wfilename = fspath.filename();
+				std::wstring wext = fspath.extension();
+
+				std::string filename(wfilename.begin(), wfilename.end());
+				size_t dotloc = filename.find('.');
+
+				if (dotloc == std::string::npos)
+					return;
+
+				std::string fullExt = filename.substr(dotloc + 1);
+				auto* resourceType = ResourceTypeRegistry::GetInstance()->GetTypeInfoByExtension(fullExt.c_str());
+
+				if (resourceType == nullptr)
+					return;
+
+				auto* resource = ResourceManager::GetInstance()->GetResource(filename.c_str(), resourceType);
+
+				if (resource == nullptr)
+					return;
+
+				ReloadResource(fspath.c_str(), resource);
+			}
+			break;
+		}
+	});
+}
