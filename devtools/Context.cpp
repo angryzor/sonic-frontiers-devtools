@@ -2,7 +2,7 @@
 #include "Inter.h"
 #include "Context.h"
 #include "Desktop.h"
-#include "Theme.h"
+#include "common/Theme.h"
 #include "imgui/imgui_freetype.h"
 
 static ID3D11Device* device;
@@ -115,12 +115,12 @@ void Context::init() {
 	if (inited)
 		return;
 
-	hh::gfnd::GraphicsContext* gfx = *rangerssdk::bootstrap::GetAddress(&hh::gfnd::GraphicsContext::instance);
+	hh::gfnd::GraphicsContext* gfx = hh::gfnd::GraphicsContext::GetInstance();
 	device = static_cast<ID3D11Device*>(gfx->renderingDevice->deviceObject->objContainer->d3dDevice);
 
 	device->GetImmediateContext(&deviceContext);
 
-	void* windowData = reinterpret_cast<void**>((*rangerssdk::bootstrap::GetAddress(&hh::fw::Application::instance))->unkFromUnkParam1)[3];
+	void* windowData = reinterpret_cast<void**>(hh::fw::Application::GetInstance()->unkFromUnkParam1)[3];
 	HWND hwnd = static_cast<HWND*>(windowData)[3];
 
 	IMGUI_CHECKVERSION();

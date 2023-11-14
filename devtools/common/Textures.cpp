@@ -1,4 +1,4 @@
-#include "Pch.h"
+#include "../Pch.h"
 #include "Textures.h"
 
 ImTextureID GetTextureIDFromResTexture(const hh::gfnd::ResTexture* resTexture) {

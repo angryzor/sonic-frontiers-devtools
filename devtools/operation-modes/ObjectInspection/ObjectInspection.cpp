@@ -2,7 +2,6 @@
 #include "ObjectInspection.h"
 #include "../../GameServiceInspector.h"
 #include "../../ResourceBrowser.h"
-#include "../../EulerTransform.h"
 #include "../../common/SimpleWidgets.h"
 
 using namespace hh::fnd;
@@ -23,10 +22,10 @@ void ObjectInspection::Render() {
 
 	if (focusedObject) {
 		auto* gocTransform = focusedObject->GetComponent<GOCTransform>();
-		auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetComponent(0);
+		auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0);
 
 		if (gocTransform && camera) {
-			hh::gfnd::GraphicsContext* gctx = *rangerssdk::bootstrap::GetAddress(&hh::gfnd::GraphicsContext::instance);
+			hh::gfnd::GraphicsContext* gctx = hh::gfnd::GraphicsContext::GetInstance();
 
 			ImGuiIO& io = ImGui::GetIO();
 

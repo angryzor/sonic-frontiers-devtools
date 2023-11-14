@@ -5,11 +5,11 @@
 
 class Desktop : public hh::fnd::BaseObject {
     ObjectInspection operationMode{ GetAllocator(), *this };
-    hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader;
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
 
 public:
+    hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader;
     static Desktop* instance;
 
     ID3D11ShaderResourceView* iconView;

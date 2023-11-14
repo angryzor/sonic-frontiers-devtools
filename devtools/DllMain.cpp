@@ -177,7 +177,7 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID res
 		{
 			baseAddress = GetModuleHandle(nullptr);
 
-			rangerssdk::bootstrap::SetBaseAddress(baseAddress);
+			rangerssdk::SetBaseAddress(baseAddress);
 
 			//pGameModeStageRebuildLevel = reinterpret_cast<GameModeStageRebuildLevelPtr>(reinterpret_cast<size_t>(baseAddress) + 0x01F5B90);
 			pGameModeBootInit = reinterpret_cast<GameModeBootInitPtr>(reinterpret_cast<size_t>(baseAddress) + 0x76832E0);

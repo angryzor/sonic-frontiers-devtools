@@ -8,7 +8,7 @@ GameUpdaterInspector::GameUpdaterInspector(csl::fnd::IAllocator* allocator) : St
 
 void GameUpdaterInspector::RenderContents()
 {
-	auto& gameUpdater = (*rangerssdk::bootstrap::GetAddress(&hh::game::GameApplication::instance))->GetGameUpdater();
+	auto& gameUpdater = hh::game::GameApplication::GetInstance()->GetGameUpdater();
 	//unsigned int flags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
 	//ImGui::CheckboxFlags("Unknown pause", &flags, 1);
 	//ImGui::CheckboxFlags("Full pause", &flags, 2);

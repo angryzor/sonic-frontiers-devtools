@@ -186,6 +186,8 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 				RenderStubRflParamEditor(member);
 				break;
 			case RflClassMember::TYPE_STRING:
+				//auto str = static_cast<csl::ut::VariableString*>(address);
+				//ImGui::InputText(GetRflMemberName(member), reinterpret, (size_t)my_str->size(), size, flags | ImGuiInputTextFlags_CallbackResize, Funcs::MyResizeCallback, (void*)my_str);
 				RenderStubRflParamEditor(member);
 				break;
 			case RflClassMember::TYPE_OBJECT_ID:

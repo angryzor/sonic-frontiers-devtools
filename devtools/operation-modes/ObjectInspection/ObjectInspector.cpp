@@ -2,7 +2,7 @@
 #include "ObjectInspector.h"
 #include "ObjectInspection.h"
 #include "../../resource-editors/ResReflectionEditor.h"
-#include "../../EulerTransform.h"
+#include "../../utilities/EulerTransform.h"
 
 using namespace hh::fnd;
 using namespace hh::game;

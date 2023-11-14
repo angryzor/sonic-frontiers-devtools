@@ -1,7 +1,7 @@
 #pragma once
 
-#include "imgui/imgui.h"
-#include "Desktop.h"
+#include "../imgui/imgui.h"
+#include "../Desktop.h"
 #include "Textures.h"
 
 struct IconUV {
@@ -130,7 +130,7 @@ constexpr IconAtlas<AssetIconId, 28> assetIcons = { 324, 389, "angryzor_devtools
 template<typename Atlas>
 void RenderIcon(const Atlas& atlas, typename Atlas::Id_t id, ImVec2 size) {
     auto& uv = atlas.uvs[static_cast<size_t>(id)];
-    auto texture = (*rangerssdk::bootstrap::GetAddress(&hh::fnd::ResourceManager::instance))->GetResource<hh::gfnd::ResTexture>(atlas.atlasFile);
+    auto texture = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::gfnd::ResTexture>(atlas.atlasFile);
 
     ImGui::Image(GetTextureIDFromResTexture(texture), size, ImVec2(uv.x / atlas.width, uv.y / atlas.height), ImVec2((uv.x + uv.w) / atlas.width, (uv.y + uv.h) / atlas.height));
 }

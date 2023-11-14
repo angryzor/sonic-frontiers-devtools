@@ -1,9 +1,13 @@
 #include "Pch.h"
 #include "ToolBar.h"
-#include "Theme.h"
+#include "common/Theme.h"
 #include "Desktop.h"
 #include "ResourceBrowser.h"
 #include "core-services/GameUpdaterInspector.h"
+#include "core-services/GraphicsContextInspector.h"
+#include "core-services/CameraManagerInspector.h"
+
+using namespace hh::game;
 
 void ToolBar::Render() {
 	ImGuiWindowFlags windowFlags
@@ -34,6 +38,10 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Insights")) {
 			if (ImGui::MenuItem("GameUpdater"))
 				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("GraphicsContext"))
+				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("CameraManager"))
+				new (Desktop::instance->GetAllocator()) CameraManagerInspector(Desktop::instance->GetAllocator());
 			ImGui::EndMenu();
 		}
 
@@ -56,32 +64,32 @@ void ToolBar::Render() {
 		ImGui::EndMenuBar();
 	}
 
-	auto& gameUpdater = (*rangerssdk::bootstrap::GetAddress(&hh::game::GameApplication::instance))->GetGameUpdater();
+	auto& gameUpdater = GameApplication::GetInstance()->GetGameUpdater();
 
 	unsigned int gameUpdaterFlags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
 
-	ImGui::CheckboxFlags("Object pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(hh::game::GameUpdater::Flags::OBJECT_PAUSE));
+	ImGui::CheckboxFlags("Object pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::OBJECT_PAUSE));
 	ImGui::SetItemTooltip("Pauses only standard object layers. Certain layers and services (e.g. weather service) keep running. (Hotkey: F3)");
 	ImGui::SameLine();
-	ImGui::CheckboxFlags("Debug pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(hh::game::GameUpdater::Flags::DEBUG_PAUSE));
+	ImGui::CheckboxFlags("Debug pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::DEBUG_PAUSE));
 	ImGui::SetItemTooltip("Pauses (almost) every object layer. (Hotkey: F4)");
 	ImGui::SameLine();
 
-	gameUpdater.flags.m_dummy = static_cast<hh::game::GameUpdater::Flags>(gameUpdaterFlags);
+	gameUpdater.flags.m_dummy = static_cast<GameUpdater::Flags>(gameUpdaterFlags);
 
 	if (ImGui::Button("Step frame"))
-		gameUpdater.flags.set(hh::game::GameUpdater::Flags::DEBUG_STEP_FRAME);
+		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
 	ImGui::SetItemTooltip("When in debug pause, step through updates frame by frame. Note that if object pause is also enabled objects will not update even while stepping. (Hotkey: F5)");
 	ImGui::SameLine();
 
 	if (ImGui::IsKeyPressed(ImGuiKey_F3))
-		gameUpdater.flags.flip(hh::game::GameUpdater::Flags::OBJECT_PAUSE);
+		gameUpdater.flags.flip(GameUpdater::Flags::OBJECT_PAUSE);
 	if (ImGui::IsKeyPressed(ImGuiKey_F4))
-		gameUpdater.flags.flip(hh::game::GameUpdater::Flags::DEBUG_PAUSE);
+		gameUpdater.flags.flip(GameUpdater::Flags::DEBUG_PAUSE);
 	if (ImGui::IsKeyPressed(ImGuiKey_F5))
-		gameUpdater.flags.set(hh::game::GameUpdater::Flags::DEBUG_STEP_FRAME);
+		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
 
-	auto* debugCameraMgr = *rangerssdk::bootstrap::GetAddress(&hh::game::DebugCameraManager::instance);
+	auto* debugCameraMgr = DebugCameraManager::GetInstance();
 
 	bool debugCameraActive{ debugCameraMgr->isActive };
 

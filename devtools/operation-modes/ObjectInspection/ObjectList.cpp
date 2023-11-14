@@ -1,7 +1,7 @@
 #include "../../Pch.h"
 #include "ObjectList.h"
 #include "ObjectInspection.h"
-#include "../../icons.h"
+#include "../../common/Icons.h"
 
 using namespace hh::fnd;
 using namespace hh::game;

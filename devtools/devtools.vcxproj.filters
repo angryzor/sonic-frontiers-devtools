@@ -19,21 +19,21 @@
     <ClInclude Include="serialization\EndianSwaps.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
     <ClInclude Include="imgui\ImGuiFileDialogConfig.h" />
-    <ClInclude Include="icons.h" />
     <ClInclude Include="Inter.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="GameServiceInspector.h" />
     <ClInclude Include="ResourceBrowser.h" />
     <ClInclude Include="StandaloneWindow.h" />
-    <ClInclude Include="ResReflectionEditorWindow.h" />
-    <ClInclude Include="Theme.h" />
-    <ClInclude Include="Textures.h" />
     <ClInclude Include="resource-editors\ResEffectEditor.h" />
     <ClInclude Include="core-services\GameUpdaterInspector.h" />
     <ClInclude Include="common\SimpleWidgets.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
-    <ClInclude Include="EulerTransform.h" />
     <ClInclude Include="core-services\GraphicsContextInspector.h" />
+    <ClInclude Include="common\icons.h" />
+    <ClInclude Include="common\Textures.h" />
+    <ClInclude Include="common\Theme.h" />
+    <ClInclude Include="utilities\EulerTransform.h" />
+    <ClInclude Include="core-services\CameraManagerInspector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -57,21 +57,21 @@
     <ClCompile Include="serialization\ReflectionSerializer.cpp" />
     <ClCompile Include="ToolBar.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
-    <ClCompile Include="Icons.cpp" />
     <ClCompile Include="FiraCode.h" />
     <ClCompile Include="GameServiceInspector.cpp" />
     <ClCompile Include="ResourceBrowser.cpp" />
     <ClCompile Include="StandaloneWindow.cpp" />
-    <ClCompile Include="ResReflectionEditorWindow.cpp" />
-    <ClCompile Include="Theme.cpp" />
-    <ClCompile Include="Textures.cpp" />
     <ClCompile Include="resource-editors\ResEffectEditor.cpp" />
     <ClCompile Include="core-services\GameUpdaterInspector.cpp" />
     <ClCompile Include="common\SimpleWidgets.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />
-    <ClCompile Include="EulerTransform.cpp" />
     <ClCompile Include="operation-modes\ObjectInspection\ObjectInspector.cpp" />
     <ClCompile Include="core-services\GraphicsContextInspector.cpp" />
+    <ClCompile Include="common\Textures.cpp" />
+    <ClCompile Include="common\Theme.cpp" />
+    <ClCompile Include="common\Icons.cpp" />
+    <ClCompile Include="utilities\EulerTransform.cpp" />
+    <ClCompile Include="core-services\CameraManagerInspector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

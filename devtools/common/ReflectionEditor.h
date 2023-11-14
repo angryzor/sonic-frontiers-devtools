@@ -63,6 +63,6 @@ public:
     }
 
     template<typename T> static void Render(T& reflectionData) {
-        Render(&reflectionData, rangerssdk::bootstrap::GetAddress(&T::rflClass));
+        Render(&reflectionData, rangerssdk::GetAddress(&T::rflClass));
     }
 };

@@ -1,5 +1,6 @@
 #include "../Pch.h"
 #include "GraphicsContextInspector.h"
+#include "../common/SimpleWidgets.h"
 
 GraphicsContextInspector::GraphicsContextInspector(csl::fnd::IAllocator* allocator) : StandaloneWindow{ allocator }
 {
@@ -8,20 +9,35 @@ GraphicsContextInspector::GraphicsContextInspector(csl::fnd::IAllocator* allocat
 
 void GraphicsContextInspector::RenderContents()
 {
-	auto* gfxContext = *rangerssdk::bootstrap::GetAddress(&hh::gfnd::GraphicsContext::instance);
+	auto* gfxContext = hh::gfnd::GraphicsContext::GetInstance();
 
-	/*if (ImGui::TreeNode("Renderable containers")) {
+	if (ImGui::TreeNode("Renderable containers")) {
 		int i = 0;
 		for (auto& container : gfxContext->renderableContainers) {
-			ImGui::TreeNode("Container %d", i++);
+			if (ImGui::TreeNode(container, "Container %d", i++)) {
+				for (auto& renderable : container->renderables) {
+					ImGui::TreeNodeEx(&renderable, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, renderable.name == nullptr ? "<anonymous>" : renderable.name);
+				}
+				ImGui::TreePop();
+			}
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Viewports")) {
+		int i = 0;
 
-			auto* renderable = container->renderables.m_pRoot;
+		if (ImGui::TreeNode("Default viewport")) {
+			ViewportDataInfo(gfxContext->defaultViewportData);
+			ImGui::TreePop();
+		}
 
-			while (renderable != nullptr) {
-				renderable->
-			}*/
+		for (auto& viewport : gfxContext->viewportDatas) {
+			if (ImGui::TreeNode(&viewport, "Viewport %d", i++)) {
+				ViewportDataInfo(viewport);
+				ImGui::TreePop();
+			}
+		}
 
-	//ImGui::Text("layers active during ingame pause: %x", gameUpdater.layersActiveDuringIngamePause);
-	//ImGui::Text("layers active during debug pause: %x", gameUpdater.layersActiveDuringDebugPause);
-	//ImGui::Text("layers active during object pause: %x", gameUpdater.layersActiveDuringObjectPause);
+		ImGui::TreePop();
+	}
 }

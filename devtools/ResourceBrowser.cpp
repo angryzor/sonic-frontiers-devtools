@@ -1,8 +1,8 @@
 #include "Pch.h"
 #include "ResourceBrowser.h"
 #include "resource-editors/ResReflectionEditor.h"
-#include "Textures.h"
-#include "icons.h"
+#include "common/Textures.h"
+#include "common/Icons.h"
 
 using namespace hh::fnd;
 
@@ -72,6 +72,32 @@ void ResourceBrowser::PreRender() {
 }
 
 void ResourceBrowser::RenderContents() {
+	if (ImGui::BeginMenuBar()) {
+		if (ImGui::MenuItem("Load file...")) {
+			//ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", ".*", ".", ImGuiFileDialogFlags_Modal);
+
+
+			//auto* fileLoader = FileLoader::GetInstance();
+
+			//fileLoader->UnkFunc8(foo);
+
+			//InplaceTempUri<128> uri{ foo, sizeof(foo) };
+			//ResourceLoader::Unk1 unk{ 1, "" };
+			//Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo(), 0, 1, unk);
+		}
+		ImGui::EndMenuBar();
+	}
+
+	//if (ImGuiFileDialog::Instance()->Display("ResourceLoadFromFileDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+	//	if (ImGuiFileDialog::Instance()->IsOk()) {
+	//		std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+	//		InplaceTempUri<128> uri{ filePath.c_str(), filePath.size() };
+
+	//		Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo());
+	//	}
+	//	ImGuiFileDialog::Instance()->Close();
+	//}
+
 	if (ImGui::Button("ROOT"))
 		currentPath.clear();
 
@@ -89,7 +115,7 @@ void ResourceBrowser::RenderMainArea() {
 	//ImGui::SetNextWindowSize(ImVec2(300, ImGui::GetContentRegionAvail().y));
 	//if (ImGui::BeginChild("Resource types")) {
 	if (currentPath.size() == 0) {
-		auto* resourceManager = *rangerssdk::bootstrap::GetAddress(&ResourceManager::instance);
+		auto* resourceManager = ResourceManager::GetInstance();
 
 		for (auto* container : resourceManager->GetResourceContainers()) {
 			RenderContainerContents(container);
@@ -111,7 +137,33 @@ void ResourceBrowser::RenderContainerContents(const ResourceContainer* container
 		ManagedResource* resource = container->GetResourceByIndex(i);
 		ImGui::PushID(resource);
 		RenderResource(resource);
+		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
+			if (ImGui::MenuItem("Load from file")) {
+				ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", ".*", ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite, resource);
+			}
+			ImGui::EndPopup();
+		}
 		ImGui::PopID();
+	}
+
+	if (ImGuiFileDialog::Instance()->Display("ResourceLoadFromFileDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			ManagedResource* resource = static_cast<ManagedResource*>(ImGuiFileDialog::Instance()->GetUserDatas());
+			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+
+			HANDLE file = CreateFileA(filePath.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+			DWORD fileSize = GetFileSize(file, NULL);
+
+			void* buffer = new char[fileSize];
+
+			ReadFile(file, buffer, fileSize, NULL, NULL);
+			CloseHandle(file);
+
+			resource->Reload(buffer, fileSize);
+
+			delete[] buffer;
+		}
+		ImGuiFileDialog::Instance()->Close();
 	}
 }
 
