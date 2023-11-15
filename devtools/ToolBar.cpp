@@ -3,6 +3,7 @@
 #include "common/Theme.h"
 #include "Desktop.h"
 #include "ResourceBrowser.h"
+#include "SettingsManager.h"
 #include "core-services/GameUpdaterInspector.h"
 #include "core-services/GraphicsContextInspector.h"
 #include "core-services/CameraManagerInspector.h"
@@ -49,18 +50,9 @@ void ToolBar::Render() {
 			ImGui::MenuItem("Object Inspection");
 			ImGui::EndMenu();
 		}
-		if (ImGui::BeginMenu("Theme")) {
-			for (size_t i = 0; i < 3; i++) {
-				bool selected{ false };
+		if (ImGui::MenuItem("Settings"))
+			SettingsManager::OpenConfigDialog();
 
-				ImGui::MenuItem(Theme::themes[i].name, nullptr, &selected);
-
-				if (selected) {
-					Theme::themes[i].Load();
-				}
-			}
-			ImGui::EndMenu();
-		}
 		ImGui::EndMenuBar();
 	}
 

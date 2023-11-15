@@ -4,6 +4,7 @@
 #include "Desktop.h"
 #include "common/Theme.h"
 #include "imgui/imgui_freetype.h"
+#include "SettingsManager.h"
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -131,16 +132,16 @@ void Context::init() {
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
 	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
+	SettingsManager::Init();
+
 	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
-	ImFontConfig fontConfig;
+	ImFontConfig fontConfig{};
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoHinting;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
-	ImFont* font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, 14, &fontConfig);// , ranges);
+	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);// , ranges);
 	io.Fonts->Build();
-
-	Theme::themes[0].Load();
 
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
 	Desktop::instance = new (allocator) Desktop(allocator);
@@ -154,6 +155,14 @@ void Context::init() {
 
 void Context::update()
 {
+	//if (font != nullptr && font->FontSize != SettingsManager::settings.fontSize) {
+	//	ImFontConfig fontConfig{};
+	//	ImGuiIO& io = ImGui::GetIO();
+	//	io.Fonts->Clear();
+	//	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);
+	//	io.Fonts->Build();
+	//}
+
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();
 

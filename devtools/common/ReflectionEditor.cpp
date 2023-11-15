@@ -2,6 +2,7 @@
 #include "ReflectionEditor.h"
 #include "../common/SimpleWidgets.h"
 #include "../imgui/imgui_internal.h"
+#include "../common/Translations.h"
 
 using namespace hh::fnd;
 
@@ -10,7 +11,12 @@ const char* ReflectionEditor::GetRflMemberName(const RflClassMember* member) {
 	const char* caption = *reinterpret_cast<const char* const*>(member->GetAttribute("Caption")->GetData());
 	const char* name = member->GetName();
 
-	return name;// caption != nullptr ? caption : name;
+	if (caption == nullptr)
+		return name;
+	
+	const char* translation = Translations::GetTranslation(caption);
+
+	return translation == nullptr ? name : translation;
 }
 
 // void EnumEditor(void* obj, const RflClassMember* member) {

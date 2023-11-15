@@ -35,6 +35,8 @@
     <ClInclude Include="utilities\EulerTransform.h" />
     <ClInclude Include="core-services\CameraManagerInspector.h" />
     <ClInclude Include="utilities\FileWatch.hpp" />
+    <ClInclude Include="common\Translations.h" />
+    <ClInclude Include="SettingsManager.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -73,6 +75,8 @@
     <ClCompile Include="common\Icons.cpp" />
     <ClCompile Include="utilities\EulerTransform.cpp" />
     <ClCompile Include="core-services\CameraManagerInspector.cpp" />
+    <ClCompile Include="common\Translations.cpp" />
+    <ClCompile Include="SettingsManager.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
