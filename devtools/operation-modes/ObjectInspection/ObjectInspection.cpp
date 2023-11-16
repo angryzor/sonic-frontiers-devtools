@@ -7,8 +7,23 @@
 using namespace hh::fnd;
 using namespace hh::game;
 
+ObjectInspection::ViewerContextHolder::ViewerContextHolder(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true } {
+}
+
+ObjectInspection::DebuggerThingEmulator::DebuggerThingEmulator(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true } {
+	ctxHolder = new (allocator) ViewerContextHolder(allocator);
+}
+
 ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator, Desktop& desktop) : OperationMode{ allocator }, desktop{ desktop }
 {
+	dbgEmulator = new (allocator) DebuggerThingEmulator(allocator);
+	gameViewerCtx = hh::dbg::ViewerContext::Create<GameViewerContext>(allocator);
+	gameViewerCtx->gameManagers.push_back(GameManager::GetInstance());
+	dbgEmulator->ctxHolder->viewerContext.push_back(gameViewerCtx);
+	objViewerCtx = hh::dbg::ViewerContext::Create<ObjectViewerContext>(allocator);
+	dbgEmulator->ctxHolder->viewerContext.push_back(objViewerCtx);
+	*rangerssdk::GetAddress(&DebuggerThingEmulator::instance) = dbgEmulator;
+	picker = MousePickingViewer::Create(allocator);
 }
 
 void ObjectInspection::Render() {
@@ -19,6 +34,9 @@ void ObjectInspection::Render() {
 	objectList.Render();
 	objectInspector.Render();
 	GameServiceInspector::Render();
+
+	if (picker->objectViewerContext->selectedObject != nullptr)
+		focusedObject = picker->objectViewerContext->selectedObject;
 
 	if (focusedObject) {
 		auto* gocTransform = focusedObject->GetComponent<GOCTransform>();
