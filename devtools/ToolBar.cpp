@@ -113,6 +113,7 @@ void ToolBar::Render() {
 		"3 on number row: change camera movement speed\n"
 		"7 on number row: change viewport"
 	);
+	ImGui::SameLine();
 
 	if (ImGui::IsKeyPressed(ImGuiKey_F6))
 		debugCameraActive = !debugCameraActive;
@@ -122,6 +123,16 @@ void ToolBar::Render() {
 			debugCameraMgr->ActivateDebugCamera({ 0, 0, 1, 0 });
 		else
 			debugCameraMgr->DeactivateDebugCamera();
+	}
+
+	if (debugCameraActive) {
+		bool debugCameraLocked{ debugCameraMgr->GetCamera()->IsLocked() };
+		bool tempDebugCameraLocked{ debugCameraLocked };
+
+		ImGui::Checkbox("Lock debug camera position", &tempDebugCameraLocked);
+
+		if (debugCameraLocked != tempDebugCameraLocked)
+			debugCameraMgr->GetCamera()->SetLocked(tempDebugCameraLocked);
 	}
 
 	ImGui::End();
