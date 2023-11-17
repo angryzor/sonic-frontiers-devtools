@@ -6,4 +6,5 @@ class ObjectList : public hh::fnd::BaseObject {
 public:
     ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection);
     void Render();
+	void RenderObjectTreeNode(hh::game::GameObject* obj);
 };
