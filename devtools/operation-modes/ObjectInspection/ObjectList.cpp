@@ -10,37 +10,69 @@ ObjectList::ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& object
 {
 }
 
+void ObjectList::RenderObjectTreeNode(GameObject* obj) {
+	ImGuiTreeNodeFlags nodeflags = 0;
+
+	if (objectInspection.focusedObject == obj)
+		nodeflags |= ImGuiTreeNodeFlags_Selected;
+
+	auto* transform = obj->GetComponent<GOCTransform>();
+
+	if (transform && transform->GetChildren().size() != 0) {
+		if (ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str())) {
+			for (auto& child : transform->GetChildren()) {
+				RenderObjectTreeNode(child.GetOwnerGameObject());
+			}
+			ImGui::TreePop();
+		}
+	}
+	else {
+		ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->pObjectName.c_str());
+	}
+
+	if (ImGui::IsItemClicked())
+		objectInspection.focusedObject = obj;
+}
+
 void ObjectList::Render() {
 	const ImGuiWindowFlags windowFlags
 		= ImGuiWindowFlags_MenuBar;
 
 	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
 	if (ImGui::Begin("Objects", NULL, windowFlags)) {
-		GameObject* objectClicked = nullptr;
+		if (ImGui::BeginTabBar("Object list views")) {
+			if (ImGui::BeginTabItem("Tree view")) {
+				for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
+					for (auto* obj : layer->objects) {
+						auto* transform = obj->GetComponent<GOCTransform>();
 
-		for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
-			if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
-				for (auto* obj : layer->objects) {
-					const char* objName = obj->pObjectName;
-
-					ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-
-					if (objectInspection.focusedObject == obj)
-						nodeflags |= ImGuiTreeNodeFlags_Selected;
-
-					//RenderIcon(IconId::OBJECT, objectInspection.desktop);
-					//ImGui::SameLine();
-					ImGui::TreeNodeEx(obj, nodeflags, objName == nullptr ? "" : objName);
-
-					if (ImGui::IsItemClicked())
-						objectClicked = obj;
+						if (!transform || !transform->IsExistParent())
+							RenderObjectTreeNode(obj);
+					}
 				}
-				ImGui::TreePop();
+				ImGui::EndTabItem();
 			}
-		}
+			if (ImGui::BeginTabItem("Layer view")) {
+				for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
+					if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
+						for (auto* obj : layer->objects) {
+							ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-		if (objectClicked)
-			objectInspection.focusedObject = objectClicked;
+							if (objectInspection.focusedObject == obj)
+								nodeflags |= ImGuiTreeNodeFlags_Selected;
+
+							ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
+
+							if (ImGui::IsItemClicked())
+								objectInspection.focusedObject = obj;
+						}
+						ImGui::TreePop();
+					}
+				}
+				ImGui::EndTabItem();
+			}
+			ImGui::EndTabBar();
+		}
 	}
 	ImGui::End();
 }
