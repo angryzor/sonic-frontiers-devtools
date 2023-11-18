@@ -47,8 +47,15 @@ HOOK(LRESULT, __fastcall, WndProcHook, 0x140D66440, HWND hWnd, UINT msg, WPARAM 
 		Context::passThroughMouse = !Context::passThroughMouse;
 		return true;
 	}
-	if (Context::visible && ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
-		return true;
+	if (Context::visible) {
+		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
+			return true;
+
+		ImGuiIO& io = ImGui::GetIO();
+
+		if (io.WantCaptureMouse && msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST)
+			return true;
+	}
 
 	return originalWndProcHook(hWnd, msg, wParam, lParam);
 }
@@ -121,8 +128,7 @@ void Context::init() {
 
 	device->GetImmediateContext(&deviceContext);
 
-	void* windowData = reinterpret_cast<void**>(hh::fw::Application::GetInstance()->unkFromUnkParam1)[3];
-	HWND hwnd = static_cast<HWND*>(windowData)[3];
+	HWND hwnd = reinterpret_cast<HWND>(hh::fw::Application::GetInstance()->frameworkEnvironment->window->hWnd);
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();

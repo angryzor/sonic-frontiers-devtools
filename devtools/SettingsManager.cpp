@@ -2,11 +2,11 @@
 #include "SettingsManager.h"
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
-SettingsManager::Settings SettingsManager::settings{ 0, Translations::Language::VAR_NAMES, 14, ImGuiConfigFlags_NavEnableKeyboard };
+SettingsManager::Settings SettingsManager::settings{ 0, Translations::Language::VAR_NAMES, 14, ImGuiConfigFlags_NavEnableKeyboard, 0xFDFFFFFF };
 bool SettingsManager::showConfigDialog{ false };
 
 bool SettingsManager::Settings::operator==(const SettingsManager::Settings& other) const {
-	return theme == other.theme && language == other.language && fontSize == other.fontSize && configFlags == other.configFlags;
+	return theme == other.theme && language == other.language && fontSize == other.fontSize && configFlags == other.configFlags && physicsPickerSelectionMask == other.physicsPickerSelectionMask;
 }
 
 bool SettingsManager::Settings::operator!=(const SettingsManager::Settings& other) const {
@@ -24,6 +24,9 @@ void SettingsManager::Init() {
 	settingsHandler.WriteAllFn = WriteAllFn;
 	settingsHandler.UserData = &settings;
 	ImGui::AddSettingsHandler(&settingsHandler);
+
+	// We apply the defaults on startup in case the user doesn't have a config yet.
+	ApplySettings();
 }
 
 void SettingsManager::Render() {
@@ -69,12 +72,20 @@ void SettingsManager::Render() {
 						}
 						ImGui::EndCombo();
 					}
+					ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
+					ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
 					ImGui::EndTabItem();
 				}
 
-				if (ImGui::BeginTabItem("Controls")) {
-					ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
-					ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
+				if (ImGui::BeginTabItem("Selection")) {
+					ImGui::SeparatorText("Physics ray cast collision mask");
+
+					for (unsigned int i = 0; i < 32; i++) {
+						char label[20];
+						snprintf(label, sizeof(label), "Bit %d", i);
+						ImGui::CheckboxFlags(label, &tempSettings.physicsPickerSelectionMask, 1 << i);
+					}
+
 					ImGui::EndTabItem();
 				}
 
@@ -98,6 +109,7 @@ void SettingsManager::ApplySettings() {
 	Theme::themes[settings.theme].Load();
 	Translations::SetCurrentLanguage(settings.language);
 	ImGui::GetIO().ConfigFlags = settings.configFlags;
+	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::selectionMask) = settings.physicsPickerSelectionMask;
 }
 
 void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
@@ -106,6 +118,7 @@ void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	settings.language = Translations::Language::VAR_NAMES;
 	//settings.fontSize = 14;
 	settings.configFlags = ImGuiConfigFlags_NavEnableKeyboard;
+	settings.physicsPickerSelectionMask = 0xFDFFFFFF;
 }
 
 void SettingsManager::ReadInitFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
@@ -125,6 +138,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	else if (sscanf_s(line, "Translations=%i", &i) == 1) { settings.language = static_cast<Translations::Language>(i); }
 	//else if (sscanf_s(line, "FontSize=%f", &f) == 1) { settings.fontSize = f; }
 	else if (sscanf_s(line, "ConfigFlags=%i", &i) == 1) { settings.configFlags = i; }
+	else if (sscanf_s(line, "PhysicsPickerSelectionMask=%i", &i) == 1) { settings.physicsPickerSelectionMask = i; }
 }
 
 void SettingsManager::ApplyAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
@@ -140,4 +154,5 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("Translations=%i\n", settings.language);
 	//out_buf->appendf("FontSize=%f\n", settings.fontSize);
 	out_buf->appendf("ConfigFlags=%i\n", settings.configFlags);
+	out_buf->appendf("PhysicsPickerSelectionMask=%i\n", settings.physicsPickerSelectionMask);
 }

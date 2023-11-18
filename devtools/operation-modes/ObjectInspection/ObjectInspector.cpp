@@ -13,7 +13,7 @@ ObjectInspector::ObjectInspector(csl::fnd::IAllocator* allocator, ObjectInspecti
 
 void ObjectInspector::Render() {
 	const ImGuiWindowFlags windowFlags
-		= ImGuiWindowFlags_MenuBar;
+		= 0;
 
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_Once, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(800, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_Once);
@@ -24,18 +24,21 @@ void ObjectInspector::Render() {
 		else {
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Components")) {
-					csl::ut::PointerMap<void*, int> amountSeen{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
-					for (auto* component : objectInspection.focusedObject->m_Components) {
-						int idx = amountSeen.GetValueOrFallback(component->GetClassId(), 0);
-						amountSeen.Insert(component->GetClassId(), idx + 1);
+					if (ImGui::BeginChild("Content")) {
+						csl::ut::PointerMap<void*, int> amountSeen{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
+						for (auto* component : objectInspection.focusedObject->m_Components) {
+							int idx = amountSeen.GetValueOrFallback(component->GetClassId(), 0);
+							amountSeen.Insert(component->GetClassId(), idx + 1);
 
-						char buf[200];
-						snprintf(buf, sizeof(buf), "%s (#%d)", component->pStaticClass->dynamicName, idx);
+							char buf[200];
+							snprintf(buf, sizeof(buf), "%s (#%d)", component->pStaticClass->dynamicName, idx);
 
-						if (ImGui::CollapsingHeader(buf)) {
-							RenderComponentInspector(*component);
+							if (ImGui::CollapsingHeader(buf)) {
+								RenderComponentInspector(*component);
+							}
 						}
 					}
+					ImGui::EndChild();
 					ImGui::EndTabItem();
 				}
 				ImGui::EndTabBar();

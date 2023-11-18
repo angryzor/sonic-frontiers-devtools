@@ -36,39 +36,45 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 
 void ObjectList::Render() {
 	const ImGuiWindowFlags windowFlags
-		= ImGuiWindowFlags_MenuBar;
+		= 0;
 
 	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
 	if (ImGui::Begin("Objects", NULL, windowFlags)) {
 		if (ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
-				for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
-					for (auto* obj : layer->objects) {
-						auto* transform = obj->GetComponent<GOCTransform>();
+				if (ImGui::BeginChild("Content")) {
+					for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
+						for (auto* obj : layer->objects) {
+							auto* transform = obj->GetComponent<GOCTransform>();
 
-						if (!transform || !transform->IsExistParent())
-							RenderObjectTreeNode(obj);
+							if (!transform || !transform->IsExistParent())
+								RenderObjectTreeNode(obj);
+						}
 					}
 				}
+				ImGui::EndChild();
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Layer view")) {
-				for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
-					if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
-						for (auto* obj : layer->objects) {
-							ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
+				if (ImGui::BeginChild("Content")) {
+					for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
+						if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
+							for (auto* obj : layer->objects) {
+								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-							if (objectInspection.focusedObject == obj)
-								nodeflags |= ImGuiTreeNodeFlags_Selected;
+								if (objectInspection.focusedObject == obj)
+									nodeflags |= ImGuiTreeNodeFlags_Selected;
 
-							ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
+								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
 
-							if (ImGui::IsItemClicked())
-								objectInspection.focusedObject = obj;
+								if (ImGui::IsItemClicked())
+									objectInspection.focusedObject = obj;
+							}
+							ImGui::TreePop();
 						}
-						ImGui::TreePop();
 					}
 				}
+				ImGui::EndChild();
 				ImGui::EndTabItem();
 			}
 			ImGui::EndTabBar();

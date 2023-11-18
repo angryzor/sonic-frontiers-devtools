@@ -6,24 +6,22 @@
 
 using namespace hh::fnd;
 using namespace hh::game;
-
-ObjectInspection::ViewerContextHolder::ViewerContextHolder(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true } {
-}
-
-ObjectInspection::DebuggerThingEmulator::DebuggerThingEmulator(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true } {
-	ctxHolder = new (allocator) ViewerContextHolder(allocator);
-}
+using namespace hh::physics;
 
 ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator, Desktop& desktop) : OperationMode{ allocator }, desktop{ desktop }
 {
-	dbgEmulator = new (allocator) DebuggerThingEmulator(allocator);
-	gameViewerCtx = hh::dbg::ViewerContext::Create<GameViewerContext>(allocator);
+	gameViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<GameViewerContext>();
 	gameViewerCtx->gameManagers.push_back(GameManager::GetInstance());
-	dbgEmulator->ctxHolder->viewerContext.push_back(gameViewerCtx);
-	objViewerCtx = hh::dbg::ViewerContext::Create<ObjectViewerContext>(allocator);
-	dbgEmulator->ctxHolder->viewerContext.push_back(objViewerCtx);
-	*rangerssdk::GetAddress(&DebuggerThingEmulator::instance) = dbgEmulator;
-	picker = MousePickingViewer::Create(allocator);
+	objViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<ObjectViewerContext>();
+	physicsViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<PhysicsViewerContext>();
+	//physicsViewerCtx->worlds.push_back(GameManager::GetInstance()->GetService<PhysicsWorldBullet>());
+
+	*rangerssdk::GetAddress(&hh::dbg::ViewerManager::instance) = &viewerManagerEmulator;
+
+	//picker = MousePickingViewer::Create(allocator);
+	physicsPicker = viewerManagerEmulator.CreateViewer<PhysicsMousePickingViewer>();
+	physicsPicker->unk1 = true;
+	//physicsObjPicker = viewerManagerEmulator.CreateViewer<PhysicsPickedObjectViewer>();
 }
 
 void ObjectInspection::Render() {
@@ -35,8 +33,11 @@ void ObjectInspection::Render() {
 	objectInspector.Render();
 	GameServiceInspector::Render();
 
-	if (picker->objectViewerContext->selectedObject != nullptr)
-		focusedObject = picker->objectViewerContext->selectedObject;
+	
+	if (physicsViewerCtx->pickedObject.collider != nullptr && prevPhysicsPickerMouseDown && !physicsPicker->mouseDown)
+		focusedObject = physicsViewerCtx->pickedObject.collider->GetOwnerGameObject();
+
+	prevPhysicsPickerMouseDown = physicsPicker->mouseDown;
 
 	if (focusedObject) {
 		auto* gocTransform = focusedObject->GetComponent<GOCTransform>();
