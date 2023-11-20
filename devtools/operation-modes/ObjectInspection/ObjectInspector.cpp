@@ -25,17 +25,14 @@ void ObjectInspector::Render() {
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Components")) {
 					if (ImGui::BeginChild("Content")) {
-						csl::ut::PointerMap<void*, int> amountSeen{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
 						for (auto* component : objectInspection.focusedObject->m_Components) {
-							int idx = amountSeen.GetValueOrFallback(component->GetClassId(), 0);
-							amountSeen.Insert(component->GetClassId(), idx + 1);
+							ImGui::PushID(component);
 
-							char buf[200];
-							snprintf(buf, sizeof(buf), "%s (#%d)", component->pStaticClass->dynamicName, idx);
-
-							if (ImGui::CollapsingHeader(buf)) {
+							if (ImGui::CollapsingHeader(component->pStaticClass->dynamicName)) {
 								RenderComponentInspector(*component);
 							}
+
+							ImGui::PopID();
 						}
 					}
 					ImGui::EndChild();
@@ -120,7 +117,7 @@ void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {
 	ImGui::SeparatorText("HFrame full transform");
 	RenderTransformViewer("HFrameTransformFull", component.frame->fullTransform);
 
-	ImGui::SeparatorText("HFrame full transform");
+	ImGui::SeparatorText("HFrame local transform");
 	RenderTransformViewer("HFrameTransformLocal", component.frame->localTransform);
 
 	if (localTransform != component.transform) {

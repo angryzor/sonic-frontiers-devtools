@@ -191,6 +191,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClInclude Include="common\icons.h" />
+    <ClInclude Include="common\ObjectDataEditor.h" />
     <ClInclude Include="common\ReflectionEditor.h" />
     <ClInclude Include="common\SimpleWidgets.h" />
     <ClInclude Include="common\Textures.h" />
@@ -215,6 +216,7 @@
     <ClInclude Include="operation-modes\ObjectInspection\ObjectList.h" />
     <ClInclude Include="operation-modes\OperationMode.h" />
     <ClInclude Include="Pch.h" />
+    <ClInclude Include="resource-editors\ResObjectWorldEditor.h" />
     <ClInclude Include="resource-editors\ResReflectionEditor.h" />
     <ClInclude Include="resource.h" />
     <ClInclude Include="ResourceBrowser.h" />
@@ -229,6 +231,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="common\Icons.cpp" />
+    <ClCompile Include="common\ObjectDataEditor.cpp" />
     <ClCompile Include="common\ReflectionEditor.cpp" />
     <ClCompile Include="common\SimpleWidgets.cpp" />
     <ClCompile Include="common\Textures.cpp" />
@@ -264,6 +267,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="resource-editors\ResEffectEditor.cpp" />
+    <ClCompile Include="resource-editors\ResObjectWorldEditor.cpp" />
     <ClCompile Include="resource-editors\ResReflectionEditor.cpp" />
     <ClCompile Include="ResourceBrowser.cpp" />
     <ClCompile Include="serialization\ReflectionSerializer.cpp" />

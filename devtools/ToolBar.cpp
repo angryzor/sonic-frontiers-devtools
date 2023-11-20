@@ -53,6 +53,11 @@ void ToolBar::Render() {
 		if (ImGui::MenuItem("Settings"))
 			SettingsManager::OpenConfigDialog();
 
+		if (ImGui::MenuItem("Edit mode")) {
+			auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
+			seqExt->GetCurrentGameMode()->SetState(0x11);
+		}
+
 		ImGui::EndMenuBar();
 	}
 

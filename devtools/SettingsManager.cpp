@@ -2,11 +2,11 @@
 #include "SettingsManager.h"
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
-SettingsManager::Settings SettingsManager::settings{ 0, Translations::Language::VAR_NAMES, 14, ImGuiConfigFlags_NavEnableKeyboard, 0xFDFFFFFF };
+SettingsManager::Settings SettingsManager::settings{ 0, Translations::Language::VAR_NAMES, 14, ImGuiConfigFlags_NavEnableKeyboard, 2000.0f, 0xFDFFFFFF };
 bool SettingsManager::showConfigDialog{ false };
 
 bool SettingsManager::Settings::operator==(const SettingsManager::Settings& other) const {
-	return theme == other.theme && language == other.language && fontSize == other.fontSize && configFlags == other.configFlags && physicsPickerSelectionMask == other.physicsPickerSelectionMask;
+	return theme == other.theme && language == other.language && fontSize == other.fontSize && configFlags == other.configFlags && physicsPickerRayLength == other.physicsPickerRayLength && physicsPickerSelectionMask == other.physicsPickerSelectionMask;
 }
 
 bool SettingsManager::Settings::operator!=(const SettingsManager::Settings& other) const {
@@ -109,6 +109,7 @@ void SettingsManager::ApplySettings() {
 	Theme::themes[settings.theme].Load();
 	Translations::SetCurrentLanguage(settings.language);
 	ImGui::GetIO().ConfigFlags = settings.configFlags;
+	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::rayLength) = settings.physicsPickerRayLength;
 	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::selectionMask) = settings.physicsPickerSelectionMask;
 }
 
@@ -118,6 +119,7 @@ void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	settings.language = Translations::Language::VAR_NAMES;
 	//settings.fontSize = 14;
 	settings.configFlags = ImGuiConfigFlags_NavEnableKeyboard;
+	settings.physicsPickerRayLength = 2000.0f;
 	settings.physicsPickerSelectionMask = 0xFDFFFFFF;
 }
 
@@ -133,11 +135,12 @@ void* SettingsManager::ReadOpenFn(ImGuiContext* ctx, ImGuiSettingsHandler* handl
 void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler, void* entry, const char* line)
 {
 	unsigned int i;
-	//float f;
+	float f;
 	if (sscanf_s(line, "Theme=%i", &i) == 1) { settings.theme = i; }
 	else if (sscanf_s(line, "Translations=%i", &i) == 1) { settings.language = static_cast<Translations::Language>(i); }
 	//else if (sscanf_s(line, "FontSize=%f", &f) == 1) { settings.fontSize = f; }
 	else if (sscanf_s(line, "ConfigFlags=%i", &i) == 1) { settings.configFlags = i; }
+	else if (sscanf_s(line, "PhysicsPickerRayLength=%f", &f) == 1) { settings.physicsPickerRayLength = f; }
 	else if (sscanf_s(line, "PhysicsPickerSelectionMask=%i", &i) == 1) { settings.physicsPickerSelectionMask = i; }
 }
 
@@ -154,5 +157,6 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("Translations=%i\n", settings.language);
 	//out_buf->appendf("FontSize=%f\n", settings.fontSize);
 	out_buf->appendf("ConfigFlags=%i\n", settings.configFlags);
+	out_buf->appendf("PhysicsPickerRayLength=%i\n", settings.physicsPickerRayLength);
 	out_buf->appendf("PhysicsPickerSelectionMask=%i\n", settings.physicsPickerSelectionMask);
 }

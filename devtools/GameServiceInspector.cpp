@@ -1,5 +1,9 @@
 #include "Pch.h"
 #include "GameServiceInspector.h"
+#include "resource-editors/ResObjectWorldEditor.h"
+#include "Desktop.h"
+#include "imgui/imgui_internal.h"
+#include "common/ObjectDataEditor.h"
 
 using namespace hh::game;
 
@@ -26,8 +30,62 @@ void GameServiceInspector::RenderServiceInspector(hh::game::GameService& service
 	if (service.pStaticClass == app::gfx::FxParamManager::GetClass()) {
 		RenderFxParamManagerInspector(static_cast<app::gfx::FxParamManager&>(service));
 	}
+	else if (service.pStaticClass == hh::game::ObjectWorld::GetClass()) {
+		RenderObjectWorldInspector(static_cast<hh::game::ObjectWorld&>(service));
+	}
 	else {
 		RenderUnknownServiceInspector(service);
+	}
+}
+
+void GameServiceInspector::RenderObjectWorldInspector(hh::game::ObjectWorld& objWorld) {
+	int i = 0;
+	for (auto* chunk : objWorld.GetWorldChunks()) {
+		if (ImGui::TreeNode(chunk, "Chunk %d", i++)) {
+			bool editorMode = chunk->IsStatusEditor();
+
+			ImGui::Checkbox("Editor mode", &editorMode);
+
+			chunk->SetEditorStatus(editorMode);
+
+			if (ImGui::CollapsingHeader("Layers")) {
+				for (auto* layer : chunk->GetLayers()) {
+					if (ImGui::TreeNode(layer, layer->GetName())) {
+						bool enabled = layer->IsEnable();
+
+						ImGui::Checkbox("Enabled", &enabled);
+
+						chunk->SetLayerEnabled(layer->GetName(), enabled);
+
+						if (ImGui::Button("Edit resource"))
+							ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), layer->GetResource());
+
+						ImGui::TreePop();
+					}
+				}
+			}
+
+			if (ImGui::CollapsingHeader("Object statuses")) {
+				for (auto& status : chunk->GetObjectStatuses()) {
+					if (ImGui::TreeNode(&status, status.objectData->name)) {
+						auto flags = static_cast<unsigned int>(status.flags.m_dummy);
+
+						ImGui::CheckboxFlags("Enabled", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::ENABLED));
+						ImGui::CheckboxFlags("Can be killed", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::CAN_BE_KILLED));
+
+						status.flags.m_dummy = static_cast<WorldObjectStatus::Flag>(flags);
+
+						ImGui::InputInt("Spawn priority", &status.spawnPriority);
+
+						ImGui::SeparatorText("Object Data");
+						ObjectDataEditor::Render(status.objectData);
+
+						ImGui::TreePop();
+					}
+				}
+			}
+			ImGui::TreePop();
+		}
 	}
 }
 

@@ -7,6 +7,7 @@ public:
     static void Render();
     static void RenderServiceInspector(hh::game::GameService& service);
     static void RenderFxParamManagerInspector(app::gfx::FxParamManager& service);
+    static void RenderObjectWorldInspector(hh::game::ObjectWorld& service);
     static void RenderUnknownServiceInspector(hh::game::GameService& service);
     template<typename Rfl> static void RenderFxParamManagerInterpolatorInspector(const char* name, app::gfx::FxParamManager::Interpolator<Rfl>& interpolator) {
         if (ImGui::TreeNode(name)) {

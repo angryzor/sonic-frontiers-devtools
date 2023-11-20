@@ -37,6 +37,8 @@
     <ClInclude Include="utilities\FileWatch.hpp" />
     <ClInclude Include="common\Translations.h" />
     <ClInclude Include="SettingsManager.h" />
+    <ClInclude Include="resource-editors\ResObjectWorldEditor.h" />
+    <ClInclude Include="common\ObjectDataEditor.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -77,6 +79,8 @@
     <ClCompile Include="core-services\CameraManagerInspector.cpp" />
     <ClCompile Include="common\Translations.cpp" />
     <ClCompile Include="SettingsManager.cpp" />
+    <ClCompile Include="resource-editors\ResObjectWorldEditor.cpp" />
+    <ClCompile Include="common\ObjectDataEditor.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

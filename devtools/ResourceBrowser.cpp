@@ -1,6 +1,7 @@
 #include "Pch.h"
 #include "ResourceBrowser.h"
 #include "resource-editors/ResReflectionEditor.h"
+#include "resource-editors/ResObjectWorldEditor.h"
 #include "common/Textures.h"
 #include "common/Icons.h"
 
@@ -179,6 +180,9 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			else if (typeInfo == ResReflection<void>::GetTypeInfo()) {
 				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection<void>*>(resource));
 			}
+			//else if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo()) {
+			//	ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::game::ResObjectWorld*>(resource));
+			//}
 		}
 		else
 			selectedResource = resource;

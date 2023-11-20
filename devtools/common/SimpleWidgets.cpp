@@ -34,6 +34,11 @@ void ViewportDataInfo(const hh::gfnd::ViewportData& viewport)
 	MatrixValues(viewport.projMatrix);
 }
 
+void WorldPositionEditor(hh::fnd::WorldPosition& worldPos) {
+	ImGui::DragFloat3("Position", worldPos.m_Position.data());
+	ImGui::DragFloat4("Rotation", worldPos.m_Rotation.coeffs().data());
+}
+
 int MyResizeCallback(ImGuiInputTextCallbackData* data)
 {
 	if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)

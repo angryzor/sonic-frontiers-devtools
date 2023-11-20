@@ -10,6 +10,7 @@ class SettingsManager
         Translations::Language language;
         float fontSize;
         ImGuiConfigFlags configFlags;
+        float physicsPickerRayLength;
         unsigned int physicsPickerSelectionMask;
 
         bool operator==(const Settings& other) const;
