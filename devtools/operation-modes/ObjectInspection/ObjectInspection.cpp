@@ -3,25 +3,14 @@
 #include "../../GameServiceInspector.h"
 #include "../../ResourceBrowser.h"
 #include "../../common/SimpleWidgets.h"
+#include "../../Desktop.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
 using namespace hh::physics;
 
-ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator, Desktop& desktop) : OperationMode{ allocator }, desktop{ desktop }
+ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator) : OperationMode{ allocator }
 {
-	gameViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<GameViewerContext>();
-	gameViewerCtx->gameManagers.push_back(GameManager::GetInstance());
-	objViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<ObjectViewerContext>();
-	physicsViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<PhysicsViewerContext>();
-	//physicsViewerCtx->worlds.push_back(GameManager::GetInstance()->GetService<PhysicsWorldBullet>());
-
-	*rangerssdk::GetAddress(&hh::dbg::ViewerManager::instance) = &viewerManagerEmulator;
-
-	//picker = MousePickingViewer::Create(allocator);
-	physicsPicker = viewerManagerEmulator.CreateViewer<PhysicsMousePickingViewer>();
-	physicsPicker->unk1 = true;
-	//physicsObjPicker = viewerManagerEmulator.CreateViewer<PhysicsPickedObjectViewer>();
 }
 
 void ObjectInspection::Render() {
@@ -33,11 +22,8 @@ void ObjectInspection::Render() {
 	objectInspector.Render();
 	GameServiceInspector::Render();
 
-	
-	if (physicsViewerCtx->pickedObject.collider != nullptr && prevPhysicsPickerMouseDown && !physicsPicker->mouseDown)
-		focusedObject = physicsViewerCtx->pickedObject.collider->GetOwnerGameObject();
-
-	prevPhysicsPickerMouseDown = physicsPicker->mouseDown;
+	if (Desktop::instance->IsPickerMouseReleased())
+		focusedObject = Desktop::instance->GetPickedObject();
 
 	if (focusedObject) {
 		auto* gocTransform = focusedObject->GetComponent<GOCTransform>();

@@ -157,6 +157,6 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("Translations=%i\n", settings.language);
 	//out_buf->appendf("FontSize=%f\n", settings.fontSize);
 	out_buf->appendf("ConfigFlags=%i\n", settings.configFlags);
-	out_buf->appendf("PhysicsPickerRayLength=%i\n", settings.physicsPickerRayLength);
+	out_buf->appendf("PhysicsPickerRayLength=%f\n", settings.physicsPickerRayLength);
 	out_buf->appendf("PhysicsPickerSelectionMask=%i\n", settings.physicsPickerSelectionMask);
 }

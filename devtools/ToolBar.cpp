@@ -47,7 +47,10 @@ void ToolBar::Render() {
 		}
 
 		if (ImGui::BeginMenu("Mode")) {
-			ImGui::MenuItem("Object Inspection");
+			if (ImGui::MenuItem("Object Inspection"))
+				Desktop::instance->SwitchToObjectInspectionMode();
+			if (ImGui::MenuItem("Level Editor"))
+				Desktop::instance->SwitchToLevelEditorMode();
 			ImGui::EndMenu();
 		}
 		if (ImGui::MenuItem("Settings"))

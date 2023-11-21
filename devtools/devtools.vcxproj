@@ -204,6 +204,9 @@
     <ClInclude Include="Desktop.h" />
     <ClInclude Include="GameServiceInspector.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="operation-modes\LevelEditor\LevelEditor.h" />
+    <ClInclude Include="operation-modes\LevelEditor\ObjectDataInspector.h" />
+    <ClInclude Include="operation-modes\LevelEditor\SetObjectList.h" />
     <ClInclude Include="resource-editors\ResEffectEditor.h" />
     <ClInclude Include="Helpers.h" />
     <ClInclude Include="imgui\ImGuiFileDialog.h" />
@@ -256,6 +259,9 @@
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="Mod.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\LevelEditor.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\ObjectDataInspector.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\SetObjectList.cpp" />
     <ClCompile Include="operation-modes\ObjectInspection\ObjectInspection.cpp" />
     <ClCompile Include="operation-modes\ObjectInspection\ObjectInspector.cpp" />
     <ClCompile Include="operation-modes\ObjectInspection\ObjectList.cpp" />

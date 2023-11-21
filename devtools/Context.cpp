@@ -4,6 +4,7 @@
 #include "Desktop.h"
 #include "common/Theme.h"
 #include "imgui/imgui_freetype.h"
+#include "imgui/ImGuizmo.h"
 #include "SettingsManager.h"
 
 static ID3D11Device* device;

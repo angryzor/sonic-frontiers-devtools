@@ -39,6 +39,9 @@
     <ClInclude Include="SettingsManager.h" />
     <ClInclude Include="resource-editors\ResObjectWorldEditor.h" />
     <ClInclude Include="common\ObjectDataEditor.h" />
+    <ClInclude Include="operation-modes\LevelEditor\LevelEditor.h" />
+    <ClInclude Include="operation-modes\LevelEditor\ObjectDataInspector.h" />
+    <ClInclude Include="operation-modes\LevelEditor\SetObjectList.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -81,6 +84,9 @@
     <ClCompile Include="SettingsManager.cpp" />
     <ClCompile Include="resource-editors\ResObjectWorldEditor.cpp" />
     <ClCompile Include="common\ObjectDataEditor.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\LevelEditor.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\ObjectDataInspector.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\SetObjectList.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

@@ -12,11 +12,15 @@ void ObjectDataEditor::Render(ObjectData* obj)
 	ImGui::Text("Name: %s", obj->name);
 	ImGui::Text("Class: %s", obj->gameObjectClass);
 	ImGui::SeparatorText("Transform");
+	ImGui::PushID("Transform");
 	ImGui::DragFloat3("Position", obj->transform.position.data());
 	ImGui::DragFloat3("Rotation", obj->transform.rotation.data());
+	ImGui::PopID();
 	ImGui::SeparatorText("Local transform");
+	ImGui::PushID("Transform");
 	ImGui::DragFloat3("Position", obj->localTransform.position.data());
 	ImGui::DragFloat3("Rotation", obj->localTransform.rotation.data());
+	ImGui::PopID();
 	ImGui::SeparatorText("Component configuration");
 
 	for (auto* componentConfig : obj->componentData) {
