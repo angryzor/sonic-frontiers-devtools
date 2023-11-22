@@ -104,7 +104,7 @@ HOOK(void*, __fastcall, SwapChainHook, 0x155B35CA0, void* in_pThis, IDXGISwapCha
 
 HOOK(void, __fastcall, MouseHookUpdate, 0x140F143C0, hh::hid::MouseWin32* a1, float a2)
 {
-	if (!Context::visible || Context::passThroughMouse) {
+	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
 		originalMouseHookUpdate(a1, a2);
 	}
 	else {

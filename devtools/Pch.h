@@ -12,6 +12,7 @@
 #include <cstdio>
 
 #include <d3d11.h>
+#include <random>
 #include <rangers-sdk.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS

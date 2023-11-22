@@ -71,7 +71,9 @@ void GameServiceInspector::RenderObjectWorldInspector(hh::game::ObjectWorld& obj
 						auto flags = static_cast<unsigned int>(status.flags.m_dummy);
 
 						ImGui::CheckboxFlags("Enabled", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::ENABLED));
-						ImGui::CheckboxFlags("Can be killed", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::CAN_BE_KILLED));
+						ImGui::CheckboxFlags("Is alive", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::IS_ALIVE));
+						ImGui::CheckboxFlags("Started", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::STARTED));
+						ImGui::CheckboxFlags("No restart", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::NO_RESTART));
 
 						status.flags.m_dummy = static_cast<WorldObjectStatus::Flag>(flags);
 

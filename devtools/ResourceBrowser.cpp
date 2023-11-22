@@ -4,6 +4,7 @@
 #include "resource-editors/ResObjectWorldEditor.h"
 #include "common/Textures.h"
 #include "common/Icons.h"
+#include "serialization/resource-rfls/ResourceRfls.h"
 
 using namespace hh::fnd;
 
@@ -140,25 +141,11 @@ void ResourceBrowser::RenderContainerContents(const ResourceContainer* container
 		RenderResource(resource);
 		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
 			if (ImGui::MenuItem("Load from file")) {
-				char extbuf[20];
-				snprintf(extbuf, 20, ".%s", ResourceTypeRegistry::GetInstance()->GetExtensionByTypeInfo(&resource->GetClass()));
-
-				ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", extbuf, ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite, resource);
+				ShowLoadResourceDialog(resource);
 			}
 			ImGui::EndPopup();
 		}
 		ImGui::PopID();
-	}
-
-	if (ImGuiFileDialog::Instance()->Display("ResourceLoadFromFileDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
-		if (ImGuiFileDialog::Instance()->IsOk()) {
-			ManagedResource* resource = static_cast<ManagedResource*>(ImGuiFileDialog::Instance()->GetUserDatas());
-			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-			std::wstring wFilePath(filePath.begin(), filePath.end());
-
-			ReloadResource(wFilePath.c_str(), resource);
-		}
-		ImGuiFileDialog::Instance()->Close();
 	}
 }
 
@@ -211,6 +198,80 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 		ImGui::SameLine();
 }
 
+void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
+{
+	char extbuf[20];
+	const char* ext = GetExtensionByTypeInfo(&resource->GetClass());
+
+	if (ext == nullptr)
+		return;
+
+	snprintf(extbuf, 20, ".%s", ext);
+
+	ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", extbuf, ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite, resource);
+}
+
+void ResourceBrowser::RenderDialogs()
+{
+	RenderLoadDialog();
+	RenderExportDialog();
+}
+
+void ResourceBrowser::ShowExportResourceDialog(hh::fnd::ManagedResource* resource)
+{
+	char extbuf[20];
+	const char* ext = GetExtensionByTypeInfo(&resource->GetClass());
+
+	if (ext == nullptr)
+		return;
+
+	snprintf(extbuf, 20, ".%s", ext);
+
+	ImGuiFileDialog::Instance()->OpenDialog("ResourceExportDialog", "Choose File", extbuf, ".", ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite, resource);
+}
+
+void ResourceBrowser::RenderLoadDialog() {
+	if (ImGuiFileDialog::Instance()->Display("ResourceLoadFromFileDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			ManagedResource* resource = static_cast<ManagedResource*>(ImGuiFileDialog::Instance()->GetUserDatas());
+			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+			std::wstring wFilePath(filePath.begin(), filePath.end());
+
+			ReloadResource(wFilePath.c_str(), resource);
+		}
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
+void ResourceBrowser::RenderExportDialog() {
+	if (ImGuiFileDialog::Instance()->Display("ResourceExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			ManagedResource* resource = static_cast<ManagedResource*>(ImGuiFileDialog::Instance()->GetUserDatas());
+			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+			std::wstring wFilePath(filePath.begin(), filePath.end());
+
+			ExportResource(wFilePath.c_str(), resource);
+		}
+		ImGuiFileDialog::Instance()->Close();
+	}
+}
+
+const char* ResourceBrowser::GetExtensionByTypeInfo(const hh::fnd::ResourceTypeInfo* typeInfo)
+{
+	if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo())
+		return "gedit";
+	else
+		return ResourceTypeRegistry::GetInstance()->GetExtensionByTypeInfo(typeInfo);
+}
+
+const hh::fnd::ResourceTypeInfo* ResourceBrowser::GetTypeInfoByExtension(const char* extension)
+{
+	if (!strcmp(extension, "gedit"))
+		return hh::game::ResObjectWorld::GetTypeInfo();
+	else
+		return ResourceTypeRegistry::GetInstance()->GetTypeInfoByExtension(extension);
+}
+
 void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, float size)
 {
 	auto cursor = ImGui::GetCursorPos();
@@ -237,15 +298,41 @@ void ResourceBrowser::ReloadResource(const wchar_t* filePath, ManagedResource* r
 
 	DWORD fileSize = GetFileSize(file, NULL);
 
-	void* buffer = new char[fileSize];
+	void* buffer = resource->GetAllocator()->Alloc(fileSize, 64);
 
 	bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
 	CloseHandle(file);
 
-	if (result)
-		resource->Reload(buffer, fileSize);
+	if (result) {
+		if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
+			auto* res = static_cast<hh::game::ResObjectWorld*>(resource);
+			void* oldResource = res->binaryData;
 
-	delete[] buffer;
+			resource->Load(buffer, fileSize);
+			resource->GetAllocator()->Free(oldResource);
+
+			auto* gameManager = hh::game::GameManager::GetInstance();
+			if (gameManager) {
+				auto* objWorld = gameManager->GetService<hh::game::ObjectWorld>();
+				if (objWorld)
+					for (auto* chunk : objWorld->GetWorldChunks())
+						chunk->Restart(true);
+			}
+		}
+		else {
+			resource->Reload(buffer, fileSize);
+			resource->GetAllocator()->Free(buffer);
+		}
+	}
+	else {
+		resource->GetAllocator()->Free(buffer);
+	}
+}
+
+void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
+	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
+		ReflectionSerializer::SerializeToFile(filePath, static_cast<hh::game::ResObjectWorld*>(resource)->binaryData, ResourceRfls::resObjectWorld);
+	}
 }
 
 filewatch::FileWatch<std::string>* ResourceBrowser::fileWatcher = nullptr;

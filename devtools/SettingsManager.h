@@ -6,12 +6,14 @@
 class SettingsManager
 {
     struct Settings {
-        unsigned int theme;
-        Translations::Language language;
-        float fontSize;
-        ImGuiConfigFlags configFlags;
-        float physicsPickerRayLength;
-        unsigned int physicsPickerSelectionMask;
+        unsigned int theme{ 0 };
+        Translations::Language language{ Translations::Language::VAR_NAMES };
+        float fontSize{ 14 };
+        ImGuiConfigFlags configFlags{ ImGuiConfigFlags_NavEnableKeyboard };
+        float physicsPickerRayLength{ 2000.0f };
+        unsigned int physicsPickerSelectionMask{ 0xFDFFFFFF };
+        float debugCameraMouseSensitivityX{ 0.05f };
+        float debugCameraMouseSensitivityY{ 0.05f };
 
         bool operator==(const Settings& other) const;
         bool operator!=(const Settings& other) const;

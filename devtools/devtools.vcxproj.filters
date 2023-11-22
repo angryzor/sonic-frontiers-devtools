@@ -42,6 +42,9 @@
     <ClInclude Include="operation-modes\LevelEditor\LevelEditor.h" />
     <ClInclude Include="operation-modes\LevelEditor\ObjectDataInspector.h" />
     <ClInclude Include="operation-modes\LevelEditor\SetObjectList.h" />
+    <ClInclude Include="serialization\resource-rfls\ResourceRfls.h" />
+    <ClInclude Include="operation-modes\LevelEditor\ObjectLibrary.h" />
+    <ClInclude Include="common\ReflectiveOperations.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -87,6 +90,9 @@
     <ClCompile Include="operation-modes\LevelEditor\LevelEditor.cpp" />
     <ClCompile Include="operation-modes\LevelEditor\ObjectDataInspector.cpp" />
     <ClCompile Include="operation-modes\LevelEditor\SetObjectList.cpp" />
+    <ClCompile Include="serialization\resource-rfls\ResObjectWorld.cpp" />
+    <ClCompile Include="operation-modes\LevelEditor\ObjectLibrary.cpp" />
+    <ClCompile Include="common\ReflectiveOperations.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

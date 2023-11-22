@@ -1,7 +1,7 @@
 #include "Pch.h"
 #include <rangers-sdk.h>
 #include "Context.h"
-
+#include "SettingsManager.h"
 
 static void* baseAddress;
 //static hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader;
@@ -143,21 +143,59 @@ void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
 	// Debug camera, keyboard bindings
 	//a2->BindActionMapping("HHFreeCameraSwitchArcballCamera", 0x2001eu, -1);
 
-	a2->BindActionMapping("HHFreeCameraSpeedChange", 0x20020u, -1);
-	a2->BindActionMapping("HHFreeCameraReset", 0x2001fu, -1);
-	a2->BindActionMapping("HHFreeCameraRoll", 0x20021u, -1);
-	a2->BindActionMapping("HHFreeCameraDistance", 0x20022u, -1);
-	a2->BindActionMapping("HHFreeCameraFovy", 0x20023u, -1);
-	a2->BindActionMapping("HHFreeCameraUpDown", 0x20022u, -1);
-	a2->BindActionMapping("HHFreeCameraSwitchViewport", 0x20024u, -1);
+	// Movement: WASD & arrows
 	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x20052u, 1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x20051u, -1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20050u, -1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x2004fu, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x2001au, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x20016u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20004u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20007u, 1.0, -1);
+
+	// Look: keypad arrows
 	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20060u, 1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2005au, -1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005cu, -1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005eu, 1.0, -1);
+
+	// Up/down: hold alt + move & pgup/dn
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x200e2u, -1);
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x2004bu, -1);
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x2004eu, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x2004bu, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x2004eu, -1.0, -1);
+
+	// Speed
+	a2->BindActionMapping("HHFreeCameraSpeedChange", 0x200e1u, -1);
+
+	// Reset
+	a2->BindActionMapping("HHFreeCameraReset", 0x2003au, -1);
+
+	// Roll: q/e
+	a2->BindActionMapping("HHFreeCameraRoll", 0x20014u, -1);
+	a2->BindActionMapping("HHFreeCameraRoll", 0x20008u, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x20014u, -1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x20008u, 1.0, -1);
+
+	// Zoom: +/-
+	a2->BindActionMapping("HHFreeCameraDistance", 0x2002eu, -1);
+	a2->BindActionMapping("HHFreeCameraDistance", 0x2002du, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2002eu, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2002du, -1.0, -1);
+	a2->BindActionMapping("HHFreeCameraDistance", 0x20057u, -1);
+	a2->BindActionMapping("HHFreeCameraDistance", 0x20056u, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20057u, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20056u, -1.0, -1);
+
+	// Fovy: home/end
+	a2->BindActionMapping("HHFreeCameraFovy", 0x2004au, -1);
+	a2->BindActionMapping("HHFreeCameraFovy", 0x2004du, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2004au, 1.0, -1);
+	a2->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2004du, -1.0, -1);
+
+	// Change viewport: KP *
+	a2->BindActionMapping("HHFreeCameraSwitchViewport", 0x20055u, -1);
 
 	//a2->BindActionMapping("HHFreeCameraArcballCameraRotate", 0x2001fu, -1);
 	//a2->BindActionMapping("HHFreeCameraArcballCameraTransXY", 0x20020u, -1);
@@ -168,6 +206,16 @@ void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
 	//a2->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x2004fu, 1.0, -1);
 	//a2->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002du, -1.0, -1);
 	//a2->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002eu, 1.0, -1);
+
+	// Mouse (to be used in conjuction with keyboard)
+	a2->BindAxisMappingEx("HHFreeCameraMoveSubVertical", 0x40001u, -SettingsManager::settings.debugCameraMouseSensitivityY, 2.0f, -1);
+	a2->BindAxisMappingEx("HHFreeCameraMoveSubHorizontal", 0x40000u, SettingsManager::settings.debugCameraMouseSensitivityX, 2.0f, -1);
+
+	// Move up/down
+	//a2->BindActionMapping("HHFreeCameraUpDown", 0x30005u, -1);
+	//a2->BindActionMapping("HHFreeCameraUpDown", 0x30006u, -1);
+	//a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30005u, -1.0, -1);
+	//a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30006u, 1.0, -1);
 }
 BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID reserved)
 {

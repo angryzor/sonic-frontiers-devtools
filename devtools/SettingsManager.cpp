@@ -2,11 +2,18 @@
 #include "SettingsManager.h"
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
-SettingsManager::Settings SettingsManager::settings{ 0, Translations::Language::VAR_NAMES, 14, ImGuiConfigFlags_NavEnableKeyboard, 2000.0f, 0xFDFFFFFF };
+SettingsManager::Settings SettingsManager::settings{};
 bool SettingsManager::showConfigDialog{ false };
 
 bool SettingsManager::Settings::operator==(const SettingsManager::Settings& other) const {
-	return theme == other.theme && language == other.language && fontSize == other.fontSize && configFlags == other.configFlags && physicsPickerRayLength == other.physicsPickerRayLength && physicsPickerSelectionMask == other.physicsPickerSelectionMask;
+	return theme == other.theme
+		&& language == other.language
+		&& fontSize == other.fontSize
+		&& configFlags == other.configFlags
+		&& physicsPickerRayLength == other.physicsPickerRayLength
+		&& physicsPickerSelectionMask == other.physicsPickerSelectionMask
+		&& debugCameraMouseSensitivityX == other.debugCameraMouseSensitivityX
+		&& debugCameraMouseSensitivityY == other.debugCameraMouseSensitivityY;
 }
 
 bool SettingsManager::Settings::operator!=(const SettingsManager::Settings& other) const {
@@ -77,7 +84,14 @@ void SettingsManager::Render() {
 					ImGui::EndTabItem();
 				}
 
+				if (ImGui::BeginTabItem("Camera")) {
+					ImGui::DragFloat("Debug camera mouse horizontal sensitivity", &tempSettings.debugCameraMouseSensitivityX, 0.001f);
+					ImGui::DragFloat("Debug camera mouse vertical sensitivity", &tempSettings.debugCameraMouseSensitivityY, 0.001f);
+					ImGui::EndTabItem();
+				}
+
 				if (ImGui::BeginTabItem("Selection")) {
+					ImGui::DragFloat("Physics ray cast ray length", &tempSettings.physicsPickerRayLength);
 					ImGui::SeparatorText("Physics ray cast collision mask");
 
 					for (unsigned int i = 0; i < 32; i++) {
@@ -111,16 +125,16 @@ void SettingsManager::ApplySettings() {
 	ImGui::GetIO().ConfigFlags = settings.configFlags;
 	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::rayLength) = settings.physicsPickerRayLength;
 	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::selectionMask) = settings.physicsPickerSelectionMask;
+
+	auto* gameManager = hh::game::GameManager::GetInstance();
+	
+	if (gameManager && gameManager->GetService<hh::game::InputManager>())
+		gameManager->ReloadInputSettings(true);
 }
 
 void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
 {
-	settings.theme = 0;
-	settings.language = Translations::Language::VAR_NAMES;
-	//settings.fontSize = 14;
-	settings.configFlags = ImGuiConfigFlags_NavEnableKeyboard;
-	settings.physicsPickerRayLength = 2000.0f;
-	settings.physicsPickerSelectionMask = 0xFDFFFFFF;
+	settings = SettingsManager::Settings{};
 }
 
 void SettingsManager::ReadInitFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
@@ -142,6 +156,8 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	else if (sscanf_s(line, "ConfigFlags=%i", &i) == 1) { settings.configFlags = i; }
 	else if (sscanf_s(line, "PhysicsPickerRayLength=%f", &f) == 1) { settings.physicsPickerRayLength = f; }
 	else if (sscanf_s(line, "PhysicsPickerSelectionMask=%i", &i) == 1) { settings.physicsPickerSelectionMask = i; }
+	else if (sscanf_s(line, "DebugCameraMouseSensitivityX=%f", &f) == 1) { settings.debugCameraMouseSensitivityX = f; }
+	else if (sscanf_s(line, "DebugCameraMouseSensitivityY=%f", &f) == 1) { settings.debugCameraMouseSensitivityY = f; }
 }
 
 void SettingsManager::ApplyAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
@@ -159,4 +175,6 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("ConfigFlags=%i\n", settings.configFlags);
 	out_buf->appendf("PhysicsPickerRayLength=%f\n", settings.physicsPickerRayLength);
 	out_buf->appendf("PhysicsPickerSelectionMask=%i\n", settings.physicsPickerSelectionMask);
+	out_buf->appendf("DebugCameraMouseSensitivityX=%f\n", settings.debugCameraMouseSensitivityX);
+	out_buf->appendf("DebugCameraMouseSensitivityY=%f\n", settings.debugCameraMouseSensitivityY);
 }

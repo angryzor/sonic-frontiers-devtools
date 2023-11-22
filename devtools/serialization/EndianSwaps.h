@@ -66,6 +66,14 @@ namespace hl {
 	}
 
 	template<bool swapOffsets = true>
+	inline void endian_swap(::csl::math::Position& v) noexcept
+	{
+		endian_swap(v(0));
+		endian_swap(v(1));
+		endian_swap(v(2));
+	}
+
+	template<bool swapOffsets = true>
 	inline void endian_swap(::csl::ut::Color<uint8_t>& v) noexcept
 	{
 		endian_swap(v.r);
@@ -81,5 +89,10 @@ namespace hl {
 		endian_swap(v.g);
 		endian_swap(v.b);
 		endian_swap(v.a);
+	}
+
+	template<bool swapOffsets = true>
+	inline void endian_swap(::hh::game::ObjectId& v) noexcept
+	{
 	}
 }

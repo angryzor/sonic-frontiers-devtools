@@ -21,6 +21,14 @@ public:
     static void RenderPreview(const hh::fnd::ManagedResource* resource, float size);
     static void WatchDirectory(const std::string& path);
     static void ReloadResource(const wchar_t* filePath, hh::fnd::ManagedResource* resource);
+    static void ExportResource(const wchar_t* filePath, hh::fnd::ManagedResource* resource);
+    static void ShowLoadResourceDialog(hh::fnd::ManagedResource* resource);
+    static void ShowExportResourceDialog(hh::fnd::ManagedResource* resource);
+    static const char* GetExtensionByTypeInfo(const hh::fnd::ResourceTypeInfo* typeInfo);
+    static const hh::fnd::ResourceTypeInfo* GetTypeInfoByExtension(const char* extension);
+    static void RenderLoadDialog();
+    static void RenderExportDialog();
+    static void RenderDialogs();
     //void RenderResources();
 };
 

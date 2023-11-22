@@ -1,6 +1,7 @@
 #include "../Pch.h"
 #include "ObjectDataEditor.h"
 #include "ReflectionEditor.h"
+#include "../common/SimpleWidgets.h"
 
 using namespace hh::game;
 
@@ -9,7 +10,7 @@ void ObjectDataEditor::Render(ObjectData* obj)
 	auto* objSystem = GameObjectSystem::GetInstance();
 
 	ImGui::Text("Id: %zx%zx", obj->id.objectId, obj->id.groupId);
-	ImGui::Text("Name: %s", obj->name);
+	InputText("Name", &obj->name);
 	ImGui::Text("Class: %s", obj->gameObjectClass);
 	ImGui::SeparatorText("Transform");
 	ImGui::PushID("Transform");

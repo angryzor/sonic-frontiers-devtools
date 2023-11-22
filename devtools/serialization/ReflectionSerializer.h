@@ -4,6 +4,7 @@
 
 struct WorkQueueEntry {
 	void* ptr;
+	void* parentPtr;
 	const hh::fnd::RflClassMember* member;
 	size_t size;
 };
@@ -24,6 +25,7 @@ class ReflectionSerializer : public hh::fnd::BaseObject {
 		writer.write_obj<T>(*static_cast<T*>(obj), alignof(T));
 	}
 	void WritePrimitive(void* address, hh::fnd::RflClassMember::Type type);
+	void WriteRflClassMember(void* obj, const hh::fnd::RflClassMember& member);
 	void WriteRflClass(void* obj, const hh::fnd::RflClass& rflClass);
 	void Write(void* obj, const hh::fnd::RflClass& rflClass);
 	ReflectionSerializer(csl::fnd::IAllocator* allocator, hl::stream& stream);

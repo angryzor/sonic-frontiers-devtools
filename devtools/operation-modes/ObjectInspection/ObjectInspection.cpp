@@ -20,7 +20,6 @@ void ObjectInspection::Render() {
 
 	objectList.Render();
 	objectInspector.Render();
-	GameServiceInspector::Render();
 
 	if (Desktop::instance->IsPickerMouseReleased())
 		focusedObject = Desktop::instance->GetPickedObject();
@@ -34,18 +33,27 @@ void ObjectInspection::Render() {
 
 			ImGuiIO& io = ImGui::GetIO();
 
-			Eigen::Transform<float, 3, Eigen::Affine> transform{};
-			transform.fromPositionOrientationScale(gocTransform->transform.position, gocTransform->transform.rotation, gocTransform->transform.scale);
+			// We want ImGuizmo to operate on the absolute transform so it can position the gizmo properly, yet apply the changes on the local transform,
+			// so we do some matrix juggling here to convert the changed absolute transform back to a local transform.
+			Eigen::Transform<float, 3, Eigen::Affine> absoluteTransform{};
+			absoluteTransform.fromPositionOrientationScale(gocTransform->frame->fullTransform.position, gocTransform->frame->fullTransform.rotation, gocTransform->frame->fullTransform.scale);
+
+			Eigen::Transform<float, 3, Eigen::Affine> localTransform{};
+			localTransform.fromPositionOrientationScale(gocTransform->transform.position, gocTransform->transform.rotation, gocTransform->transform.scale);
+
+			Eigen::Transform<float, 3, Eigen::Affine> parentTransform = absoluteTransform * localTransform.inverse();
 
 			ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-			ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), gctx->defaultViewportData.projMatrix.data(), gizmoOperation, gizmoMode, reinterpret_cast<float*>(&transform), NULL, NULL);
+			ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), gctx->viewportDatas[0].projMatrix.data(), gizmoOperation, gizmoMode, absoluteTransform.data(), NULL, NULL);
+
+			Eigen::Transform<float, 3, Eigen::Affine> updatedLocalTransform = parentTransform.inverse() * absoluteTransform;
 
 			Eigen::Matrix3f rotation;
 			Eigen::Matrix3f scaling;
 
-			transform.computeRotationScaling(&rotation, &scaling);
+			updatedLocalTransform.computeRotationScaling(&rotation, &scaling);
 
-			gocTransform->SetLocalTransform({ { transform.translation() }, { Eigen::Quaternionf{ rotation } }, { Eigen::Vector3f{ scaling.diagonal() } } });
+			gocTransform->SetLocalTransform({ { updatedLocalTransform.translation() }, { Eigen::Quaternionf{ rotation } }, { Eigen::Vector3f{ scaling.diagonal() } } });
 
 			if ((ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) && ImGui::IsKeyPressed(ImGuiKey_Space))
 				gizmoMode = gizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;

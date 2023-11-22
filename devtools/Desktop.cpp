@@ -6,6 +6,7 @@
 #include "ResourceBrowser.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
 #include "operation-modes/LevelEditor/LevelEditor.h"
+#include "GameServiceInspector.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -37,6 +38,8 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 void Desktop::Render() {
 	ToolBar::Render();
 	operationMode->Render();
+	GameServiceInspector::Render();
+	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
 
@@ -86,8 +89,8 @@ GameObject* Desktop::GetPickedObject() const {
 	return physicsViewerCtx->pickedObject.collider == nullptr ? nullptr : physicsViewerCtx->pickedObject.collider->GetOwnerGameObject();
 }
 
-csl::math::Vector3& Desktop::GetPickedLocation() const {
-	return physicsPicker->mouseSpringAction.unk1;
+csl::math::Vector3* Desktop::GetPickedLocation() const {
+	return &physicsPicker->mouseSpringAction.unk1;
 }
 
 void Desktop::SwitchToObjectInspectionMode()

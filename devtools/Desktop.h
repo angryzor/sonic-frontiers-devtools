@@ -29,7 +29,7 @@ public:
     bool IsPickerMouseClicked() const;
     bool IsPickerMouseReleased() const;
     hh::game::GameObject* GetPickedObject() const;
-    csl::math::Vector3& GetPickedLocation() const;
+    csl::math::Vector3* GetPickedLocation() const;
     void SwitchToObjectInspectionMode();
     void SwitchToLevelEditorMode();
 };

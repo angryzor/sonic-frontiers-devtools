@@ -49,17 +49,18 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Mode")) {
 			if (ImGui::MenuItem("Object Inspection"))
 				Desktop::instance->SwitchToObjectInspectionMode();
-			if (ImGui::MenuItem("Level Editor"))
+			if (ImGui::MenuItem("Level Editor")) {
 				Desktop::instance->SwitchToLevelEditorMode();
+			}
 			ImGui::EndMenu();
 		}
 		if (ImGui::MenuItem("Settings"))
 			SettingsManager::OpenConfigDialog();
 
-		if (ImGui::MenuItem("Edit mode")) {
-			auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
-			seqExt->GetCurrentGameMode()->SetState(0x11);
-		}
+		//if (ImGui::MenuItem("Edit mode")) {
+		//	auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
+		//	seqExt->GetCurrentGameMode()->SetState(0x13);
+		//}
 
 		ImGui::EndMenuBar();
 	}
@@ -110,16 +111,16 @@ void ToolBar::Render() {
 		"Y: change camera movement speed\n"
 		"B: change viewport\n"
 		"\n"
-		"Keyboard (these are a bit clunky, will improve in a future version):\n"
-		"Arrow keys: move camera\n"
-		"Numpad arrow keys: rotate camera\n"
-		"Hold 4 on number row + arrow keys: move camera up/down\n"
-		"Hold 4 on number row + numpad up/down: zoom in/out\n"
-		"Hold 5 on number row + numpad left/right: roll camera\n"
-		"Hold 6 on number row + numpad up/down: change fov\n"
-		"2 on number row: reset camera\n"
-		"3 on number row: change camera movement speed\n"
-		"7 on number row: change viewport"
+		"Keyboard + mouse:\n"
+		"WASD / arrow keys: move camera\n"
+		"Mouse / numpad arrow keys: rotate camera\n"
+		"Hold LALT + move forward backward OR PgUp/PgDn: move camera up/down\n"
+		"Keypad +/-: zoom in/out\n"
+		"Q/E: roll camera\n"
+		"Home/End: change fov\n"
+		"F1: reset camera\n"
+		"LShift/RShift: toggle camera movement speed\n"
+		"Keypad asterisk: change viewport"
 	);
 	ImGui::SameLine();
 
