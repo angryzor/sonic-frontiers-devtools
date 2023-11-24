@@ -3,7 +3,7 @@
 
 #define PI 3.14159265359f
 
-EulerTransform::EulerTransform(const csl::math::Transform& transform) : position{ transform.position }, rotation{ transform.rotation.toRotationMatrix().eulerAngles(0, 1, 2) }, scale{ transform.scale } {}
+EulerTransform::EulerTransform(const csl::math::Transform& transform) : position{ transform.position }, rotation{ transform.rotation.toRotationMatrix().canonicalEulerAngles(0, 1, 2) }, scale{ transform.scale } {}
 
 EulerTransform::operator csl::math::Transform() {
 	return {

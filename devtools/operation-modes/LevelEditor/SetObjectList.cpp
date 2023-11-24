@@ -8,32 +8,54 @@
 using namespace hh::fnd;
 using namespace hh::game;
 
+SetObjectListTreeNode::SetObjectListTreeNode(csl::fnd::IAllocator* allocator) : hh::fnd::ReferencedObject{ allocator, true }, children{ allocator } {
+}
+
+const char* SetObjectListTreeNode::GetLabel() const {
+	if (type == SetObjectListTreeNode::Type::OBJECT)
+		return objectInfo.object->name.c_str();
+	else
+		return groupInfo.label;
+}
+
+SetObjectListTreeNode* SetObjectListTreeNode::CreateObjectNode(csl::fnd::IAllocator* allocator, hh::game::ObjectData* objData) {
+	auto* node = new (allocator) SetObjectListTreeNode(allocator);
+	node->type = SetObjectListTreeNode::Type::OBJECT;
+	node->objectInfo.object = objData;
+	return node;
+}
+
+SetObjectListTreeNode* SetObjectListTreeNode::CreateGroupNode(csl::fnd::IAllocator* allocator, const char* label) {
+	auto* node = new (allocator) SetObjectListTreeNode(allocator);
+	node->type = SetObjectListTreeNode::Type::GROUP;
+	node->groupInfo.label = label;
+	return node;
+}
+
 SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }
 {
 }
 
-void SetObjectList::RenderObjectTreeNode(ObjectData* objData) {
+void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode* node) {
 	ImGuiTreeNodeFlags nodeflags = 0;
 
-	if (levelEditor.focusedObject == objData)
+	if (node->type == SetObjectListTreeNode::Type::OBJECT && levelEditor.focusedObject == node->objectInfo.object)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
-	//auto* transform = objData->GetComponent<GOCTransform>();
+	if (node->children.size() != 0) {
+		if (ImGui::TreeNodeEx(node, nodeflags, "%s", node->GetLabel())) {
+			for (SetObjectListTreeNode* child : node->children) {
+				RenderObjectTreeNode(child);
+			}
+			ImGui::TreePop();
+		}
+	}
+	else {
+		ImGui::TreeNodeEx(node, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", node->GetLabel());
+	}
 
-	//if (transform && transform->GetChildren().size() != 0) {
-	//	if (ImGui::TreeNodeEx(objData, nodeflags, "%s", objData->pObjectName.c_str())) {
-	//		for (auto& child : transform->GetChildren()) {
-	//			RenderObjectTreeNode(child.GetOwnerGameObject());
-	//		}
-	//		ImGui::TreePop();
-	//	}
-	//}
-	//else {
-		ImGui::TreeNodeEx(&objData, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", objData->name.c_str());
-	//}
-
-	if (ImGui::IsItemClicked())
-		levelEditor.focusedObject = objData;
+	if (node->type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
+		levelEditor.focusedObject = node->objectInfo.object;
 }
 
 void SetObjectList::Render() {
@@ -87,14 +109,8 @@ void SetObjectList::Render() {
 		if (levelEditor.focusedChunk && ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
 				if (ImGui::BeginChild("Content")) {
-					for (auto& status : levelEditor.focusedChunk->GetObjectStatuses()) {
-						RenderObjectTreeNode(status.objectData);
-						//for (auto* obj : layer->) {
-						//	auto* transform = obj->GetComponent<GOCTransform>();
-
-						//	if (!transform || !transform->IsExistParent())
-						//		RenderObjectTreeNode(obj);
-						//}
+					for (SetObjectListTreeNode* child : tree->children) {
+						RenderObjectTreeNode(child);
 					}
 				}
 				ImGui::EndChild();
@@ -103,17 +119,10 @@ void SetObjectList::Render() {
 			if (ImGui::BeginTabItem("Layer view")) {
 				if (ImGui::BeginChild("Content")) {
 					for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
+						ImGui::PushID(layer);
 						if (ImGui::TreeNode(layer, "%s", layer->GetName())) {
-							for (auto& obj : layer->GetResource()->GetObjects()) {
-								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
-
-								if (levelEditor.focusedObject == obj)
-									nodeflags |= ImGuiTreeNodeFlags_Selected;
-
-								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
-
-								if (ImGui::IsItemClicked())
-									levelEditor.focusedObject = obj;
+							for (SetObjectListTreeNode* child : treesByLayer.GetValueOrFallback(layer, nullptr)->children) {
+								RenderObjectTreeNode(child);
 							}
 							ImGui::TreePop();
 						}
@@ -127,6 +136,7 @@ void SetObjectList::Render() {
 							}
 							ImGui::EndPopup();
 						}
+						ImGui::PopID();
 					}
 				}
 				ImGui::EndChild();
@@ -136,4 +146,41 @@ void SetObjectList::Render() {
 		}
 	}
 	ImGui::End();
+}
+
+SetObjectListTreeNode* SetObjectList::BuildTreeNode(ObjectData* objData) {
+	auto objId = objData == nullptr ? ObjectId{ 0, 0 } : objData->id;
+	auto* node = SetObjectListTreeNode::CreateObjectNode(GetAllocator(), objData);
+
+	for (auto* layer : levelEditor.focusedChunk->GetLayers())
+		for (auto* object : layer->GetResource()->GetObjects())
+			if (object->parentID == objId)
+				node->children.push_back(BuildTreeNode(object));
+
+	return node;
+}
+
+SetObjectListTreeNode* SetObjectList::BuildSingleLayerTreeNode(hh::game::ObjectWorldChunkLayer* layer, ObjectData* objData) {
+	auto objId = objData == nullptr ? ObjectId{ 0, 0 } : objData->id;
+	auto* node = SetObjectListTreeNode::CreateObjectNode(GetAllocator(), objData);
+
+	for (auto* object : layer->GetResource()->GetObjects())
+		if (object->parentID == objId)
+			node->children.push_back(BuildSingleLayerTreeNode(layer, object));
+
+	return node;
+}
+
+void SetObjectList::RebuildTree() {
+	if (levelEditor.focusedChunk == nullptr) {
+		tree = nullptr;
+		treesByLayer.clear();
+	}
+	else {
+		tree = BuildTreeNode(nullptr);
+
+		for (auto* layer : levelEditor.focusedChunk->GetLayers())
+			treesByLayer.Insert(layer, BuildSingleLayerTreeNode(layer, nullptr));
+	}
+	std::vector<int> v;
 }

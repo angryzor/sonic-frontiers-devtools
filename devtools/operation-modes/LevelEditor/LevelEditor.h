@@ -26,4 +26,6 @@ public:
     virtual void WorldChunkRemovedCallback(hh::game::ObjectWorldChunk* chunk) override;
 
     void SetFocusedChunk(hh::game::ObjectWorldChunk* chunk);
+    void SpawnObject();
+    void DeleteFocusedObject();
 };

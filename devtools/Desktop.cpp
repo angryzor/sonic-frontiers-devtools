@@ -90,7 +90,7 @@ GameObject* Desktop::GetPickedObject() const {
 }
 
 csl::math::Vector3* Desktop::GetPickedLocation() const {
-	return &physicsPicker->mouseSpringAction.unk1;
+	return physicsViewerCtx->pickedObject.collider == nullptr ? nullptr : &physicsViewerCtx->pickedObject.unk2; //&physicsPicker->mouseSpringAction.unk1;
 }
 
 void Desktop::SwitchToObjectInspectionMode()

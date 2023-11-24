@@ -16,12 +16,21 @@ struct OffsetVarStr {
 	}
 };
 
-size_t ReflectionSerializer::EnqueueChunk(const WorkQueueEntry& chunk) {
+size_t ReflectionSerializer::EnqueueChunk(WorkQueueEntry chunk) {
 	auto processed = processedPointers.Find(chunk.ptr);
 	if (processed != processedPointers.end())
 		return *processed;
 
-	auto offset = nextFreeAddress;
+	auto alignment = chunk.member->GetSubType() == RflClassMember::TYPE_VOID ? reinterpret_cast<RflClass * (*)(void*)>(chunk.member->GetStructClass())(chunk.parentPtr)->GetAlignment() : chunk.member->GetSubTypeAlignment();
+	auto misalignment = nextFreeAddress % alignment;
+
+	chunk.dbgUnalignedOffset = nextFreeAddress;
+	if (misalignment > 0)
+		nextFreeAddress += alignment - misalignment;
+
+	size_t offset = nextFreeAddress;
+	chunk.dbgExpectedOffset = offset;
+	chunk.id = curChunkId++;
 
 	nextFreeAddress += chunk.member->GetSubType() == RflClassMember::TYPE_VOID ? reinterpret_cast<RflClass* (*)(void*)>(chunk.member->GetStructClass())(chunk.parentPtr)->GetSizeInBytes() * chunk.size : chunk.member->GetSubTypeArraySizeInBytes(chunk.size);
 
@@ -103,7 +112,6 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 
 	if (parent != nullptr) {
 		WriteRflClass(obj, *parent);
-		writer.pad(parent->GetAlignment());
 	}
 
 	for (uint32_t i = 0; i < rflClass.m_pMembers.count; i++) {
@@ -112,11 +120,11 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 		size_t constArrSize = constArrSizeOrZero == 0 ? 1 : constArrSizeOrZero;
 		size_t alignment = member.GetAlignment();
 
+		writer.pad(alignment);
+
 		for (size_t j = 0; j < constArrSize; j++) {
 			size_t memberSingleSize = member.GetSingleSizeInBytes();
 			void* address = reinterpret_cast<void*>(reinterpret_cast<size_t>(obj) + member.m_Offset + j * memberSingleSize);
-
-			writer.pad(alignment);
 
 			// Catch alignment issues.
 			assert((writer.tell() - dbgStructStartLoc) == (reinterpret_cast<size_t>(address) - reinterpret_cast<size_t>(obj)));
@@ -131,9 +139,9 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 
 				writer.add_offset(writer.tell());
 				hl::csl::move_array64<void*> offsetarr{
-					EnqueueChunk({ arr->begin(), obj, &member, arr->size()}),
+					EnqueueChunk({ arr->begin(), obj, &member, arr->size() }),
 					arr->size(),
-					arr->capacity() | csl::ut::SIGN_BIT,
+					arr->capacity(),
 					0ui64,
 				};
 
@@ -176,12 +184,13 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 				WritePrimitive(address, member.GetType());
 				break;
 			}
-			writer.pad(alignment);
 
 			// Catch alignment issues.
 			assert((writer.tell() - dbgStructStartLoc) == (reinterpret_cast<size_t>(address) + memberSingleSize - reinterpret_cast<size_t>(obj)));
 		}
 	}
+
+	writer.pad(rflClass.GetAlignment());
 }
 
 void ReflectionSerializer::Write(void* obj, const RflClass& rflClass) {
@@ -191,49 +200,51 @@ void ReflectionSerializer::Write(void* obj, const RflClass& rflClass) {
 	nextFreeAddress = rflClass.GetSizeInBytes();
 	WriteRflClass(obj, rflClass);
 
+	size_t chunkId = 0;
 	while (!workQueue.empty()) {
 		WorkQueueEntry chunk = *workQueue.begin();
 		workQueue.remove(0);
 
 		switch (chunk.member->GetSubType()) {
 		case RflClassMember::TYPE_VOID: {
-			const RflClass* rflClass = reinterpret_cast<RflClass * (*)(void*)>(chunk.member->GetStructClass())(chunk.parentPtr);
+			const RflClass* rflClass = reinterpret_cast<RflClass* (*)(void*)>(chunk.member->GetStructClass())(chunk.parentPtr);
 			size_t itemSize = rflClass->GetSizeInBytes();
 			size_t alignment = rflClass->GetAlignment();
 
-			for (size_t i = 0; i < chunk.size; i++) {
-				writer.pad(alignment);
+			writer.pad(alignment);
+			assert(chunk.dbgExpectedOffset == writer.tell() - 0x40);
+
+			for (size_t i = 0; i < chunk.size; i++)
 				WriteRflClass(reinterpret_cast<void*>(reinterpret_cast<size_t>(chunk.ptr) + i * itemSize), *rflClass);
-				writer.pad(alignment);
-			}
 
 			break;
 		}
 		case RflClassMember::TYPE_STRUCT: {
 			size_t itemSize = chunk.member->GetSubTypeSizeInBytes();
-			size_t alignment = chunk.member->GetAlignment();
+			size_t alignment = chunk.member->GetSubTypeAlignment();
 
-			for (size_t i = 0; i < chunk.size; i++) {
-				writer.pad(alignment);
+			writer.pad(alignment);
+			assert(chunk.dbgExpectedOffset == writer.tell() - 0x40);
+
+			for (size_t i = 0; i < chunk.size; i++)
 				WriteRflClass(reinterpret_cast<void*>(reinterpret_cast<size_t>(chunk.ptr) + i * itemSize), *chunk.member->GetStructClass());
-				writer.pad(alignment);
-			}
 
 			break;
 		}
 		default: {
 			size_t itemSize = chunk.member->GetSubTypeSizeInBytes();
-			size_t alignment = chunk.member->GetAlignment();
+			size_t alignment = chunk.member->GetSubTypeAlignment();
 
-			for (size_t i = 0; i < chunk.size; i++) {
-				writer.pad(alignment);
+			writer.pad(alignment);
+			assert(chunk.dbgExpectedOffset == writer.tell() - 0x40);
+
+			for (size_t i = 0; i < chunk.size; i++)
 				WritePrimitive(reinterpret_cast<void*>(reinterpret_cast<size_t>(chunk.ptr) + i * itemSize), chunk.member->GetSubType());
-				writer.pad(alignment);
-			}
 
 			break;
 		}
 		}
+		chunkId++;
 	}
 
 	writer.finish_data_block();

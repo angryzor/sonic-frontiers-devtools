@@ -67,8 +67,7 @@ RflClassMember componentDataArrayEntryMembers[]{
 RflClass componentDataArrayEntry{ "ComponentDataArrayEntry", nullptr, 8, nullptr, 0, componentDataArrayEntryMembers, 1, nullptr };
 
 RflClassMember objectDataMembers[]{
-    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, unk1), nullptr },
-    { "unk2", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, unk2), nullptr },
+    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, flags), nullptr },
     { "gameObjectClass", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, gameObjectClass), nullptr },
     { "name", nullptr, nullptr, RflClassMember::TYPE_STRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, name), nullptr },
     { "id", nullptr, nullptr, RflClassMember::TYPE_OBJECT_ID, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, id), nullptr },

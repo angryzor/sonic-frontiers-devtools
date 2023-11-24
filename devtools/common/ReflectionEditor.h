@@ -61,7 +61,9 @@ class ReflectionEditor {
 
 public:
     static void Render(void* reflectionData, const hh::fnd::RflClass* rflClass) {
+        ImGui::BeginGroup();
         RenderStructRflParamEditor(rflClass->m_pName, reflectionData, rflClass);
+        ImGui::EndGroup();
     }
 
     template<typename T> static void Render(T& reflectionData) {

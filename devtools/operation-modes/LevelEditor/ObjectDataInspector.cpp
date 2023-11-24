@@ -22,6 +22,16 @@ void ObjectDataInspector::Render() {
 		}
 		else {
 			ObjectDataEditor::Render(levelEditor.focusedObject);
+
+			if (ImGui::IsItemDeactivatedAfterEdit()) {
+				auto status = levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(levelEditor.focusedObject->id);
+				auto idx = levelEditor.focusedChunk->GetObjectIndexById(levelEditor.focusedObject->id);
+
+				if (status.objectData && idx != -1) {
+					levelEditor.focusedChunk->DespawnByIndex(idx);
+					status.Restart();
+				}
+			}
 		}
 	}
 	ImGui::End();

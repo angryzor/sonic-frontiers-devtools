@@ -14,13 +14,13 @@ void ObjectDataEditor::Render(ObjectData* obj)
 	ImGui::Text("Class: %s", obj->gameObjectClass);
 	ImGui::SeparatorText("Transform");
 	ImGui::PushID("Transform");
-	ImGui::DragFloat3("Position", obj->transform.position.data());
-	ImGui::DragFloat3("Rotation", obj->transform.rotation.data());
+	ImGui::DragFloat3("Position", obj->transform.position.data(), 0.05f);
+	ImGui::DragFloat3("Rotation", obj->transform.rotation.data(), 0.005f);
 	ImGui::PopID();
 	ImGui::SeparatorText("Local transform");
-	ImGui::PushID("Transform");
-	ImGui::DragFloat3("Position", obj->localTransform.position.data());
-	ImGui::DragFloat3("Rotation", obj->localTransform.rotation.data());
+	ImGui::PushID("Local Transform");
+	ImGui::DragFloat3("Position", obj->localTransform.position.data(), 0.05f);
+	ImGui::DragFloat3("Rotation", obj->localTransform.rotation.data(), 0.005f);
 	ImGui::PopID();
 	ImGui::SeparatorText("Component configuration");
 

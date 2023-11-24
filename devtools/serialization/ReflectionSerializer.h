@@ -3,10 +3,15 @@
 #include <hedgelib/io/hl_bina.h>
 
 struct WorkQueueEntry {
+	size_t id;
 	void* ptr;
 	void* parentPtr;
 	const hh::fnd::RflClassMember* member;
 	size_t size;
+	size_t dbgUnalignedOffset;
+	size_t dbgExpectedOffset;
+
+	WorkQueueEntry(void* ptr, void* parentPtr, const hh::fnd::RflClassMember* member, size_t size) : ptr{ ptr }, parentPtr{ parentPtr }, member{ member }, size{ size }, dbgExpectedOffset{ 0 } {}
 };
 
 class ReflectionSerializer : public hh::fnd::BaseObject {
@@ -15,11 +20,12 @@ class ReflectionSerializer : public hh::fnd::BaseObject {
 	hl::off_table offTable{};
 	hl::str_table strTable{};
 
+	size_t curChunkId;
 	size_t nextFreeAddress;
 	csl::ut::PointerMap<void*, size_t> processedPointers{ GetAllocator() };
 	csl::ut::MoveArray<WorkQueueEntry> workQueue{ GetAllocator() };
 
-	size_t EnqueueChunk(const WorkQueueEntry& chunk);
+	size_t EnqueueChunk(WorkQueueEntry chunk);
 	template<typename T>
 	void WriteCast(void* obj) {
 		writer.write_obj<T>(*static_cast<T*>(obj), alignof(T));
