@@ -9,7 +9,7 @@ void ObjectDataEditor::Render(ObjectData* obj)
 {
 	auto* objSystem = GameObjectSystem::GetInstance();
 
-	ImGui::Text("Id: %zx%zx", obj->id.objectId, obj->id.groupId);
+	ImGui::Text("Id: %016zx%016zx", obj->id.groupId, obj->id.objectId);
 	InputText("Name", &obj->name);
 	ImGui::Text("Class: %s", obj->gameObjectClass);
 	ImGui::SeparatorText("Transform");

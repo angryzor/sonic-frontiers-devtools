@@ -9,7 +9,7 @@ using namespace hh::fnd;
 using namespace hh::game;
 using namespace hh::physics;
 
-LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator }
+LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator }, mt{ std::random_device()() }
 {
 	auto* gameManager = GameManager::GetInstance();
 	if (!gameManager)
@@ -122,19 +122,21 @@ void LevelEditor::Render() {
 			int idx = focusedChunk->GetObjectIndexById(focusedObject->id);
 
 			if (idx != -1) {
-				auto* obj = focusedChunk->GetObjectByIndex(idx);
+				focusedChunk->DespawnByIndex(idx);
+				focusedChunk->GetWorldObjectStatusByIndex(idx).Restart();
+				//auto* obj = focusedChunk->GetObjectByIndex(idx);
 
-				if (obj) {
-					auto* gocTransform = obj->GetComponent<GOCTransform>();
+				//if (obj) {
+				//	auto* gocTransform = obj->GetComponent<GOCTransform>();
 
-					if (gocTransform) {
-						// Depending on whether the parent was able to be spawned, the object uses the local or the absolute transform as the GOC transform, so we have to replicate that here.
-						if (gocTransform->IsExistParent())
-							gocTransform->SetLocalTransform({ { updatedLocalTransform.translation() }, { Eigen::Quaternionf{ updatedLocalRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
-						else
-							gocTransform->SetLocalTransform({ { absoluteTransform.translation() }, { Eigen::Quaternionf{ absoluteRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
-					}
-				}
+				//	if (gocTransform) {
+				//		// Depending on whether the parent was able to be spawned, the object uses the local or the absolute transform as the GOC transform, so we have to replicate that here.
+				//		if (gocTransform->IsExistParent())
+				//			gocTransform->SetLocalTransform({ { updatedLocalTransform.translation() }, { Eigen::Quaternionf{ updatedLocalRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
+				//		else
+				//			gocTransform->SetLocalTransform({ { absoluteTransform.translation() }, { Eigen::Quaternionf{ absoluteRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
+				//	}
+				//}
 			}
 
 			if ((ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) && ImGui::IsKeyPressed(ImGuiKey_Space))
@@ -173,9 +175,13 @@ void LevelEditor::Render() {
 			DeleteFocusedObject();
 			setObjectList.RebuildTree();
 		}
+
+		if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+			focusedObject = nullptr;
+		}
 	}
 
-	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && Desktop::instance->GetPickedLocation()) {
+	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && placeTargetLayer && Desktop::instance->GetPickedLocation()) {
 		SpawnObject();
 		setObjectList.RebuildTree();
 	}
@@ -199,20 +205,25 @@ struct RangeSpawningData {
 };
 
 void LevelEditor::SpawnObject() {
-	auto* resource = focusedChunk->GetLayers()[1]->GetResource();
+	auto* resource = placeTargetLayer->GetResource();
 	auto* alloc = resource->GetAllocator();
 
 	char name[200];
 	snprintf(name, sizeof(name), "%s_%zd", objectClassToPlace->pName, resource->GetObjects().size());
 
+	ObjectId id;
+	id.groupId = mt();
+	id.objectId = mt();
+
 	auto* objData = new (alloc) ObjectData{
 		alloc,
 		objectClassToPlace,
+		id,
 		name,
-		nullptr,
+		focusedObject,
 		{ csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0, 0, 0 } }
 	};
-	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 500 };
+	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 20 };
 	auto* rangeSpawning = new (GetAllocator()) ComponentData{ GetAllocator(), GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName("RangeSpawning"), rangeSpawningData };
 	objData->componentData.push_back(rangeSpawning);
 
@@ -249,6 +260,8 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 	if (focusedChunk == chunk)
 		return;
 
+	placeTargetLayer = nullptr;
+	objectClassToPlace = nullptr;
 	focusedObject = nullptr;
 	if (focusedChunk) {
 		focusedChunk->DespawnAll();

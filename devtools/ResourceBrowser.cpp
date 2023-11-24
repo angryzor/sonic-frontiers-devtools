@@ -110,7 +110,9 @@ void ResourceBrowser::RenderContents() {
 				currentPath.remove(j);
 	}
 
-	RenderMainArea();
+	if (ImGui::BeginChild("Main area"))
+		RenderMainArea();
+	ImGui::EndChild();
 }
 
 void ResourceBrowser::RenderMainArea() {

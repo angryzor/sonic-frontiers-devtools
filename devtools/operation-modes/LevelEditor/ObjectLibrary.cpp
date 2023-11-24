@@ -20,14 +20,50 @@ void ObjectLibrary::Render() {
 
 	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
 	if (ImGui::Begin("Object library", NULL, windowFlags)) {
-		for (auto* obj : registry->GetGameObjectClasses()) {
-			if (ImGui::Selectable(obj->pName, selectedClass == obj))
-				selectedClass = obj;
-			if (selectedClass == obj)
-				ImGui::SetItemDefaultFocus();
+		if (levelEditor.focusedChunk) {
+			const char* targetLayerPreview = "<none>";
+
+			for (auto* layer : levelEditor.focusedChunk->GetLayers())
+				if (layer == levelEditor.placeTargetLayer)
+					targetLayerPreview = layer->GetName();
+
+			if (ImGui::BeginCombo("Target placement layer", targetLayerPreview)) {
+				for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
+					if (ImGui::Selectable(layer->GetName(), layer == levelEditor.placeTargetLayer))
+						levelEditor.placeTargetLayer = layer;
+					if (levelEditor.placeTargetLayer == layer)
+						ImGui::SetItemDefaultFocus();
+				}
+				ImGui::EndCombo();
+			}
+
+			if (levelEditor.placeTargetLayer) {
+				if (levelEditor.objectClassToPlace) {
+					bool clickedStop = ImGui::Button("Stop placing");
+					ImGui::SameLine();
+					ImGui::Text("Placing %s", levelEditor.objectClassToPlace->pName);
+					if (clickedStop)
+						levelEditor.objectClassToPlace = nullptr;
+				}
+				else {
+					if (!selectedClass)
+						ImGui::BeginDisabled();
+					if (ImGui::Button("Place"))
+						levelEditor.objectClassToPlace = selectedClass;
+					if (!selectedClass)
+						ImGui::EndDisabled();
+				}
+			}
 		}
-		if (selectedClass && ImGui::Button("Place"))
-			levelEditor.objectClassToPlace = selectedClass;
+		if (ImGui::BeginChild("List of objects")) {
+			for (auto* obj : registry->GetGameObjectClasses()) {
+				if (ImGui::Selectable(obj->pName, selectedClass == obj))
+					selectedClass = obj;
+				if (selectedClass == obj)
+					ImGui::SetItemDefaultFocus();
+			}
+		}
+		ImGui::EndChild();
 	}
 	ImGui::End();
 }

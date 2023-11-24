@@ -37,13 +37,18 @@ SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& level
 }
 
 void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode* node) {
-	ImGuiTreeNodeFlags nodeflags = 0;
+	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 	if (node->type == SetObjectListTreeNode::Type::OBJECT && levelEditor.focusedObject == node->objectInfo.object)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 	if (node->children.size() != 0) {
-		if (ImGui::TreeNodeEx(node, nodeflags, "%s", node->GetLabel())) {
+		auto isOpen = ImGui::TreeNodeEx(node, nodeflags, "%s", node->GetLabel());
+
+		if (node->type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
+			levelEditor.focusedObject = node->objectInfo.object;
+
+		if (isOpen) {
 			for (SetObjectListTreeNode* child : node->children) {
 				RenderObjectTreeNode(child);
 			}
@@ -52,10 +57,10 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode* node) {
 	}
 	else {
 		ImGui::TreeNodeEx(node, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", node->GetLabel());
-	}
 
-	if (node->type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
-		levelEditor.focusedObject = node->objectInfo.object;
+		if (node->type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
+			levelEditor.focusedObject = node->objectInfo.object;
+	}
 }
 
 void SetObjectList::Render() {

@@ -53,8 +53,9 @@ class ReflectionEditor {
     static void WritePrimitiveInt(void* obj, int64_t value, const hh::fnd::RflClassMember::Type type);
     static void RenderEnumEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member);
     static void RenderFlagsEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member);
-
+    static void RenderPrimitiveEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, const hh::fnd::RflClassMember::Type type);
     static void RenderStubRflParamEditor(const char* name, const hh::fnd::RflClassMember* member);
+    static void RenderArrayRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member);
     static void RflClassMemberEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member);
     static void RenderStructRflParamEditor(const char* name, void* obj, const hh::fnd::RflClass* rflClass);
     static void RflClassMembersEditor(void* obj, const hh::fnd::RflClass* rflClass);

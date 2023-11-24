@@ -103,3 +103,37 @@ void InputText(const char* label, csl::ut::VariableString *str, ImGuiInputTextFl
 
 	ImGui::InputText(label, rstr->c_str(), rstr->size() + 1, flags | ImGuiInputTextFlags_CallbackResize, VariableStringResizeCallback, rstr);
 }
+
+void InputObjectId(const char* label, hh::game::ObjectId* id) {
+	auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
+
+	if (objWorld == nullptr) {
+		char pureIdName[200];
+		snprintf(pureIdName, sizeof(pureIdName), "%016zd%016zd", id->groupId, id->objectId);
+		ImGui::Text("%s: %s", label, pureIdName);
+	}
+	else {
+		const char* name = "<unknown>";
+
+		for (auto* chunk : objWorld->GetWorldChunks()) {
+			int idx = chunk->GetObjectIndexById(*id);
+
+			if (idx != -1)
+				name = chunk->GetWorldObjectStatusByIndex(idx).objectData->name;
+		}
+
+		if (ImGui::BeginCombo(label, name)) {
+			for (auto* chunk : objWorld->GetWorldChunks()) {
+				for (auto* layers : chunk->GetLayers()) {
+					for (auto* obj : layers->GetResource()->GetObjects()) {
+						if (ImGui::Selectable(obj->name))
+							*id = obj->id;
+						if (*id == obj->id)
+							ImGui::SetItemDefaultFocus();
+					}
+				}
+			}
+			ImGui::EndCombo();
+		}
+	}
+}

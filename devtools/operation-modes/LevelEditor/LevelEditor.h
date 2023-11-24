@@ -11,6 +11,7 @@ class LevelEditor : public OperationMode, public hh::game::GameManagerListener, 
     ObjectLibrary objectLibrary{ GetAllocator(), *this };
     ImGuizmo::OPERATION gizmoOperation{ ImGuizmo::TRANSLATE };
     ImGuizmo::MODE gizmoMode{ ImGuizmo::LOCAL };
+    std::mt19937_64 mt;
 
 public:
     LevelEditor(csl::fnd::IAllocator* allocator);
@@ -19,6 +20,7 @@ public:
     hh::game::ObjectWorldChunk* focusedChunk{};
     hh::game::ObjectData* focusedObject{};
     const hh::game::GameObjectClass* objectClassToPlace{};
+    hh::game::ObjectWorldChunkLayer* placeTargetLayer{};
 
     virtual void Render() override;
     virtual void GameServiceAddedCallback(hh::game::GameService* gameService) override;

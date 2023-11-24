@@ -6,6 +6,100 @@
 
 using namespace hh::fnd;
 
+class RflMoveArray : public csl::ut::MoveArray<void*> {
+public:
+	void change_allocator(csl::fnd::IAllocator* new_allocator, const RflClassMember* member)
+	{
+		if (!new_allocator)
+		{
+			return;
+		}
+
+		if (isUninitialized() || !this->m_pBuffer)
+		{
+			m_pAllocator = new_allocator;
+			return;
+		}
+
+		if (m_pAllocator == new_allocator)
+		{
+			return;
+		}
+
+		size_t subTypeSize = member->GetSubTypeSizeInBytes();
+
+		void* new_buffer = new_allocator->Alloc(this->capacity() * subTypeSize, 16);
+
+		memcpy(new_buffer, this->m_pBuffer, subTypeSize * this->m_length);
+
+		if (m_pAllocator && !isUninitialized())
+		{
+			m_pAllocator->Free(this->m_pBuffer);
+		}
+
+		m_pAllocator = new_allocator;
+		this->m_pBuffer = static_cast<void**>(new_buffer);
+	}
+
+	void reserve(size_t len, const RflClassMember* member) {
+		if (len <= capacity())
+			return;
+
+		size_t subTypeSize = member->GetSubTypeSizeInBytes();
+		
+		if (!m_pAllocator && !isUninitialized())
+			change_allocator(app::fnd::AppHeapManager::GetResidentAllocator(), member);
+
+		void* new_buffer = m_pAllocator->Alloc(subTypeSize * len, 16);
+
+		if (m_pBuffer)
+		{
+			memcpy(new_buffer, m_pBuffer, subTypeSize * m_length);
+		}
+
+		if (!isUninitialized())
+		{
+			m_pAllocator->Free(m_pBuffer);
+		}
+
+		m_capacity = len;
+		m_pBuffer = static_cast<void**>(new_buffer);
+	}
+
+	void emplace_back(const RflClassMember* member) {
+		size_t subTypeSize = member->GetSubTypeSizeInBytes();
+
+		m_length++;
+
+		if (m_length > capacity())
+		{
+			reserve(m_length * 2, member);
+		}
+
+		void* placement = reinterpret_cast<void*>(reinterpret_cast<size_t>(m_pBuffer) + subTypeSize * (m_length - 1));
+
+		if (member->GetSubType() == RflClassMember::TYPE_STRUCT)
+			RflTypeInfoRegistry::GetInstance()->ConstructObject(m_pAllocator, placement, member->GetStructClass()->GetName());
+		else
+			memset(placement, 0, subTypeSize);
+	}
+
+	void remove(size_t i, const RflClassMember* member) {
+		size_t subTypeSize = member->GetSubTypeSizeInBytes();
+		if (i >= m_length)
+			return;
+
+		void* placement = reinterpret_cast<void*>(reinterpret_cast<size_t>(m_pBuffer) + subTypeSize * i);
+
+		if (member->GetSubType() == RflClassMember::TYPE_STRUCT)
+			RflTypeInfoRegistry::GetInstance()->CleanupLoadedObject(placement, member->GetName());
+
+		memmove(placement, reinterpret_cast<void*>(reinterpret_cast<size_t>(m_pBuffer) + subTypeSize * (i + 1)), subTypeSize * (m_length - i - 1));
+
+		m_length--;
+	}
+};
+
 
 const char* ReflectionEditor::GetRflMemberName(const RflClassMember* member) {
 	const char* caption = *reinterpret_cast<const char* const*>(member->GetAttribute("Caption")->GetData());
@@ -76,6 +170,31 @@ void ReflectionEditor::RenderStubRflParamEditor(const char* name, const RflClass
 	ImGui::Text("Coming soon!");
 }
 
+void ReflectionEditor::RenderArrayRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member)
+{
+	auto* arr = static_cast<RflMoveArray*>(obj);
+	void* buf = arr->begin();
+
+	if (ImGui::TreeNode("MoveArray", "%s[0..]", name)) {
+		for (int i = 0; i < arr->size(); i++) {
+			ImGui::PushID(i);
+			if (ImGui::Button("x"))
+				arr->remove(i, member);
+			ImGui::SameLine();
+
+			char indexedName[200];
+			snprintf(indexedName, sizeof(indexedName), "%s[%d]", name, i);
+			RenderPrimitiveEditor(indexedName, reinterpret_cast<void*>(reinterpret_cast<size_t>(buf) + i * member->GetSubTypeSizeInBytes()), member, member->GetSubType());
+			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Add item"))
+			arr->emplace_back(member);
+
+		ImGui::TreePop();
+	}
+}
+
 void ReflectionEditor::RenderEnumEditor(const char* name, void* obj, const RflClassMember* member) {
 	const RflClassEnum* enumClass = member->GetEnumClass();
 	
@@ -116,8 +235,8 @@ void ReflectionEditor::RenderFlagsEditor(const char* name, void* obj, const RflC
 	}
 }
 
-void ReflectionEditor::RflClassMemberEditor(const char* name, void* obj, const RflClassMember* member) {
-	switch (member->m_Type) {
+void ReflectionEditor::RenderPrimitiveEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, const hh::fnd::RflClassMember::Type type) {
+	switch (type) {
 	case RflClassMember::TYPE_BOOL:
 		ImGui::Checkbox(name, static_cast<bool*>(obj));
 		break;
@@ -175,20 +294,8 @@ void ReflectionEditor::RflClassMemberEditor(const char* name, void* obj, const R
 	case RflClassMember::TYPE_POINTER:
 		RenderStubRflParamEditor(name, member);
 		break;
-	case RflClassMember::TYPE_ARRAY:
-		RenderStubRflParamEditor(name, member);
-		break;
-	case RflClassMember::TYPE_SIMPLE_ARRAY:
-		RenderStubRflParamEditor(name, member);
-		break;
-	case RflClassMember::TYPE_ENUM:
-		RenderEnumEditor(name, obj, member);
-		break;
 	case RflClassMember::TYPE_STRUCT:
 		RenderStructRflParamEditor(name, obj, member->m_pClass);
-		break;
-	case RflClassMember::TYPE_FLAGS:
-		RenderFlagsEditor(name, obj, member);
 		break;
 	case RflClassMember::TYPE_CSTRING:
 		ImGui::Text("%s: %s", name, static_cast<const char*>(obj));
@@ -197,10 +304,7 @@ void ReflectionEditor::RflClassMemberEditor(const char* name, void* obj, const R
 		InputText(name, static_cast<csl::ut::VariableString*>(obj));
 		break;
 	case RflClassMember::TYPE_OBJECT_ID:
-		RenderStubRflParamEditor(name, member);
-		break;
-	case RflClassMember::TYPE_POSITION:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(name, obj, member, ImGuiDataType_Float, 3, "RangeFloat");
+		InputObjectId(name, static_cast<hh::game::ObjectId*>(obj));
 		break;
 	case RflClassMember::TYPE_COLOR_BYTE: {
 		auto originalColor{ static_cast<csl::ut::Color<uint8_t>*>(obj) };
@@ -220,11 +324,36 @@ void ReflectionEditor::RflClassMemberEditor(const char* name, void* obj, const R
 			originalColor->b = static_cast<uint8_t>(editableColor[2] * 255);
 			originalColor->a = static_cast<uint8_t>(editableColor[3] * 255);
 		}
-
 		break;
 	}
 	case RflClassMember::TYPE_COLOR_FLOAT:
 		ImGui::ColorEdit4(name, static_cast<float*>(obj), ImGuiColorEditFlags_Float);
+		break;
+	case RflClassMember::TYPE_POSITION:
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(name, obj, member, ImGuiDataType_Float, 3, "RangeFloat");
+		break;
+	default:
+		assert(!"rfl editor assertion failed: unknown primitive type");
+		break;
+	}
+}
+
+void ReflectionEditor::RflClassMemberEditor(const char* name, void* obj, const RflClassMember* member) {
+	switch (member->GetType()) {
+	case RflClassMember::TYPE_ARRAY:
+		RenderArrayRflParamEditor(name, obj, member);
+		break;
+	case RflClassMember::TYPE_SIMPLE_ARRAY:
+		RenderStubRflParamEditor(name, member);
+		break;
+	case RflClassMember::TYPE_ENUM:
+		RenderEnumEditor(name, obj, member);
+		break;
+	case RflClassMember::TYPE_FLAGS:
+		RenderFlagsEditor(name, obj, member);
+		break;
+	default:
+		RenderPrimitiveEditor(name, obj, member, member->GetType());
 		break;
 	}
 }
@@ -248,7 +377,7 @@ void ReflectionEditor::RflClassMembersEditor(void* obj, const RflClass* rflClass
 			RflClassMemberEditor(memberName, reinterpret_cast<void*>(baseAddr), member);
 		}
 		else {
-			if (ImGui::TreeNode("Array", "%s[]", memberName)) {
+			if (ImGui::TreeNode("Array", "%s[0..%zd]", memberName, constArrSize - 1)) {
 				for (size_t j = 0; j < constArrSize; j++) {
 					char name[200] = "";
 					snprintf(name, 200, "%s[%zd]", memberName, j);
