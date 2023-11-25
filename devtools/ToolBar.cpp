@@ -114,7 +114,7 @@ void ToolBar::Render() {
 		"Keyboard + mouse:\n"
 		"WASD / arrow keys: move camera\n"
 		"Mouse / numpad arrow keys: rotate camera\n"
-		"Hold LALT + move forward backward OR PgUp/PgDn: move camera up/down\n"
+		"Hold LCTRL/RCTRL + move forward backward OR PgUp/PgDn: move camera up/down\n"
 		"Keypad +/-: zoom in/out\n"
 		"Q/E: roll camera\n"
 		"Home/End: change fov\n"

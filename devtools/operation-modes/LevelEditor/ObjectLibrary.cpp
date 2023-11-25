@@ -57,8 +57,12 @@ void ObjectLibrary::Render() {
 		}
 		if (ImGui::BeginChild("List of objects")) {
 			for (auto* obj : registry->GetGameObjectClasses()) {
-				if (ImGui::Selectable(obj->pName, selectedClass == obj))
+				if (ImGui::Selectable(obj->pName, selectedClass == obj)) {
 					selectedClass = obj;
+
+					if (levelEditor.objectClassToPlace)
+						levelEditor.objectClassToPlace = selectedClass;
+				}
 				if (selectedClass == obj)
 					ImGui::SetItemDefaultFocus();
 			}

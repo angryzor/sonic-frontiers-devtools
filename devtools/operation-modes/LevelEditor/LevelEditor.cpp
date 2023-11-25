@@ -82,13 +82,13 @@ void LevelEditor::Render() {
 
 			absoluteTransform.fromPositionOrientationScale(
 				focusedObject->transform.position,
-				Eigen::AngleAxisf(focusedObject->transform.rotation[0], Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(-focusedObject->transform.rotation[2], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(focusedObject->transform.rotation[1], Eigen::Vector3f::UnitY()),
+				Eigen::AngleAxisf(focusedObject->transform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(focusedObject->transform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(focusedObject->transform.rotation[2], Eigen::Vector3f::UnitZ()),
 				csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
 			);
 
 			localTransform.fromPositionOrientationScale(
 				focusedObject->localTransform.position,
-				Eigen::AngleAxisf(focusedObject->localTransform.rotation[0], Eigen::Vector3f::UnitZ()) * Eigen::AngleAxisf(-focusedObject->localTransform.rotation[2], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(focusedObject->localTransform.rotation[1], Eigen::Vector3f::UnitY()),
+				Eigen::AngleAxisf(focusedObject->localTransform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(focusedObject->localTransform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(focusedObject->localTransform.rotation[2], Eigen::Vector3f::UnitZ()),
 				csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
 			);
 
@@ -107,8 +107,8 @@ void LevelEditor::Render() {
 			absoluteTransform.computeRotationScaling(&absoluteRotation, &absoluteScaling);
 
 			focusedObject->transform.position = { absoluteTransform.translation() };
-			auto absoluteEuler = absoluteRotation.canonicalEulerAngles(2, 0, 1);
-			focusedObject->transform.rotation = { absoluteEuler[0], absoluteEuler[2], -absoluteEuler[1] };
+			auto absoluteEuler = absoluteRotation.eulerAngles(1, 0, 2);
+			focusedObject->transform.rotation = { absoluteEuler[1], absoluteEuler[0], absoluteEuler[2] };
 
 			Eigen::Matrix3f updatedLocalRotation;
 			Eigen::Matrix3f updatedLocalScaling;
@@ -116,27 +116,27 @@ void LevelEditor::Render() {
 			updatedLocalTransform.computeRotationScaling(&updatedLocalRotation, &updatedLocalScaling);
 
 			focusedObject->localTransform.position = { updatedLocalTransform.translation() };
-			auto localEuler = updatedLocalRotation.canonicalEulerAngles(2, 0, 1);
-			focusedObject->localTransform.rotation = { localEuler[0], localEuler[2], -localEuler[1] };
+			auto localEuler = updatedLocalRotation.eulerAngles(1, 0, 2);
+			focusedObject->localTransform.rotation = { localEuler[1], localEuler[0], localEuler[2] };
 
 			int idx = focusedChunk->GetObjectIndexById(focusedObject->id);
 
 			if (idx != -1) {
-				focusedChunk->DespawnByIndex(idx);
-				focusedChunk->GetWorldObjectStatusByIndex(idx).Restart();
-				//auto* obj = focusedChunk->GetObjectByIndex(idx);
+				//focusedChunk->DespawnByIndex(idx);
+				//focusedChunk->GetWorldObjectStatusByIndex(idx).Restart();
+				auto* obj = focusedChunk->GetObjectByIndex(idx);
 
-				//if (obj) {
-				//	auto* gocTransform = obj->GetComponent<GOCTransform>();
+				if (obj) {
+					auto* gocTransform = obj->GetComponent<GOCTransform>();
 
-				//	if (gocTransform) {
-				//		// Depending on whether the parent was able to be spawned, the object uses the local or the absolute transform as the GOC transform, so we have to replicate that here.
-				//		if (gocTransform->IsExistParent())
-				//			gocTransform->SetLocalTransform({ { updatedLocalTransform.translation() }, { Eigen::Quaternionf{ updatedLocalRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
-				//		else
-				//			gocTransform->SetLocalTransform({ { absoluteTransform.translation() }, { Eigen::Quaternionf{ absoluteRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
-				//	}
-				//}
+					if (gocTransform) {
+						// Depending on whether the parent was able to be spawned, the object uses the local or the absolute transform as the GOC transform, so we have to replicate that here.
+						if (gocTransform->IsExistParent())
+							gocTransform->SetLocalTransform({ { updatedLocalTransform.translation() }, { Eigen::Quaternionf{ updatedLocalRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
+						else
+							gocTransform->SetLocalTransform({ { absoluteTransform.translation() }, { Eigen::Quaternionf{ absoluteRotation } }, { Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } } });
+					}
+				}
 			}
 
 			if ((ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) && ImGui::IsKeyPressed(ImGuiKey_Space))

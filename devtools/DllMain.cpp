@@ -159,8 +159,9 @@ void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
 	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005cu, -1.0, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005eu, 1.0, -1);
 
-	// Up/down: hold alt + move & pgup/dn
-	a2->BindActionMapping("HHFreeCameraUpDown", 0x200e2u, -1);
+	// Up/down: hold ctrl + move & pgup/dn
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x200e0u, -1);
+	a2->BindActionMapping("HHFreeCameraUpDown", 0x200e4u, -1);
 	a2->BindActionMapping("HHFreeCameraUpDown", 0x2004bu, -1);
 	a2->BindActionMapping("HHFreeCameraUpDown", 0x2004eu, -1);
 	a2->BindAxisMapping("HHFreeCameraMoveVertical", 0x2004bu, 1.0, -1);
@@ -168,6 +169,7 @@ void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
 
 	// Speed
 	a2->BindActionMapping("HHFreeCameraSpeedChange", 0x200e1u, -1);
+	a2->BindActionMapping("HHFreeCameraSpeedChange", 0x200e5u, -1);
 
 	// Reset
 	a2->BindActionMapping("HHFreeCameraReset", 0x2003au, -1);

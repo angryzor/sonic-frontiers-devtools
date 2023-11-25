@@ -78,7 +78,7 @@ RflClassMember objectDataMembers[]{
     { "objInfo", reinterpret_cast<RflClass*>(handleObjInfo), nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, objInfo), nullptr },
 };
 
-RflClass objectData{ "ObjectData", nullptr, sizeof(ObjectData), nullptr, 0, objectDataMembers, 10, nullptr };
+RflClass objectData{ "ObjectData", nullptr, sizeof(ObjectData), nullptr, 0, objectDataMembers, 9, nullptr };
 
 RflClassMember objectDataArrayEntryMembers[]{
     { "ptr", &objectData, nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_STRUCT, 0, 0, 0, nullptr },
