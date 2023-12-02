@@ -6,6 +6,7 @@
 #include "imgui/imgui_freetype.h"
 #include "imgui/ImGuizmo.h"
 #include "SettingsManager.h"
+#include "GOCVisualDebugDrawRenderer.h"
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -118,6 +119,7 @@ void Context::install_hooks()
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	INSTALL_HOOK(MouseHookUpdate);
+	//GOCVisualDebugDrawRenderer::InstallHooks();
 }
 
 void Context::init() {
@@ -153,6 +155,8 @@ void Context::init() {
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
 	Desktop::instance = new (allocator) Desktop(allocator);
 
+	//GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
+
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(device, deviceContext);
@@ -175,9 +179,13 @@ void Context::update()
 
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
+
+	//GOCVisualDebugDrawRenderer::instance->Render();
+
 	//ImGui::PushFont(firaCode);
 	//ImGui::ShowDemoWindow();
 	Desktop::instance->Render();
+
 	ImGui::Render();
 	//ImGui::PopFont();
 

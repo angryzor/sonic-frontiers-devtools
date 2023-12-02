@@ -207,6 +207,7 @@
     <ClInclude Include="core-services\GraphicsContextInspector.h" />
     <ClInclude Include="Desktop.h" />
     <ClInclude Include="GameServiceInspector.h" />
+    <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
     <ClInclude Include="operation-modes\LevelEditor\LevelEditor.h" />
     <ClInclude Include="operation-modes\LevelEditor\ObjectDataInspector.h" />
@@ -255,6 +256,7 @@
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="FiraCode.h" />
     <ClCompile Include="GameServiceInspector.cpp" />
+    <ClCompile Include="GOCVisualDebugDrawRenderer.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />
     <ClCompile Include="imgui\ImGuiFileDialog.cpp" />
     <ClCompile Include="imgui\ImGuizmo.cpp" />

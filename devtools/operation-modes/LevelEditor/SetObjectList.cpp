@@ -8,58 +8,153 @@
 using namespace hh::fnd;
 using namespace hh::game;
 
-SetObjectListTreeNode::SetObjectListTreeNode(csl::fnd::IAllocator* allocator) : hh::fnd::ReferencedObject{ allocator, true }, children{ allocator } {
+SetObjectListTreeNode::SetObjectListTreeNode(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true }, children{ allocator }, info{ nullptr } {
+}
+
+SetObjectListTreeNode::SetObjectListTreeNode(SetObjectListTreeNode&& other) : ReferencedObject{ other.GetAllocator(), true }, type{ other.type }, info{ other.info }, children{ std::move(other.children) }, totalChildrenCount{ other.totalChildrenCount }, parent{ other.parent } {
+	for (auto& child : children)
+		child.parent = this;
 }
 
 const char* SetObjectListTreeNode::GetLabel() const {
 	if (type == SetObjectListTreeNode::Type::OBJECT)
-		return objectInfo.object->name.c_str();
+		return info.object.object->name.c_str();
 	else
-		return groupInfo.label;
+		return info.group.label;
 }
 
-SetObjectListTreeNode* SetObjectListTreeNode::CreateObjectNode(csl::fnd::IAllocator* allocator, hh::game::ObjectData* objData) {
-	auto* node = new (allocator) SetObjectListTreeNode(allocator);
-	node->type = SetObjectListTreeNode::Type::OBJECT;
-	node->objectInfo.object = objData;
+SetObjectListTreeNode SetObjectListTreeNode::CreateObjectNode(csl::fnd::IAllocator* allocator, ObjectData* objData) {
+	SetObjectListTreeNode node{ allocator };
+	node.type = SetObjectListTreeNode::Type::OBJECT;
+	node.info.object.object = objData;
 	return node;
 }
 
-SetObjectListTreeNode* SetObjectListTreeNode::CreateGroupNode(csl::fnd::IAllocator* allocator, const char* label) {
-	auto* node = new (allocator) SetObjectListTreeNode(allocator);
-	node->type = SetObjectListTreeNode::Type::GROUP;
-	node->groupInfo.label = label;
+SetObjectListTreeNode SetObjectListTreeNode::CreateGroupNode(csl::fnd::IAllocator* allocator, const char* label) {
+	SetObjectListTreeNode node{ allocator };
+	node.type = SetObjectListTreeNode::Type::GROUP;
+	node.info.group.label = label;
 	return node;
+}
+
+void SetObjectListTreeNode::SetIsOpen(bool value) {
+	if (isOpen == value)
+		return;
+
+	isOpen = value;
+
+	if (parent)
+		parent->UpdateTotalChildrenCount(value ? totalChildrenCount : -totalChildrenCount);
+}
+
+int SetObjectListTreeNode::GetTotalVisibleObjects() const {
+	return isOpen ? 1 + totalChildrenCount : 1;
+}
+
+void SetObjectListTreeNode::AddChild(SetObjectListTreeNode&& child) {
+	child.parent = this;
+	UpdateTotalChildrenCount(child.GetTotalVisibleObjects());
+	children.push_back(std::move(child));
+}
+
+void SetObjectListTreeNode::UpdateTotalChildrenCount(int difference) {
+	totalChildrenCount += difference;
+
+	if (parent)
+		parent->UpdateTotalChildrenCount(difference);
 }
 
 SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }
 {
 }
 
-void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode* node) {
+void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startIdx, int count) {
 	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-	if (node->type == SetObjectListTreeNode::Type::OBJECT && levelEditor.focusedObject == node->objectInfo.object)
+	if (node.type == SetObjectListTreeNode::Type::OBJECT && levelEditor.focusedObject == node.info.object.object)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
-	if (node->children.size() != 0) {
-		auto isOpen = ImGui::TreeNodeEx(node, nodeflags, "%s", node->GetLabel());
+	if (node.children.size() != 0) {
+		if (startIdx < 1)
+			count--;
 
-		if (node->type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
-			levelEditor.focusedObject = node->objectInfo.object;
+		startIdx = std::max(0, startIdx - 1);
+
+		// If the header would have fallen off the screen because we're scrolled down too far, we replace the
+		// first real displayed element with the header. We then let it take an index to account for this.
+		if (startIdx != 0) {
+			count--;
+			startIdx++;
+		}
+
+		ImGui::SetNextItemOpen(node.isOpen);
+		auto isOpen = ImGui::TreeNodeEx(&node, nodeflags, "%s", node.GetLabel());
+		node.SetIsOpen(isOpen);
+
+		if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
+			levelEditor.focusedObject = node.info.object.object;
 
 		if (isOpen) {
-			for (SetObjectListTreeNode* child : node->children) {
-				RenderObjectTreeNode(child);
+			for (SetObjectListTreeNode& child : node.children) {
+				if (count <= 0)
+					break;
+
+				if (startIdx < child.GetTotalVisibleObjects()) {
+					RenderObjectTreeNode(child, startIdx, count);
+
+					count -= child.GetTotalVisibleObjects() - startIdx;
+				}
+
+				startIdx = std::max(0, startIdx - child.GetTotalVisibleObjects());
 			}
 			ImGui::TreePop();
 		}
 	}
 	else {
-		ImGui::TreeNodeEx(node, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", node->GetLabel());
+		ImGui::TreeNodeEx(&node, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", node.GetLabel());
 
-		if (node->type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
-			levelEditor.focusedObject = node->objectInfo.object;
+		if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
+			levelEditor.focusedObject = node.info.object.object;
+	}
+	if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::BeginDragDropSource()) {
+		ObjectData* obj = node.info.object.object;
+		ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));
+		ImGui::EndDragDropSource();
+	}
+	if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
+			ObjectData* parent = node.info.object.object;
+			ObjectData* child = *static_cast<ObjectData**>(payload->Data);
+
+			if (parent != child) {
+				Eigen::Transform<float, 3, Eigen::Affine> parentAbsoluteTransform{};
+				Eigen::Transform<float, 3, Eigen::Affine> childAbsoluteTransform{};
+
+				parentAbsoluteTransform.fromPositionOrientationScale(
+					parent->transform.position,
+					Eigen::AngleAxisf(parent->transform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(parent->transform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(parent->transform.rotation[2], Eigen::Vector3f::UnitZ()),
+					csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
+				);
+
+				childAbsoluteTransform.fromPositionOrientationScale(
+					child->transform.position,
+					Eigen::AngleAxisf(child->transform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(child->transform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(child->transform.rotation[2], Eigen::Vector3f::UnitZ()),
+					csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
+				);
+
+				Eigen::Transform<float, 3, Eigen::Affine> localTransform = parentAbsoluteTransform.inverse() * childAbsoluteTransform;
+
+				Eigen::Matrix3f localRotation;
+				Eigen::Matrix3f localScaling;
+
+				localTransform.computeRotationScaling(&localRotation, &localScaling);
+
+				child->localTransform.position = { localTransform.translation() };
+				auto localEuler = localRotation.eulerAngles(1, 0, 2);
+				child->localTransform.rotation = { localEuler[1], localEuler[0], localEuler[2] };
+			}
+		}
+		ImGui::EndDragDropTarget();
 	}
 }
 
@@ -83,8 +178,7 @@ void SetObjectList::Render() {
 		int i = 0;
 		for (auto* chunk : objWorld->GetWorldChunks()) {
 			if (chunk == levelEditor.focusedChunk)
-				snprintf(chunkid, sizeof(chunkid), "Chunk %d", i);
-			i++;
+				snprintf(chunkid, sizeof(chunkid), "Chunk %d", i++);
 		}
 
 		if (ImGui::BeginCombo("Chunk to be edited", chunkid)) {
@@ -99,50 +193,70 @@ void SetObjectList::Render() {
 			i = 0;
 			for (auto* chunk : objWorld->GetWorldChunks()) {
 				bool is_selected = levelEditor.focusedChunk == chunk;
-				snprintf(chunkid, sizeof(chunkid), "Chunk %d", i);
+				snprintf(chunkid, sizeof(chunkid), "Chunk %d", i++);
 
 				if (ImGui::Selectable(chunkid, is_selected))
 					levelEditor.SetFocusedChunk(chunk);
 
 				if (is_selected)
 					ImGui::SetItemDefaultFocus();
-				i++;
 			}
 			ImGui::EndCombo();
 		}
 
-		if (levelEditor.focusedChunk && ImGui::BeginTabBar("Object list views")) {
+		if (levelEditor.focusedChunk && &*tree && ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
 				if (ImGui::BeginChild("Content")) {
-					for (SetObjectListTreeNode* child : tree->children) {
-						RenderObjectTreeNode(child);
+					ImGuiListClipper clipper;
+					clipper.Begin(tree->GetTotalVisibleObjects(), ImGui::GetTextLineHeight());
+
+					while (clipper.Step()) {
+						int startIdx = clipper.DisplayStart;
+						int count = clipper.DisplayEnd - clipper.DisplayStart;
+
+						for (SetObjectListTreeNode& child : tree->children) {
+							if (count <= 0)
+								break;
+
+							if (startIdx < child.GetTotalVisibleObjects()) {
+								RenderObjectTreeNode(child, startIdx, count);
+
+								count -= child.GetTotalVisibleObjects() - startIdx;
+							}
+
+							startIdx = std::max(0, startIdx - child.GetTotalVisibleObjects());
+						}
 					}
+
+					clipper.End();
 				}
 				ImGui::EndChild();
 				ImGui::EndTabItem();
 			}
 			if (ImGui::BeginTabItem("Layer view")) {
 				if (ImGui::BeginChild("Content")) {
-					for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
-						ImGui::PushID(layer);
-						if (ImGui::TreeNode(layer, "%s", layer->GetName())) {
-							for (SetObjectListTreeNode* child : treesByLayer.GetValueOrFallback(layer, nullptr)->children) {
-								RenderObjectTreeNode(child);
-							}
-							ImGui::TreePop();
-						}
+					ImGuiListClipper clipper;
+					clipper.Begin(layerTree->GetTotalVisibleObjects(), ImGui::GetTextLineHeight());
 
-						if (ImGui::BeginPopupContextItem("Layer context menu")) {
-							if (ImGui::MenuItem("Load from file...")) {
-								ResourceBrowser::ShowLoadResourceDialog(layer->GetResource());
+					while (clipper.Step()) {
+						int startIdx = clipper.DisplayStart;
+						int count = clipper.DisplayEnd - clipper.DisplayStart;
+
+						for (SetObjectListTreeNode& child : layerTree->children) {
+							if (count <= 0)
+								break;
+
+							if (startIdx < child.GetTotalVisibleObjects()) {
+								RenderObjectTreeNode(child, startIdx, count);
+
+								count -= child.GetTotalVisibleObjects() - startIdx;
 							}
-							if (ImGui::MenuItem("Export...")) {
-								ResourceBrowser::ShowExportResourceDialog(layer->GetResource());
-							}
-							ImGui::EndPopup();
+
+							startIdx = std::max(0, startIdx - child.GetTotalVisibleObjects());
 						}
-						ImGui::PopID();
 					}
+
+					clipper.End();
 				}
 				ImGui::EndChild();
 				ImGui::EndTabItem();
@@ -153,39 +267,81 @@ void SetObjectList::Render() {
 	ImGui::End();
 }
 
-SetObjectListTreeNode* SetObjectList::BuildTreeNode(ObjectData* objData) {
-	auto objId = objData == nullptr ? ObjectId{ 0, 0 } : objData->id;
-	auto* node = SetObjectListTreeNode::CreateObjectNode(GetAllocator(), objData);
+size_t count = 0;
 
-	for (auto* layer : levelEditor.focusedChunk->GetLayers())
-		for (auto* object : layer->GetResource()->GetObjects())
-			if (object->parentID == objId)
-				node->children.push_back(BuildTreeNode(object));
+SetObjectListTreeNode SetObjectList::BuildTreeNode(csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>>& childMaps, ObjectData* objData) {
+	auto objId = objData == nullptr ? ObjectId{ 0, 0 } : objData->id;
+	auto node = SetObjectListTreeNode::CreateObjectNode(GetAllocator(), objData);
+
+	for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
+		auto childLayerMapIt = childMaps.Find(layer);
+		auto childMapIt = childLayerMapIt->Find(objId);
+
+		if (childMapIt == childLayerMapIt->end())
+			continue;
+
+		for (auto* object : *childMapIt)
+			node.AddChild(BuildTreeNode(childMaps, object));
+	}
 
 	return node;
 }
 
-SetObjectListTreeNode* SetObjectList::BuildSingleLayerTreeNode(hh::game::ObjectWorldChunkLayer* layer, ObjectData* objData) {
-	auto objId = objData == nullptr ? ObjectId{ 0, 0 } : objData->id;
-	auto* node = SetObjectListTreeNode::CreateObjectNode(GetAllocator(), objData);
+SetObjectListTreeNode SetObjectList::BuildSingleLayerTreeNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer, ObjectData* objData) {
+	auto node = SetObjectListTreeNode::CreateObjectNode(GetAllocator(), objData);
 
-	for (auto* object : layer->GetResource()->GetObjects())
-		if (object->parentID == objId)
-			node->children.push_back(BuildSingleLayerTreeNode(layer, object));
+	auto childMapIt = childMap.Find(objData->id);
+
+	if (childMapIt == childMap.end())
+		return node;
+
+	for (auto* object : *childMapIt)
+		node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
+
+	return node;
+}
+
+SetObjectListTreeNode SetObjectList::BuildSingleLayerRootNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer) {
+	auto node = SetObjectListTreeNode::CreateGroupNode(GetAllocator(), layer->GetName());
+
+	auto childMapIt = childMap.Find(ObjectId{ 0, 0 });
+
+	if (childMapIt == childMap.end())
+		return node;
+
+	for (auto* object : *childMapIt)
+		node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
 
 	return node;
 }
 
 void SetObjectList::RebuildTree() {
-	if (levelEditor.focusedChunk == nullptr) {
-		tree = nullptr;
-		treesByLayer.clear();
-	}
-	else {
-		tree = BuildTreeNode(nullptr);
+	tree = nullptr;
+	layerTree = nullptr;
+
+	if (levelEditor.focusedChunk != nullptr) {
+		csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>> childMaps{ GetAllocator() };
+
+		for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
+			auto& childMap = *childMaps.Insert(layer, { GetAllocator() });
+
+			for (auto* object : layer->GetResource()->GetObjects()) {
+				auto parentIt = childMap.Find(object->parentID);
+
+				if (parentIt == childMap.end())
+					parentIt = childMap.Insert(object->parentID, { GetAllocator() });
+
+				parentIt->push_back(object);
+			}
+		}
+
+		tree = new (GetAllocator()) SetObjectListTreeNode(BuildTreeNode(childMaps, nullptr));
+		layerTree = new (GetAllocator()) SetObjectListTreeNode(SetObjectListTreeNode::CreateGroupNode(GetAllocator(), "ROOT"));
 
 		for (auto* layer : levelEditor.focusedChunk->GetLayers())
-			treesByLayer.Insert(layer, BuildSingleLayerTreeNode(layer, nullptr));
+			layerTree->AddChild(BuildSingleLayerRootNode(*childMaps.Find(layer), layer));
+
+		tree->SetIsOpen(true);
+		layerTree->SetIsOpen(true);
 	}
-	std::vector<int> v;
 }

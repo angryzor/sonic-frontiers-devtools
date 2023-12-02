@@ -45,6 +45,7 @@
     <ClInclude Include="serialization\resource-rfls\ResourceRfls.h" />
     <ClInclude Include="operation-modes\LevelEditor\ObjectLibrary.h" />
     <ClInclude Include="common\ReflectiveOperations.h" />
+    <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -93,6 +94,7 @@
     <ClCompile Include="serialization\resource-rfls\ResObjectWorld.cpp" />
     <ClCompile Include="operation-modes\LevelEditor\ObjectLibrary.cpp" />
     <ClCompile Include="common\ReflectiveOperations.cpp" />
+    <ClCompile Include="GOCVisualDebugDrawRenderer.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

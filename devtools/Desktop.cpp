@@ -41,7 +41,29 @@ void Desktop::Render() {
 	GameServiceInspector::Render();
 	ResourceBrowser::RenderDialogs();
 
-	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
+	auto* ahm = app::fnd::AppHeapManager::GetInstance();
+
+	ImGui::Text("Resident");
+	ImGui::Text("Live allocations: %d", ahm->residentAllocator.heap.liveAllocations);
+	ImGui::Text("Total allocations: %d", ahm->residentAllocator.heap.totalAllocations);
+	ImGui::Text("Block count: %d", ahm->residentAllocator.heap.blockCount);
+
+	ImGui::Text("Cyloop");
+	ImGui::Text("Live allocations: %d", ahm->cyloopAllocator.heap.liveAllocations);
+	ImGui::Text("Total allocations: %d", ahm->cyloopAllocator.heap.totalAllocations);
+	ImGui::Text("Block count: %d", ahm->cyloopAllocator.heap.blockCount);
+
+	ImGui::Text("Heightfield");
+	ImGui::Text("Live allocations: %d", ahm->heightfieldAllocator.heap.liveAllocations);
+	ImGui::Text("Total allocations: %d", ahm->heightfieldAllocator.heap.totalAllocations);
+	ImGui::Text("Block count: %d", ahm->heightfieldAllocator.heap.blockCount);
+
+	ImGui::Text("Needle");
+	ImGui::Text("Live allocations: %d", ahm->needleAllocator->heap.liveAllocations);
+	ImGui::Text("Total allocations: %d", ahm->needleAllocator->heap.totalAllocations);
+	ImGui::Text("Block count: %d", ahm->needleAllocator->heap.blockCount);
+
+	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
 	for (auto& window : windows) {
 		if (!window->Render())

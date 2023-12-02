@@ -259,6 +259,6 @@ ReflectionSerializer::ReflectionSerializer(csl::fnd::IAllocator* allocator, hl::
 
 void ReflectionSerializer::SerializeToFile(const hl::nchar* filename, void* obj, const RflClass& rflClass) {
 	hl::file_stream stream{ filename, hl::file::mode::write };
-	ReflectionSerializer serializer{ GetTempAllocator(GetAllocatorSystem()), stream };
+	ReflectionSerializer serializer{ MemoryRouter::GetTempAllocator(), stream };
 	serializer.Write(obj, rflClass);
 }

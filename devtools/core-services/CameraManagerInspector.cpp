@@ -28,7 +28,7 @@ void CameraManagerInspector::RenderContents()
 		for (int i = 0; i < cameraManager->GetCameraCount(); i++) {
 			ImGui::PushID(i);
 			if (ImGui::TreeNode("Camera stack", "Camera stack %d", i)) {
-				csl::ut::MoveArray<CameraComponent*> components{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
+				csl::ut::MoveArray<CameraComponent*> components{ hh::fnd::MemoryRouter::GetTempAllocator() };
 				cameraManager->GetComponents(i, components);
 
 				if (components.size() > 0) {

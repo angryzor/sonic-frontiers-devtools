@@ -229,8 +229,6 @@ void LevelEditor::SpawnObject() {
 
 	resource->AddObject(objData);
 	focusedChunk->AddWorldObjectStatus(objData, true, 0);
-	//auto idx = focusedChunk->GetObjectIndexById(objData->id);
-	//focusedChunk->SpawnByIndex(idx, nullptr);
 	focusedObject = objData;
 }
 

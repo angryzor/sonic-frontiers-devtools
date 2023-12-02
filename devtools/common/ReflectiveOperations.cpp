@@ -1,6 +1,6 @@
-//#include "../Pch.h"
-//#include "ReflectiveOperations.h"
-//
+#include "../Pch.h"
+#include "ReflectiveOperations.h"
+
 //using namespace hh::fnd;
 //
 //void* ReflectiveOperations::InitializeObject(csl::fnd::IAllocator* allocator, const hh::fnd::RflClass* rflClass) {
