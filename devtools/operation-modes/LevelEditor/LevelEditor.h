@@ -30,4 +30,9 @@ public:
     void SetFocusedChunk(hh::game::ObjectWorldChunk* chunk);
     void SpawnObject();
     void DeleteFocusedObject();
+
+    void HandleObjectSelection();
+    void HandleObjectManipulation();
+    void CheckGizmoHotkeys();
+    void CheckSelectionHotkeys();
 };

@@ -46,6 +46,8 @@
     <ClInclude Include="operation-modes\LevelEditor\ObjectLibrary.h" />
     <ClInclude Include="common\ReflectiveOperations.h" />
     <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
+    <ClInclude Include="ObjectDataUtils.h" />
+    <ClInclude Include="MathUtils.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -95,6 +97,8 @@
     <ClCompile Include="operation-modes\LevelEditor\ObjectLibrary.cpp" />
     <ClCompile Include="common\ReflectiveOperations.cpp" />
     <ClCompile Include="GOCVisualDebugDrawRenderer.cpp" />
+    <ClCompile Include="ObjectDataUtils.cpp" />
+    <ClCompile Include="MathUtils.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

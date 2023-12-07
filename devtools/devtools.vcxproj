@@ -209,6 +209,8 @@
     <ClInclude Include="GameServiceInspector.h" />
     <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="ObjectDataUtils.h" />
     <ClInclude Include="operation-modes\LevelEditor\LevelEditor.h" />
     <ClInclude Include="operation-modes\LevelEditor\ObjectDataInspector.h" />
     <ClInclude Include="operation-modes\LevelEditor\ObjectLibrary.h" />
@@ -267,7 +269,9 @@
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
     <ClCompile Include="Library.cpp" />
+    <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="Mod.cpp" />
+    <ClCompile Include="ObjectDataUtils.cpp" />
     <ClCompile Include="operation-modes\LevelEditor\LevelEditor.cpp" />
     <ClCompile Include="operation-modes\LevelEditor\ObjectDataInspector.cpp" />
     <ClCompile Include="operation-modes\LevelEditor\ObjectLibrary.cpp" />

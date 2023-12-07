@@ -51,7 +51,7 @@ int MyResizeCallback(ImGuiInputTextCallbackData* data)
 	return 0;
 }
 
-// This is completely nonstandard hack around the fact that these things don't have resizeable buffers
+// This is a completely nonstandard hack around the fact that these things don't have resizeable buffers
 // (instead they are always allocated to the exact string length) but it shouldn't cause issues.
 class ResizeableVariableString : public csl::ut::VariableString {
 	static char dummy[1];
@@ -108,9 +108,7 @@ void InputObjectId(const char* label, hh::game::ObjectId* id) {
 	auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
 
 	if (objWorld == nullptr) {
-		char pureIdName[200];
-		snprintf(pureIdName, sizeof(pureIdName), "%016zd%016zd", id->groupId, id->objectId);
-		ImGui::Text("%s: %s", label, pureIdName);
+		ImGui::Text("%s: %016zd%016zd", label, id->groupId, id->objectId);
 	}
 	else {
 		const char* name = "<unknown>";

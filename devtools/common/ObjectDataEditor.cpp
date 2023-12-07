@@ -2,6 +2,7 @@
 #include "ObjectDataEditor.h"
 #include "ReflectionEditor.h"
 #include "../common/SimpleWidgets.h"
+#include "../ObjectDataUtils.h"
 
 using namespace hh::game;
 
@@ -47,53 +48,17 @@ void ObjectDataEditor::Render(ObjectData* obj)
 		ImGui::EndTable();
 	}
 
-	csl::math::Position localPosition{ obj->localTransform.position };
-	csl::math::Position localRotation{ obj->localTransform.rotation };
+	hh::game::ObjectTransformData localTransformData{ obj->localTransform };
 
 	ImGui::SeparatorText("Local transform");
 	ImGui::PushID("Local Transform");
-	ImGui::DragFloat3("Position", localPosition.data(), 0.05f);
-	ImGui::DragFloat3("Rotation", localRotation.data(), 0.005f);
+	ImGui::DragFloat3("Position", localTransformData.position.data(), 0.05f);
+	ImGui::DragFloat3("Rotation", localTransformData.rotation.data(), 0.005f);
 	ImGui::PopID();
-	
-	if (localPosition != obj->localTransform.position || localRotation != obj->localTransform.rotation) {
-		Eigen::Transform<float, 3, Eigen::Affine> absoluteTransform{};
-		Eigen::Transform<float, 3, Eigen::Affine> localTransform{};
-		Eigen::Transform<float, 3, Eigen::Affine> updatedLocalTransform{};
 
-		absoluteTransform.fromPositionOrientationScale(
-			obj->transform.position,
-			Eigen::AngleAxisf(obj->transform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(obj->transform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(obj->transform.rotation[2], Eigen::Vector3f::UnitZ()),
-			csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
-		);
+	if (localTransformData != obj->localTransform)
+		UpdateLocalTransform(ObjectTransformDataToAffine3f(localTransformData), *obj);
 
-		localTransform.fromPositionOrientationScale(
-			localPosition,
-			Eigen::AngleAxisf(localRotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(localRotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(localRotation[2], Eigen::Vector3f::UnitZ()),
-			csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
-		);
-
-		updatedLocalTransform.fromPositionOrientationScale(
-			obj->localTransform.position,
-			Eigen::AngleAxisf(obj->localTransform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(obj->localTransform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(obj->localTransform.rotation[2], Eigen::Vector3f::UnitZ()),
-			csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
-		);
-
-		Eigen::Transform<float, 3, Eigen::Affine> parentTransform = absoluteTransform * localTransform.inverse();
-		Eigen::Transform<float, 3, Eigen::Affine> updatedAbsoluteTransform = parentTransform * updatedLocalTransform;
-
-		Eigen::Matrix3f updatedAbsoluteRotation;
-		Eigen::Matrix3f updatedAbsoluteScaling;
-
-		updatedAbsoluteTransform.computeRotationScaling(&updatedAbsoluteRotation, &updatedAbsoluteScaling);
-
-		obj->transform.position = { updatedAbsoluteTransform.translation() };
-		auto updatedAbsoluteEuler = updatedAbsoluteRotation.eulerAngles(1, 0, 2);
-		obj->transform.rotation = { updatedAbsoluteEuler[1], updatedAbsoluteEuler[0], updatedAbsoluteEuler[2] };
-		obj->localTransform.position = localPosition;
-		obj->localTransform.rotation = localRotation;
-	}
-	
 	ImGui::SeparatorText("Component configuration");
 
 	for (auto* componentConfig : obj->componentData) {

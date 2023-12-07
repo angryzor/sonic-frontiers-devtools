@@ -16,4 +16,10 @@ public:
     hh::fnd::Reference<hh::game::GameObject> focusedObject{};
 
     virtual void Render() override;
+
+    void DeleteFocusedObject();
+    void HandleObjectSelection();
+    void HandleObjectManipulation();
+    void CheckGizmoHotkeys();
+    void CheckSelectionHotkeys();
 };

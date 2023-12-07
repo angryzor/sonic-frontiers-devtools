@@ -24,9 +24,8 @@ bool StandaloneWindow::Render() {
 
 	bool shouldStayOpen{ true };
 
-	if (ImGui::Begin(title.c_str(), &shouldStayOpen, windowFlags)) {
+	if (ImGui::Begin(title.c_str(), &shouldStayOpen, windowFlags))
 		RenderContents();
-	}
 	ImGui::End();
 
 	return shouldStayOpen;
