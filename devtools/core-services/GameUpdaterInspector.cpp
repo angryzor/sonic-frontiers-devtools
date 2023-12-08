@@ -40,7 +40,7 @@ void GameUpdaterInspector::RenderContents()
 	//}
 
 	for (int i = 0; i < 32; i++) {
-		ImGui::Text("updateInfo for layer %d: deltaTime (s): %f, total time (ms): %d, unk2: %x, unk3: %x", i, gameUpdater.unk8[i].deltaTime, gameUpdater.unk8[i].currentFrame, gameUpdater.unk8[i].unk2, gameUpdater.unk8[i].unk3);
+		ImGui::Text("updateInfo for layer %d: deltaTime (s): %f, total time (ms): %d, unk2: %x, unk3: %x", i, gameUpdater.updateInfos[i].deltaTime, gameUpdater.updateInfos[i].currentFrame, gameUpdater.updateInfos[i].unk2, gameUpdater.updateInfos[i].unk3);
 	}
 
 	//float deltaTimes[32];

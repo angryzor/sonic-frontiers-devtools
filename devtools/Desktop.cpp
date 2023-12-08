@@ -41,7 +41,7 @@ void Desktop::Render() {
 	GameServiceInspector::Render();
 	ResourceBrowser::RenderDialogs();
 
-	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::GetTempAllocator(hh::fnd::GetAllocatorSystem()) };
+	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
 	for (auto& window : windows) {
 		if (!window->Render())
