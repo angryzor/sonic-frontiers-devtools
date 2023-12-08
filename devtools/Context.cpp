@@ -39,7 +39,7 @@ bool Context::alreadyRendering = false;
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-HOOK(LRESULT, __fastcall, WndProcHook, 0x140D66440, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+HOOK(LRESULT, __fastcall, WndProcHook, 0x140D68F80, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_KEYDOWN && wParam == VK_F8) {
 		Context::visible = !Context::visible;
@@ -95,7 +95,7 @@ VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, ResizeBuffers, UINT BufferCount, UI
 	return originalIDXGISwapChainResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 }
 
-HOOK(void*, __fastcall, SwapChainHook, 0x155B35CA0, void* in_pThis, IDXGISwapChain* in_pSwapChain)
+HOOK(void*, __fastcall, SwapChainHook, 0x155D23F80, void* in_pThis, IDXGISwapChain* in_pSwapChain)
 {
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, Present, 8);
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, ResizeBuffers, 13);
@@ -103,7 +103,7 @@ HOOK(void*, __fastcall, SwapChainHook, 0x155B35CA0, void* in_pThis, IDXGISwapCha
 	return originalSwapChainHook(in_pThis, in_pSwapChain);
 }
 
-HOOK(void, __fastcall, MouseHookUpdate, 0x140F143C0, hh::hid::MouseWin32* a1, float a2)
+HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, float a2)
 {
 	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
 		originalMouseHookUpdate(a1, a2);
