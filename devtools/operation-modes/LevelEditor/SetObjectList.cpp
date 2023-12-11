@@ -4,6 +4,7 @@
 #include "../../common/Icons.h"
 #include "../../imgui/ImGuiFileDialog.h"
 #include "../../ResourceBrowser.h"
+#include "../../ObjectDataUtils.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -47,6 +48,14 @@ void SetObjectListTreeNode::SetIsOpen(bool value) {
 		parent->UpdateTotalChildrenCount(value ? totalChildrenCount : -totalChildrenCount);
 }
 
+bool SetObjectListTreeNode::RenderTreeNode(ImGuiTreeNodeFlags nodeflags) const
+{
+	if (type == SetObjectListTreeNode::Type::OBJECT)
+		return ImGui::TreeNodeEx(info.object.object, nodeflags, "%s", info.object.object->name.c_str());
+	else
+		return ImGui::TreeNodeEx(info.group.label, nodeflags, "%s", info.group.label);
+}
+
 int SetObjectListTreeNode::GetTotalVisibleObjects() const {
 	return isOpen ? 1 + totalChildrenCount : 1;
 }
@@ -88,7 +97,7 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startI
 		}
 
 		ImGui::SetNextItemOpen(node.isOpen);
-		auto isOpen = ImGui::TreeNodeEx(&node, nodeflags, "%s", node.GetLabel());
+		auto isOpen = node.RenderTreeNode(nodeflags);
 		node.SetIsOpen(isOpen);
 
 		if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
@@ -111,7 +120,7 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startI
 		}
 	}
 	else {
-		ImGui::TreeNodeEx(&node, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", node.GetLabel());
+		node.RenderTreeNode(nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 
 		if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
 			levelEditor.focusedObject = node.info.object.object;
@@ -127,31 +136,21 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startI
 			ObjectData* child = *static_cast<ObjectData**>(payload->Data);
 
 			if (parent != child) {
-				Eigen::Transform<float, 3, Eigen::Affine> parentAbsoluteTransform{};
-				Eigen::Transform<float, 3, Eigen::Affine> childAbsoluteTransform{};
+				auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
+				auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
 
-				parentAbsoluteTransform.fromPositionOrientationScale(
-					parent->transform.position,
-					Eigen::AngleAxisf(parent->transform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(parent->transform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(parent->transform.rotation[2], Eigen::Vector3f::UnitZ()),
-					csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
-				);
+				child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+				child->parentID = parent->id;
 
-				childAbsoluteTransform.fromPositionOrientationScale(
-					child->transform.position,
-					Eigen::AngleAxisf(child->transform.rotation[1], Eigen::Vector3f::UnitY()) * Eigen::AngleAxisf(child->transform.rotation[0], Eigen::Vector3f::UnitX()) * Eigen::AngleAxisf(child->transform.rotation[2], Eigen::Vector3f::UnitZ()),
-					csl::math::Vector3{ 1.0f, 1.0f, 1.0f }
-				);
+				RebuildTree();
 
-				Eigen::Transform<float, 3, Eigen::Affine> localTransform = parentAbsoluteTransform.inverse() * childAbsoluteTransform;
+				auto childStatus = levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(levelEditor.focusedObject->id);
+				auto childIdx = levelEditor.focusedChunk->GetObjectIndexById(levelEditor.focusedObject->id);
 
-				Eigen::Matrix3f localRotation;
-				Eigen::Matrix3f localScaling;
-
-				localTransform.computeRotationScaling(&localRotation, &localScaling);
-
-				child->localTransform.position = { localTransform.translation() };
-				auto localEuler = localRotation.eulerAngles(1, 0, 2);
-				child->localTransform.rotation = { localEuler[1], localEuler[0], localEuler[2] };
+				if (childStatus.objectData && childIdx != -1) {
+					levelEditor.focusedChunk->DespawnByIndex(childIdx);
+					childStatus.Restart();
+				}
 			}
 		}
 		ImGui::EndDragDropTarget();

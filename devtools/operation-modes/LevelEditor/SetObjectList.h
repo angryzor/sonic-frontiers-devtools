@@ -32,6 +32,7 @@ struct SetObjectListTreeNode : public hh::fnd::ReferencedObject {
 	SetObjectListTreeNode& operator=(SetObjectListTreeNode& other) = delete;
 	const char* GetLabel() const;
 	int GetTotalVisibleObjects() const;
+	bool RenderTreeNode(ImGuiTreeNodeFlags nodeflags) const;
 	void SetIsOpen(bool value);
 	void AddChild(SetObjectListTreeNode&& child);
 	void UpdateTotalChildrenCount(int difference);
