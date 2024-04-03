@@ -108,10 +108,13 @@ void InputObjectId(const char* label, hh::game::ObjectId* id) {
 	auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
 
 	if (objWorld == nullptr) {
-		ImGui::Text("%s: %016zd%016zd", label, id->groupId, id->objectId);
+		ImGui::Text("%s: %016zx%016zx", label, id->groupId, id->objectId);
 	}
 	else {
-		const char* name = "<unknown>";
+		char unkNameBuf[50];
+		sprintf_s(unkNameBuf, 50, "<%016zx%016zx>", id->groupId, id->objectId);
+
+		const char* name = unkNameBuf;
 
 		for (auto* chunk : objWorld->GetWorldChunks()) {
 			int idx = chunk->GetObjectIndexById(*id);

@@ -70,27 +70,27 @@ Desktop::~Desktop()
 	delete operationMode;
 }
 
-bool Desktop::IsPickerMouseDown() const
-{
-	return physicsPicker->mouseDown;
-}
+//bool Desktop::IsPickerMouseDown() const
+//{
+//	return physicsPicker->mouseDown;
+//}
 
 bool Desktop::IsPickerMouseReleased() const
 {
 	return prevPhysicsPickerMouseDown && !physicsPicker->mouseDown;
 }
 
-bool Desktop::IsPickerMouseClicked() const
-{
-	return !prevPhysicsPickerMouseDown && physicsPicker->mouseDown;
-}
+//bool Desktop::IsPickerMouseClicked() const
+//{
+//	return !prevPhysicsPickerMouseDown && physicsPicker->mouseDown;
+//}
 
 GameObject* Desktop::GetPickedObject() const {
 	return physicsViewerCtx->pickedObject.collider == nullptr ? nullptr : physicsViewerCtx->pickedObject.collider->GetOwnerGameObject();
 }
 
 csl::math::Vector3* Desktop::GetPickedLocation() const {
-	return physicsViewerCtx->pickedObject.collider == nullptr ? nullptr : &physicsViewerCtx->pickedObject.unk2; //&physicsPicker->mouseSpringAction.unk1;
+	return physicsViewerCtx->pickedObject.collider == nullptr ? nullptr : &physicsViewerCtx->pickedObject.unk2;
 }
 
 void Desktop::SwitchToObjectInspectionMode()

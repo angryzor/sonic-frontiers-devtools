@@ -158,7 +158,7 @@ void Context::init() {
 	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);// , ranges);
 	io.Fonts->Build();
 
-	auto allocator = hh::fnd::MemoryRouter::GetDebugAllocator();
+	auto allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 	Desktop::instance = new (allocator) Desktop(allocator);
 
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);

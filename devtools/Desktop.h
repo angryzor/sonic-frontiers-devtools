@@ -25,8 +25,8 @@ public:
     void Render();
     void AddStandaloneWindow(StandaloneWindow* window);
     void RemoveStandaloneWindow(StandaloneWindow* window);
-    bool IsPickerMouseDown() const;
-    bool IsPickerMouseClicked() const;
+    //bool IsPickerMouseDown() const;
+    //bool IsPickerMouseClicked() const;
     bool IsPickerMouseReleased() const;
     hh::game::GameObject* GetPickedObject() const;
     csl::math::Vector3* GetPickedLocation() const;
