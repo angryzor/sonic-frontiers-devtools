@@ -142,8 +142,6 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startI
 				child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
 				child->parentID = parent->id;
 
-				RebuildTree();
-
 				auto childStatus = levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(levelEditor.focusedObject->id);
 				auto childIdx = levelEditor.focusedChunk->GetObjectIndexById(levelEditor.focusedObject->id);
 
@@ -151,6 +149,8 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startI
 					levelEditor.focusedChunk->DespawnByIndex(childIdx);
 					childStatus.Restart();
 				}
+
+				InvalidateTree();
 			}
 		}
 		ImGui::EndDragDropTarget();
@@ -202,6 +202,9 @@ void SetObjectList::Render() {
 			}
 			ImGui::EndCombo();
 		}
+
+		if (dirty)
+			RebuildTree();
 
 		if (levelEditor.focusedChunk && &*tree && ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
@@ -315,6 +318,7 @@ SetObjectListTreeNode SetObjectList::BuildSingleLayerRootNode(ObjectMap<csl::ut:
 }
 
 void SetObjectList::RebuildTree() {
+	dirty = false;
 	tree = nullptr;
 	layerTree = nullptr;
 
@@ -343,4 +347,8 @@ void SetObjectList::RebuildTree() {
 		tree->SetIsOpen(true);
 		layerTree->SetIsOpen(true);
 	}
+}
+
+void SetObjectList::InvalidateTree() {
+	dirty = true;
 }

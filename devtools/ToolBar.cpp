@@ -7,6 +7,7 @@
 #include "core-services/GameUpdaterInspector.h"
 #include "core-services/GraphicsContextInspector.h"
 #include "core-services/CameraManagerInspector.h"
+#include "MemoryInspector.h"
 
 using namespace hh::game;
 
@@ -43,6 +44,8 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("CameraManager"))
 				new (Desktop::instance->GetAllocator()) CameraManagerInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("Memory"))
+				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
 			ImGui::EndMenu();
 		}
 

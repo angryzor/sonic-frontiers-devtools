@@ -114,12 +114,18 @@ HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, fl
 	}
 }
 
+HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::RenderingDevice** renderingDevice, hh::needle::RenderingDeviceContext** renderingDeviceContext, void* deviceCreationSetting, void** displaySwapDevice, unsigned int creationFlags)
+{
+	return originalCreateRenderingDeviceDX11(renderingDevice, renderingDeviceContext, deviceCreationSetting, displaySwapDevice, D3D11_CREATE_DEVICE_DEBUG);
+}
+
 void Context::install_hooks()
 {
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	INSTALL_HOOK(MouseHookUpdate);
-	//GOCVisualDebugDrawRenderer::InstallHooks();
+	//INSTALL_HOOK(CreateRenderingDeviceDX11);
+	GOCVisualDebugDrawRenderer::InstallHooks();
 }
 
 void Context::init() {
@@ -155,7 +161,7 @@ void Context::init() {
 	auto allocator = app::fnd::AppHeapManager::GetResidentAllocator();
 	Desktop::instance = new (allocator) Desktop(allocator);
 
-	//GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
+	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
@@ -179,8 +185,6 @@ void Context::update()
 
 	ImGui::NewFrame();
 	ImGuizmo::BeginFrame();
-
-	//GOCVisualDebugDrawRenderer::instance->Render();
 
 	//ImGui::PushFont(firaCode);
 	//ImGui::ShowDemoWindow();

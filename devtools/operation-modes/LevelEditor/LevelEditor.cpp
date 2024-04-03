@@ -57,7 +57,7 @@ void LevelEditor::HandleObjectSelection() {
 
 	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && placeTargetLayer && Desktop::instance->GetPickedLocation()) {
 		SpawnObject();
-		setObjectList.RebuildTree();
+		setObjectList.InvalidateTree();
 	}
 
 	CheckSelectionHotkeys();
@@ -127,7 +127,7 @@ void LevelEditor::CheckGizmoHotkeys() {
 void LevelEditor::CheckSelectionHotkeys() {
 	if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
 		DeleteFocusedObject();
-		setObjectList.RebuildTree();
+		setObjectList.InvalidateTree();
 	}
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
@@ -217,5 +217,5 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 		focusedChunk->ShutdownPendingObjects();
 		focusedChunk->Restart(true);
 	}
-	setObjectList.RebuildTree();
+	setObjectList.InvalidateTree();
 }

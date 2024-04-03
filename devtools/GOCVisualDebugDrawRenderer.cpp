@@ -1,12 +1,17 @@
 #include "Pch.h"
 #include "GOCVisualDebugDrawRenderer.h"
+#include <d3dcompiler.h>
+#ifdef _MSC_VER
+#pragma comment(lib, "d3dcompiler")
+#endif
 
 using namespace hh::game;
 using namespace hh::gfx;
 
 class GOCMyVisualDebugDraw : public GOCVisualDebugDraw {
 public:
-	GOCVisualDebugDraw::DebugGeometryDefinition def;
+	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> geometry;
+	//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> fillGeometry;
 	csl::ut::Color<uint8_t> color{ 0, 0, 0, 0 };
 	bool hasGeometry;
 
@@ -22,7 +27,11 @@ GOCMyVisualDebugDraw* GOCMyVisualDebugDraw::Create(csl::fnd::IAllocator* allocat
 	return new (std::align_val_t(alignof(GOCMyVisualDebugDraw)), allocator) GOCMyVisualDebugDraw(allocator);
 }
 
-GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator) : GOCVisualDebugDraw{ allocator }, def{ allocator } {
+GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator)
+	: GOCVisualDebugDraw{ allocator }
+	, geometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
+	//, fillGeometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
+{
 }
 
 void GOCMyVisualDebugDraw::OnGOCEvent(GOCEvent event, GameObject& ownerGameObject, void* data) {
@@ -35,18 +44,20 @@ void GOCMyVisualDebugDraw::OnGOCEvent(GOCEvent event, GameObject& ownerGameObjec
 }
 
 void GOCMyVisualDebugDraw::InstallHooks() {
-	WRITE_MEMORY(0x143CE89E8, void*, &GOCMyVisualDebugDraw::Create);
+	WRITE_MEMORY(0x143CECB00 + offsetof(hh::game::GOComponentClass, instantiator), void*, &GOCMyVisualDebugDraw::Create);
 }
 
-HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x14F973750, GOCMyVisualDebugDraw* gocVisual, const GOCVisualDebugDraw::SetupInfo& setupInfo) {
+HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140D06320, GOCMyVisualDebugDraw* gocVisual, const GOCVisualDebugDraw::SetupInfo& setupInfo) {
 	bool ret = originalVisualDebugDrawSetup(gocVisual, setupInfo);
 
-	if (setupInfo.geomDef != nullptr) {
-		for (auto& vertex : setupInfo.geomDef->vertices)
-			gocVisual->def.vertices.push_back(vertex);
+	if (setupInfo.geometry != nullptr) {
+		gocVisual->geometry->InitializeEdge(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
+		gocVisual->geometry->SetColor(setupInfo.color);
 
-		for (auto& triangle : setupInfo.geomDef->triangles)
-			gocVisual->def.triangles.push_back(triangle);
+		//csl::ut::Color8 fillColor{ setupInfo.color };
+		//fillColor.a = 50;
+		//gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
+		//gocVisual->fillGeometry->SetColor(setupInfo.color);
 
 		gocVisual->hasGeometry = true;
 	}
@@ -63,8 +74,17 @@ void GOCVisualDebugDrawRenderer::InstallHooks() {
 	GOCMyVisualDebugDraw::InstallHooks();
 }
 
-GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true }
+GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator)
+	: ReferencedObject{ allocator, true }
+	, memCtx{ true }
+	, unk2{ &memCtx }
+	, unk3{ &unk2 }
+	//, sharedDDRes{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystem::CreateSharedDebugDrawResource))(allocator) }
+	, drawContext{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystem::CreateDrawContext))(allocator, &unk3) }
+	, renderable{ new (allocator) Renderable(allocator, this) }
 {
+	renderable->name = "DevTools Debug Overlay";
+	hh::gfnd::GraphicsContext::GetInstance()->AddRenderableToViewport(renderable, 7);
 }
 
 void GOCVisualDebugDrawRenderer::AddGOC(GOCMyVisualDebugDraw* goc) {
@@ -75,8 +95,11 @@ void GOCVisualDebugDrawRenderer::RemoveGOC(GOCMyVisualDebugDraw* goc) {
 	gocs.remove(gocs.find(goc));
 }
 
-void GOCVisualDebugDrawRenderer::Render() {
+void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderableParameter* renderableParameter) {
 	auto& io = ImGui::GetIO();
+
+	if (renderer->gocs.empty())
+		return;
 
 	auto* gameManager = hh::game::GameManager::GetInstance();
 	if (!gameManager)
@@ -86,46 +109,24 @@ void GOCVisualDebugDrawRenderer::Render() {
 	if (!camera)
 		return;
 
-	Eigen::Matrix4f cameraMat{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
+	renderer->drawContext->BeginScene(renderableParameter);
 
-	for (auto* goc : gocs) {
-		if ((goc->frame2->fullTransform.position - camera->viewportData.unk6).norm() > 300)
+	hh::gfnd::DrawContext::BeginDrawInfo bdi{};
+	memcpy(bdi.viewMatrix, camera->viewportData.viewMatrix.data(), sizeof(camera->viewportData.viewMatrix));
+	memcpy(bdi.projMatrix, camera->viewportData.projMatrix.data(), sizeof(camera->viewportData.projMatrix));
+	renderer->drawContext->BeginDraw(bdi);
+
+	for (auto& goc : renderer->gocs) {
+		if (!goc->hasGeometry)
 			continue;
 
-		uint32_t color = (goc->color.a << IM_COL32_A_SHIFT) | (goc->color.b << IM_COL32_B_SHIFT) | (goc->color.g << IM_COL32_G_SHIFT) | (goc->color.r << IM_COL32_R_SHIFT);
-		uint32_t fillColor = (16 << IM_COL32_A_SHIFT) | (goc->color.b << IM_COL32_B_SHIFT) | (goc->color.g << IM_COL32_G_SHIFT) | (goc->color.r << IM_COL32_R_SHIFT);
-
-		Eigen::Transform<float, 3, Eigen::Affine> absoluteTransform{};
-		absoluteTransform.fromPositionOrientationScale(goc->frame2->fullTransform.position, goc->frame2->fullTransform.rotation, goc->frame2->fullTransform.scale);
-
-		Eigen::Matrix4f totalMat{ cameraMat * absoluteTransform.matrix() };
-
-		for (auto& triangle : goc->def.triangles) {
-			Eigen::Vector4f hv1{ totalMat * goc->def.vertices[triangle.v1].homogeneous() };
-			Eigen::Vector4f hv2{ totalMat * goc->def.vertices[triangle.v2].homogeneous() };
-			Eigen::Vector4f hv3{ totalMat * goc->def.vertices[triangle.v3].homogeneous() };
-
-			// Very QnD cull on Z axis instead of proper clipping
-			if (hv1.z() <= 0 || hv1.z() > hv1.w() || hv2.z() <= 0 || hv2.z() > hv2.w() || hv3.z() <= 0 || hv3.z() > hv3.w())
-				continue;
-
-			Eigen::Vector4f v1{ hv1 * 0.5 / hv1.w() };
-			Eigen::Vector4f v2{ hv2 * 0.5 / hv2.w() };
-			Eigen::Vector4f v3{ hv3 * 0.5 / hv3.w() };
-
-			ImGui::GetBackgroundDrawList()->AddTriangleFilled(
-				ImVec2((v1.x() + 0.5f) * io.DisplaySize.x, (0.5f - v1.y()) * io.DisplaySize.y),
-				ImVec2((v2.x() + 0.5f) * io.DisplaySize.x, (0.5f - v2.y()) * io.DisplaySize.y),
-				ImVec2((v3.x() + 0.5f) * io.DisplaySize.x, (0.5f - v3.y()) * io.DisplaySize.y),
-				fillColor
-			);
-
-			ImGui::GetBackgroundDrawList()->AddTriangle(
-				ImVec2((v1.x() + 0.5f) * io.DisplaySize.x, (0.5f - v1.y()) * io.DisplaySize.y),
-				ImVec2((v2.x() + 0.5f) * io.DisplaySize.x, (0.5f - v2.y()) * io.DisplaySize.y),
-				ImVec2((v3.x() + 0.5f) * io.DisplaySize.x, (0.5f - v3.y()) * io.DisplaySize.y),
-				color
-			);
-		}
+		goc->geometry->Render(renderer->drawContext, goc->transformationMatrix);
 	}
+
+	renderer->drawContext->EndDraw();
+	renderer->drawContext->EndScene();
+}
+
+GOCVisualDebugDrawRenderer::Renderable::Renderable(csl::fnd::IAllocator* allocator, GOCVisualDebugDrawRenderer* renderer) : hh::gfnd::Renderable{ allocator }, renderer{ renderer }
+{
 }

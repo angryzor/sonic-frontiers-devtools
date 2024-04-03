@@ -45,12 +45,14 @@ class SetObjectList : public hh::fnd::BaseObject {
 	LevelEditor& levelEditor;
 	hh::fnd::Reference<SetObjectListTreeNode> tree;
 	hh::fnd::Reference<SetObjectListTreeNode> layerTree;
-public:
-	SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor);
-	void Render();
-	void RenderObjectTreeNode(SetObjectListTreeNode& obj, int startIdx, int endIdx);
+	bool dirty{ false };
 	SetObjectListTreeNode BuildTreeNode(csl::ut::PointerMap<hh::game::ObjectWorldChunkLayer*, hh::game::ObjectMap<csl::ut::MoveArray<hh::game::ObjectData*>>>& childMaps, hh::game::ObjectData* objData);
 	SetObjectListTreeNode BuildSingleLayerTreeNode(hh::game::ObjectMap<csl::ut::MoveArray<hh::game::ObjectData*>>& childMaps, hh::game::ObjectWorldChunkLayer* layer, hh::game::ObjectData* objData);
 	SetObjectListTreeNode BuildSingleLayerRootNode(hh::game::ObjectMap<csl::ut::MoveArray<hh::game::ObjectData*>>& childMaps, hh::game::ObjectWorldChunkLayer* layer);
 	void RebuildTree();
+public:
+	SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor);
+	void Render();
+	void RenderObjectTreeNode(SetObjectListTreeNode& obj, int startIdx, int endIdx);
+	void InvalidateTree();
 };

@@ -48,6 +48,7 @@
     <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
     <ClInclude Include="ObjectDataUtils.h" />
     <ClInclude Include="MathUtils.h" />
+    <ClInclude Include="MemoryInspector.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -99,6 +100,7 @@
     <ClCompile Include="GOCVisualDebugDrawRenderer.cpp" />
     <ClCompile Include="ObjectDataUtils.cpp" />
     <ClCompile Include="MathUtils.cpp" />
+    <ClCompile Include="MemoryInspector.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />
