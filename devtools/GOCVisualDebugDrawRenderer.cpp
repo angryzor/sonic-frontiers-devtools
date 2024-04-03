@@ -4,6 +4,7 @@
 #ifdef _MSC_VER
 #pragma comment(lib, "d3dcompiler")
 #endif
+#include "Desktop.h"
 
 using namespace hh::game;
 using namespace hh::gfx;
@@ -96,9 +97,7 @@ void GOCVisualDebugDrawRenderer::RemoveGOC(GOCMyVisualDebugDraw* goc) {
 }
 
 void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderableParameter* renderableParameter) {
-	auto& io = ImGui::GetIO();
-
-	if (renderer->gocs.empty())
+	if (!renderer->enabled || renderer->gocs.empty())
 		return;
 
 	auto* gameManager = hh::game::GameManager::GetInstance();

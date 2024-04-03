@@ -105,6 +105,7 @@ bool SetObjectListTreeNode::RenderTreeNode(ImGuiTreeNodeFlags nodeflags, SetObje
 	}
 
 	if (type == SetObjectListTreeNode::Type::LAYER) {
+		ImGui::PushID(GetID());
 		if (ImGui::BeginPopupContextItem("Layer context menu")) {
 			if (ImGui::MenuItem("Load from file..."))
 				ResourceBrowser::ShowLoadResourceDialog(info.layer.layer->GetResource());
@@ -114,6 +115,7 @@ bool SetObjectListTreeNode::RenderTreeNode(ImGuiTreeNodeFlags nodeflags, SetObje
 
 			ImGui::EndPopup();
 		}
+		ImGui::PopID();
 	}
 
 	return isOpen;

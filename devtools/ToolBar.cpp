@@ -8,6 +8,7 @@
 #include "core-services/GraphicsContextInspector.h"
 #include "core-services/CameraManagerInspector.h"
 #include "MemoryInspector.h"
+#include "GOCVisualDebugDrawRenderer.h"
 
 using namespace hh::game;
 
@@ -144,7 +145,11 @@ void ToolBar::Render() {
 
 		if (debugCameraLocked != tempDebugCameraLocked)
 			debugCameraMgr->GetCamera()->SetLocked(tempDebugCameraLocked);
+
+		ImGui::SameLine();
 	}
+
+	ImGui::Checkbox("Render debug visuals", &GOCVisualDebugDrawRenderer::instance->enabled);
 
 	ImGui::End();
 }

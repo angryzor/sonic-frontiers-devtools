@@ -14,6 +14,7 @@ class GOCVisualDebugDrawRenderer : public hh::fnd::ReferencedObject
 	hh::fnd::Reference<Renderable> renderable;
 	hh::fnd::Reference<hh::gfnd::SharedDebugDrawResource> sharedDDRes;
 public:
+	bool enabled{ false };
 	hh::needle::CScratchMemoryContext memCtx;
 	hh::gfnd::DrawContext::Unk2 unk2;
 	hh::gfnd::DrawContext::Unk3 unk3;
