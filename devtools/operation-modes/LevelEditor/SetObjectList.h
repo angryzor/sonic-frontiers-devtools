@@ -1,5 +1,6 @@
 #pragma once
 
+class SetObjectList;
 struct SetObjectListTreeNode : public hh::fnd::ReferencedObject {
 	enum class Type {
 		OBJECT,
@@ -22,26 +23,27 @@ struct SetObjectListTreeNode : public hh::fnd::ReferencedObject {
 	} info;
 
 	csl::ut::MoveArray<SetObjectListTreeNode> children;
-	bool isOpen{ false };
-	int totalChildrenCount{ 0 };
 	SetObjectListTreeNode* parent{};
 
 	SetObjectListTreeNode(csl::fnd::IAllocator* allocator);
 	SetObjectListTreeNode(SetObjectListTreeNode& other) = delete;
 	SetObjectListTreeNode(SetObjectListTreeNode&& other);
 	SetObjectListTreeNode& operator=(SetObjectListTreeNode& other) = delete;
+	const void* GetID() const;
 	const char* GetLabel() const;
 	int GetTotalVisibleObjects() const;
-	bool RenderTreeNode(ImGuiTreeNodeFlags nodeflags) const;
-	void SetIsOpen(bool value);
+	bool RenderTreeNode(ImGuiTreeNodeFlags nodeflags, SetObjectList& list) const;
+	void RenderChildren(SetObjectList& list, int startIdx, int count);
+	void Render(SetObjectList& list, int startIdx, int count);
 	void AddChild(SetObjectListTreeNode&& child);
-	void UpdateTotalChildrenCount(int difference);
 	static SetObjectListTreeNode CreateObjectNode(csl::fnd::IAllocator* allocator, hh::game::ObjectData* objData);
 	static SetObjectListTreeNode CreateGroupNode(csl::fnd::IAllocator* allocator, const char* label);
 };
 
 class LevelEditor;
 class SetObjectList : public hh::fnd::BaseObject {
+	friend struct SetObjectListTreeNode;
+
 	LevelEditor& levelEditor;
 	hh::fnd::Reference<SetObjectListTreeNode> tree;
 	hh::fnd::Reference<SetObjectListTreeNode> layerTree;

@@ -12,9 +12,16 @@ using namespace hh::game;
 SetObjectListTreeNode::SetObjectListTreeNode(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true }, children{ allocator }, info{ nullptr } {
 }
 
-SetObjectListTreeNode::SetObjectListTreeNode(SetObjectListTreeNode&& other) : ReferencedObject{ other.GetAllocator(), true }, type{ other.type }, info{ other.info }, children{ std::move(other.children) }, totalChildrenCount{ other.totalChildrenCount }, parent{ other.parent } {
+SetObjectListTreeNode::SetObjectListTreeNode(SetObjectListTreeNode&& other) : ReferencedObject{ other.GetAllocator(), true }, type{ other.type }, info{ other.info }, children{ std::move(other.children) }, parent{ other.parent } {
 	for (auto& child : children)
 		child.parent = this;
+}
+
+const void* SetObjectListTreeNode::GetID() const {
+	if (type == SetObjectListTreeNode::Type::OBJECT)
+		return info.object.object;
+	else
+		return info.group.label;
 }
 
 const char* SetObjectListTreeNode::GetLabel() const {
@@ -38,52 +45,74 @@ SetObjectListTreeNode SetObjectListTreeNode::CreateGroupNode(csl::fnd::IAllocato
 	return node;
 }
 
-void SetObjectListTreeNode::SetIsOpen(bool value) {
-	if (isOpen == value)
-		return;
-
-	isOpen = value;
-
-	if (parent)
-		parent->UpdateTotalChildrenCount(value ? totalChildrenCount : -totalChildrenCount);
-}
-
-bool SetObjectListTreeNode::RenderTreeNode(ImGuiTreeNodeFlags nodeflags) const
+bool SetObjectListTreeNode::RenderTreeNode(ImGuiTreeNodeFlags nodeflags, SetObjectList& list) const
 {
-	if (type == SetObjectListTreeNode::Type::OBJECT)
-		return ImGui::TreeNodeEx(info.object.object, nodeflags, "%s", info.object.object->name.c_str());
-	else
-		return ImGui::TreeNodeEx(info.group.label, nodeflags, "%s", info.group.label);
-}
-
-int SetObjectListTreeNode::GetTotalVisibleObjects() const {
-	return isOpen ? 1 + totalChildrenCount : 1;
-}
-
-void SetObjectListTreeNode::AddChild(SetObjectListTreeNode&& child) {
-	child.parent = this;
-	UpdateTotalChildrenCount(child.GetTotalVisibleObjects());
-	children.push_back(std::move(child));
-}
-
-void SetObjectListTreeNode::UpdateTotalChildrenCount(int difference) {
-	totalChildrenCount += difference;
-
-	if (parent)
-		parent->UpdateTotalChildrenCount(difference);
-}
-
-SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }
-{
-}
-
-void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startIdx, int count) {
-	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-
-	if (node.type == SetObjectListTreeNode::Type::OBJECT && levelEditor.focusedObject == node.info.object.object)
+	if (type == SetObjectListTreeNode::Type::OBJECT && list.levelEditor.focusedObject == info.object.object)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
-	if (node.children.size() != 0) {
+	bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
+
+	if (type == SetObjectListTreeNode::Type::OBJECT) {
+		if (ImGui::IsItemClicked())
+			list.levelEditor.focusedObject = info.object.object;
+
+		if (ImGui::BeginDragDropSource()) {
+			ObjectData* obj = info.object.object;
+			ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
+				ObjectData* parent = info.object.object;
+				ObjectData* child = *static_cast<ObjectData**>(payload->Data);
+
+				if (parent != child) {
+					auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
+					auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
+
+					child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+					child->parentID = parent->id;
+
+					auto childStatus = list.levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(list.levelEditor.focusedObject->id);
+					auto childIdx = list.levelEditor.focusedChunk->GetObjectIndexById(list.levelEditor.focusedObject->id);
+
+					if (childStatus.objectData && childIdx != -1) {
+						list.levelEditor.focusedChunk->DespawnByIndex(childIdx);
+						childStatus.Restart();
+					}
+
+					list.InvalidateTree();
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
+	}
+
+	return isOpen;
+}
+
+void SetObjectListTreeNode::RenderChildren(SetObjectList& list, int startIdx, int count) {
+	for (SetObjectListTreeNode& child : children) {
+		if (count <= 0)
+			break;
+
+		auto visibleChildCount = child.GetTotalVisibleObjects();
+
+		if (startIdx < visibleChildCount) {
+			child.Render(list, startIdx, count);
+
+			count -= visibleChildCount - startIdx;
+		}
+
+		startIdx = std::max(0, startIdx - visibleChildCount);
+	}
+}
+
+void SetObjectListTreeNode::Render(SetObjectList& list, int startIdx, int count) {
+	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+
+	if (children.size() != 0) {
 		if (startIdx < 1)
 			count--;
 
@@ -96,65 +125,32 @@ void SetObjectList::RenderObjectTreeNode(SetObjectListTreeNode& node, int startI
 			startIdx++;
 		}
 
-		ImGui::SetNextItemOpen(node.isOpen);
-		auto isOpen = node.RenderTreeNode(nodeflags);
-		node.SetIsOpen(isOpen);
-
-		if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
-			levelEditor.focusedObject = node.info.object.object;
-
-		if (isOpen) {
-			for (SetObjectListTreeNode& child : node.children) {
-				if (count <= 0)
-					break;
-
-				if (startIdx < child.GetTotalVisibleObjects()) {
-					RenderObjectTreeNode(child, startIdx, count);
-
-					count -= child.GetTotalVisibleObjects() - startIdx;
-				}
-
-				startIdx = std::max(0, startIdx - child.GetTotalVisibleObjects());
-			}
+		if (RenderTreeNode(nodeflags, list)) {
+			RenderChildren(list, startIdx, count);
 			ImGui::TreePop();
 		}
 	}
-	else {
-		node.RenderTreeNode(nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
+	else
+		RenderTreeNode(nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, list);
+}
 
-		if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::IsItemClicked())
-			levelEditor.focusedObject = node.info.object.object;
-	}
-	if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::BeginDragDropSource()) {
-		ObjectData* obj = node.info.object.object;
-		ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));
-		ImGui::EndDragDropSource();
-	}
-	if (node.type == SetObjectListTreeNode::Type::OBJECT && ImGui::BeginDragDropTarget()) {
-		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
-			ObjectData* parent = node.info.object.object;
-			ObjectData* child = *static_cast<ObjectData**>(payload->Data);
+int SetObjectListTreeNode::GetTotalVisibleObjects() const {
+	int result = 1;
 
-			if (parent != child) {
-				auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
-				auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
+	if (parent == nullptr || ImGui::GetStateStorage()->GetInt(ImGui::GetID(GetID())))
+		for (auto& child : children)
+			result += child.GetTotalVisibleObjects();
 
-				child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
-				child->parentID = parent->id;
+	return result;
+}
 
-				auto childStatus = levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(levelEditor.focusedObject->id);
-				auto childIdx = levelEditor.focusedChunk->GetObjectIndexById(levelEditor.focusedObject->id);
+void SetObjectListTreeNode::AddChild(SetObjectListTreeNode&& child) {
+	child.parent = this;
+	children.push_back(std::move(child));
+}
 
-				if (childStatus.objectData && childIdx != -1) {
-					levelEditor.focusedChunk->DespawnByIndex(childIdx);
-					childStatus.Restart();
-				}
-
-				InvalidateTree();
-			}
-		}
-		ImGui::EndDragDropTarget();
-	}
+SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }
+{
 }
 
 void SetObjectList::Render() {
@@ -212,23 +208,8 @@ void SetObjectList::Render() {
 					ImGuiListClipper clipper;
 					clipper.Begin(tree->GetTotalVisibleObjects(), ImGui::GetTextLineHeight());
 
-					while (clipper.Step()) {
-						int startIdx = clipper.DisplayStart;
-						int count = clipper.DisplayEnd - clipper.DisplayStart;
-
-						for (SetObjectListTreeNode& child : tree->children) {
-							if (count <= 0)
-								break;
-
-							if (startIdx < child.GetTotalVisibleObjects()) {
-								RenderObjectTreeNode(child, startIdx, count);
-
-								count -= child.GetTotalVisibleObjects() - startIdx;
-							}
-
-							startIdx = std::max(0, startIdx - child.GetTotalVisibleObjects());
-						}
-					}
+					while (clipper.Step())
+						tree->RenderChildren(*this, clipper.DisplayStart, clipper.DisplayEnd - clipper.DisplayStart);
 
 					clipper.End();
 				}
@@ -240,23 +221,8 @@ void SetObjectList::Render() {
 					ImGuiListClipper clipper;
 					clipper.Begin(layerTree->GetTotalVisibleObjects(), ImGui::GetTextLineHeight());
 
-					while (clipper.Step()) {
-						int startIdx = clipper.DisplayStart;
-						int count = clipper.DisplayEnd - clipper.DisplayStart;
-
-						for (SetObjectListTreeNode& child : layerTree->children) {
-							if (count <= 0)
-								break;
-
-							if (startIdx < child.GetTotalVisibleObjects()) {
-								RenderObjectTreeNode(child, startIdx, count);
-
-								count -= child.GetTotalVisibleObjects() - startIdx;
-							}
-
-							startIdx = std::max(0, startIdx - child.GetTotalVisibleObjects());
-						}
-					}
+					while (clipper.Step())
+						layerTree->RenderChildren(*this, clipper.DisplayStart, clipper.DisplayEnd - clipper.DisplayStart);
 
 					clipper.End();
 				}
@@ -343,9 +309,6 @@ void SetObjectList::RebuildTree() {
 
 		for (auto* layer : levelEditor.focusedChunk->GetLayers())
 			layerTree->AddChild(BuildSingleLayerRootNode(*childMaps.Find(layer), layer));
-
-		tree->SetIsOpen(true);
-		layerTree->SetIsOpen(true);
 	}
 }
 
