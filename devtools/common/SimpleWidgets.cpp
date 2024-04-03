@@ -58,7 +58,7 @@ class ResizeableVariableString : public csl::ut::VariableString {
 public:
 	void resize(size_t newSize) {
 		size_t allocatorAddr = reinterpret_cast<size_t>(m_pAllocator);
-		csl::fnd::IAllocator* allocator = m_pAllocator == nullptr ? app::fnd::AppHeapManager::GetResidentAllocator() : reinterpret_cast<csl::fnd::IAllocator*>(allocatorAddr & ~1);
+		csl::fnd::IAllocator* allocator = m_pAllocator == nullptr ? hh::fnd::MemoryRouter::GetModuleAllocator() : reinterpret_cast<csl::fnd::IAllocator*>(allocatorAddr & ~1);
 
 		char* oldStr = m_pStr;
 		m_pStr = (char*)allocator->Alloc(newSize, 1);

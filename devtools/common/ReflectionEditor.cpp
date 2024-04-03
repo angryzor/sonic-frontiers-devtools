@@ -48,7 +48,7 @@ public:
 		size_t subTypeSize = member->GetSubTypeSizeInBytes();
 		
 		if (!m_pAllocator && !isUninitialized())
-			change_allocator(app::fnd::AppHeapManager::GetResidentAllocator(), member);
+			change_allocator(hh::fnd::MemoryRouter::GetModuleAllocator(), member);
 
 		void* new_buffer = m_pAllocator->Alloc(subTypeSize * len, 16);
 

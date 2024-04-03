@@ -340,7 +340,7 @@ void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* r
 filewatch::FileWatch<std::string>* ResourceBrowser::fileWatcher = nullptr;
 
 void ResourceBrowser::WatchDirectory(const std::string& path) {
-	auto* allocator = app::fnd::AppHeapManager::GetResidentAllocator();
+	auto* allocator = hh::fnd::MemoryRouter::GetDebugAllocator();
 
 	if (fileWatcher != nullptr) {
 		fileWatcher->~FileWatch();
