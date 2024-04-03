@@ -18,23 +18,38 @@ SetObjectListTreeNode::SetObjectListTreeNode(SetObjectListTreeNode&& other) : Re
 }
 
 const void* SetObjectListTreeNode::GetID() const {
-	if (type == SetObjectListTreeNode::Type::OBJECT)
+	switch (type) {
+	case SetObjectListTreeNode::Type::OBJECT:
 		return info.object.object;
-	else
+	case SetObjectListTreeNode::Type::LAYER:
+		return info.layer.layer;
+	case SetObjectListTreeNode::Type::GROUP:
 		return info.group.label;
+	}
 }
 
 const char* SetObjectListTreeNode::GetLabel() const {
-	if (type == SetObjectListTreeNode::Type::OBJECT)
+	switch (type) {
+	case SetObjectListTreeNode::Type::OBJECT:
 		return info.object.object->name.c_str();
-	else
+	case SetObjectListTreeNode::Type::LAYER:
+		return info.layer.layer->GetName();
+	case SetObjectListTreeNode::Type::GROUP:
 		return info.group.label;
+	}
 }
 
 SetObjectListTreeNode SetObjectListTreeNode::CreateObjectNode(csl::fnd::IAllocator* allocator, ObjectData* objData) {
 	SetObjectListTreeNode node{ allocator };
 	node.type = SetObjectListTreeNode::Type::OBJECT;
 	node.info.object.object = objData;
+	return node;
+}
+
+SetObjectListTreeNode SetObjectListTreeNode::CreateLayerNode(csl::fnd::IAllocator* allocator, ObjectWorldChunkLayer* layer) {
+	SetObjectListTreeNode node{ allocator };
+	node.type = SetObjectListTreeNode::Type::LAYER;
+	node.info.layer.layer = layer;
 	return node;
 }
 
@@ -89,6 +104,18 @@ bool SetObjectListTreeNode::RenderTreeNode(ImGuiTreeNodeFlags nodeflags, SetObje
 		}
 	}
 
+	if (type == SetObjectListTreeNode::Type::LAYER) {
+		if (ImGui::BeginPopupContextItem("Layer context menu")) {
+			if (ImGui::MenuItem("Load from file..."))
+				ResourceBrowser::ShowLoadResourceDialog(info.layer.layer->GetResource());
+
+			if (ImGui::MenuItem("Export..."))
+				ResourceBrowser::ShowExportResourceDialog(info.layer.layer->GetResource());
+
+			ImGui::EndPopup();
+		}
+	}
+
 	return isOpen;
 }
 
@@ -97,41 +124,30 @@ void SetObjectListTreeNode::RenderChildren(SetObjectList& list, int startIdx, in
 		if (count <= 0)
 			break;
 
-		auto visibleChildCount = child.GetTotalVisibleObjects();
+		auto totalVisible = child.GetTotalVisibleObjects();
 
-		if (startIdx < visibleChildCount) {
+		if (startIdx < totalVisible) {
 			child.Render(list, startIdx, count);
 
-			count -= visibleChildCount - startIdx;
+			count -= totalVisible - startIdx;
 		}
 
-		startIdx = std::max(0, startIdx - visibleChildCount);
+		startIdx = std::max(0, startIdx - totalVisible);
 	}
 }
 
 void SetObjectListTreeNode::Render(SetObjectList& list, int startIdx, int count) {
-	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 	if (children.size() != 0) {
-		if (startIdx < 1)
-			count--;
-
-		startIdx = std::max(0, startIdx - 1);
-
-		// If the header would have fallen off the screen because we're scrolled down too far, we replace the
-		// first real displayed element with the header. We then let it take an index to account for this.
-		if (startIdx != 0) {
-			count--;
-			startIdx++;
-		}
-
 		if (RenderTreeNode(nodeflags, list)) {
-			RenderChildren(list, startIdx, count);
-			ImGui::TreePop();
+			ImGui::Indent();
+			RenderChildren(list, startIdx, count - 1);
+			ImGui::Unindent();
 		}
 	}
 	else
-		RenderTreeNode(nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, list);
+		RenderTreeNode(nodeflags | ImGuiTreeNodeFlags_Leaf, list);
 }
 
 int SetObjectListTreeNode::GetTotalVisibleObjects() const {
@@ -270,7 +286,7 @@ SetObjectListTreeNode SetObjectList::BuildSingleLayerTreeNode(ObjectMap<csl::ut:
 }
 
 SetObjectListTreeNode SetObjectList::BuildSingleLayerRootNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer) {
-	auto node = SetObjectListTreeNode::CreateGroupNode(GetAllocator(), layer->GetName());
+	auto node = SetObjectListTreeNode::CreateLayerNode(GetAllocator(), layer);
 
 	auto childMapIt = childMap.Find(ObjectId{ 0, 0 });
 

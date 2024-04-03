@@ -4,11 +4,16 @@ class SetObjectList;
 struct SetObjectListTreeNode : public hh::fnd::ReferencedObject {
 	enum class Type {
 		OBJECT,
+		LAYER,
 		GROUP,
 	};
 
 	struct GroupNodeInfo {
 		const char* label{};
+	};
+
+	struct LayerNodeInfo {
+		hh::game::ObjectWorldChunkLayer* layer;
 	};
 
 	struct ObjectNodeInfo {
@@ -19,6 +24,7 @@ struct SetObjectListTreeNode : public hh::fnd::ReferencedObject {
 
 	union {
 		GroupNodeInfo group;
+		LayerNodeInfo layer;
 		ObjectNodeInfo object;
 	} info;
 
@@ -37,6 +43,7 @@ struct SetObjectListTreeNode : public hh::fnd::ReferencedObject {
 	void Render(SetObjectList& list, int startIdx, int count);
 	void AddChild(SetObjectListTreeNode&& child);
 	static SetObjectListTreeNode CreateObjectNode(csl::fnd::IAllocator* allocator, hh::game::ObjectData* objData);
+	static SetObjectListTreeNode CreateLayerNode(csl::fnd::IAllocator* allocator, hh::game::ObjectWorldChunkLayer* layer);
 	static SetObjectListTreeNode CreateGroupNode(csl::fnd::IAllocator* allocator, const char* label);
 };
 
