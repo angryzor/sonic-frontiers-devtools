@@ -168,6 +168,18 @@ void LevelEditor::SpawnObject() {
 		{ csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0, 0, 0 } }
 	};
 
+	if (auto* objInfoAttribute = objectClassToPlace->GetAttribute("objinfo")) {
+		auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
+		auto* objInfoName = static_cast<const char*>(objInfoAttribute->m_Value);
+
+		if (objInfoContainer->GetInfo(objInfoName) == nullptr) {
+			auto* objInfoClass = (*rangerssdk::GetAddress(&ObjInfoRegistry::instance))->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
+			auto* objInfo = objInfoClass->Create(GetAllocator());
+
+			objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
+		}
+	}
+
 	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 20 };
 	auto* rangeSpawning = new (GetAllocator()) ComponentData{ GetAllocator(), GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName("RangeSpawning"), rangeSpawningData };
 	objData->componentData.push_back(rangeSpawning);

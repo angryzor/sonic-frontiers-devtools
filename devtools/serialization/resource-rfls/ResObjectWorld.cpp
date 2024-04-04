@@ -40,8 +40,8 @@ const RflClass* handleComponentDataData(void* obj) {
     return GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
 }
 
-const RflClass* handleObjInfo(void* obj) {
-    return GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(static_cast<ObjectData*>(obj)->gameObjectClass)->rflClass;
+const RflClass* handleSpawnerData(void* obj) {
+    return GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(static_cast<ObjectData*>(obj)->gameObjectClass)->spawnerDataRflClass;
 }
 
 RflClassMember componentDataMembers[]{
@@ -75,7 +75,7 @@ RflClassMember objectDataMembers[]{
     { "transform", &objectTransformData, nullptr, RflClassMember::TYPE_STRUCT, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, transform), nullptr },
     { "localTransform", &objectTransformData, nullptr, RflClassMember::TYPE_STRUCT, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, localTransform), nullptr },
     { "componentData", &componentDataArrayEntry, nullptr, RflClassMember::TYPE_ARRAY, RflClassMember::TYPE_STRUCT, 0, 0, offsetof(ObjectData, componentData), nullptr },
-    { "objInfo", reinterpret_cast<RflClass*>(handleObjInfo), nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, objInfo), nullptr },
+    { "spawnerData", reinterpret_cast<RflClass*>(handleSpawnerData), nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, spawnerData), nullptr },
 };
 
 RflClass objectData{ "ObjectData", nullptr, sizeof(ObjectData), nullptr, 0, objectDataMembers, 9, nullptr };
