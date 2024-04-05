@@ -141,6 +141,7 @@ void Context::init() {
 
 	IMGUI_CHECKVERSION();
 	ImGui::CreateContext();
+	ImPlot::CreateContext();
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
@@ -188,6 +189,7 @@ void Context::update()
 
 	//ImGui::PushFont(firaCode);
 	//ImGui::ShowDemoWindow();
+	ImPlot::ShowDemoWindow();
 	Desktop::instance->Render();
 
 	ImGui::Render();

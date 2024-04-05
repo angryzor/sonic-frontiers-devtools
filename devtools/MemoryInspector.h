@@ -1,26 +1,25 @@
 #pragma once
 #include "StandaloneWindow.h"
 
+class MemoryInspector;
 class HeapInspector : public hh::fnd::ReferencedObject {
-	const char* name;
-	csl::fnd::TlsfHeapBase* target;
-	float allocationsHistory[512]{ 0 };
-	uint32_t maxAllocations{ 0 };
+	MemoryInspector* memoryInspector;
+	uint32_t allocationsHistory[512]{ 0 };
+	size_t usedHistory[512]{ 0 };
 	int nextFrame{ 0 };
+	csl::ut::MoveArray<hh::fnd::Reference<HeapInspector>> childHeapInspectors{ GetAllocator() };
 public:
-	HeapInspector(csl::fnd::IAllocator* allocator, const char* name, csl::fnd::TlsfHeapBase* target);
+	csl::fnd::HeapBase* target;
+	HeapInspector(csl::fnd::IAllocator* allocator, MemoryInspector* memoryInspector, csl::fnd::HeapBase* target);
+	void Tick();
 	void Render();
 };
 
 class MemoryInspector : public StandaloneWindow {
-	hh::fnd::Reference<HeapInspector> moduleInspector;
-	hh::fnd::Reference<HeapInspector> debugInspector;
-	hh::fnd::Reference<HeapInspector> criHedgehogInspector;
-	hh::fnd::Reference<HeapInspector> residentInspector;
-	hh::fnd::Reference<HeapInspector> cyloopInspector;
-	hh::fnd::Reference<HeapInspector> heightfieldInspector;
-	hh::fnd::Reference<HeapInspector> needleInspector;
+	csl::ut::MoveArray<hh::fnd::Reference<HeapInspector>> heapInspectors{ GetAllocator() };
 public:
+	int units{ 0 };
+	bool absoluteUsed{ false };
 	MemoryInspector(csl::fnd::IAllocator* allocator);
 	virtual void RenderContents();
 };

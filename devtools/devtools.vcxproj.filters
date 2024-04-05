@@ -49,6 +49,8 @@
     <ClInclude Include="ObjectDataUtils.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="MemoryInspector.h" />
+    <ClInclude Include="imgui\implot.h" />
+    <ClInclude Include="imgui\implot_internal.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -101,6 +103,9 @@
     <ClCompile Include="ObjectDataUtils.cpp" />
     <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="MemoryInspector.cpp" />
+    <ClCompile Include="imgui\implot.cpp" />
+    <ClCompile Include="imgui\implot_demo.cpp" />
+    <ClCompile Include="imgui\implot_items.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

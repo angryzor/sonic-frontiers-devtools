@@ -209,6 +209,8 @@
     <ClInclude Include="GameServiceInspector.h" />
     <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
+    <ClInclude Include="imgui\implot.h" />
+    <ClInclude Include="imgui\implot_internal.h" />
     <ClInclude Include="MathUtils.h" />
     <ClInclude Include="MemoryInspector.h" />
     <ClInclude Include="ObjectDataUtils.h" />
@@ -269,6 +271,9 @@
     <ClCompile Include="imgui\imgui_impl_win32.cpp" />
     <ClCompile Include="imgui\imgui_tables.cpp" />
     <ClCompile Include="imgui\imgui_widgets.cpp" />
+    <ClCompile Include="imgui\implot.cpp" />
+    <ClCompile Include="imgui\implot_demo.cpp" />
+    <ClCompile Include="imgui\implot_items.cpp" />
     <ClCompile Include="Library.cpp" />
     <ClCompile Include="MathUtils.cpp" />
     <ClCompile Include="MemoryInspector.cpp" />
