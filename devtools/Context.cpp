@@ -159,8 +159,12 @@ void Context::init() {
 	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);// , ranges);
 	io.Fonts->Build();
 
-	auto allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-	Desktop::instance = new (allocator) Desktop(allocator);
+	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+	static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
+	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
+	auto* allocator = &devtoolsAllocator;
+
+	Desktop::instance = new (allocator) Desktop{ allocator };
 
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 
@@ -189,7 +193,7 @@ void Context::update()
 
 	//ImGui::PushFont(firaCode);
 	//ImGui::ShowDemoWindow();
-	ImPlot::ShowDemoWindow();
+	//ImPlot::ShowDemoWindow();
 	Desktop::instance->Render();
 
 	ImGui::Render();

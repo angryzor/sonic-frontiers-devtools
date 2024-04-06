@@ -241,22 +241,22 @@ void ReflectionEditor::RenderPrimitiveEditor(const char* name, void* obj, const 
 		ImGui::Checkbox(name, static_cast<bool*>(obj));
 		break;
 	case RflClassMember::TYPE_SINT8:
-		RenderScalarRflParamEditor<int8_t>(name, obj, member, ImGuiDataType_S8, 1);
+		RenderScalarRflParamEditor<int8_t>(name, obj, member, ImGuiDataType_S8, 1, "RangeSint32");
 		break;
 	case RflClassMember::TYPE_UINT8:
-		RenderScalarRflParamEditor<uint8_t>(name, obj, member, ImGuiDataType_U8, 1);
+		RenderScalarRflParamEditor<uint8_t>(name, obj, member, ImGuiDataType_U8, 1, "RangeUint32");
 		break;
 	case RflClassMember::TYPE_SINT16:
-		RenderScalarRflParamEditor<int16_t>(name, obj, member, ImGuiDataType_S16, 1);
+		RenderScalarRflParamEditor<int16_t>(name, obj, member, ImGuiDataType_S16, 1, "RangeSint32");
 		break;
 	case RflClassMember::TYPE_UINT16:
-		RenderScalarRflParamEditor<uint16_t>(name, obj, member, ImGuiDataType_U16, 1);
+		RenderScalarRflParamEditor<uint16_t>(name, obj, member, ImGuiDataType_U16, 1, "RangeUint32");
 		break;
 	case RflClassMember::TYPE_SINT32:
 		RenderScalarRflParamEditor<int32_t>(name, obj, member, ImGuiDataType_S32, 1, "RangeSint32");
 		break;
 	case RflClassMember::TYPE_UINT32:
-		RenderScalarRflParamEditor<uint32_t>(name, obj, member, ImGuiDataType_U32, 1);
+		RenderScalarRflParamEditor<uint32_t>(name, obj, member, ImGuiDataType_U32, 1, "RangeUint32");
 		break;
 	case RflClassMember::TYPE_SINT64:
 		RenderScalarRflParamEditor<int64_t>(name, obj, member, ImGuiDataType_S64, 1);
@@ -268,28 +268,48 @@ void ReflectionEditor::RenderPrimitiveEditor(const char* name, void* obj, const 
 		RenderScalarRflParamEditor<float>(name, obj, member, ImGuiDataType_Float, 1, "RangeFloat");
 		break;
 	case RflClassMember::TYPE_VECTOR2:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector2>(name, obj, member, ImGuiDataType_Float, 2, "RangeFloat");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector2>(name, obj, member, ImGuiDataType_Float, 2, "RangeVector2");
 		break;
 	case RflClassMember::TYPE_VECTOR3:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(name, obj, member, ImGuiDataType_Float, 3, "RangeFloat");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector3>(name, obj, member, ImGuiDataType_Float, 3, "RangeVector3");
 		break;
 	case RflClassMember::TYPE_VECTOR4:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4, "RangeFloat");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4, "RangeVector4");
 		break;
 	case RflClassMember::TYPE_QUATERNION:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4, "RangeFloat");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
 		break;
 	case RflClassMember::TYPE_MATRIX34:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		ImGui::PushID(name);
+		ImGui::PushID("r1");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[0], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PushID("r2");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[1], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PushID("r3");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[2], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PushID("r4");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[3], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PopID();
 		break;
 	case RflClassMember::TYPE_MATRIX44:
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
-		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, obj, member, ImGuiDataType_Float, 4);
+		ImGui::PushID(name);
+		ImGui::PushID("r1");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[0], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PushID("r2");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[1], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PushID("r3");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[2], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PushID("r4");
+		RenderSliderlessScalarRflParamEditor<csl::math::Vector4>(name, &static_cast<csl::math::Vector4*>(obj)[3], member, ImGuiDataType_Float, 4);
+		ImGui::PopID();
+		ImGui::PopID();
 		break;
 	case RflClassMember::TYPE_POINTER:
 		RenderStubRflParamEditor(name, member);

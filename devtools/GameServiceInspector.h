@@ -1,10 +1,12 @@
 #pragma once
+#include "StandaloneWindow.h"
 #include "common/ReflectionEditor.h"
 
-class GameServiceInspector
+class GameServiceInspector : public StandaloneWindow
 {
 public:
-    static void Render();
+    GameServiceInspector(csl::fnd::IAllocator* allocator);
+    virtual void RenderContents() override;
     static void RenderServiceInspector(hh::game::GameService& service);
     static void RenderFxParamManagerInspector(app::gfx::FxParamManager& service);
     static void RenderObjectWorldInspector(hh::game::ObjectWorld& service);
@@ -15,14 +17,18 @@ public:
             ImGui::Text("Enabled group bits: %x", interpolator.interpolationGroupEnabledBits);
 
             unsigned short i{ 0 };
-            for (auto& interpolationActor : interpolator.interpolationActors) {
+            for (auto& interpolationJob : interpolator.interpolationJobs) {
                 char nodename[200];
-                snprintf(nodename, sizeof(nodename), "Actor %d", i++);
+                snprintf(nodename, sizeof(nodename), "Job %d", i++);
 
                 if (ImGui::TreeNode(nodename)) {
-                    ImGui::Text("Wants to interpolate groups %x", interpolationActor.wantsToInterpolateGroupBits);
-                    ImGui::Text("Delta: %f", interpolationActor.delta);
-                    ReflectionEditor::Render(interpolationActor.parameters);
+                    ImGui::Text("Active on interpolation groups %x", interpolationJob.interpolationGroupMemberBits);
+                    ImGui::Text("Owner hash: %zx", interpolationJob.ownerId);
+                    ImGui::Text("Priority: %d", interpolationJob.priority);
+                    ImGui::Text("Tween duration: %f", 1 / interpolationJob.tweenPositionIncrementPerSecond);
+                    ImGui::SliderFloat("Current time", &interpolationJob.currentTweenPosition, 0.0f, 1.0f);
+                    ImGui::SeparatorText("Target parameters");
+                    ReflectionEditor::Render(interpolationJob.parameters);
                     ImGui::TreePop();
                 }
             }

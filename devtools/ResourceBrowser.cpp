@@ -177,6 +177,11 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			selectedResource = resource;
 	}
 
+	if (ImGui::BeginDragDropSource()) {
+		ImGui::SetDragDropPayload("Resource", &resource, sizeof(resource));
+		ImGui::EndDragDropSource();
+	}
+
 	ImGui::SetCursorPos(cursor);
 	RenderPreview(resource, 100);
 

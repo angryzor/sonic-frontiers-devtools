@@ -206,6 +206,7 @@
     <ClInclude Include="core-services\GameUpdaterInspector.h" />
     <ClInclude Include="core-services\GraphicsContextInspector.h" />
     <ClInclude Include="Desktop.h" />
+    <ClInclude Include="NeedleFxSceneDataTester.h" />
     <ClInclude Include="GameServiceInspector.h" />
     <ClInclude Include="GOCVisualDebugDrawRenderer.h" />
     <ClInclude Include="imgui\ImGuizmo.h" />
@@ -260,6 +261,7 @@
     <ClCompile Include="Desktop.cpp" />
     <ClCompile Include="DllMain.cpp" />
     <ClCompile Include="FiraCode.h" />
+    <ClCompile Include="NeedleFxSceneDataTester.cpp" />
     <ClCompile Include="GameServiceInspector.cpp" />
     <ClCompile Include="GOCVisualDebugDrawRenderer.cpp" />
     <ClCompile Include="imgui\imgui.cpp" />

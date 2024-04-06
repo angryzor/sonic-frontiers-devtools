@@ -38,7 +38,6 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 void Desktop::Render() {
 	ToolBar::Render();
 	operationMode->Render();
-	GameServiceInspector::Render();
 	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };

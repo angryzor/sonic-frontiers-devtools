@@ -4,11 +4,13 @@
 #include "Desktop.h"
 #include "ResourceBrowser.h"
 #include "SettingsManager.h"
+#include "GameServiceInspector.h"
 #include "core-services/GameUpdaterInspector.h"
 #include "core-services/GraphicsContextInspector.h"
 #include "core-services/CameraManagerInspector.h"
 #include "MemoryInspector.h"
 #include "GOCVisualDebugDrawRenderer.h"
+#include "NeedleFxSceneDataTester.h"
 
 using namespace hh::game;
 
@@ -38,7 +40,9 @@ void ToolBar::Render() {
 		if (ImGui::MenuItem("Resource Browser"))
 			new (Desktop::instance->GetAllocator()) ResourceBrowser(Desktop::instance->GetAllocator());
 
-		if (ImGui::BeginMenu("Insights")) {
+		if (ImGui::BeginMenu("Inspectors")) {
+			if (ImGui::MenuItem("GameService"))
+				new (Desktop::instance->GetAllocator()) GameServiceInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GameUpdater"))
 				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GraphicsContext"))
@@ -47,6 +51,12 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) CameraManagerInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("Memory"))
 				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
+			ImGui::EndMenu();
+		}
+
+		if (ImGui::BeginMenu("Tools")) {
+			if (ImGui::MenuItem("NeedleFxSceneData Tester") && ImGui::FindWindowByName("NeedleFxSceneData testing tool") == nullptr)
+				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTester(Desktop::instance->GetAllocator());
 			ImGui::EndMenu();
 		}
 

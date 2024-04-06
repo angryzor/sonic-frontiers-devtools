@@ -51,6 +51,7 @@
     <ClInclude Include="MemoryInspector.h" />
     <ClInclude Include="imgui\implot.h" />
     <ClInclude Include="imgui\implot_internal.h" />
+    <ClInclude Include="NeedleFxSceneDataTester.h" />
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="DllMain.cpp" />
@@ -106,6 +107,7 @@
     <ClCompile Include="imgui\implot.cpp" />
     <ClCompile Include="imgui\implot_demo.cpp" />
     <ClCompile Include="imgui\implot_items.cpp" />
+    <ClCompile Include="NeedleFxSceneDataTester.cpp" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

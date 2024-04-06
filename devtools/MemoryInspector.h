@@ -5,6 +5,7 @@ class MemoryInspector;
 class HeapInspector : public hh::fnd::ReferencedObject {
 	MemoryInspector* memoryInspector;
 	uint32_t allocationsHistory[512]{ 0 };
+	size_t allocatedHistory[512]{ 0 };
 	size_t usedHistory[512]{ 0 };
 	int nextFrame{ 0 };
 	csl::ut::MoveArray<hh::fnd::Reference<HeapInspector>> childHeapInspectors{ GetAllocator() };
@@ -19,8 +20,8 @@ class MemoryInspector : public StandaloneWindow {
 	csl::ut::MoveArray<hh::fnd::Reference<HeapInspector>> heapInspectors{ GetAllocator() };
 public:
 	int units{ 0 };
-	bool absoluteUsed{ false };
 	MemoryInspector(csl::fnd::IAllocator* allocator);
-	virtual void RenderContents();
+	virtual void PreRender() override;
+	virtual void RenderContents() override;
 };
 

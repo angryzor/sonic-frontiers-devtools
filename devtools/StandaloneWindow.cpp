@@ -16,6 +16,9 @@ void StandaloneWindow::PreRender() {
 	ImGui::SetNextWindowSize(ImVec2(600, 400), ImGuiCond_Once);
 }
 
+void StandaloneWindow::PostRender() {
+}
+
 bool StandaloneWindow::Render() {
 	PreRender();
 
@@ -27,6 +30,8 @@ bool StandaloneWindow::Render() {
 	if (ImGui::Begin(title.c_str(), &shouldStayOpen, windowFlags))
 		RenderContents();
 	ImGui::End();
+
+	PostRender();
 
 	return shouldStayOpen;
 }
