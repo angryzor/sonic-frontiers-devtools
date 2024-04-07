@@ -122,7 +122,7 @@ void SettingsManager::OpenConfigDialog() {
 void SettingsManager::ApplySettings() {
 	Theme::themes[settings.theme].Load();
 	Translations::SetCurrentLanguage(settings.language);
-	ImGui::GetIO().ConfigFlags = settings.configFlags;
+	ImGui::GetIO().ConfigFlags = settings.configFlags | ImGuiConfigFlags_DockingEnable;
 	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::rayLength) = settings.physicsPickerRayLength;
 	*rangerssdk::GetAddress(&hh::physics::PhysicsMousePickingViewer::selectionMask) = settings.physicsPickerSelectionMask;
 

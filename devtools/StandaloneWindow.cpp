@@ -8,7 +8,7 @@ StandaloneWindow::StandaloneWindow(csl::fnd::IAllocator* allocator) : hh::fnd::R
 
 void StandaloneWindow::SetTitle(const char* title) {
 	char buf[500];
-	snprintf(buf, sizeof(buf), "%s###%zx", title, reinterpret_cast<size_t>(this));
+	snprintf(buf, sizeof(buf), "%s###%zx%s", title, reinterpret_cast<size_t>(this), title);
 	this->title.Set(buf);
 }
 

@@ -105,6 +105,9 @@ void ObjectInspection::CheckGizmoHotkeys() {
 }
 
 void ObjectInspection::CheckSelectionHotkeys() {
+	if (!focusedObject)
+		return;
+
 	if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
 		DeleteFocusedObject();
 	}

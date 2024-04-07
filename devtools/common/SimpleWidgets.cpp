@@ -39,22 +39,26 @@ void WorldPositionEditor(hh::fnd::WorldPosition& worldPos) {
 	ImGui::DragFloat4("Rotation", worldPos.m_Rotation.coeffs().data());
 }
 
-int MyResizeCallback(ImGuiInputTextCallbackData* data)
+static char dummy[1] = { '\0' };
+
+static int StringResizeCallback(ImGuiInputTextCallbackData* data)
 {
 	if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
 	{
-		ImVector<char>* my_str = (ImVector<char>*)data->UserData;
-		IM_ASSERT(my_str->begin() == data->Buf);
-		my_str->resize(data->BufSize); // NB: On resizing calls, generally data->BufSize == data->BufTextLen + 1
-		data->Buf = my_str->begin();
+		auto my_str = static_cast<csl::ut::String*>(data->UserData);
+		my_str->reserve(data->BufSize);
+		data->Buf = my_str->c_str();
 	}
 	return 0;
+}
+
+void InputText(const char* label, csl::ut::String* str, ImGuiInputTextFlags flags) {
+	ImGui::InputText(label, str->c_str() == nullptr ? dummy : str->c_str(), str->size(), flags | ImGuiInputTextFlags_CallbackResize, StringResizeCallback, str);
 }
 
 // This is a completely nonstandard hack around the fact that these things don't have resizeable buffers
 // (instead they are always allocated to the exact string length) but it shouldn't cause issues.
 class ResizeableVariableString : public csl::ut::VariableString {
-	static char dummy[1];
 public:
 	void resize(size_t newSize) {
 		size_t allocatorAddr = reinterpret_cast<size_t>(m_pAllocator);
@@ -83,8 +87,6 @@ public:
 		return m_pStr == nullptr ? dummy : m_pStr;
 	}
 };
-
-char ResizeableVariableString::dummy[] = {'\0'};
 
 static int VariableStringResizeCallback(ImGuiInputTextCallbackData* data)
 {

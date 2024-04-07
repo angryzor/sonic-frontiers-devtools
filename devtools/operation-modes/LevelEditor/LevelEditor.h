@@ -35,4 +35,6 @@ public:
     void HandleObjectManipulation();
     void CheckGizmoHotkeys();
     void CheckSelectionHotkeys();
+
+    void RenderDebugComments();
 };

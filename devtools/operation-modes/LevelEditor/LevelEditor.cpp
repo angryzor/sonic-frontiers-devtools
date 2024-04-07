@@ -5,6 +5,7 @@
 #include "../../common/SimpleWidgets.h"
 #include "../../Desktop.h"
 #include "../../ObjectDataUtils.h"
+#include "../../MathUtils.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -33,6 +34,7 @@ void LevelEditor::Render() {
 	setObjectList.Render();
 	objectDataInspector.Render();
 	objectLibrary.Render();
+	RenderDebugComments();
 
 	if (!focusedChunk)
 		return;
@@ -42,6 +44,59 @@ void LevelEditor::Render() {
 		HandleObjectManipulation();
 
 	HandleObjectSelection();
+}
+
+void LevelEditor::RenderDebugComments()
+{
+	auto* gameManager = GameManager::GetInstance();
+
+	if (auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0)) {
+		auto cameraMatrix{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
+		auto* ivp = ImGui::GetMainViewport();
+
+		ImGui::SetNextWindowSize(ivp->Size);
+		ImGui::SetNextWindowPos(ivp->Pos);
+
+		ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
+		ImGui::PushStyleColor(ImGuiCol_Border, 0);
+		ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+		ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
+		ImGui::Begin("Debug text", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+
+		for (auto* obj : gameManager->m_Objects) {
+			if (auto* gocTransform = obj->GetComponent<GOCTransform>()) {
+				hh::dbg::MsgGetDebugCommentInEditor msgGetDbgCmt{};
+
+				obj->ProcessMessage(msgGetDbgCmt);
+
+				if (strlen(msgGetDbgCmt.comment) == 0)
+					continue;
+
+				Eigen::Matrix4f fullMatrix{ cameraMatrix * TransformToAffine3f(gocTransform->frame->fullTransform).matrix() };
+				Eigen::Vector4f clipSpaceOrigin{ fullMatrix * Eigen::Vector4f{ 0.0f, 0.0f, 0.0f, 1.0f } };
+
+				// Cull
+				if (clipSpaceOrigin.x() < -clipSpaceOrigin.w() || clipSpaceOrigin.x() > clipSpaceOrigin.w()
+					|| clipSpaceOrigin.y() < -clipSpaceOrigin.w() || clipSpaceOrigin.y() > clipSpaceOrigin.w()
+					|| clipSpaceOrigin.z() <= 0 || clipSpaceOrigin.z() > clipSpaceOrigin.w())
+					continue;
+
+				Eigen::Vector4f transformedOrigin{ clipSpaceOrigin * 0.5 / clipSpaceOrigin.w() };
+
+				auto originInImGuiSpace = ImVec2{ (transformedOrigin.x() + 0.5f) * ivp->Size.x, (0.5f - transformedOrigin.y()) * ivp->Size.y };
+
+				auto textSize = ImGui::CalcTextSize(msgGetDbgCmt.comment);
+
+				ImGui::SetCursorPos(originInImGuiSpace - textSize / 2);
+				ImGui::Text(msgGetDbgCmt.comment);
+			}
+		}
+
+		ImGui::End();
+		ImGui::PopStyleVar();
+		ImGui::PopStyleColor(3);
+	}
 }
 
 void LevelEditor::HandleObjectSelection() {
@@ -55,10 +110,8 @@ void LevelEditor::HandleObjectSelection() {
 			focusedObject = nullptr;
 	}
 
-	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && placeTargetLayer && Desktop::instance->GetPickedLocation()) {
+	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && placeTargetLayer && Desktop::instance->GetPickedLocation())
 		SpawnObject();
-		setObjectList.InvalidateTree();
-	}
 
 	CheckSelectionHotkeys();
 }
@@ -125,14 +178,14 @@ void LevelEditor::CheckGizmoHotkeys() {
 }
 
 void LevelEditor::CheckSelectionHotkeys() {
-	if (ImGui::IsKeyPressed(ImGuiKey_Delete)) {
-		DeleteFocusedObject();
-		setObjectList.InvalidateTree();
-	}
+	if (!focusedObject)
+		return;
 
-	if (ImGui::IsKeyPressed(ImGuiKey_Escape)) {
+	if (ImGui::IsKeyPressed(ImGuiKey_Delete))
+		DeleteFocusedObject();
+
+	if (ImGui::IsKeyPressed(ImGuiKey_Escape))
 		focusedObject = nullptr;
-	}
 }
 
 void LevelEditor::DeleteFocusedObject() {
@@ -145,6 +198,8 @@ void LevelEditor::DeleteFocusedObject() {
 				focusedObject = nullptr;
 				return;
 			}
+
+	setObjectList.InvalidateTree();
 }
 
 struct RangeSpawningData {
@@ -171,13 +226,10 @@ void LevelEditor::SpawnObject() {
 	if (auto* objInfoAttribute = objectClassToPlace->GetAttribute("objinfo")) {
 		auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
 		auto* objInfoName = static_cast<const char*>(objInfoAttribute->m_Value);
+		auto* objInfoClass = (*rangerssdk::GetAddress(&ObjInfoRegistry::instance))->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
+		auto* objInfo = objInfoClass->Create(GetAllocator());
 
-		if (objInfoContainer->GetInfo(objInfoName) == nullptr) {
-			auto* objInfoClass = (*rangerssdk::GetAddress(&ObjInfoRegistry::instance))->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
-			auto* objInfo = objInfoClass->Create(GetAllocator());
-
-			objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
-		}
+		objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
 	}
 
 	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 20 };
@@ -187,6 +239,8 @@ void LevelEditor::SpawnObject() {
 	resource->AddObject(objData);
 	focusedChunk->AddWorldObjectStatus(objData, true, 0);
 	focusedObject = objData;
+
+	setObjectList.InvalidateTree();
 }
 
 void LevelEditor::GameServiceAddedCallback(GameService* service) {
