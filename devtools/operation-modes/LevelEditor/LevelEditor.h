@@ -21,6 +21,7 @@ public:
     hh::game::ObjectData* focusedObject{};
     const hh::game::GameObjectClass* objectClassToPlace{};
     hh::game::ObjectWorldChunkLayer* placeTargetLayer{};
+    bool renderDebugComments{ false };
 
     virtual void Render() override;
     virtual void GameServiceAddedCallback(hh::game::GameService* gameService) override;

@@ -34,7 +34,15 @@ void LevelEditor::Render() {
 	setObjectList.Render();
 	objectDataInspector.Render();
 	objectLibrary.Render();
-	RenderDebugComments();
+
+	if (ImGui::Begin("Sonic Frontiers Devtools")) {
+		ImGui::SameLine();
+		ImGui::Checkbox("Render debug comments", &renderDebugComments);
+	}
+	ImGui::End();
+	
+	if (renderDebugComments)
+		RenderDebugComments();
 
 	if (!focusedChunk)
 		return;
@@ -69,8 +77,7 @@ void LevelEditor::RenderDebugComments()
 				hh::dbg::MsgGetDebugCommentInEditor msgGetDbgCmt{};
 
 				obj->ProcessMessage(msgGetDbgCmt);
-
-				if (strlen(msgGetDbgCmt.comment) == 0)
+				if (msgGetDbgCmt.comment[0] == 0)
 					continue;
 
 				Eigen::Matrix4f fullMatrix{ cameraMatrix * TransformToAffine3f(gocTransform->frame->fullTransform).matrix() };
