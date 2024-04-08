@@ -1,12 +1,3 @@
-[submodule "include/ImGuizmo"]
-	path = vendor/imguizmo/ImGuizmo
-	url = https://github.com/CedricGuillemet/ImGuizmo.git
-[submodule "include/ImGuiFileDialog"]
-	path = vendor/imgui-file-dialog/ImGuiFileDialog
-	url = https://github.com/aiekick/ImGuiFileDialog.git
-[submodule "include/implot"]
-	path = vendor/implot/implot
-	url = https://github.com/epezent/implot.git
 [submodule "vendor/detours/Detours"]
 	path = vendor/detours/Detours
 	url = https://github.com/microsoft/Detours.git
@@ -22,3 +13,12 @@
 [submodule "vendor/imgui/imgui"]
 	path = vendor/imgui/imgui
 	url = https://github.com/ocornut/imgui.git
+[submodule "vendor/imguizmo/ImGuizmo"]
+	path = vendor/imguizmo/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "vendor/imgui-file-dialog/ImGuiFileDialog"]
+	path = vendor/imgui-file-dialog/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git
+[submodule "vendor/implot/implot"]
+	path = vendor/implot/implot
+	url = https://github.com/epezent/implot.git
