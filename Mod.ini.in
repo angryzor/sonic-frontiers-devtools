@@ -1,0 +1,17 @@
+[Desc]
+Version="${PROJECT_VERSION}"
+Author="${PROJECT_AUTHOR}"
+Title="${PROJECT_DESCRIPTION}"
+Description="${PROJECT_LONG_DESCRIPTION}"
+Date="${PROJECT_BUILD_DATE}"
+AuthorURL="https://github.com/angryzor"
+[Main]
+UpdateServer="https://raw.githubusercontent.com/angryzor/hmm-update-server/main/sonic-frontiers/devtools/"
+SaveFile=""
+ID="angryzor.devtools"
+IncludeDir0="."
+IncludeDirCount=1
+DependsCount=0
+DLLFile="devtools.dll"
+CodeFile=""
+ConfigSchemaFile=""

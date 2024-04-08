@@ -1,3 +1,24 @@
 [submodule "debug-tools/imgui"]
-	path = devtools/imgui
+	path = vendor/imgui/imgui
 	url = https://github.com/ocornut/imgui
+[submodule "include/ImGuizmo"]
+	path = vendor/imguizmo/ImGuizmo
+	url = https://github.com/CedricGuillemet/ImGuizmo.git
+[submodule "include/ImGuiFileDialog"]
+	path = vendor/imgui-file-dialog/ImGuiFileDialog
+	url = https://github.com/aiekick/ImGuiFileDialog.git
+[submodule "include/implot"]
+	path = vendor/implot/implot
+	url = https://github.com/epezent/implot.git
+[submodule "vendor/detours/Detours"]
+	path = vendor/detours/Detours
+	url = https://github.com/microsoft/Detours.git
+[submodule "vendor/filewatch/filewatch"]
+	path = vendor/filewatch/filewatch
+	url = https://github.com/ThomasMonkman/filewatch.git
+[submodule "rangers-sdk"]
+	path = rangers-sdk
+	url = https://github.com/angryzor/rangers-sdk.git
+[submodule "vendor/hedgelib/HedgeLib"]
+	path = vendor/hedgelib/HedgeLib
+	url = https://github.com/Radfordhound/HedgeLib.git

@@ -1,6 +1,1 @@
-/.vs
-/.vscode
-/packages
-/x64
-*.aps
-
+/build*
