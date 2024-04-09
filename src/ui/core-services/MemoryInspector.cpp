@@ -24,7 +24,7 @@ void HeapInspector::Tick() {
 	allocationsHistory[nextFrame] = stats.liveAllocations;
 	allocatedHistory[nextFrame] = stats.allocated;
 	usedHistory[nextFrame] = stats.used;
-	nextFrame = (nextFrame + 1) % 512;
+	nextFrame = (nextFrame + 1) % numSamples;
 
 	for (auto i = 0; i < childHeapInspectors.size(); i++) {
 		bool found{ false };
@@ -91,10 +91,10 @@ void HeapInspector::Render()
 		ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, static_cast<double>(stats.bufferSize), ImPlotCond_Always);
 		ImPlot::SetNextLineStyle(ImVec4(0.471f, 0.349f, 0.392f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.471f, 0.349f, 0.392f, 1.0f));
-		ImPlot::PlotLine("Allocated", allocatedHistory, 512, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Allocated", allocatedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::SetNextLineStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
-		ImPlot::PlotLine("Used", usedHistory, 512, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Used", usedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::EndPlot();
 	}
 	ImGui::TableNextColumn();
@@ -107,11 +107,11 @@ void HeapInspector::Render()
 		ImPlot::SetNextLineStyle(ImVec4(0.31f, 0.69f, 0.776f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.31f, 0.69f, 0.776f, 1.0f), 0.3f);
 		ImPlot::SetAxes(ImAxis_X1, ImAxis_Y1);
-		ImPlot::PlotLine("Live allocations", allocationsHistory, 512, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Live allocations", allocationsHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::SetNextLineStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f), 0.3f);
 		ImPlot::SetAxes(ImAxis_X1, ImAxis_Y2);
-		ImPlot::PlotLine("Used", usedHistory, 512, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Used", usedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::EndPlot();
 	}
 

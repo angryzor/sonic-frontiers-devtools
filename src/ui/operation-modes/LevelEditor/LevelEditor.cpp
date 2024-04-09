@@ -189,7 +189,7 @@ void LevelEditor::CheckSelectionHotkeys() {
 		DeleteFocusedObject();
 
 	if (ImGui::IsKeyPressed(ImGuiKey_Escape))
-		focusedObject = nullptr;
+		Deselect();
 }
 
 void LevelEditor::DeleteFocusedObject() {
@@ -203,6 +203,11 @@ void LevelEditor::DeleteFocusedObject() {
 				return;
 			}
 
+	setObjectList.InvalidateTree();
+}
+
+void LevelEditor::ReloadObjectWorldData()
+{
 	setObjectList.InvalidateTree();
 }
 
@@ -245,6 +250,11 @@ void LevelEditor::SpawnObject() {
 	focusedObject = objData;
 
 	setObjectList.InvalidateTree();
+}
+
+void LevelEditor::Deselect()
+{
+	focusedObject = nullptr;
 }
 
 void LevelEditor::GameServiceAddedCallback(GameService* service) {

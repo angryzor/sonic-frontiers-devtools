@@ -1,7 +1,7 @@
 #include "winres.h"
 
-#define CONCAT(x,y) x##y
-#define STR(x) #x
+#define STR_(x) #x
+#define STR(x) STR_(x)
 
 LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
 VS_VERSION_INFO VERSIONINFO
@@ -21,14 +21,14 @@ BEGIN
     BEGIN
         BLOCK "000004b0"
         BEGIN
-            VALUE "CompanyName",      STR(DEVTOOLS_AUTHOR)
-            VALUE "FileDescription",  STR(DEVTOOLS_PROJECT_LONG_DESCRIPTION)
-            VALUE "FileVersion",      STR(CONCAT(DEVTOOLS_VERSION,.0))
+            VALUE "CompanyName",      DEVTOOLS_PROJECT_AUTHOR
+            VALUE "FileDescription",  DEVTOOLS_PROJECT_LONG_DESCRIPTION
+            VALUE "FileVersion",      STR(DEVTOOLS_VERSION.0)
             VALUE "InternalName",     STR(DEVTOOLS_BINARY_FILENAME)
-            VALUE "LegalCopyright",   STR(DEVTOOLS_PROJECT_COPYRIGHT)
+            VALUE "LegalCopyright",   DEVTOOLS_PROJECT_COPYRIGHT
             VALUE "OriginalFilename", STR(DEVTOOLS_BINARY_FILENAME)
-            VALUE "ProductName",      STR(DEVTOOLS_PROJECT_DESCRIPTION)
-            VALUE "ProductVersion",   STR(CONCAT(DEVTOOLS_VERSION,.0))
+            VALUE "ProductName",      DEVTOOLS_PROJECT_DESCRIPTION
+            VALUE "ProductVersion",   STR(DEVTOOLS_VERSION.0)
         END
     END
     BLOCK "VarFileInfo"

@@ -4,6 +4,7 @@
 #include "editors/ResObjectWorldEditor.h"
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
+#include <ui/operation-modes/LevelEditor/LevelEditor.h>
 #include <reflection/serialization/resource-rfls/ResourceRfls.h>
 #include <locale>
 #include <codecvt>
@@ -319,34 +320,65 @@ void ResourceBrowser::ReloadResource(const wchar_t* filePath, ManagedResource* r
 
 	DWORD fileSize = GetFileSize(file, NULL);
 
-	void* buffer = resource->GetAllocator()->Alloc(fileSize, 64);
+	void* buffer = resource->GetResourceAllocator()->Alloc(fileSize, 64);
 
 	bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
 	CloseHandle(file);
 
 	if (result) {
 		if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
-			auto* res = static_cast<hh::game::ResObjectWorld*>(resource);
-			void* oldResource = res->binaryData;
+			bool success{ false };
+			Reference<hh::game::ResObjectWorld> res = static_cast<hh::game::ResObjectWorld*>(resource);
 
-			resource->Load(buffer, fileSize);
-			resource->GetAllocator()->Free(oldResource);
+			if (auto* gameManager = hh::game::GameManager::GetInstance()) {
+				if (auto* objWorld = gameManager->GetService<hh::game::ObjectWorld>()) {
 
-			auto* gameManager = hh::game::GameManager::GetInstance();
-			if (gameManager) {
-				auto* objWorld = gameManager->GetService<hh::game::ObjectWorld>();
-				if (objWorld)
-					for (auto* chunk : objWorld->GetWorldChunks())
-						chunk->Restart(true);
+					for (auto* chunk : objWorld->GetWorldChunks()) {
+						if (auto* layer = chunk->GetLayerByName(resource->GetName())) {
+							hh::ut::BinaryFile bfile{ buffer };
+
+							if (bfile.IsValid()) {
+								auto* allocator = layer->GetAllocator();
+								bool wasEnabled = layer->IsEnable();
+
+								if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+									levelEditor->Deselect();
+								
+								{
+									Reference<hh::game::ObjectWorldChunkLayer> l{ layer };
+									chunk->RemoveLayer(layer);
+									chunk->ShutdownPendingObjects();
+								}
+
+								res->size = fileSize;
+								res->originalBinaryData = buffer;
+								res->unpackedBinaryData = bfile.GetDataAddress(-1);
+								res->Load(res->unpackedBinaryData, res->size);
+
+								chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, res));
+								chunk->SetLayerEnabled(resource->GetName(), wasEnabled);
+
+								if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+									levelEditor->ReloadObjectWorldData();
+
+								success = true;
+								break;
+							}
+						}
+					}
+				}
 			}
+
+			if (!success)
+				resource->GetResourceAllocator()->Free(buffer);
 		}
 		else {
 			resource->Reload(buffer, fileSize);
-			resource->GetAllocator()->Free(buffer);
+			resource->GetResourceAllocator()->Free(buffer);
 		}
 	}
 	else {
-		resource->GetAllocator()->Free(buffer);
+		resource->GetResourceAllocator()->Free(buffer);
 	}
 }
 

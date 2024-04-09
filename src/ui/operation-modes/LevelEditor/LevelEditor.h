@@ -29,7 +29,9 @@ public:
 
     void SetFocusedChunk(hh::game::ObjectWorldChunk* chunk);
     void SpawnObject();
+    void Deselect();
     void DeleteFocusedObject();
+    void ReloadObjectWorldData();
 
     void HandleObjectSelection();
     void HandleObjectManipulation();

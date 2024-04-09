@@ -3,10 +3,11 @@
 
 class MemoryInspector;
 class HeapInspector : public hh::fnd::ReferencedObject {
+	static constexpr size_t numSamples = 256;
 	MemoryInspector* memoryInspector;
-	uint32_t allocationsHistory[512]{ 0 };
-	size_t allocatedHistory[512]{ 0 };
-	size_t usedHistory[512]{ 0 };
+	uint32_t allocationsHistory[numSamples]{ 0 };
+	size_t allocatedHistory[numSamples]{ 0 };
+	size_t usedHistory[numSamples]{ 0 };
 	int nextFrame{ 0 };
 	csl::ut::MoveArray<hh::fnd::Reference<HeapInspector>> childHeapInspectors{ GetAllocator() };
 public:

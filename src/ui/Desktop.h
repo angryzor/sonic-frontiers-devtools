@@ -3,7 +3,6 @@
 #include <ui/common/StandaloneWindow.h>
 
 class Desktop : public hh::fnd::BaseObject {
-    hh::fnd::Reference<OperationMode> operationMode;
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     hh::dbg::ViewerManager viewerManagerEmulator{ GetAllocator() };
@@ -12,6 +11,7 @@ class Desktop : public hh::fnd::BaseObject {
     hh::fnd::Reference<hh::physics::PhysicsViewerContext> physicsViewerCtx;
     bool prevPhysicsPickerMouseDown;
 public:
+    hh::fnd::Reference<OperationMode> operationMode;
     //hh::fnd::Reference<hh::game::MousePickingViewer> picker;
     hh::fnd::Reference<hh::physics::PhysicsMousePickingViewer> physicsPicker;
     //hh::fnd::Reference<hh::physics::PhysicsPickedObjectViewer> physicsObjPicker;
