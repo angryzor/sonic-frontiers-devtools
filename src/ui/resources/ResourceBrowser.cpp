@@ -92,7 +92,7 @@ void ResourceBrowser::RenderContents() {
 		//}
 		if (ImGui::MenuItem("Watch directory...")) {
 			IGFD::FileDialogConfig cfg{};
-			cfg.fileName = ".";
+			cfg.path = ".";
 			cfg.flags = ImGuiFileDialogFlags_Modal;
 			ImGuiFileDialog::Instance()->OpenDialog("ResourceBrowserWatchDirectory", "Choose directory", nullptr, cfg);
 		}
@@ -102,7 +102,7 @@ void ResourceBrowser::RenderContents() {
 
 	if (ImGuiFileDialog::Instance()->Display("ResourceBrowserWatchDirectory", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk())
-			WatchDirectory(ImGuiFileDialog::Instance()->GetFilePathName());
+			WatchDirectory(ImGuiFileDialog::Instance()->GetCurrentPath());
 
 		ImGuiFileDialog::Instance()->Close();
 	}
@@ -420,7 +420,7 @@ void ResourceBrowser::WatchDirectory(const std::string& path) {
 					return;
 
 				std::string fullExt = filename.substr(dotloc + 1);
-				auto* resourceType = ResourceTypeRegistry::GetInstance()->GetTypeInfoByExtension(fullExt.c_str());
+				auto* resourceType = ResourceBrowser::GetTypeInfoByExtension(fullExt.c_str());
 
 				if (resourceType == nullptr)
 					return;
