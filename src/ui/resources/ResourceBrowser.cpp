@@ -2,12 +2,11 @@
 #include "ResourceBrowser.h"
 #include "editors/ResReflectionEditor.h"
 #include "editors/ResObjectWorldEditor.h"
+#include <hot-reload/ReloadManager.h>
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
-#include <ui/operation-modes/LevelEditor/LevelEditor.h>
+#include <utilities/ResourceTypes.h>
 #include <reflection/serialization/resource-rfls/ResourceRfls.h>
-#include <locale>
-#include <codecvt>
 
 using namespace hh::fnd;
 
@@ -102,7 +101,7 @@ void ResourceBrowser::RenderContents() {
 
 	if (ImGuiFileDialog::Instance()->Display("ResourceBrowserWatchDirectory", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk())
-			WatchDirectory(ImGuiFileDialog::Instance()->GetCurrentPath());
+			ReloadManager::instance->WatchDirectory(ImGuiFileDialog::Instance()->GetCurrentPath());
 
 		ImGuiFileDialog::Instance()->Close();
 	}
@@ -123,8 +122,6 @@ void ResourceBrowser::RenderContents() {
 }
 
 void ResourceBrowser::RenderMainArea() {
-	//ImGui::SetNextWindowSize(ImVec2(300, ImGui::GetContentRegionAvail().y));
-	//if (ImGui::BeginChild("Resource types")) {
 	if (currentPath.size() == 0) {
 		auto* resourceManager = ResourceManager::GetInstance();
 
@@ -259,7 +256,7 @@ void ResourceBrowser::RenderLoadDialog() {
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			std::wstring wFilePath(filePath.begin(), filePath.end());
 
-			ReloadResource(wFilePath.c_str(), resource);
+			ReloadManager::instance->QueueReload(wFilePath, resource);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}
@@ -276,22 +273,6 @@ void ResourceBrowser::RenderExportDialog() {
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}
-}
-
-const char* ResourceBrowser::GetExtensionByTypeInfo(const hh::fnd::ResourceTypeInfo* typeInfo)
-{
-	if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo())
-		return "gedit";
-	else
-		return ResourceTypeRegistry::GetInstance()->GetExtensionByTypeInfo(typeInfo);
-}
-
-const hh::fnd::ResourceTypeInfo* ResourceBrowser::GetTypeInfoByExtension(const char* extension)
-{
-	if (!strcmp(extension, "gedit"))
-		return hh::game::ResObjectWorld::GetTypeInfo();
-	else
-		return ResourceTypeRegistry::GetInstance()->GetTypeInfoByExtension(extension);
 }
 
 void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, float size)
@@ -313,126 +294,8 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 	ImGui::Dummy(ImVec2(size, size));
 }
 
-void ResourceBrowser::ReloadResource(const wchar_t* filePath, ManagedResource* resource) {
-	HANDLE file = CreateFileW(filePath, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (file == INVALID_HANDLE_VALUE)
-		return;
-
-	DWORD fileSize = GetFileSize(file, NULL);
-
-	void* buffer = resource->GetResourceAllocator()->Alloc(fileSize, 64);
-
-	bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
-	CloseHandle(file);
-
-	if (result) {
-		if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
-			bool success{ false };
-			Reference<hh::game::ResObjectWorld> res = static_cast<hh::game::ResObjectWorld*>(resource);
-
-			if (auto* gameManager = hh::game::GameManager::GetInstance()) {
-				if (auto* objWorld = gameManager->GetService<hh::game::ObjectWorld>()) {
-
-					for (auto* chunk : objWorld->GetWorldChunks()) {
-						if (auto* layer = chunk->GetLayerByName(resource->GetName())) {
-							hh::ut::BinaryFile bfile{ buffer };
-
-							if (bfile.IsValid()) {
-								auto* allocator = layer->GetAllocator();
-								bool wasEnabled = layer->IsEnable();
-
-								if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-									levelEditor->Deselect();
-								
-								{
-									Reference<hh::game::ObjectWorldChunkLayer> l{ layer };
-									chunk->RemoveLayer(layer);
-									chunk->ShutdownPendingObjects();
-								}
-
-								res->size = fileSize;
-								res->originalBinaryData = buffer;
-								res->unpackedBinaryData = bfile.GetDataAddress(-1);
-								res->Load(res->unpackedBinaryData, res->size);
-
-								chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, res));
-								chunk->SetLayerEnabled(resource->GetName(), wasEnabled);
-
-								if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-									levelEditor->ReloadObjectWorldData();
-
-								success = true;
-								break;
-							}
-						}
-					}
-				}
-			}
-
-			if (!success)
-				resource->GetResourceAllocator()->Free(buffer);
-		}
-		else {
-			resource->Reload(buffer, fileSize);
-			resource->GetResourceAllocator()->Free(buffer);
-		}
-	}
-	else {
-		resource->GetResourceAllocator()->Free(buffer);
-	}
-}
-
 void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
 		ReflectionSerializer::SerializeToFile(filePath, static_cast<hh::game::ResObjectWorld*>(resource)->binaryData, ResourceRfls::resObjectWorld);
 	}
-}
-
-filewatch::FileWatch<std::string>* ResourceBrowser::fileWatcher = nullptr;
-
-void ResourceBrowser::WatchDirectory(const std::string& path) {
-	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-
-	if (fileWatcher != nullptr) {
-		fileWatcher->~FileWatch();
-		allocator->Free(fileWatcher);
-	}
-
-	fileWatcher = new (allocator) filewatch::FileWatch<std::string>(path, [path](const std::string& subpath, const filewatch::Event changeType) {
-		switch (changeType) {
-		case filewatch::Event::added:
-		case filewatch::Event::modified:
-			{
-				std::filesystem::path fspath{ path };
-				fspath /= subpath;
-
-				if (!std::filesystem::exists(fspath))
-					return;
-
-				std::wstring wfilename = fspath.filename();
-				std::wstring wext = fspath.extension();
-
-				std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t> converter;
-				std::string filename = converter.to_bytes(wfilename);
-				size_t dotloc = filename.find('.');
-
-				if (dotloc == std::string::npos)
-					return;
-
-				std::string fullExt = filename.substr(dotloc + 1);
-				auto* resourceType = ResourceBrowser::GetTypeInfoByExtension(fullExt.c_str());
-
-				if (resourceType == nullptr)
-					return;
-
-				auto* resource = ResourceManager::GetInstance()->GetResource(filename.c_str(), resourceType);
-
-				if (resource == nullptr)
-					return;
-
-				ReloadResource(fspath.c_str(), resource);
-			}
-			break;
-		}
-	});
 }

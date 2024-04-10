@@ -88,7 +88,7 @@ RflClass objectDataArrayEntry{ "ObjectDataArrayEntry", nullptr, 8, nullptr, 0, o
 RflClassMember resObjWorldMembers[]{
     { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, unk1), nullptr },
     { "unk2", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, unk2), nullptr },
-    { "unk3", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, unk3), nullptr },
+    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT8, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, flags), nullptr },
     { "objects", &objectDataArrayEntry, nullptr, RflClassMember::TYPE_ARRAY, RflClassMember::TYPE_STRUCT, 0, 0, offsetof(ObjectWorldData, objects), nullptr },
 };
 

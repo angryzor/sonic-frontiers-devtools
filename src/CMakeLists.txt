@@ -8,6 +8,7 @@ target_sources(devtools
         DllMain.cpp
         Mod.cpp
         debug-rendering/GOCVisualDebugDrawRenderer.cpp
+        hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/serialization/ReflectionSerializer.cpp
         reflection/serialization/resource-rfls/ResObjectWorld.cpp
@@ -43,9 +44,11 @@ target_sources(devtools
         utilities/math/EulerTransform.cpp
         utilities/math/MathUtils.cpp
         utilities/ObjectDataUtils.cpp
+        utilities/ResourceTypes.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/GOCVisualDebugDrawRenderer.h
+        hot-reload/ReloadManager.h
         reflection/ReflectiveOperations.h
         reflection/serialization/EndianSwaps.h
         reflection/serialization/ReflectionSerializer.h
@@ -86,4 +89,5 @@ target_sources(devtools
         utilities/math/EulerTransform.h
         utilities/math/MathUtils.h
         utilities/ObjectDataUtils.h
+        utilities/ResourceTypes.h
 )

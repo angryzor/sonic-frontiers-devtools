@@ -4,6 +4,7 @@
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <hot-reload/ReloadManager.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -163,6 +164,7 @@ void Context::init() {
 
 	Desktop::instance = new (allocator) Desktop{ allocator };
 
+	ReloadManager::instance = new (allocator) ReloadManager(allocator);
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 
 	// Setup Platform/Renderer backends
