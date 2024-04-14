@@ -1,3 +1,4 @@
+cmake_minimum_required(VERSION 3.28)
 project(HedgeLibWrapper)
 
 set(HEDGELIB_BUILD_HEDGERENDER OFF)

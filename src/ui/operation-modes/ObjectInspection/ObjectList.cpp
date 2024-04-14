@@ -42,7 +42,7 @@ void ObjectList::Render() {
 	const ImGuiWindowFlags windowFlags
 		= 0;
 
-	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Objects", NULL, windowFlags)) {
 		if (ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {

@@ -15,7 +15,7 @@ void ObjectLibrary::Render() {
 	const ImGuiWindowFlags windowFlags
 		= 0;
 
-	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Object library", NULL, windowFlags)) {
 		if (levelEditor.focusedChunk) {
 			const char* targetLayerPreview = "<none>";

@@ -249,7 +249,7 @@ void Theme_ImGui() {
 	ImGui::StyleColorsDark(&style);
 }
 
-Theme Theme::themes[3] = {
+Theme Theme::themes[themeCount] = {
 	{ "Sonic Frontiers", Theme_SonicFrontiers },
 	{ "Gindows", Theme_Gindows },
 	{ "ImGui Default", Theme_ImGui },

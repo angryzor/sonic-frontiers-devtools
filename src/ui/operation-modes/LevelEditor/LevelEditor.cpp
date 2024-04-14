@@ -132,17 +132,18 @@ void LevelEditor::HandleObjectManipulation() {
 		auto absoluteTransform = ObjectTransformDataToAffine3f(focusedObject->transform);
 
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), camera->viewportData.projMatrix.data(), gizmoOperation, gizmoMode, absoluteTransform.data(), NULL, NULL);
 
-		// Update both transforms based on this changed absolute transform.
-		UpdateAbsoluteTransform(absoluteTransform, *focusedObject);
+		if (ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), camera->viewportData.projMatrix.data(), gizmoOperation, gizmoMode, absoluteTransform.data(), NULL, NULL)) {
+			// Update both transforms based on this changed absolute transform.
+			UpdateAbsoluteTransform(absoluteTransform, *focusedObject);
 
-		// Copy changes to the live object if any.
-		int idx = focusedChunk->GetObjectIndexById(focusedObject->id);
-		if (idx != -1)
-			if (auto* obj = focusedChunk->GetObjectByIndex(idx))
-				if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-					UpdateGOCTransform(*focusedObject, *gocTransform);
+			// Copy changes to the live object if any.
+			int idx = focusedChunk->GetObjectIndexById(focusedObject->id);
+			if (idx != -1)
+				if (auto* obj = focusedChunk->GetObjectByIndex(idx))
+					if (auto* gocTransform = obj->GetComponent<GOCTransform>())
+						UpdateGOCTransform(*focusedObject, *gocTransform);
+		}
 
 		CheckGizmoHotkeys();
 	}

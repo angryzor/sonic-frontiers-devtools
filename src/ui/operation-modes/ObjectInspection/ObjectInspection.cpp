@@ -46,9 +46,9 @@ void ObjectInspection::HandleObjectManipulation() {
 		auto parentTransform = absoluteTransform * localTransform.inverse();
 
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
-		ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), gctx->viewportDatas[0].projMatrix.data(), gizmoOperation, gizmoMode, absoluteTransform.data(), NULL, NULL);
 
-		gocTransform->SetLocalTransform(Affine3fToTransform(parentTransform.inverse() * absoluteTransform));
+		if (ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), gctx->viewportDatas[0].projMatrix.data(), gizmoOperation, gizmoMode, absoluteTransform.data(), NULL, NULL))
+			gocTransform->SetLocalTransform(Affine3fToTransform(parentTransform.inverse() * absoluteTransform));
 	}
 
 	CheckGizmoHotkeys();

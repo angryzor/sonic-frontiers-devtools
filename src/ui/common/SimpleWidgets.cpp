@@ -1,4 +1,5 @@
 #include "SimpleWidgets.h"
+#include <utilities/math/MathUtils.h>
 
 void MatrixValues(const Eigen::Matrix4f& mat) {
 	ImGui::Text("%f %f %f %f", mat(0, 0), mat(0, 1), mat(0, 2), mat(0, 3));
@@ -33,9 +34,117 @@ void ViewportDataInfo(const hh::gfnd::ViewportData& viewport)
 	MatrixValues(viewport.projMatrix);
 }
 
+void VectorEditor(const char* label, csl::math::Vector3& vec) {
+	ImGui::DragFloat3(label, vec.data(), 0.01f);
+}
+
+void QuaternionEditor(const char* label, csl::math::Quaternion& quat) {
+	auto euler = MatrixToEuler(quat.toRotationMatrix());
+
+	ImGui::DragFloat3(label, euler.data(), 0.005f);
+	if (ImGui::IsItemEdited())
+		quat = EulerToQuat(euler);
+}
+
 void WorldPositionEditor(hh::fnd::WorldPosition& worldPos) {
-	ImGui::DragFloat3("Position", worldPos.m_Position.data());
-	ImGui::DragFloat4("Rotation", worldPos.m_Rotation.coeffs().data());
+	ImGui::BeginGroup();
+	VectorEditor("Position", worldPos.m_Position);
+	QuaternionEditor("Rotation", worldPos.m_Rotation);
+	ImGui::EndGroup();
+}
+
+void TransformEditor(csl::math::Transform& transform) {
+	ImGui::BeginGroup();
+	VectorEditor("Position", transform.position);
+	QuaternionEditor("Rotation", transform.rotation);
+	VectorEditor("Scale", transform.scale);
+	ImGui::EndGroup();
+}
+
+bool BeginVectorViewerTable (const char* id, bool withWAxis) {
+	bool tableResult = ImGui::BeginTable(id, withWAxis ? 5 : 4);
+
+	if (tableResult) {
+		ImGui::GetStateStorage()->SetBool(ImGui::GetID("WithW"), withWAxis);
+
+		ImGui::TableSetupColumn("X");
+		ImGui::TableSetupColumn("Y");
+		ImGui::TableSetupColumn("Z");
+		if (withWAxis)
+			ImGui::TableSetupColumn("W");
+		ImGui::TableSetupColumn("");
+
+		ImGui::TableHeadersRow();
+	}
+
+	return tableResult;
+}
+
+void EndVectorViewerTable() {
+	ImGui::EndTable();
+}
+
+void VectorViewerTableItem(const char* label, const csl::math::Vector3& vec) {
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.x());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.y());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.z());
+	if (ImGui::GetStateStorage()->GetBool(ImGui::GetID("WithW")))
+		ImGui::TableNextColumn();
+	ImGui::TableNextColumn();
+	ImGui::Text(label);
+}
+
+void VectorViewerTableItem(const char* label, const csl::math::Vector4& vec) {
+	IM_ASSERT(ImGui::GetStateStorage()->GetBool(ImGui::GetID("WithW")));
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.x());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.y());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.z());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", vec.w());
+	ImGui::TableNextColumn();
+	ImGui::Text(label);
+}
+
+void VectorViewerTableItem(const char* label, const csl::math::Quaternion& quat) {
+	IM_ASSERT(ImGui::GetStateStorage()->GetBool(ImGui::GetID("WithW")));
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.x());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.y());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.z());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.w());
+	ImGui::TableNextColumn();
+	ImGui::Text(label);
+}
+
+void WorldPositionViewer(const char* id, const hh::fnd::WorldPosition& worldPos)
+{
+	if (BeginVectorViewerTable(id, true)) {
+		VectorViewerTableItem("Position", worldPos.m_Position);
+		VectorViewerTableItem("Rotation", worldPos.m_Rotation);
+		EndVectorViewerTable();
+	}
+}
+
+void TransformViewer(const char* id, csl::math::Transform& transform)
+{
+	if (BeginVectorViewerTable(id, true)) {
+		VectorViewerTableItem("Position", transform.position);
+		VectorViewerTableItem("Rotation", transform.rotation);
+		VectorViewerTableItem("Scale", transform.scale);
+		EndVectorViewerTable();
+	}
 }
 
 static char dummy[1] = { '\0' };

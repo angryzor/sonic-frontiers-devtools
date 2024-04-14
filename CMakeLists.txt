@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.10
+project(devtools VERSION 0.1.11
                  DESCRIPTION "Sonic Frontiers DevTools"
                  LANGUAGES CXX)
 
@@ -26,6 +26,7 @@ add_subdirectory(${RANGERS_SDK_PATH} rangers-sdk EXCLUDE_FROM_ALL)
 # DevTools
 add_library(devtools SHARED)
 target_compile_features(devtools PRIVATE cxx_std_17)
+target_compile_options(devtools PRIVATE /ZI)
 target_compile_definitions(devtools
     PRIVATE
         DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:devtools>
@@ -50,6 +51,7 @@ foreach(LIB rangers-sdk HedgeLib filewatch detours imgui imgui-backend-win32 img
 endforeach()
 
 add_subdirectory(src)
+add_subdirectory(natvis)
 configure_file(Mod.ini.in Mod.ini)
 
 set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT devtools)

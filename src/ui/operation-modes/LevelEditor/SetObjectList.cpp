@@ -33,8 +33,7 @@ const char* SetObjectListTreeNode::GetLabel() const {
 	case SetObjectListTreeNode::Type::LAYER:
 		return info.layer.layer->GetName();
 	case SetObjectListTreeNode::Type::GROUP:
-		return info.group.label;
-	}
+		return info.group.label;	}
 }
 
 SetObjectListTreeNode SetObjectListTreeNode::CreateObjectNode(csl::fnd::IAllocator* allocator, ObjectData* objData) {
@@ -175,7 +174,7 @@ void SetObjectList::Render() {
 	const ImGuiWindowFlags windowFlags
 		= 0;
 
-	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_Once);
+	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("World objects", NULL, windowFlags)) {
 		if (objWorld == nullptr) {
 			ImGui::Text("ObjectWorld service not active. Load a level first.");

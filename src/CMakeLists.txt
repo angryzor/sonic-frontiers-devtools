@@ -61,6 +61,7 @@ target_sources(devtools
         ui/common/Textures.h
         ui/common/Theme.h
         ui/common/Translations.h
+        ui/common/TreeView.h
         ui/Context.h
         ui/core-services/CameraManagerInspector.h
         ui/core-services/GameUpdaterInspector.h

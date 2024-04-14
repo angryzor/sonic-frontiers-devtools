@@ -21,58 +21,62 @@ class ReflectionEditor {
         typedef std::numeric_limits<float> numeric_limits;
     };
 
-    static constexpr float default_step(bool integer) { return integer ? 1.0f : 0.001f; }
-    template<typename T> static constexpr float default_step() {  return default_step(rfl_type_info<T>::numeric_limits::is_integer); }
+    template<typename T> class range_info {
+    };
+    template<> class range_info<int32_t> {
+    public:
+        static constexpr const char* name = "RangeSInt32";
+    };
+    template<> class range_info<uint32_t> {
+    public:
+        static constexpr const char* name = "RangeUInt32";
+    };
+    template<> class range_info<float> {
+    public:
+        static constexpr const char* name = "RangeFloat";
+    };
+    template<> class range_info<csl::math::Vector2> {
+    public:
+        static constexpr const char* name = "RangeVector2";
+    };
+    template<> class range_info<csl::math::Vector3> {
+    public:
+        static constexpr const char* name = "RangeVector3";
+    };
+    template<> class range_info<csl::math::Vector4> {
+    public:
+        static constexpr const char* name = "RangeVector4";
+    };
 
-    template<typename T> static float rfl_step(const T& rangeValue) { return static_cast<float>(rangeValue); }
-    template<> static float rfl_step<csl::math::Vector2>(const csl::math::Vector2& rangeValue) { return rangeValue.x(); }
-    template<> static float rfl_step<csl::math::Vector3>(const csl::math::Vector3& rangeValue) { return rangeValue.x(); }
-    template<> static float rfl_step<csl::math::Vector4>(const csl::math::Vector4& rangeValue) { return rangeValue.x(); }
+    static float default_step(bool integer) { return integer ? 1.0f : defaultFloatStep; }
+    template<typename T> static float default_step() {  return default_step(rfl_type_info<T>::numeric_limits::is_integer); }
 
-    template<typename T>
-    static void RenderSliderlessScalarRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, ImGuiDataType dtype, int n, const char* rangeName) {
-        const hh::fnd::RflCustomAttribute* rangeAttr;
-
-        if (rangeName && (rangeAttr = member->GetAttribute(rangeName))) {
-            const T* rangeValues = reinterpret_cast<const T*>(rangeAttr->GetData());
-
-            ImGui::DragScalarN(name, dtype, obj, n, rfl_step(rangeValues[2]), &rangeValues[0], &rangeValues[1]);
-        }
-        else {
-            ImGui::DragScalarN(name, dtype, obj, n, default_step<T>());
-        }
-    }
-
-    template<typename T>
-    static void RenderSliderlessScalarRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, ImGuiDataType dtype, int n) {
-        RenderSliderlessScalarRflParamEditor<T>(name, obj, member, dtype, n, nullptr);
-    }
-
-    template<typename T>
-    static void RenderScalarRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, ImGuiDataType dtype, int n, const char* rangeName, const T& minSliderRange, const T& maxSliderRange) {
-        const hh::fnd::RflCustomAttribute* rangeAttr;
-
-        if (rangeName && (rangeAttr = member->GetAttribute(rangeName))) {
-            const T* rangeValues = reinterpret_cast<const T*>(rangeAttr->GetData());
-
-            if (minSliderRange <= rangeValues[0] && rangeValues[1] <= maxSliderRange)
-                ImGui::SliderScalarN(name, dtype, obj, n, &rangeValues[0], &rangeValues[1]);
-            else
-                ImGui::DragScalarN(name, dtype, obj, n, rfl_step(rangeValues[2]), &rangeValues[0], &rangeValues[1]);
-        }
-        else {
-            ImGui::DragScalarN(name, dtype, obj, n, default_step<T>());
-        }
-    }
-
-    template<typename T>
-    static void RenderScalarRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, ImGuiDataType dtype, int n, const char* rangeName) {
-        RenderScalarRflParamEditor<T>(name, obj, member, dtype, n, rangeName, rfl_type_info<T>::numeric_limits::lowest() / 2, rfl_type_info<T>::numeric_limits::max() / 2);
-    }
+    template<typename T> static float rfl_step(const T& rangeValue) { return std::fmaxf(minFloatStep, static_cast<float>(rangeValue)); }
+    template<> static float rfl_step<csl::math::Vector2>(const csl::math::Vector2& rangeValue) { return rfl_step(rangeValue.x()); }
+    template<> static float rfl_step<csl::math::Vector3>(const csl::math::Vector3& rangeValue) { return rfl_step(rangeValue.x()); }
+    template<> static float rfl_step<csl::math::Vector4>(const csl::math::Vector4& rangeValue) { return rfl_step(rangeValue.x()); }
 
     template<typename T>
     static void RenderScalarRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, ImGuiDataType dtype, int n) {
-        RenderScalarRflParamEditor<T>(name, obj, member, dtype, n, nullptr);
+        ImGui::DragScalarN(name, dtype, obj, n, default_step<T>());
+    }
+
+    template<typename T, typename R, bool allowSliders = true>
+    static void RenderScalarRflParamEditor(const char* name, void* obj, const hh::fnd::RflClassMember* member, ImGuiDataType dtype, int n) {
+        if (const auto* rangeAttr = member->GetAttribute(range_info<typename R>::name)) {
+            auto rangeValues = reinterpret_cast<const R*>(rangeAttr->GetData());
+
+            if constexpr (allowSliders) {
+                if (rangeValues[1] - rangeValues[0] < sliderCutOff) {
+                    ImGui::SliderScalarN(name, dtype, obj, n, &rangeValues[0], &rangeValues[1]);
+                    return;
+                }
+            }
+ 
+            ImGui::DragScalarN(name, dtype, obj, n, rfl_step(rangeValues[2]), &rangeValues[0], &rangeValues[1]);
+        }
+        else
+            RenderScalarRflParamEditor<T>(name, obj, member, dtype, n);
     }
 
     static int64_t ReadPrimitiveInt(void* obj, const hh::fnd::RflClassMember::Type type);
@@ -87,6 +91,10 @@ class ReflectionEditor {
     static void RflClassMembersEditor(void* obj, const hh::fnd::RflClass* rflClass);
 
 public:
+    static float defaultFloatStep;
+    static float minFloatStep;
+    static unsigned int sliderCutOff;
+
     static void Render(void* reflectionData, const hh::fnd::RflClass* rflClass) {
         ImGui::BeginGroup();
         RenderStructRflParamEditor(rflClass->m_pName, reflectionData, rflClass);

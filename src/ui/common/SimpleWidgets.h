@@ -2,7 +2,17 @@
 
 void MatrixValues(const Eigen::Matrix4f& mat);
 void ViewportDataInfo(const hh::gfnd::ViewportData& viewport);
+void VectorEditor(const char* label, csl::math::Vector3& vec);
+void QuaternionEditor(const char* label, csl::math::Quaternion& quat);
 void WorldPositionEditor(hh::fnd::WorldPosition& worldPos);
+void TransformEditor(csl::math::Transform& transform);
+bool BeginVectorViewerTable(const char* id, bool withWAxis);
+void EndVectorViewerTable();
+void VectorViewerTableItem(const char* label, const csl::math::Vector3& vec);
+void VectorViewerTableItem(const char* label, const csl::math::Vector4& vec);
+void VectorViewerTableItem(const char* label, const csl::math::Quaternion& quat);
+void WorldPositionViewer(const char* id, const hh::fnd::WorldPosition& worldPos);
+void TransformViewer(const char* id, csl::math::Transform& transform);
 void InputText(const char* label, csl::ut::VariableString* str, ImGuiInputTextFlags flags = 0);
 void InputText(const char* label, csl::ut::String* str, ImGuiInputTextFlags flags = 0);
 void InputObjectId(const char* label, hh::game::ObjectId* id);

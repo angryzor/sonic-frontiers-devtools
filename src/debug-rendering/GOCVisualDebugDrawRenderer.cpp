@@ -1,16 +1,18 @@
 #include "GOCVisualDebugDrawRenderer.h"
-#include <d3dcompiler.h>
-#ifdef _MSC_VER
-#pragma comment(lib, "d3dcompiler")
-#endif
+#include <utilities/math/MathUtils.h>
 
 using namespace hh::game;
 using namespace hh::gfx;
 
+bool GOCVisualDebugDrawRenderer::colliderFilters[32][32]{ false };
+bool GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw{ true };
+bool GOCVisualDebugDrawRenderer::renderColliders{ true };
+uint8_t GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity{ 80 };
+
 class GOCMyVisualDebugDraw : public GOCVisualDebugDraw {
 public:
-	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> geometry;
-	//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> fillGeometry;
+	//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> geometry;
+	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> fillGeometry;
 	csl::ut::Color<uint8_t> color{ 0, 0, 0, 0 };
 	bool hasGeometry;
 
@@ -28,8 +30,8 @@ GOCMyVisualDebugDraw* GOCMyVisualDebugDraw::Create(csl::fnd::IAllocator* allocat
 
 GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator)
 	: GOCVisualDebugDraw{ allocator }
-	, geometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
-	//, fillGeometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
+	//, geometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
+	, fillGeometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
 {
 }
 
@@ -50,13 +52,14 @@ HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140D06320, GOCMyVisualDebugDraw* 
 	bool ret = originalVisualDebugDrawSetup(gocVisual, setupInfo);
 
 	if (setupInfo.geometry != nullptr) {
-		gocVisual->geometry->InitializeEdge(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
-		gocVisual->geometry->SetColor(setupInfo.color);
+		//gocVisual->geometry->InitializeEdge(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
+		//gocVisual->geometry->SetColor(setupInfo.color);
 
-		//csl::ut::Color8 fillColor{ setupInfo.color };
-		//fillColor.a = 50;
-		//gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
-		//gocVisual->fillGeometry->SetColor(setupInfo.color);
+		csl::ut::Color8 fillColor{ setupInfo.color };
+		//fillColor.a = 80;
+		fillColor.a = GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity;
+		gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
+		gocVisual->fillGeometry->SetColor(fillColor);
 
 		gocVisual->hasGeometry = true;
 	}
@@ -83,7 +86,7 @@ GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* all
 	, renderable{ new (allocator) Renderable(allocator, this) }
 {
 	renderable->name = "DevTools Debug Overlay";
-	hh::gfnd::GraphicsContext::GetInstance()->AddRenderableToViewport(renderable, 7);
+	hh::gfnd::GraphicsContext::GetInstance()->AddRenderableToViewport(renderable, 7);// 5);
 }
 
 void GOCVisualDebugDrawRenderer::AddGOC(GOCMyVisualDebugDraw* goc) {
@@ -92,6 +95,11 @@ void GOCVisualDebugDrawRenderer::AddGOC(GOCMyVisualDebugDraw* goc) {
 
 void GOCVisualDebugDrawRenderer::RemoveGOC(GOCMyVisualDebugDraw* goc) {
 	gocs.remove(gocs.find(goc));
+}
+
+Eigen::Matrix4f GetColliderTransform(hh::physics::GOCCollider* collider) {
+	Eigen::Affine3f affine{};
+	return affine.fromPositionOrientationScale(collider->transformedWorldPosition.m_Position, collider->transformedWorldPosition.m_Rotation, collider->scale).matrix();
 }
 
 void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderableParameter* renderableParameter) {
@@ -112,12 +120,47 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 	memcpy(bdi.viewMatrix, camera->viewportData.viewMatrix.data(), sizeof(camera->viewportData.viewMatrix));
 	memcpy(bdi.projMatrix, camera->viewportData.projMatrix.data(), sizeof(camera->viewportData.projMatrix));
 	renderer->drawContext->BeginDraw(bdi);
+	renderer->drawContext->SetCullingMode(1);
 
-	for (auto& goc : renderer->gocs) {
-		if (!goc->hasGeometry)
-			continue;
+	if (renderGOCVisualDebugDraw) {
+		for (auto& goc : renderer->gocs) {
+			if (!goc->hasGeometry)
+				continue;
 
-		goc->geometry->Render(renderer->drawContext, goc->transformationMatrix);
+			//goc->geometry->Render(renderer->drawContext, goc->worldMatrix);
+			goc->fillGeometry->Render(renderer->drawContext, goc->worldMatrix);
+		}
+	}
+
+	if (renderColliders) {
+		for (auto* gameObject : gameManager->m_Objects) {
+			//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {
+			//	renderer->drawContext->DrawOBB(gocV->worldMatrix, { 1, 1, 1 }, { 255, 255, 255, 0 });
+			//	renderer->drawContext->DrawAABB(gocV->transformedAabb.m_Min, gocV->transformedAabb.m_Max, { 255, 255, 255, 255 });
+			//}
+			for (auto* goc : gameObject->m_Components) {
+				if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
+					auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
+					if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+						renderer->drawContext->DrawSphere({ GetColliderTransform(cGoc) }, cGoc->radius, { 255, 255, 255, 0 });
+				}
+				else if (goc->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
+					auto* cGoc = static_cast<hh::physics::GOCBoxCollider*>(goc);
+					if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+						renderer->drawContext->DrawOBB({ GetColliderTransform(cGoc) }, cGoc->dimensions, { 255, 255, 255, 0 });
+				}
+				else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
+					auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
+					if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+						renderer->drawContext->DrawCapsule({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
+				}
+				else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
+					auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);
+					if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+						renderer->drawContext->DrawCylinder({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
+				}
+			}
+		}
 	}
 
 	renderer->drawContext->EndDraw();
