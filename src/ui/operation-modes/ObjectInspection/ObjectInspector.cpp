@@ -218,7 +218,7 @@ void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {
 	auto transform = component.transform;
 
 	ImGui::SeparatorText("Main local transform (editable form)");
-	TransformEditor(component.transform);
+	TransformEditor(transform);
 	if (ImGui::IsItemEdited())
 		component.SetLocalTransform(transform);
 
