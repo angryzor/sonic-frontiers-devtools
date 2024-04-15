@@ -71,7 +71,6 @@ void Desktop::HandleMousePicking()
 	auto& io = ImGui::GetIO();
 
 	pickerClicked = false;
-	ImGui::Text("Objects selected");
 
 	if (!io.WantCaptureMouse && !ImGui::IsAnyItemHovered()) {
 		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
