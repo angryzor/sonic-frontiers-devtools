@@ -55,6 +55,9 @@ HOOK(LRESULT, __fastcall, WndProcHook, 0x140D68F80, HWND hWnd, UINT msg, WPARAM 
 
 		if (io.WantCaptureMouse && msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST)
 			return true;
+
+		if (io.WantCaptureKeyboard && msg >= WM_KEYFIRST && msg <= WM_KEYLAST)
+			return true;
 	}
 
 	return originalWndProcHook(hWnd, msg, wParam, lParam);
@@ -162,10 +165,10 @@ void Context::init() {
 	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
 	auto* allocator = &devtoolsAllocator;
 
-	Desktop::instance = new (allocator) Desktop{ allocator };
-
 	ReloadManager::instance = new (allocator) ReloadManager(allocator);
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
+	Desktop::instance = new (allocator) Desktop{ allocator };
+
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);

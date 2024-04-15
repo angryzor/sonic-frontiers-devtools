@@ -54,10 +54,17 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::fnd::SUpd
 			return;
 		}
 
+		auto* gameManager = hh::game::GameManager::GetInstance();
+		if (gameManager)
+			gameManager->PreResourceReloadCallback(request->resource);
+
 		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
 			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
 		else
 			Reload(buffer, fileSize, request->resource);
+
+		if (gameManager)
+			gameManager->PostResourceReloadCallback(request->resource);
 
 		delete request;
     }

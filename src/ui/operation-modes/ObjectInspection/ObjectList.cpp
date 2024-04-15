@@ -12,7 +12,7 @@ ObjectList::ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& object
 void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-	if (objectInspection.focusedObject == obj)
+	if (objectInspection.focusedObjects.find(obj) != -1)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 	auto* transform = obj->GetComponent<GOCTransform>();
@@ -20,8 +20,10 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	if (transform && transform->GetChildren().size() != 0) {
 		bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
 
-		if (ImGui::IsItemClicked())
-			objectInspection.focusedObject = obj;
+		if (ImGui::IsItemClicked()) {
+			objectInspection.focusedObjects.clear();
+			objectInspection.focusedObjects.push_back(obj);
+		}
 		
 		if (isOpen) {
 			for (auto& child : transform->GetChildren()) {
@@ -33,8 +35,10 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	else {
 		ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->pObjectName.c_str());
 
-		if (ImGui::IsItemClicked())
-			objectInspection.focusedObject = obj;
+		if (ImGui::IsItemClicked()) {
+			objectInspection.focusedObjects.clear();
+			objectInspection.focusedObjects.push_back(obj);
+		}
 	}
 }
 
@@ -66,13 +70,15 @@ void ObjectList::Render() {
 							for (auto* obj : layer->objects) {
 								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-								if (objectInspection.focusedObject == obj)
+								if (objectInspection.focusedObjects.find(obj) != -1)
 									nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
 
-								if (ImGui::IsItemClicked())
-									objectInspection.focusedObject = obj;
+								if (ImGui::IsItemClicked()) {
+									objectInspection.focusedObjects.clear();
+									objectInspection.focusedObjects.push_back(obj);
+								}
 							}
 							ImGui::TreePop();
 						}

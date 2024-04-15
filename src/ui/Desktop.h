@@ -13,7 +13,7 @@ class Desktop : public hh::fnd::BaseObject {
     //hh::physics::PhysicsQueryResult lastRaycastResult;
     bool pickerClicked{ false };
     bool locationPicked{ false };
-    hh::game::GameObject* pickedObject;
+    csl::ut::MoveArray<hh::game::GameObject*> pickedObjects{ GetAllocator() };
     csl::math::Vector3 pickedLocation;
 public:
     static bool selectionColliderFilters[32][32];
@@ -35,7 +35,7 @@ public:
     //bool IsPickerMouseDown() const;
     //bool IsPickerMouseClicked() const;
     bool IsPickerMouseReleased() const;
-    hh::game::GameObject* GetPickedObject() const;
+    const csl::ut::MoveArray<hh::game::GameObject*>& GetPickedObjects() const;
     const csl::math::Vector3* GetPickedLocation() const;
     void SwitchToObjectInspectionMode();
     void SwitchToLevelEditorMode();

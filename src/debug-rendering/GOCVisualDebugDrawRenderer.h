@@ -1,5 +1,6 @@
 #pragma once
 class GOCMyVisualDebugDraw;
+class DebugRenderable;
 class GOCVisualDebugDrawRenderer : public hh::fnd::ReferencedObject
 {
 	class Renderable : public hh::gfnd::Renderable {
@@ -22,9 +23,17 @@ public:
 	hh::gfnd::DrawContext::Unk2 unk2;
 	hh::gfnd::DrawContext::Unk3 unk3;
 	hh::gfnd::DrawContext* drawContext;
+	csl::ut::MoveArray<DebugRenderable*> additionalRenderables{ GetAllocator() };
 	GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator);
 	void AddGOC(GOCMyVisualDebugDraw* goc);
 	void RemoveGOC(GOCMyVisualDebugDraw* goc);
 	static hh::fnd::Reference<GOCVisualDebugDrawRenderer> instance;
 	static void InstallHooks();
+};
+
+class DebugRenderable {
+public:
+	DebugRenderable();
+	virtual ~DebugRenderable();
+	virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) = 0;
 };

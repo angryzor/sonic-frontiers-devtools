@@ -17,14 +17,18 @@ void ObjectDataInspector::Render() {
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_FirstUseEver, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(800, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Object data inspector", NULL, windowFlags)) {
-		if (levelEditor.focusedObject == nullptr) {
+		if (levelEditor.focusedObjects.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");
 		}
+		else if (levelEditor.focusedObjects.size() > 1) {
+			ImGui::Text("Multiple objects selected");
+		}
 		else {
-			ObjectDataEditor::Render(levelEditor.focusedObject);
+			auto focusedObject = levelEditor.focusedObjects[0];
+			ObjectDataEditor::Render(focusedObject);
 
 			if (ImGui::IsItemEdited()) {
-				if (auto* obj = levelEditor.focusedChunk->GetGameObjectByObjectId(levelEditor.focusedObject->id)) {
+				if (auto* obj = levelEditor.focusedChunk->GetGameObjectByObjectId(focusedObject->id)) {
 					hh::dbg::MsgParamChangedInEditor msg{};
 
 					obj->ProcessMessage(msg);
@@ -32,8 +36,8 @@ void ObjectDataInspector::Render() {
 			}
 
 			if (ImGui::IsItemDeactivatedAfterEdit()) {
-				auto status = levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(levelEditor.focusedObject->id);
-				auto idx = levelEditor.focusedChunk->GetObjectIndexById(levelEditor.focusedObject->id);
+				auto status = levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(focusedObject->id);
+				auto idx = levelEditor.focusedChunk->GetObjectIndexById(focusedObject->id);
 
 				if (status.objectData && idx != -1) {
 					levelEditor.focusedChunk->DespawnByIndex(idx);

@@ -2,6 +2,7 @@
 #include <ui/common/SimpleWidgets.h>
 #include <ui/Desktop.h>
 #include <utilities/ObjectDataUtils.h>
+#include <utilities/BoundingBoxes.h>
 #include <utilities/math/MathUtils.h>
 
 using namespace hh::fnd;
@@ -27,6 +28,14 @@ LevelEditor::~LevelEditor() {
 		objWorld->RemoveWorldListener(this);
 }
 
+void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
+{
+	if (haveSelectionAabb) {
+		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
+		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 140, 255, 255, 255 });
+	}
+}
+
 void LevelEditor::Render() {
 	setObjectList.Render();
 	objectDataInspector.Render();
@@ -45,8 +54,18 @@ void LevelEditor::Render() {
 		return;
 
 	// Object manipulation
-	if (focusedObject)
+	if (focusedObjects.size() > 0) {
+		csl::ut::MoveArray<GameObject*> gameObjects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		for (auto* obj : focusedObjects)
+			if (auto* gameObject = focusedChunk->GetGameObjectByObjectId(obj->id))
+				gameObjects.push_back(gameObject);
+
+		haveSelectionAabb = CalcApproxAabb(gameObjects, selectionAabb);
 		HandleObjectManipulation();
+	}
+	else {
+		haveSelectionAabb = false;
+	}
 
 	HandleObjectSelection();
 }
@@ -105,13 +124,14 @@ void LevelEditor::RenderDebugComments()
 
 void LevelEditor::HandleObjectSelection() {
 	if (Desktop::instance->IsPickerMouseReleased()) {
-		if (auto* picked = Desktop::instance->GetPickedObject()) {
-			auto* status = picked->GetWorldObjectStatus();
+		auto& picked = Desktop::instance->GetPickedObjects();
+		focusedObjects.clear();
+		for (auto* object : picked) {
+			auto* status = object->GetWorldObjectStatus();
 
-			focusedObject = status == nullptr || focusedChunk->GetObjectIndexById(status->objectData->id) == -1 ? nullptr : status->objectData;
+			if (status != nullptr && focusedChunk->GetObjectIndexById(status->objectData->id) != -1)
+				focusedObjects.push_back(status->objectData);
 		}
-		else
-			focusedObject = nullptr;
 	}
 
 	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && placeTargetLayer && Desktop::instance->GetPickedLocation())
@@ -128,21 +148,58 @@ void LevelEditor::HandleObjectManipulation() {
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		// We are operating the gizmo on the absolute transform so ImGuizmo can position it correctly.
-		auto absoluteTransform = ObjectTransformDataToAffine3f(focusedObject->transform);
+		Eigen::Affine3f pivotTransform{};
+		if (focusedObjects.size() > 1 && haveSelectionAabb)
+			pivotTransform.fromPositionOrientationScale((selectionAabb.m_Min + selectionAabb.m_Max) / 2.0f, Eigen::Quaternionf::Identity(), Eigen::Vector3f{ 1.0f, 1.0f, 1.0f });
+		else
+			pivotTransform = ObjectTransformDataToAffine3f(focusedObjects[0]->transform);
+
+		csl::ut::MoveArray<ObjectData*> objsToMove{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		for (auto& object : focusedObjects) {
+			ObjectData* obj = object;
+			bool keepLooking{ true };
+			while (keepLooking) {
+				if (obj->parentID != ObjectId{ 0, 0 }) {
+					for (auto& obj2 : focusedObjects) {
+						if (obj2->id == obj->parentID) {
+							keepLooking = false;
+							break;
+						}
+					}
+
+					obj = focusedChunk->GetWorldObjectStatusByObjectId(obj->parentID).objectData;
+				}
+				else {
+					objsToMove.push_back(object);
+					keepLooking = false;
+				}
+			}
+		}
+
+		csl::ut::MoveArray<Eigen::Affine3f> preTransforms{ hh::fnd::MemoryRouter::GetTempAllocator() };
+
+		for (auto& object : objsToMove) {
+			auto absoluteTransform = ObjectTransformDataToAffine3f(object->transform);
+			auto localTransform = ObjectTransformDataToAffine3f(object->localTransform);
+			preTransforms.push_back(pivotTransform.inverse() * absoluteTransform);
+		}
 
 		ImGuizmo::SetRect(0, 0, io.DisplaySize.x, io.DisplaySize.y);
 
-		if (ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), camera->viewportData.projMatrix.data(), gizmoOperation, gizmoMode, absoluteTransform.data(), NULL, NULL)) {
-			// Update both transforms based on this changed absolute transform.
-			UpdateAbsoluteTransform(absoluteTransform, *focusedObject);
+		if (ImGuizmo::Manipulate(camera->viewportData.viewMatrix.data(), camera->viewportData.projMatrix.data(), gizmoOperation, gizmoMode, pivotTransform.data(), NULL, NULL)) {
+			size_t i{ 0 };
+			for (auto& object : objsToMove) {
+				// Update both transforms based on this changed absolute transform.
+				UpdateAbsoluteTransform(pivotTransform * preTransforms[i], *object);
+				i++;
 
-			// Copy changes to the live object if any.
-			int idx = focusedChunk->GetObjectIndexById(focusedObject->id);
-			if (idx != -1)
-				if (auto* obj = focusedChunk->GetObjectByIndex(idx))
-					if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-						UpdateGOCTransform(*focusedObject, *gocTransform);
+				// Copy changes to the live object if any.
+				int idx = focusedChunk->GetObjectIndexById(object->id);
+				if (idx != -1)
+					if (auto* obj = focusedChunk->GetObjectByIndex(idx))
+						if (auto* gocTransform = obj->GetComponent<GOCTransform>())
+							UpdateGOCTransform(*object, *gocTransform);
+			}
 		}
 
 		CheckGizmoHotkeys();
@@ -183,9 +240,6 @@ void LevelEditor::CheckGizmoHotkeys() {
 }
 
 void LevelEditor::CheckSelectionHotkeys() {
-	if (!focusedObject)
-		return;
-
 	if (ImGui::IsKeyPressed(ImGuiKey_Delete))
 		DeleteFocusedObject();
 
@@ -194,15 +248,16 @@ void LevelEditor::CheckSelectionHotkeys() {
 }
 
 void LevelEditor::DeleteFocusedObject() {
-	focusedChunk->Despawn(focusedObject);
+	for (auto& focusedObject : focusedObjects) {
+		focusedChunk->Despawn(focusedObject);
 
-	for (auto* layer : focusedChunk->GetLayers())
-		for (auto* object : layer->GetResource()->GetObjects())
-			if (object == focusedObject) {
-				layer->RemoveObjectData(focusedObject);
-				focusedObject = nullptr;
-				return;
-			}
+		for (auto* layer : focusedChunk->GetLayers())
+			for (auto* object : layer->GetResource()->GetObjects())
+				if (object == focusedObject)
+					layer->RemoveObjectData(focusedObject);
+	}
+
+	Deselect();
 
 	setObjectList.InvalidateTree();
 }
@@ -229,7 +284,7 @@ void LevelEditor::SpawnObject() {
 		objectClassToPlace,
 		{ mt(), mt() },
 		name,
-		focusedObject,
+		focusedObjects.size() == 1 ? focusedObjects[0] : nullptr,
 		{ csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0, 0, 0 } }
 	};
 
@@ -248,14 +303,15 @@ void LevelEditor::SpawnObject() {
 
 	resource->AddObject(objData);
 	focusedChunk->AddWorldObjectStatus(objData, true, 0);
-	focusedObject = objData;
+	focusedObjects.clear();
+	focusedObjects.push_back(objData);
 
 	setObjectList.InvalidateTree();
 }
 
 void LevelEditor::Deselect()
 {
-	focusedObject = nullptr;
+	focusedObjects.clear();
 }
 
 void LevelEditor::GameServiceAddedCallback(GameService* service) {
@@ -285,7 +341,7 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 
 	placeTargetLayer = nullptr;
 	objectClassToPlace = nullptr;
-	focusedObject = nullptr;
+	Deselect();
 	if (focusedChunk) {
 		focusedChunk->DespawnAll();
 		focusedChunk->ShutdownPendingObjects();

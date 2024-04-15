@@ -20,17 +20,21 @@ void ObjectInspector::Render() {
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_FirstUseEver, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Object inspector", NULL, windowFlags)) {
-		if (objectInspection.focusedObject == nullptr) {
+		if (objectInspection.focusedObjects.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");
 		}
+		else if (objectInspection.focusedObjects.size() > 1) {
+			ImGui::Text("Multiple objects selected");
+		}
 		else {
-			ImGui::Text("Object name: %s", objectInspection.focusedObject->pObjectName.c_str());
-			ImGui::Text("Layer: %d", objectInspection.focusedObject->layer);
+			auto focusedObject = objectInspection.focusedObjects[0];
+			ImGui::Text("Object name: %s", focusedObject->pObjectName.c_str());
+			ImGui::Text("Layer: %d", focusedObject->layer);
 			ImGui::Separator();
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Components")) {
 					if (ImGui::BeginChild("Content")) {
-						for (auto* component : objectInspection.focusedObject->m_Components) {
+						for (auto* component : focusedObject->m_Components) {
 							ImGui::PushID(component);
 
 							char title[200];
@@ -68,7 +72,10 @@ void ObjectInspector::RenderComponentInspector(GOComponent& component) {
 		RenderGOCCapsuleColliderInspector(static_cast<hh::physics::GOCCapsuleCollider&>(component));
 	} else if (component.pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
 		RenderGOCCylinderColliderInspector(static_cast<hh::physics::GOCCylinderCollider&>(component));
-	} else {
+	} else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass()) {
+		RenderGOCAnimatorInspector(static_cast<hh::anim::GOCAnimator&>(component));
+	}
+	else {
 		RenderUnknownComponentInspector(component);
 	}
 }
@@ -212,6 +219,88 @@ void ObjectInspector::RenderGOCCylinderColliderInspector(hh::physics::GOCCylinde
 	ImGui::Text("Radius: %f", component.radius);
 	ImGui::Text("Height: %f", component.height);
 	RenderGOCColliderInspector(component);
+}
+
+void RenderBlendNode(hh::anim::BlendNodeBase* node) {
+	const char* type;
+
+	switch (node->type) {
+	case hh::anim::BlendNodeType::LERP:
+		type = "LERP";
+		break;
+	case hh::anim::BlendNodeType::ADDITIVE:
+		type = "ADDITIVE";
+		break;
+	case hh::anim::BlendNodeType::CLIP:
+		type = "CLIP";
+		break;
+	case hh::anim::BlendNodeType::OVERRIDE:
+		type = "OVERRIDE";
+		break;
+	case hh::anim::BlendNodeType::LAYER:
+		type = "LAYER";
+		break;
+	case hh::anim::BlendNodeType::MULTIPLY:
+		type = "MULTIPLY";
+		break;
+	case hh::anim::BlendNodeType::BLEND_SPACE:
+		type = "BLENDSPACE";
+		break;
+	case hh::anim::BlendNodeType::TWO_POINT_LERP:
+		type = "TWO POINT LERP";
+		break;
+	default:
+		type = "UNKNOWN";
+		break;
+	}
+
+	if (ImGui::TreeNodeEx(node, ImGuiTreeNodeFlags_DefaultOpen, "%x - type %s - flags %x", node, type, node->flags)) {
+		for (auto* child : node->children)
+			RenderBlendNode(child);
+		ImGui::TreePop();
+	}
+}
+
+void ObjectInspector::RenderGOCAnimatorInspector(hh::anim::GOCAnimator& component)
+{
+	bool nope{ false };
+	const char* select{ "Select one" };
+	if (ImGui::BeginCombo("Current state", select)) {
+		auto& stateIds = component.asmResourceManager->animatorResource->stateIdsByName;
+		for (auto it = stateIds.begin(); it != stateIds.end(); it++) {
+			if (ImGui::Selectable(it.key(), &nope)) {
+				component.ChangeState(it.key());
+			}
+		}
+		ImGui::EndCombo();
+	}
+	//if (ImGui::BeginCombo("Variables", select)) {
+	ImGui::SeparatorText("Variables");
+	auto& variableIds = component.asmResourceManager->animatorResource->variableIdsByName;
+
+	for (auto it = variableIds.begin(); it != variableIds.end(); it++) {
+		ImGui::Text("%d: %s", *it, it.key());
+	}
+	//}
+
+	ImGui::SeparatorText("BlendNodes");
+	RenderBlendNode(component.animationStateMachine->blendTree);
+
+	ImGui::SeparatorText("Layers");
+	for (auto& layer : component.animationStateMachine->layers) {
+		if (ImGui::TreeNodeEx(&layer, ImGuiTreeNodeFlags_None, "%d - %s", layer.layerId, component.asmResourceManager->animatorResource->binaryData->layers[layer.layerId].name)) {
+			ImGui::Text("%d", layer.layerId);
+			ImGui::Text("%x", layer.unk2);
+			ImGui::Text("%x", layer.unk3);
+			ImGui::Text("%x", layer.unk4);
+			ImGui::Text("%x", layer.unk5);
+			ImGui::Text("%x", layer.unk6);
+			ImGui::Text("%x", layer.unk7);
+			ImGui::Text("%x", layer.unk8);
+			RenderBlendNode(layer.blendNode);
+			ImGui::TreePop();
+		}
+	}
 }
 
 void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {

@@ -11,6 +11,7 @@ class ObjectInspector : public hh::fnd::BaseObject {
     void RenderGOCBoxColliderInspector(hh::physics::GOCBoxCollider& component);
     void RenderGOCCapsuleColliderInspector(hh::physics::GOCCapsuleCollider& component);
     void RenderGOCCylinderColliderInspector(hh::physics::GOCCylinderCollider& component);
+    void RenderGOCAnimatorInspector(hh::anim::GOCAnimator& component);
 	void RenderUnknownComponentInspector(hh::game::GOComponent& component);
 
 public:
