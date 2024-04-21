@@ -5,6 +5,7 @@
 class Desktop : public hh::fnd::BaseObject {
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
+    csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
     csl::ut::MoveArray<hh::physics::PhysicsQueryResult> pickerResults{ GetAllocator() };
     //hh::dbg::ViewerManager viewerManagerEmulator{ GetAllocator() };
     //hh::fnd::Reference<hh::game::GameViewerContext> gameViewerCtx;
@@ -15,6 +16,8 @@ class Desktop : public hh::fnd::BaseObject {
     bool locationPicked{ false };
     csl::ut::MoveArray<hh::game::GameObject*> pickedObjects{ GetAllocator() };
     csl::math::Vector3 pickedLocation;
+    void AddStandaloneWindow(StandaloneWindow* window);
+    void RemoveStandaloneWindow(StandaloneWindow* window);
 public:
     static bool selectionColliderFilters[32][32];
     hh::fnd::Reference<OperationMode> operationMode;
@@ -29,8 +32,7 @@ public:
     Desktop(csl::fnd::IAllocator* allocator);
     ~Desktop();
     void Render();
-    void AddStandaloneWindow(StandaloneWindow* window);
-    void RemoveStandaloneWindow(StandaloneWindow* window);
+    void OpenStandaloneWindow(StandaloneWindow* window);
     void HandleMousePicking();
     //bool IsPickerMouseDown() const;
     //bool IsPickerMouseClicked() const;

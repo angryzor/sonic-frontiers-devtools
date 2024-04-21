@@ -18,7 +18,7 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	auto* transform = obj->GetComponent<GOCTransform>();
 
 	if (transform && transform->GetChildren().size() != 0) {
-		bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
+		bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
 		if (ImGui::IsItemClicked()) {
 			objectInspection.focusedObjects.clear();
@@ -33,7 +33,7 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 		}
 	}
 	else {
-		ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->pObjectName.c_str());
+		ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->name.c_str());
 
 		if (ImGui::IsItemClicked()) {
 			objectInspection.focusedObjects.clear();
@@ -51,7 +51,7 @@ void ObjectList::Render() {
 		if (ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
 				if (ImGui::BeginChild("Content")) {
-					for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
+					for (auto* layer : GameManager::GetInstance()->gameObjectLayers) {
 						for (auto* obj : layer->objects) {
 							auto* transform = obj->GetComponent<GOCTransform>();
 
@@ -65,7 +65,7 @@ void ObjectList::Render() {
 			}
 			if (ImGui::BeginTabItem("Layer view")) {
 				if (ImGui::BeginChild("Content")) {
-					for (auto* layer : GameManager::GetInstance()->m_GameObjectLayers) {
+					for (auto* layer : GameManager::GetInstance()->gameObjectLayers) {
 						if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
 							for (auto* obj : layer->objects) {
 								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
@@ -73,7 +73,7 @@ void ObjectList::Render() {
 								if (objectInspection.focusedObjects.find(obj) != -1)
 									nodeflags |= ImGuiTreeNodeFlags_Selected;
 
-								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->pObjectName.c_str());
+								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
 								if (ImGui::IsItemClicked()) {
 									objectInspection.focusedObjects.clear();

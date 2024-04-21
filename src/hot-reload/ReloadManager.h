@@ -16,9 +16,10 @@ public:
 
     static ReloadManager* instance;
 
-    virtual void UpdateCallback(hh::game::GameManager* gameManager, const hh::fnd::SUpdateInfo& updateInfo) override;
+    virtual void UpdateCallback(hh::game::GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo) override;
     void QueueReload(const std::wstring& path, hh::fnd::ManagedResource* resource);
     void Reload(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource);
+    void ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource);
     void Reload(void* buffer, size_t fileSize, hh::game::ResObjectWorld* resource);
     void WatchDirectory(const std::string& path);
 };

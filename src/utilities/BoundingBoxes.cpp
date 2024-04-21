@@ -19,7 +19,7 @@ bool CalcApproxAabb(const csl::ut::MoveArray<hh::game::GameObject*>& objects, cs
 			csl::geom::Aabb tempAabb;
 			int colliderCount{ 0 };
 
-			for (auto* component : object->m_Components) {
+			for (auto* component : object->components) {
 				if (component->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
 					auto* coll = static_cast<hh::physics::GOCSphereCollider*>(component);
 					tempAabb.m_Min = Eigen::Vector3f{ coll->transformedWorldPosition.m_Position - coll->scale * coll->radius };

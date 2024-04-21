@@ -35,6 +35,12 @@ void GameServiceInspector::RenderServiceInspector(hh::game::GameService& service
 	else if (service.pStaticClass == app::level::LevelInfo::GetClass()) {
 		RenderLevelInfoInspector(static_cast<app::level::LevelInfo&>(service));
 	}
+	else if (service.pStaticClass == app::game::GameModeResourceManager::GetClass()) {
+		RenderGameModeResourceManagerInspector(static_cast<app::game::GameModeResourceManager&>(service));
+	}
+	else if (service.pStaticClass == app::trr::TerrainManager::GetClass()) {
+		RenderTerrainManagerInspector(static_cast<app::trr::TerrainManager&>(service));
+	}
 	else {
 		RenderUnknownServiceInspector(service);
 	}
@@ -235,6 +241,33 @@ void GameServiceInspector::RenderStageDataInspector(app::level::StageData& data)
 	}
 
 	ImGui::PopID();
+}
+
+void GameServiceInspector::RenderGameModeResourceManagerInspector(app::game::GameModeResourceManager& service)
+{
+	for (auto& module : service.modules) {
+		if (ImGui::TreeNodeEx(module, ImGuiTreeNodeFlags_DefaultOpen, "%x", module->GetNameHash())) {
+			ImGui::Text("Module flags: %x", module->flags);
+			if (ImGui::TreeNode("Resources")) {
+				for (auto& resource : module->resourceCollection->resources) {
+					ImGui::Text("%s", resource.name);
+				}
+				ImGui::TreePop();
+			}
+			ImGui::TreePop();
+		}
+	}
+}
+
+void GameServiceInspector::RenderTerrainManagerInspector(app::trr::TerrainManager& service)
+{
+	ImGui::Text("Unk11: %d", service.currentTerrain);
+	ImGui::Text("Unk10 count: %d", service.unk10.size());
+	//ImGui::SeparatorText("Unk13s:");
+	//if (service.unk13.)
+	//for (auto i = service.unk13.begin(); i != service.unk13.end(); i++) {
+	//	ImGui::Text("%s", i.key());
+	//}
 }
 
 

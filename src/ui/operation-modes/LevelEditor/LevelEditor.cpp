@@ -88,7 +88,7 @@ void LevelEditor::RenderDebugComments()
 
 		ImGui::Begin("Debug text", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
 
-		for (auto* obj : gameManager->m_Objects) {
+		for (auto* obj : gameManager->objects) {
 			if (auto* gocTransform = obj->GetComponent<GOCTransform>()) {
 				hh::dbg::MsgGetDebugCommentInEditor msgGetDbgCmt{};
 

@@ -34,7 +34,7 @@ void ReloadManager::QueueReload(const std::wstring& path, ManagedResource* resou
 		delete prevPtr;
 }
 
-void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::fnd::SUpdateInfo& updateInfo)
+void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo)
 {
     if (auto* request = static_cast<ReloadRequest*>(InterlockedExchangePointer(&reloadRequestInFlight, nullptr))) {
 		HANDLE file = CreateFileW(request->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
@@ -55,16 +55,37 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::fnd::SUpd
 		}
 
 		auto* gameManager = hh::game::GameManager::GetInstance();
-		if (gameManager)
+		if (gameManager) {
 			gameManager->PreResourceReloadCallback(request->resource);
+			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+				trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
+		}
 
 		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
 			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
+		else if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo())
+			ReloadByLoad(buffer, fileSize, request->resource);
 		else
 			Reload(buffer, fileSize, request->resource);
 
-		if (gameManager)
+		if (gameManager) {
 			gameManager->PostResourceReloadCallback(request->resource);
+			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+				trrMgr->reloaderListener->PostResourceReloadCallback(request->resource);
+		}
+
+		if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo()
+			|| &request->resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
+			|| &request->resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
+			if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
+				for (auto& module : resMan->modules) {
+					if (module->GetNameHash() == 0x74DA1FC3) {
+						module->UnkFunc7();
+						module->Load();
+					}
+				}
+			}
+		}
 
 		delete request;
     }
@@ -72,7 +93,18 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::fnd::SUpd
 
 void ReloadManager::Reload(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
 {
+	hh::fnd::ResourceManagerResolver resolver{};
 	resource->Reload(buffer, fileSize);
+	resource->Resolve(resolver);
+	resource->GetResourceAllocator()->Free(buffer);
+}
+
+void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
+{
+	hh::fnd::ResourceManagerResolver resolver{};
+	resource->Unload();
+	resource->Load(buffer, fileSize);
+	resource->Resolve(resolver);
 	resource->GetResourceAllocator()->Free(buffer);
 }
 

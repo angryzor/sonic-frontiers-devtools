@@ -2,6 +2,7 @@
 #include "ResourceBrowser.h"
 #include "editors/ResReflectionEditor.h"
 #include "editors/ResObjectWorldEditor.h"
+#include "editors/ResMaterialEditor.h"
 #include <hot-reload/ReloadManager.h>
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
@@ -10,36 +11,12 @@
 
 using namespace hh::fnd;
 
-namespace heur::resources {
-	class ResAtomConfig { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResAtomCueSheet { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResMirageLight { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResMaterial { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResTerrainModel { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResModel { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResComputeShader { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResFragmentShader { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResVertexShader { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResLevel { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResMasterLevel { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResBitmapFont { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResScalableFontSet { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResEffect { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResPhysicalSkeleton { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	//class ResSoftBody { public: inline static const ResourceTypeInfo* GetTypeInfo(); };
-	//class ResHelperBone { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	//class ResOrcaData { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResAnimation { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResSkeleton { public: static const ResourceTypeInfo* GetTypeInfo(); };
-	class ResDvScene { public: static const ResourceTypeInfo* GetTypeInfo(); };
-}
-
 AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
 	if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
 	if (typeInfo == heur::resources::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;
 	if (typeInfo == heur::resources::ResAtomCueSheet::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
 	if (typeInfo == heur::resources::ResMirageLight::GetTypeInfo()) return AssetIconId::LIGHTING;
-	if (typeInfo == heur::resources::ResMaterial::GetTypeInfo()) return AssetIconId::MATERIAL;
+	if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) return AssetIconId::MATERIAL;
 	if (typeInfo == heur::resources::ResTerrainModel::GetTypeInfo()) return AssetIconId::TERRAIN_MODEL;
 	if (typeInfo == heur::resources::ResModel::GetTypeInfo()) return AssetIconId::MODEL;
 	if (typeInfo == heur::resources::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
@@ -172,6 +149,9 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			}
 			else if (typeInfo == ResReflection<void>::GetTypeInfo()) {
 				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection<void>*>(resource));
+			}
+			else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
+				ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
 			}
 			//else if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo()) {
 			//	ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::game::ResObjectWorld*>(resource));

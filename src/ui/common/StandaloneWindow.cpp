@@ -2,7 +2,7 @@
 #include <ui/Desktop.h>
 
 StandaloneWindow::StandaloneWindow(csl::fnd::IAllocator* allocator) : hh::fnd::ReferencedObject{ allocator, true } {
-	Desktop::instance->AddStandaloneWindow(this);
+	Desktop::instance->OpenStandaloneWindow(this);
 }
 
 void StandaloneWindow::SetTitle(const char* title) {

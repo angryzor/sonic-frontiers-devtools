@@ -13,9 +13,9 @@ void GraphicsContextInspector::RenderContents()
 	if (ImGui::TreeNode("Renderable containers")) {
 		int i = 0;
 		for (auto& container : gfxContext->renderableContainers) {
-			if (ImGui::TreeNode(container, "Container %d", i++)) {
+			if (ImGui::TreeNode(container, "Render pass %d", i++)) {
 				for (auto& renderable : container->renderables) {
-					ImGui::TreeNodeEx(&renderable, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, renderable.name == nullptr ? "<anonymous>" : renderable.name);
+					ImGui::TreeNodeEx(&renderable, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s - priority %d", renderable.name == nullptr ? "<anonymous>" : renderable.name, renderable.priority);
 				}
 				ImGui::TreePop();
 			}

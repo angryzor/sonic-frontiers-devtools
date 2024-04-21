@@ -36,7 +36,9 @@ target_sources(devtools
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResEffectEditor.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
+        ui/resources/editors/ResMaterialEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
+        ui/resources/editors/ResSurfRideProjectEditor.cpp
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
@@ -82,7 +84,9 @@ target_sources(devtools
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h
         ui/resources/editors/ResObjectWorldEditor.h
+        ui/resources/editors/ResMaterialEditor.h
         ui/resources/editors/ResReflectionEditor.h
+        ui/resources/editors/ResSurfRideProjectEditor.h
         ui/resources/ResourceBrowser.h
         ui/SettingsManager.h
         ui/ToolBar.h

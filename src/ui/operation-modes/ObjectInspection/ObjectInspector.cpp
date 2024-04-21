@@ -28,13 +28,13 @@ void ObjectInspector::Render() {
 		}
 		else {
 			auto focusedObject = objectInspection.focusedObjects[0];
-			ImGui::Text("Object name: %s", focusedObject->pObjectName.c_str());
+			ImGui::Text("Object name: %s", focusedObject->name.c_str());
 			ImGui::Text("Layer: %d", focusedObject->layer);
 			ImGui::Separator();
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Components")) {
 					if (ImGui::BeginChild("Content")) {
-						for (auto* component : focusedObject->m_Components) {
+						for (auto* component : focusedObject->components) {
 							ImGui::PushID(component);
 
 							char title[200];
@@ -85,7 +85,7 @@ void ObjectInspector::RenderUnknownComponentInspector(GOComponent& component) {
 }
 
 void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerParameter& component) {
-	auto* obj = component.pOwnerGameObject;
+	auto* obj = component.owner;
 
 	ImGui::Text("Character:");
 	ImGui::SameLine();

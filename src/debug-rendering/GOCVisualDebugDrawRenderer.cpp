@@ -36,9 +36,9 @@ GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator)
 }
 
 void GOCMyVisualDebugDraw::OnGOCEvent(GOCEvent event, GameObject& ownerGameObject, void* data) {
-	if (event == GOCEvent::ACTIVATE)
+	if (event == GOCEvent::ADDED_TO_OBJECT)
 		GOCVisualDebugDrawRenderer::instance->AddGOC(this);
-	if (event == GOCEvent::DEACTIVATE)
+	if (event == GOCEvent::REMOVED_FROM_OBJECT)
 		GOCVisualDebugDrawRenderer::instance->RemoveGOC(this);
 	
 	GOCVisualDebugDraw::OnGOCEvent(event, ownerGameObject, data);
@@ -135,12 +135,12 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 		}
 
 		if (renderColliders) {
-			for (auto* gameObject : gameManager->m_Objects) {
+			for (auto* gameObject : gameManager->objects) {
 				//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {
 				//	renderer->drawContext->DrawOBB(gocV->worldMatrix, { 1, 1, 1 }, { 255, 255, 255, 0 });
 				//	renderer->drawContext->DrawAABB(gocV->transformedAabb.m_Min, gocV->transformedAabb.m_Max, { 255, 255, 255, 255 });
 				//}
-				for (auto* goc : gameObject->m_Components) {
+				for (auto* goc : gameObject->components) {
 					if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
 						if (colliderFilters[gameObject->layer][cGoc->filterCategory])

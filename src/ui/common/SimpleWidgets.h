@@ -15,7 +15,9 @@ void WorldPositionViewer(const char* id, const hh::fnd::WorldPosition& worldPos)
 void TransformViewer(const char* id, csl::math::Transform& transform);
 void InputText(const char* label, csl::ut::VariableString* str, ImGuiInputTextFlags flags = 0);
 void InputText(const char* label, csl::ut::String* str, ImGuiInputTextFlags flags = 0);
+void InputText(const char* label, hh::needle::intrusive_ptr<hh::needle::CNameIDObject>& str, ImGuiInputTextFlags flags = 0);
 void InputObjectId(const char* label, hh::game::ObjectId* id);
+void RsFlagMaskEditor(const char* label, hh::needle::RsFlagMask* mask);
 
 template<typename T>
 void CheckboxFlags(const char* label, csl::ut::Bitset<T>* v, T value) {

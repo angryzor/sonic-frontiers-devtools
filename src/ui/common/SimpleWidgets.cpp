@@ -1,5 +1,6 @@
 #include "SimpleWidgets.h"
 #include <utilities/math/MathUtils.h>
+#include <imgui_internal.h>
 
 void MatrixValues(const Eigen::Matrix4f& mat) {
 	ImGui::Text("%f %f %f %f", mat(0, 0), mat(0, 1), mat(0, 2), mat(0, 3));
@@ -164,6 +165,18 @@ void InputText(const char* label, csl::ut::String* str, ImGuiInputTextFlags flag
 	ImGui::InputText(label, str->c_str() == nullptr ? dummy : str->c_str(), str->size(), flags | ImGuiInputTextFlags_CallbackResize, StringResizeCallback, str);
 }
 
+void InputText(const char* label, hh::needle::intrusive_ptr<hh::needle::CNameIDObject>& str, ImGuiInputTextFlags flags)
+{
+	char name[256];
+
+	strcpy_s(name, str->nameProbably);
+
+	ImGui::InputText(label, name, sizeof(name));
+
+	if (ImGui::IsItemEdited())
+		str = hh::needle::CNameIDObject::RegisterUniqueObject(name, nullptr);
+}
+
 // This is a completely nonstandard hack around the fact that these things don't have resizeable buffers
 // (instead they are always allocated to the exact string length) but it shouldn't cause issues.
 class ResizeableVariableString : public csl::ut::VariableString {
@@ -247,4 +260,33 @@ void InputObjectId(const char* label, hh::game::ObjectId* id) {
 			ImGui::EndCombo();
 		}
 	}
+}
+
+template<typename T>
+void BitFieldEditor(const char* label, ImGuiDataType dtype, T* field, T startBit, T size) {
+	T minVal = 0;
+	T maxVal = ((1 << size) - 1);
+	T orig = (*field >> startBit) & maxVal;
+	T v = orig;
+	ImGui::DragScalar(label, dtype, &v, 1.0f, &minVal, &maxVal);
+	if (ImGui::IsItemEdited())
+		*field = (*field & ~(maxVal << startBit)) | (v << startBit);
+}
+
+void RsFlagMaskEditor(const char* label, hh::needle::RsFlagMask* mask)
+{
+	uint64_t origFlags = mask->flags;
+	ImGui::SeparatorText(label);
+	ImGui::Text("Mask: %zx", mask->flags);
+	BitFieldEditor("Blend mode 1", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask->flags), 28ui64, 4ui64);
+	BitFieldEditor("Blend mode 2", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask->flags), 23ui64, 4ui64);
+	BitFieldEditor("Blend op", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask->flags), 19ui64, 3ui64);
+	BitFieldEditor("Alpha blend mode 1", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask->flags), 14ui64, 4ui64);
+	BitFieldEditor("Alpha blend mode 2", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask->flags), 9ui64, 4ui64);
+	BitFieldEditor("Alpha blend op", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask->flags), 5ui64, 3ui64);
+	ImGui::CheckboxFlags("Enable blending", reinterpret_cast<uint64_t*>(&mask->flags), 1ui64 << 46ui64);
+	ImGui::CheckboxFlags("Cull front", reinterpret_cast<uint64_t*>(&mask->flags), 1ui64 << 41ui64);
+	ImGui::CheckboxFlags("Cull back", reinterpret_cast<uint64_t*>(&mask->flags), 1ui64 << 40ui64);
+	ImGui::CheckboxFlags("Cull unknown", reinterpret_cast<uint64_t*>(&mask->flags), 1ui64 << 39ui64);
+	ImGui::Text("Mask: %zx", mask->flags);
 }

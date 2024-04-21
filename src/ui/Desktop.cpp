@@ -44,14 +44,17 @@ void Desktop::Render() {
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
-	for (auto& window : windows) {
+	for (auto& window : windows)
 		if (!window->Render())
 			windowsThatWantToClose.push_back(window);
-	}
 
-	for (auto* window : windowsThatWantToClose) {
+	for (auto& window : windowsThatOpened)
+		AddStandaloneWindow(window);
+
+	windowsThatOpened.clear();
+
+	for (auto* window : windowsThatWantToClose)
 		RemoveStandaloneWindow(window);
-	}
 
 	SettingsManager::Render();
 
@@ -64,6 +67,10 @@ void Desktop::AddStandaloneWindow(StandaloneWindow* window) {
 
 void Desktop::RemoveStandaloneWindow(StandaloneWindow* window) {
 	this->windows.remove(this->windows.find(window));
+}
+
+void Desktop::OpenStandaloneWindow(StandaloneWindow* window) {
+	this->windowsThatOpened.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
 }
 
 void Desktop::HandleMousePicking()
@@ -121,7 +128,7 @@ void Desktop::HandleMousePicking()
 				};
 
 				pickedObjects.clear();
-				for (auto* object : gameManager->m_Objects) {
+				for (auto* object : gameManager->objects) {
 					if (auto* gocTransform = object->GetComponent<GOCTransform>()) {
 						bool foundCounter{ false };
 
@@ -223,7 +230,7 @@ void Desktop::HandleMousePicking()
 			if (auto* collider = result.collider.Get(*(rangerssdk::GetAddress(&hh::game::GameObjectSystem::handleManager)))) {
 				auto* gameObject = collider->GetOwnerGameObject();
 
-				if (ImGui::Selectable(gameObject->pObjectName)) {
+				if (ImGui::Selectable(gameObject->name)) {
 					pickedObjects.clear();
 					pickedObjects.push_back(collider->GetOwnerGameObject());
 					locationPicked = false;

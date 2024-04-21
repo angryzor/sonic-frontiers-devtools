@@ -13,6 +13,8 @@ public:
     static void RenderStageInfoInspector(app::level::StageInfo& service);
     static void RenderLevelInfoInspector(app::level::LevelInfo& service);
     static void RenderStageDataInspector(app::level::StageData& data);
+    static void RenderGameModeResourceManagerInspector(app::game::GameModeResourceManager& service);
+    static void RenderTerrainManagerInspector(app::trr::TerrainManager& service);
     static void RenderUnknownServiceInspector(hh::game::GameService& service);
     template<typename Rfl> static void RenderFxParamManagerInterpolatorInspector(const char* name, app::gfx::FxParamManager::Interpolator<Rfl>& interpolator) {
         if (ImGui::TreeNode(name)) {
