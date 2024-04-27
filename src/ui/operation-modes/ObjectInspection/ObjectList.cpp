@@ -1,6 +1,7 @@
 #include "ObjectList.h"
 #include "ObjectInspection.h"
 #include <ui/common/Icons.h>
+#include <utilities/math/MathUtils.h>
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -24,6 +25,29 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 			objectInspection.focusedObjects.clear();
 			objectInspection.focusedObjects.push_back(obj);
 		}
+
+		if (ImGui::BeginDragDropSource()) {
+			ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
+				GameObject* child = *static_cast<GameObject**>(payload->Data);
+
+				GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
+				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
+
+				if (obj != child) {
+					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->frame->fullTransform);
+					auto childAbsoluteTransform = TransformToAffine3f(childTransform->frame->fullTransform);
+
+					childTransform->transform = Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+					childTransform->SetParent(objTransform);
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 		
 		if (isOpen) {
 			for (auto& child : transform->GetChildren()) {
@@ -38,6 +62,29 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 		if (ImGui::IsItemClicked()) {
 			objectInspection.focusedObjects.clear();
 			objectInspection.focusedObjects.push_back(obj);
+		}
+
+		if (ImGui::BeginDragDropSource()) {
+			ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
+			ImGui::EndDragDropSource();
+		}
+
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
+				GameObject* child = *static_cast<GameObject**>(payload->Data);
+
+				GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
+				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
+
+				if (obj != child) {
+					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->frame->fullTransform);
+					auto childAbsoluteTransform = TransformToAffine3f(childTransform->frame->fullTransform);
+
+					childTransform->transform = Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+					childTransform->SetParent(objTransform);
+				}
+			}
+			ImGui::EndDragDropTarget();
 		}
 	}
 }
@@ -78,6 +125,29 @@ void ObjectList::Render() {
 								if (ImGui::IsItemClicked()) {
 									objectInspection.focusedObjects.clear();
 									objectInspection.focusedObjects.push_back(obj);
+								}
+
+								if (ImGui::BeginDragDropSource()) {
+									ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
+									ImGui::EndDragDropSource();
+								}
+
+								if (ImGui::BeginDragDropTarget()) {
+									if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
+										GameObject* child = *static_cast<GameObject**>(payload->Data);
+
+										GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
+										GOCTransform* childTransform = child->GetComponent<GOCTransform>();
+
+										if (obj != child) {
+											auto parentAbsoluteTransform = TransformToAffine3f(objTransform->frame->fullTransform);
+											auto childAbsoluteTransform = TransformToAffine3f(childTransform->frame->fullTransform);
+
+											childTransform->transform = Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+											childTransform->SetParent(objTransform);
+										}
+									}
+									ImGui::EndDragDropTarget();
 								}
 							}
 							ImGui::TreePop();

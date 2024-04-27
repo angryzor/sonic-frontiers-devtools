@@ -105,7 +105,7 @@ public:
 
 
 const char* ReflectionEditor::GetRflMemberName(const RflClassMember* member) {
-	const RflCustomAttribute* captionAttribute = member->m_pAttributes != nullptr ? nullptr : member->GetAttribute("Caption");
+	const RflCustomAttribute* captionAttribute = member->GetAttribute("Caption");
 	const char* caption = captionAttribute == nullptr ? nullptr : *reinterpret_cast<const char* const*>(captionAttribute->GetData());
 	const char* name = member->GetName();
 

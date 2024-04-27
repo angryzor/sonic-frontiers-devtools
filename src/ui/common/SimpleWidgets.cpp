@@ -39,6 +39,10 @@ void VectorEditor(const char* label, csl::math::Vector3& vec) {
 	ImGui::DragFloat3(label, vec.data(), 0.01f);
 }
 
+void VectorEditor(const char* label, csl::math::Vector4& vec) {
+	ImGui::DragFloat4(label, vec.data(), 0.01f);
+}
+
 void QuaternionEditor(const char* label, csl::math::Quaternion& quat) {
 	auto euler = MatrixToEuler(quat.toRotationMatrix());
 

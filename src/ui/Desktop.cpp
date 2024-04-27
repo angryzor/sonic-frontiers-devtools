@@ -6,6 +6,7 @@
 #include "game-services/GameServiceInspector.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
 #include "operation-modes/LevelEditor/LevelEditor.h"
+#include "reflection/serialization/ReflectionSerializer.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -21,20 +22,14 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 
 	Translations::Init(allocator);
 
-	//gameViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<GameViewerContext>();
-	//gameViewerCtx->gameManagers.push_back(GameManager::GetInstance());
-	//objViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<ObjectViewerContext>();
-	//physicsViewerCtx = viewerManagerEmulator.viewerContextManager->CreateViewerContext<PhysicsViewerContext>();
-
-	//*rangerssdk::GetAddress(&hh::dbg::ViewerManager::instance) = &viewerManagerEmulator;
-
-	//picker = viewerManagerEmulator.CreateViewer<MousePickingViewer>();
-	//physicsPicker = viewerManagerEmulator.CreateViewer<PhysicsMousePickingViewer>();
-	//physicsPicker->unk1 = true;
-
 	SwitchToObjectInspectionMode();
 }
 
+namespace app::game {
+	class GrindService : hh::game::GameService {
+		GAMESERVICE_CLASS_DECLARATION(GrindService)
+	};
+}
 void Desktop::Render() {
 	HandleMousePicking();
 
@@ -58,7 +53,34 @@ void Desktop::Render() {
 
 	SettingsManager::Render();
 
-	//prevPhysicsPickerMouseDown = physicsPicker->mouseDown;
+	if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
+		ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
+		ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
+	}
+
+	if (ImGui::Button("Add island objinfo")) {
+
+		auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+		auto* islandObjInfo = new (moduleAllocator) app::IslandObjInfo(moduleAllocator);
+		GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
+
+	}
+
+	//if (ImGui::Button("Export")) {
+	//	auto* sonicRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::SonicParameters>>("player_common");
+	//	auto* amyRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::AmyParameters>>("amy_common");
+	//	auto* tailsRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::TailsParameters>>("tails_common");
+	//	auto* knucklesRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::KnucklesParameters>>("knuckles_common");
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_sonic_cyberspace\\player_common_extra_cyber\\amy_modepackage_cyber.rfl", &sonicRfl->reflectionData->cyberspace);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_sonic_cyberspace\\player_common_extra_cyber\\tails_modepackage_cyber.rfl", &sonicRfl->reflectionData->cyberspace);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_sonic_cyberspace\\player_common_extra_cyber\\knuckles_modepackage_cyber.rfl", &sonicRfl->reflectionData->cyberspace);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_cyberspace_sv\\player_common_extra_cyber\\amy_modepackage_cyber.rfl", &amyRfl->reflectionData->cyberspaceSV);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_cyberspace_sv\\player_common_extra_cyber\\tails_modepackage_cyber.rfl", &tailsRfl->reflectionData->cyberspaceSV);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_cyberspace_sv\\player_common_extra_cyber\\knuckles_modepackage_cyber.rfl", &knucklesRfl->reflectionData->cyberspaceSV);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_forward_view\\player_common_extra_cyber\\amy_modepackage_cyber.rfl", &amyRfl->reflectionData->forwardView);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_forward_view\\player_common_extra_cyber\\tails_modepackage_cyber.rfl", &tailsRfl->reflectionData->forwardView);
+	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_forward_view\\player_common_extra_cyber\\knuckles_modepackage_cyber.rfl", &knucklesRfl->reflectionData->forwardView);
+	//}
 }
 
 void Desktop::AddStandaloneWindow(StandaloneWindow* window) {

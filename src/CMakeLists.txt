@@ -43,11 +43,13 @@ target_sources(devtools
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
         ui/tools/NeedleFxSceneDataTester.cpp
+        ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
         utilities/math/MathUtils.cpp
         utilities/ObjectDataUtils.cpp
         utilities/ResourceTypes.cpp
+        utilities/RflDiff.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/GOCVisualDebugDrawRenderer.h
@@ -91,10 +93,12 @@ target_sources(devtools
         ui/SettingsManager.h
         ui/ToolBar.h
         ui/tools/NeedleFxSceneDataTester.h
+        ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h
         utilities/math/EulerTransform.h
         utilities/math/MathUtils.h
         utilities/ObjectDataUtils.h
         utilities/ResourceTypes.h
+        utilities/RflDiff.h
 )

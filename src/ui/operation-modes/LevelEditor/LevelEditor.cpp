@@ -9,6 +9,12 @@ using namespace hh::fnd;
 using namespace hh::game;
 using namespace hh::physics;
 
+namespace app::gfx {
+	class GOCVisualGeometryInstance : public GOComponent {
+		GOCOMPONENT_CLASS_DECLARATION(GOCVisualGeometryInstance)
+	};
+}
+
 LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator }, mt{ std::random_device()() }
 {
 	auto* gameManager = GameManager::GetInstance();
@@ -17,6 +23,13 @@ LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ alloc
 
 	if (auto* objWorld = gameManager->GetService<ObjectWorld>())
 		objWorld->AddWorldListener(this);
+
+	hh::fnd::Geometry box{ allocator };
+	box.CreateBox({ 0, 0, 0 }, { 0.3, 0.3, 0.3 }, csl::math::Quaternion::Identity);
+
+	targetBox = (*rangerssdk::GetAddress(&hh::gfnd::DrawSystem::CreateGraphicsGeometry))(nullptr, allocator);
+	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
+	targetBox->SetColor({ 255, 255, 0, 255 });
 }
 
 LevelEditor::~LevelEditor() {
@@ -33,6 +46,16 @@ void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 	if (haveSelectionAabb) {
 		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
 		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 140, 255, 255, 255 });
+	}
+
+	if (focusedChunk) {
+		for (auto& status : focusedChunk->GetObjectStatuses()) {
+			auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
+
+			if (gameObject && ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>())) {
+				targetBox->Render(&ctx, { ObjectTransformDataToAffine3f(status.objectData->transform).matrix() });
+			}
+		}
 	}
 }
 
@@ -92,7 +115,7 @@ void LevelEditor::RenderDebugComments()
 			if (auto* gocTransform = obj->GetComponent<GOCTransform>()) {
 				hh::dbg::MsgGetDebugCommentInEditor msgGetDbgCmt{};
 
-				obj->ProcessMessage(msgGetDbgCmt);
+				obj->SendMessageImm(msgGetDbgCmt);
 				if (msgGetDbgCmt.comment[0] == 0)
 					continue;
 
@@ -123,16 +146,8 @@ void LevelEditor::RenderDebugComments()
 }
 
 void LevelEditor::HandleObjectSelection() {
-	if (Desktop::instance->IsPickerMouseReleased()) {
-		auto& picked = Desktop::instance->GetPickedObjects();
-		focusedObjects.clear();
-		for (auto* object : picked) {
-			auto* status = object->GetWorldObjectStatus();
-
-			if (status != nullptr && focusedChunk->GetObjectIndexById(status->objectData->id) != -1)
-				focusedObjects.push_back(status->objectData);
-		}
-	}
+	if (Desktop::instance->IsPickerMouseReleased())
+		Select(Desktop::instance->GetPickedObjects());
 
 	if (Desktop::instance->IsPickerMouseReleased() && objectClassToPlace && placeTargetLayer && Desktop::instance->GetPickedLocation())
 		SpawnObject();
@@ -194,12 +209,12 @@ void LevelEditor::HandleObjectManipulation() {
 				i++;
 
 				// Copy changes to the live object if any.
-				int idx = focusedChunk->GetObjectIndexById(object->id);
-				if (idx != -1)
-					if (auto* obj = focusedChunk->GetObjectByIndex(idx))
-						if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-							UpdateGOCTransform(*object, *gocTransform);
+				if (auto* obj = focusedChunk->GetGameObjectByObjectId(object->id))
+					if (auto* gocTransform = obj->GetComponent<GOCTransform>())
+						UpdateGOCTransform(*object, *gocTransform);
 			}
+
+			NotifyUpdatedObject();
 		}
 
 		CheckGizmoHotkeys();
@@ -248,8 +263,12 @@ void LevelEditor::CheckSelectionHotkeys() {
 }
 
 void LevelEditor::DeleteFocusedObject() {
+	// Send an early notification as we are going to delete it.
+	NotifyDeselectedObject();
+
 	for (auto& focusedObject : focusedObjects) {
 		focusedChunk->Despawn(focusedObject);
+		focusedChunk->ShutdownPendingObjects();
 
 		for (auto* layer : focusedChunk->GetLayers())
 			for (auto* object : layer->GetResource()->GetObjects())
@@ -277,7 +296,7 @@ void LevelEditor::SpawnObject() {
 	auto* alloc = resource->GetAllocator();
 
 	char name[200];
-	snprintf(name, sizeof(name), "%s_%zd", objectClassToPlace->pName, resource->GetObjects().size());
+	snprintf(name, sizeof(name), "%s_%zd", objectClassToPlace->name, resource->GetObjects().size());
 
 	auto* objData = new (alloc) ObjectData{
 		alloc,
@@ -303,15 +322,76 @@ void LevelEditor::SpawnObject() {
 
 	resource->AddObject(objData);
 	focusedChunk->AddWorldObjectStatus(objData, true, 0);
-	focusedObjects.clear();
-	focusedObjects.push_back(objData);
+	Select(objData);
 
 	setObjectList.InvalidateTree();
 }
 
+void LevelEditor::Select(const csl::ut::MoveArray<GameObject*>& objs)
+{
+	Deselect();
+	for (auto* object : objs) {
+		auto* status = object->GetWorldObjectStatus();
+
+		if (status != nullptr && focusedChunk->GetObjectIndexById(status->objectData->id) != -1)
+			focusedObjects.push_back(status->objectData);
+	}
+	NotifySelectedObject();
+}
+
+void LevelEditor::Select(const csl::ut::MoveArray<ObjectData*>& objectDatas)
+{
+	Deselect();
+	for (auto* objectData : objectDatas)
+		focusedObjects.push_back(objectData);
+	NotifySelectedObject();
+}
+
+void LevelEditor::Select(ObjectData* objectData)
+{
+	Deselect();
+	focusedObjects.push_back(objectData);
+	NotifySelectedObject();
+}
+
 void LevelEditor::Deselect()
 {
+	NotifyDeselectedObject();
 	focusedObjects.clear();
+}
+
+void LevelEditor::NotifySelectedObject()
+{
+	NotifyActiveObject(hh::dbg::MsgStartActiveObjectInEditor{});
+}
+
+void LevelEditor::NotifyUpdatedObject()
+{
+	NotifyActiveObject(hh::dbg::MsgUpdateActiveObjectInEditor{});
+
+	for (auto* obj : GameManager::GetInstance()->objects) {
+		if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
+			hh::dbg::MsgUpdateActiveObjectInEditor msg;
+			obj->SendMessageImm(msg);
+			void* updater = *reinterpret_cast<void**>(reinterpret_cast<size_t>(grind) + 168);
+			uint8_t* flag = reinterpret_cast<uint8_t*>(reinterpret_cast<size_t>(updater) + 172);
+			*flag |= 2;
+		}
+	}
+}
+
+void LevelEditor::NotifyDeselectedObject()
+{
+	NotifyActiveObject(hh::dbg::MsgFinishActiveObjectInEditor{});
+}
+
+void LevelEditor::NotifyActiveObject(Message& msg)
+{
+	if (focusedObjects.size() == 1) {
+		if (auto* obj = focusedChunk->GetGameObjectByObjectId(focusedObjects[0]->id)) {
+			obj->SendMessageImm(msg);
+		}
+	}
 }
 
 void LevelEditor::GameServiceAddedCallback(GameService* service) {
@@ -330,8 +410,12 @@ void LevelEditor::GameServiceRemovedCallback(GameService* service) {
 
 void LevelEditor::WorldChunkRemovedCallback(ObjectWorldChunk* chunk)
 {
-	if (focusedChunk == chunk)
-		SetFocusedChunk(nullptr);
+	if (focusedChunk == chunk) {
+		focusedObjects.clear();
+		placeTargetLayer = nullptr;
+		objectClassToPlace = nullptr;
+		focusedChunk = nullptr;
+	}
 }
 
 void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
@@ -346,6 +430,7 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 		focusedChunk->DespawnAll();
 		focusedChunk->ShutdownPendingObjects();
 		focusedChunk->SetEditorStatus(false);
+		focusedChunk->SpawnByAttribute(GetStatusEternal);
 	}
 	focusedChunk = chunk;
 	if (focusedChunk) {
@@ -353,6 +438,7 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 		focusedChunk->DespawnAll();
 		focusedChunk->ShutdownPendingObjects();
 		focusedChunk->Restart(true);
+		focusedChunk->SpawnByAttribute(GetStatusEternal);
 	}
 	setObjectList.InvalidateTree();
 }

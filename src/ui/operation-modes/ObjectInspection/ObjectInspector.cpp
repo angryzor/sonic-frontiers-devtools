@@ -74,8 +74,11 @@ void ObjectInspector::RenderComponentInspector(GOComponent& component) {
 		RenderGOCCylinderColliderInspector(static_cast<hh::physics::GOCCylinderCollider&>(component));
 	} else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass()) {
 		RenderGOCAnimatorInspector(static_cast<hh::anim::GOCAnimator&>(component));
-	}
-	else {
+	} else if (component.pStaticClass == app::game::GOCEventCollision::GetClass()) {
+		RenderGOCEventCollisionInspector(static_cast<app::game::GOCEventCollision&>(component));
+	} else if (component.pStaticClass == app::player::GOCPlayerKinematicParams::GetClass()) {
+		RenderGOCPlayerKinematicParamsInspector(static_cast<app::player::GOCPlayerKinematicParams&>(component));
+	} else {
 		RenderUnknownComponentInspector(component);
 	}
 }
@@ -83,6 +86,9 @@ void ObjectInspector::RenderComponentInspector(GOComponent& component) {
 void ObjectInspector::RenderUnknownComponentInspector(GOComponent& component) {
 	ImGui::Text("Inspector for this component not yet implemented");
 }
+
+const char* playerParameterModes[] = { "Normal", "Water", "Cyberspace Forward View", "Cyberspace Side View" };
+const char* playerParameterSuperStates[] = { "Normal", "Super Sonic", "Super Sonic 2" };
 
 void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerParameter& component) {
 	auto* obj = component.owner;
@@ -107,6 +113,9 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 		break;
 	}
 
+	ComboEnum("Mode", &component.mode, playerParameterModes);
+	ComboEnum("Super state", &component.superState, playerParameterSuperStates);
+
 	if (ImGui::Button("Edit character parameters..."))
 		switch (component.characterId) {
 		case app::player::CharacterId::SONIC:
@@ -125,6 +134,45 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 
 	if (ImGui::Button("Edit Camera Set parameters..."))
 		ResReflectionEditor::Create(GetAllocator(), &*component.cameraSetParameters);
+
+	if (ImGui::TreeNode("Currently loaded mode parameters")) {
+		ImGui::SeparatorText("Mode packages");
+		RenderModeParameterInspector("Mode packages", component.modePackages);
+		if (ImGui::TreeNode("Water mode package")) {
+			ReflectionEditor::Render(*component.waterModePackage);
+			ImGui::TreePop();
+		}
+		ImGui::SeparatorText("Parameters");
+		RenderModeParameterInspector("common", component.commonParameters);
+		RenderModeParameterInspector("speed", component.speedParameters);
+		RenderModeParameterInspector("jump", component.jumpParameters);
+		RenderModeParameterInspector("jumpSpeed", component.jumpSpeedParameters);
+		RenderModeParameterInspector("doubleJump", component.doubleJumpParameters);
+		RenderModeParameterInspector("boost", component.boostParameters);
+		RenderModeParameterInspector("airBoost", component.airBoostParameters);
+		ImGui::TreePop();
+	}
+}
+
+void ObjectInspector::RenderGOCPlayerKinematicParamsInspector(app::player::GOCPlayerKinematicParams& component)
+{
+	VectorEditor("Position", component.position);
+	QuaternionEditor("Rotation", component.rotation);
+	VectorEditor("Scale", component.scale);
+	ImGui::PushID("WorldPos");
+	ImGui::SeparatorText("World position");
+	ImGui::PopID();
+	WorldPositionEditor(component.worldPosition);
+	ImGui::SeparatorText("Physics");
+	VectorEditor("Velocity", component.velocity);
+	VectorEditor("Unk1", component.unk1);
+	VectorEditor("Unk2", component.unk2);
+	VectorEditor("Unk3", component.unk3);
+	VectorEditor("Unk4", component.unk4);
+	VectorEditor("Unk5", component.unk5);
+	VectorEditor("Unk6", component.unk6);
+	ImGui::Text("Unk7");
+	MatrixValues(component.unk7);
 }
 
 void ObjectInspector::RenderGOCColliderInspector(hh::physics::GOCCollider& component)
@@ -283,8 +331,10 @@ void ObjectInspector::RenderGOCAnimatorInspector(hh::anim::GOCAnimator& componen
 	}
 	//}
 
-	ImGui::SeparatorText("BlendNodes");
-	RenderBlendNode(component.animationStateMachine->blendTree);
+	if (component.animationStateMachine->blendTree) {
+		ImGui::SeparatorText("BlendNodes");
+		RenderBlendNode(component.animationStateMachine->blendTree);
+	}
 
 	ImGui::SeparatorText("Layers");
 	for (auto& layer : component.animationStateMachine->layers) {
@@ -301,6 +351,23 @@ void ObjectInspector::RenderGOCAnimatorInspector(hh::anim::GOCAnimator& componen
 			ImGui::TreePop();
 		}
 	}
+}
+
+void ObjectInspector::RenderGOCEventInspector(app::game::GOCEvent& component)
+{
+	CheckboxFlagsLT32("Triggered", &component.flags, app::game::GOCEvent::Flag::ENABLED);
+	CheckboxFlagsLT32("Unknown 1", &component.flags, app::game::GOCEvent::Flag::UNK1);
+	CheckboxFlagsLT32("Deactivate after event (maybe)", &component.flags, app::game::GOCEvent::Flag::MAYBE_DEACTIVATE_AFTER_EVENT);
+}
+
+const char* gocEventCollisionConditions[] = { "ON_TRIGGER", "ON_STAY", "UNKNOWN", "PULSE" };
+
+void ObjectInspector::RenderGOCEventCollisionInspector(app::game::GOCEventCollision& component)
+{
+	ImGui::SliderFloat("Time left", &component.timeLeft, 0, component.lifetime);
+	ImGui::DragFloat("Lifetime", &component.lifetime);
+	ImGui::Checkbox("Lifetime reached", &component.lifetimeReached);
+	ComboEnum("Condition", &component.collisionListener.condition, gocEventCollisionConditions);
 }
 
 void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {

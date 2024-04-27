@@ -9,6 +9,7 @@
 #include "core-services/CameraManagerInspector.h"
 #include "core-services/MemoryInspector.h"
 #include "tools/NeedleFxSceneDataTester.h"
+#include "tools/RflComparer.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
 using namespace hh::game;
@@ -56,6 +57,8 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Tools")) {
 			if (ImGui::MenuItem("NeedleFxSceneData Tester") && ImGui::FindWindowByName("NeedleFxSceneData testing tool") == nullptr)
 				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTester(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RFL Comparer"))
+				new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
 			ImGui::EndMenu();
 		}
 

@@ -37,4 +37,8 @@ class ReflectionSerializer : public hh::fnd::BaseObject {
 	ReflectionSerializer(csl::fnd::IAllocator* allocator, hl::stream& stream);
 public:
 	static void SerializeToFile(const hl::nchar* filename, void* obj, const hh::fnd::RflClass& rflClass);
+	template<typename T>
+	static void SerializeToFile(const hl::nchar* filename, T* obj) {
+		SerializeToFile(filename, obj, *rangerssdk::GetAddress(&T::rflClass));
+	}
 };

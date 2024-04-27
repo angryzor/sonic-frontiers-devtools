@@ -27,12 +27,15 @@ void ObjectDataInspector::Render() {
 			auto focusedObject = levelEditor.focusedObjects[0];
 			ObjectDataEditor::Render(focusedObject);
 
-			if (ImGui::IsItemEdited()) {
-				if (auto* obj = levelEditor.focusedChunk->GetGameObjectByObjectId(focusedObject->id)) {
-					hh::dbg::MsgParamChangedInEditor msg{};
+			if (ImGui::IsItemEdited() || ImGui::IsItemDeactivatedAfterEdit()) {
+				hh::dbg::MsgParamChangedInEditor msg{};
 
-					obj->ProcessMessage(msg);
-				}
+				levelEditor.NotifyActiveObject(msg);
+				// The only reason I do this is because apparently sending MsgParamChanged sets the debug visual visibility to false on volumes??
+				levelEditor.NotifySelectedObject();
+				levelEditor.NotifyUpdatedObject();
+
+				hh::dbg::MsgUpdateSetEditor msg3{};
 			}
 
 			if (ImGui::IsItemDeactivatedAfterEdit()) {
@@ -41,7 +44,14 @@ void ObjectDataInspector::Render() {
 
 				if (status.objectData && idx != -1) {
 					levelEditor.focusedChunk->DespawnByIndex(idx);
-					status.Restart();
+					levelEditor.focusedChunk->ShutdownPendingObjects();
+					levelEditor.focusedChunk->SpawnByIndex(idx, nullptr);
+					levelEditor.NotifySelectedObject();
+					
+					//for (auto* obj : GameManager::GetInstance()->objects) {
+					//	hh::dbg::MsgUpdateActiveObjectInEditor msg{};
+					//	obj->SendMessageImm(msg);
+					//}
 				}
 			}
 		}

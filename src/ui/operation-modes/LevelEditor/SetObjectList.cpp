@@ -47,10 +47,8 @@ bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
 
 	if (type == SetObjectListTreeViewNode::Type::OBJECT) {
-		if (ImGui::IsItemClicked()) {
-			list.levelEditor.focusedObjects.clear();
-			list.levelEditor.focusedObjects.push_back(object.object);
-		}
+		if (ImGui::IsItemClicked())
+			list.levelEditor.Select(object.object);
 
 		if (ImGui::BeginDragDropSource()) {
 			ObjectData* obj = object.object;

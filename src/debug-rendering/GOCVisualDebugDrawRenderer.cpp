@@ -123,17 +123,15 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 	renderer->drawContext->BeginDraw(bdi);
 	renderer->drawContext->SetCullingMode(1);
 
+	for (auto& goc : renderer->gocs) {
+		if (!goc->hasGeometry || (!(renderer->enabled && renderGOCVisualDebugDraw) && !(goc->visualFlags.test(GOCVisualDebugDraw::Flag::VISIBLE))))
+			continue;
+
+		//goc->geometry->Render(renderer->drawContext, goc->worldMatrix);
+		goc->fillGeometry->Render(renderer->drawContext, goc->worldMatrix);
+	}
+
 	if (renderer->enabled) {
-		if (renderGOCVisualDebugDraw) {
-			for (auto& goc : renderer->gocs) {
-				if (!goc->hasGeometry)
-					continue;
-
-				//goc->geometry->Render(renderer->drawContext, goc->worldMatrix);
-				goc->fillGeometry->Render(renderer->drawContext, goc->worldMatrix);
-			}
-		}
-
 		if (renderColliders) {
 			for (auto* gameObject : gameManager->objects) {
 				//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {

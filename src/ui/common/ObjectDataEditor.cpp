@@ -71,6 +71,8 @@ void ObjectDataEditor::Render(ObjectData* obj)
 
 	auto* objClass = objSystem->gameObjectRegistry->GetGameObjectClassByName(obj->gameObjectClass);
 
-	ImGui::SeparatorText("Object information");
-	ReflectionEditor::Render(obj->spawnerData, objClass->spawnerDataRflClass);
+	if (obj->spawnerData) {
+		ImGui::SeparatorText("Object information");
+		ReflectionEditor::Render(obj->spawnerData, objClass->spawnerDataRflClass);
+	}
 }
