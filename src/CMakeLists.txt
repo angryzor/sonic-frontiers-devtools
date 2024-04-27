@@ -43,6 +43,7 @@ target_sources(devtools
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
         ui/tools/NeedleFxSceneDataTester.cpp
+        ui/tools/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
@@ -93,6 +94,7 @@ target_sources(devtools
         ui/SettingsManager.h
         ui/ToolBar.h
         ui/tools/NeedleFxSceneDataTester.h
+        ui/tools/NeedleFxSceneDataTesterV2.h
         ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h

@@ -30,6 +30,7 @@ public:
                     ImGui::Text("Active on interpolation groups %x", interpolationJob.interpolationGroupMemberBits);
                     ImGui::Text("Owner hash: %zx", interpolationJob.ownerId);
                     ImGui::Text("Priority: %d", interpolationJob.priority);
+                    ImGui::Text("Unk6: %d", interpolationJob.unk6);
                     ImGui::Text("Tween duration: %f", 1 / interpolationJob.tweenPositionIncrementPerSecond);
                     ImGui::SliderFloat("Current time", &interpolationJob.currentTweenPosition, 0.0f, 1.0f);
                     ImGui::SeparatorText("Target parameters");

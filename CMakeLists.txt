@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.14
+project(devtools VERSION 0.1.15
                  DESCRIPTION "Sonic Frontiers DevTools"
                  LANGUAGES CXX)
 
