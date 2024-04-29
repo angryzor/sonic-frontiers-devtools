@@ -44,13 +44,13 @@ DevTools has a builtin level editor complete with rendering of debug visualizati
 
 ![The level editor](/.github/editor.png)
 
-DevTools is able to manipulate datastructures and resources inside the game's memory through reflection:
-
-![RFL editing](/.github/rfl.jpg)
-
 As well as debug information left in the game's binary:
 
 ![Rendering of debug visuals](/.github/debugv.jpg)
+
+DevTools is able to manipulate datastructures and resources inside the game's memory through reflection:
+
+![RFL editing](/.github/rfl.jpg)
 
 DevTools has a resource browser where you can see that game's currently loaded resources, edit them and hot reload them while the game is running:
 
