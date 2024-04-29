@@ -1,8 +1,8 @@
 # Sonic Frontiers DevTools
 
 This is an in-engine modding toolkit for the SEGA game Sonic Frontiers.
-Releases can be found on [https://github.com/angryzor/sonic-frontiers-devtools/releases](GitHub)
-or on [https://gamebanana.com/tools/15218](the project's GameBanana page).
+Releases can be found on [GitHub](https://github.com/angryzor/sonic-frontiers-devtools/releases)
+or on [the project's GameBanana page](https://gamebanana.com/tools/15218).
 A HMM update server is also available.
 
 ![The level editor](/.github/editor.png)
