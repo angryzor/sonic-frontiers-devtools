@@ -3,6 +3,7 @@
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include "resources/ResourceBrowser.h"
+#include "game-modes/GameModeInspector.h"
 #include "game-services/GameServiceInspector.h"
 #include "core-services/GameUpdaterInspector.h"
 #include "core-services/GraphicsContextInspector.h"
@@ -52,6 +53,8 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) CameraManagerInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("Memory"))
 				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("GameMode"))
+				new (Desktop::instance->GetAllocator()) GameModeInspector(Desktop::instance->GetAllocator());
 			ImGui::EndMenu();
 		}
 
@@ -94,7 +97,7 @@ void ToolBar::Render() {
 	ImGui::SetItemTooltip("Pauses (almost) every object layer. (Hotkey: F4)");
 	ImGui::SameLine();
 
-	gameUpdater.flags.m_dummy = static_cast<GameUpdater::Flags>(gameUpdaterFlags);
+	gameUpdater.flags.m_dummy = gameUpdaterFlags;
 
 	if (ImGui::Button("Step frame"))
 		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);

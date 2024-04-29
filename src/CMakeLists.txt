@@ -25,6 +25,7 @@ target_sources(devtools
         ui/core-services/GraphicsContextInspector.cpp
         ui/core-services/MemoryInspector.cpp
         ui/Desktop.cpp
+        ui/game-modes/GameModeInspector.cpp
         ui/game-services/GameServiceInspector.cpp
         ui/operation-modes/LevelEditor/LevelEditor.cpp
         ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
@@ -33,6 +34,7 @@ target_sources(devtools
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
         ui/operation-modes/ObjectInspection/ObjectInspector.cpp
         ui/operation-modes/ObjectInspection/ObjectList.cpp
+        ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResEffectEditor.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
@@ -76,6 +78,7 @@ target_sources(devtools
         ui/Desktop.h
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
+        ui/game-modes/GameModeInspector.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/LevelEditor/LevelEditor.h
         ui/operation-modes/LevelEditor/ObjectDataInspector.h
@@ -84,6 +87,7 @@ target_sources(devtools
         ui/operation-modes/ObjectInspection/ObjectInspection.h
         ui/operation-modes/ObjectInspection/ObjectInspector.h
         ui/operation-modes/ObjectInspection/ObjectList.h
+        ui/operation-modes/SurfRideEditor/SurfRideEditor.h
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h
         ui/resources/editors/ResObjectWorldEditor.h

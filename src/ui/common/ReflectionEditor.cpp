@@ -263,10 +263,10 @@ void ReflectionEditor::RenderPrimitiveEditor(const char* name, void* obj, const 
 		RenderScalarRflParamEditor<uint32_t, uint32_t>(name, obj, member, ImGuiDataType_U32, 1);
 		break;
 	case RflClassMember::TYPE_SINT64:
-		RenderScalarRflParamEditor<int64_t>(name, obj, member, ImGuiDataType_S64, 1);
+		RenderScalarRflParamEditor<int64_t, int64_t>(name, obj, member, ImGuiDataType_S64, 1);
 		break;
 	case RflClassMember::TYPE_UINT64:
-		RenderScalarRflParamEditor<uint64_t>(name, obj, member, ImGuiDataType_U64, 1);
+		RenderScalarRflParamEditor<uint64_t, uint64_t>(name, obj, member, ImGuiDataType_U64, 1);
 		break;
 	case RflClassMember::TYPE_FLOAT:
 		RenderScalarRflParamEditor<float, float>(name, obj, member, ImGuiDataType_Float, 1);

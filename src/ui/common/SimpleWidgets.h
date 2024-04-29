@@ -20,16 +20,16 @@ void InputText(const char* label, hh::needle::intrusive_ptr<hh::needle::CNameIDO
 void InputObjectId(const char* label, hh::game::ObjectId* id);
 void RsFlagMaskEditor(const char* label, hh::needle::RsFlagMask* mask);
 
-template<typename T>
-void CheckboxFlags(const char* label, csl::ut::Bitset<T>* v, T value) {
-	ImGui::CheckboxFlags(label, reinterpret_cast<std::underlying_type_t<T>*>(&v->m_dummy), static_cast<std::underlying_type_t<T>>(1) << static_cast<std::underlying_type_t<T>>(value));
+template<typename T, typename U>
+void CheckboxFlags(const char* label, csl::ut::Bitset<T, U>* v, T value) {
+	ImGui::CheckboxFlags(label, &v->m_dummy, static_cast<U>(1) << static_cast<U>(value));
 }
 
-template<typename T>
-void CheckboxFlagsLT32(const char* label, csl::ut::Bitset<T>* v, T value) {
-	int v2 = static_cast<std::underlying_type_t<T>>(v->m_dummy);
-	ImGui::CheckboxFlags(label, &v2, static_cast<std::underlying_type_t<T>>(1) << static_cast<std::underlying_type_t<T>>(value));
-	*v = static_cast<T>(static_cast<std::underlying_type_t<T>>(v2));
+template<typename T, typename U>
+void CheckboxFlagsLT32(const char* label, csl::ut::Bitset<T, U>* v, T value) {
+	int v2 = v->m_dummy;
+	ImGui::CheckboxFlags(label, &v2, static_cast<U>(1) << static_cast<U>(value));
+	*v = static_cast<U>(v2);
 }
 
 template<typename T, size_t count>

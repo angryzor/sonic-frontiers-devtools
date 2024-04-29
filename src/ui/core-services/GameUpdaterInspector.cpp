@@ -5,46 +5,62 @@ GameUpdaterInspector::GameUpdaterInspector(csl::fnd::IAllocator* allocator) : St
 	SetTitle("GameUpdater");
 }
 
+void GameUpdaterInspector::PreRender()
+{
+	ImGui::SetNextWindowSize(ImVec2(800, 920), ImGuiCond_Once);
+}
+
 void GameUpdaterInspector::RenderContents()
 {
 	auto& gameUpdater = hh::game::GameApplication::GetInstance()->GetGameUpdater();
-	//unsigned int flags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
-	//ImGui::CheckboxFlags("Unknown pause", &flags, 1);
-	//ImGui::CheckboxFlags("Full pause", &flags, 2);
-	//ImGui::CheckboxFlags("flag 2", &flags, 4);
-	//ImGui::CheckboxFlags("flag 3", &flags, 8);
-	//ImGui::CheckboxFlags("Step single frame", &flags, 16);
-	//ImGui::CheckboxFlags("Object pause", &flags, 32);
-	//ImGui::CheckboxFlags("flag 6", &flags, 64);
-	//ImGui::CheckboxFlags("flag 7", &flags, 128);
-	//gameUpdater.flags.m_dummy = static_cast<hh::game::GameUpdater::Flags>(flags);
+	auto* gameManager = hh::game::GameManager::GetInstance();
 
-	//ImGui::Text("unk7.unk1.unk1: %x", gameUpdater.unk7.unk1.unk1);
-	//ImGui::Text("unk7.unk1.unk2: %x", gameUpdater.unk7.unk1.unk2);
-	//ImGui::Text("unk7.unk2.unk1: %x", gameUpdater.unk7.unk2.unk1);
-	//ImGui::Text("unk7.unk2.unk2: %x", gameUpdater.unk7.unk2.unk2);
+	ImGui::DragFloat("FPS", (*reinterpret_cast<float**>(0x143D907A0) + 5));
+	ImGui::DragFloat("Timescale", &gameUpdater.timeScale, 0.01f);
 
-	ImGui::Text("layers active during normal operation: %x", gameUpdater.layersActiveDuringNormalOperation);
-	ImGui::Text("layers active during ingame pause: %x", gameUpdater.layersActiveDuringIngamePause);
-	ImGui::Text("layers active during debug pause: %x", gameUpdater.layersActiveDuringDebugPause);
-	ImGui::Text("layers active during object pause: %x", gameUpdater.layersActiveDuringObjectPause);
+	ImGui::SeparatorText("Per-layer information");
+	if (ImGui::BeginTable("Layer information", 10, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
+		ImGui::TableSetupColumn("Layer id");
+		ImGui::TableSetupColumn("Normal operation");
+		ImGui::TableSetupColumn("Ingame pause");
+		ImGui::TableSetupColumn("Debug pause");
+		ImGui::TableSetupColumn("Object pause");
+		ImGui::TableSetupColumn("Timescale");
+		ImGui::TableSetupColumn("DeltaTime");
+		ImGui::TableSetupColumn("Current frame");
+		ImGui::TableSetupColumn("Unk2");
+		ImGui::TableSetupColumn("Unk3");
+		ImGui::TableHeadersRow();
 
-	//ImGui::DragFloat("unkFloat5", &gameUpdater.unk5);
-	//ImGui::DragFloat("unkFloat6", &gameUpdater.unk6);
+		for (size_t i = 0; i < 32; i++) {
+			char name[20];
+			snprintf(name, sizeof(name), "Layer %zd", i);
 
-	//for (int i = 0; i < 32; i++) {
-	//	char name[100];
-	//	snprintf(name, sizeof(name), "unk float for layer %d", i);
-	//	ImGui::DragFloat(name, &gameUpdater.maybeFrameTimes[i]);
-	//}
+			ImGui::PushID(i);
+			ImGui::TableNextRow();
+			ImGui::TableNextColumn();
+			ImGui::Text("%zd", i);
+			ImGui::TableNextColumn();
+			ImGui::CheckboxFlags("##layersActiveDuringNormalOperation", &gameUpdater.layersActiveDuringNormalOperation, 1 << i);
+			ImGui::TableNextColumn();
+			ImGui::CheckboxFlags("##layersActiveDuringIngamePause", &gameUpdater.layersActiveDuringIngamePause, 1 << i);
+			ImGui::TableNextColumn();
+			ImGui::CheckboxFlags("##layersActiveDuringDebugPause", &gameUpdater.layersActiveDuringDebugPause, 1 << i);
+			ImGui::TableNextColumn();
+			ImGui::CheckboxFlags("##layersActiveDuringObjectPause", &gameUpdater.layersActiveDuringObjectPause, 1 << i);
+			ImGui::TableNextColumn();
+			ImGui::DragFloat("##layerTimeScale", &gameUpdater.layerTimeScale[i], 0.01f);
+			ImGui::TableNextColumn();
+			ImGui::Text("%f", gameUpdater.updateInfos[i].deltaTime);
+			ImGui::TableNextColumn();
+			ImGui::Text("%d", gameUpdater.updateInfos[i].currentFrame);
+			ImGui::TableNextColumn();
+			ImGui::Text("%d", gameUpdater.updateInfos[i].unk2);
+			ImGui::TableNextColumn();
+			ImGui::Text("%x", gameUpdater.updateInfos[i].unk3);
+			ImGui::PopID();
+		}
 
-	for (int i = 0; i < 32; i++) {
-		ImGui::Text("updateInfo for layer %d: deltaTime (s): %f, total time (ms): %d, unk2: %x, unk3: %x", i, gameUpdater.updateInfos[i].deltaTime, gameUpdater.updateInfos[i].currentFrame, gameUpdater.updateInfos[i].unk2, gameUpdater.updateInfos[i].unk3);
+		ImGui::EndTable();
 	}
-
-	//float deltaTimes[32];
-
-	//for (int i = 0; i < 32; i++) {
-	//	deltaTimes[i] = gameUpdater.unk8[i].deltaTime;
-	//}
 }

@@ -83,7 +83,7 @@ void GameServiceInspector::RenderObjectWorldInspector(hh::game::ObjectWorld& obj
 						ImGui::CheckboxFlags("Started", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::STARTED));
 						ImGui::CheckboxFlags("No restart", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::NO_RESTART));
 
-						status.flags.m_dummy = static_cast<WorldObjectStatus::Flag>(flags);
+						status.flags.m_dummy = flags;
 
 						ImGui::InputInt("Spawn priority", &status.spawnPriority);
 

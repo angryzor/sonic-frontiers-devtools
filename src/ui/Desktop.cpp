@@ -108,8 +108,10 @@ void Desktop::HandleMousePicking()
 				auto cameraMatrix{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
 				auto inverseCameraMatrix{ cameraMatrix.inverse() };
 				auto* ivp = ImGui::GetMainViewport();
-				auto topLeft = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
-				auto botRight = ImGui::GetMousePos();
+				auto mouseStart = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
+				auto mouseEnd = ImGui::GetMousePos();
+				auto topLeft = ImVec2{ std::fminf(mouseStart.x, mouseEnd.x), std::fminf(mouseStart.y, mouseEnd.y) };
+				auto botRight = ImVec2{ std::fmaxf(mouseStart.x, mouseEnd.x), std::fmaxf(mouseStart.y, mouseEnd.y) };
 
 				ImGui::SetNextWindowSize(ivp->Size);
 				ImGui::SetNextWindowPos(ivp->Pos);

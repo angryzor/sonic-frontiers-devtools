@@ -25,11 +25,19 @@ class ReflectionEditor {
     };
     template<> class range_info<int32_t> {
     public:
-        static constexpr const char* name = "RangeSInt32";
+        static constexpr const char* name = "RangeSint32";
     };
     template<> class range_info<uint32_t> {
     public:
-        static constexpr const char* name = "RangeUInt32";
+        static constexpr const char* name = "RangeUint32";
+    };
+    template<> class range_info<int64_t> {
+    public:
+        static constexpr const char* name = "RangeSint64";
+    };
+    template<> class range_info<uint64_t> {
+    public:
+        static constexpr const char* name = "RangeUint64";
     };
     template<> class range_info<float> {
     public:
