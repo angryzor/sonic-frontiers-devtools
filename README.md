@@ -52,7 +52,7 @@ DevTools is able to manipulate datastructures and resources inside the game's me
 
 ![RFL editing](/.github/rfl.jpg)
 
-DevTools has a resource browser where you can see that game's currently loaded resources, edit them and hot reload them while the game is running:
+DevTools has a resource browser where you can see the game's currently loaded resources, edit them and hot reload them while the game is running:
 
 ![Resource browser](/.github/resource-browser.jpg)
 
