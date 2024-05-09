@@ -22,6 +22,7 @@ target_sources(devtools
         ui/common/editors/Needle.cpp
         ui/common/viewers/Basic.cpp
         ui/common/viewers/ObjectData.cpp
+        ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/Textures.cpp
@@ -81,6 +82,7 @@ target_sources(devtools
         ui/common/editors/Needle.h
         ui/common/viewers/Basic.h
         ui/common/viewers/ObjectData.h
+        ui/common/viewers/RflDiff.h
         ui/common/inputs/Basic.h
         ui/common/inputs/Needle.h
         ui/common/icons.h

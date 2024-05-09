@@ -56,7 +56,24 @@ namespace rflops {
 
 			static typename V::result_type ProcessArray(RflObj<S>... objs, const hh::fnd::RflClassMember* member)
 			{
-				return V::VisitArray(RflMoveArrayAccessor{ *static_cast<csl::ut::MoveArray<void*>*>(objs), member }..., [member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); });
+				return V::VisitArray(
+					RflMoveArrayAccessor{ *static_cast<csl::ut::MoveArray<void*>*>(objs), member }...,
+					[member]() {
+						void* obj = new (std::align_val_t(16), hh::fnd::MemoryRouter::GetModuleAllocator()) char[member->GetSubTypeSizeInBytes()];
+
+						if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+							hh::fnd::RflTypeInfoRegistry::GetInstance()->ConstructObject(hh::fnd::MemoryRouter::GetModuleAllocator(), obj, member->GetStructClass()->GetName());
+						
+						return obj;
+					},
+					[member](void* obj) {
+						if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+							hh::fnd::RflTypeInfoRegistry::GetInstance()->CleanupLoadedObject(obj, member->GetStructClass()->GetName());
+
+						hh::fnd::MemoryRouter::GetModuleAllocator()->Free(obj);
+					},
+					[member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); }
+				);
 			}
 
 			static typename V::result_type ProcessEnum(RflObj<S>... objs, const hh::fnd::RflClassMember* member) {
@@ -64,7 +81,7 @@ namespace rflops {
 			}
 
 			static typename V::result_type ProcessFlags(RflObj<S>... objs, const hh::fnd::RflClassMember* member) {
-				auto* enumEntries = reinterpret_cast<const RflArray<RflClassEnumMember>*>(member->GetAttribute("DisplayIndex")->GetData());
+				auto* enumEntries = reinterpret_cast<const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>*>(member->GetAttribute("DisplayIndex")->GetData());
 
 				return V::VisitFlags(objs..., member->GetSubType(), enumEntries, [member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); });
 			}
@@ -146,8 +163,8 @@ namespace rflops {
 				assert(false);
 				return 0;
 			}
-			template<typename F>
-			static int VisitArray(RflMoveArrayAccessor& arr1, RflMoveArrayAccessor& arr2, F f) {
+			template<typename F, typename C, typename D>
+			static int VisitArray(RflMoveArrayAccessor& arr1, RflMoveArrayAccessor& arr2, C c, D d, F f) {
 				arr1.clear();
 
 				for (auto item : arr2) {
@@ -162,7 +179,7 @@ namespace rflops {
 				return f(obj1, obj2);
 			}
 			template<typename F>
-			static int VisitFlags(void* obj1, void* obj2, hh::fnd::RflClassMember::Type type, const hh::fnd::RflArray<hh::fnd::RflClassEnumMember>* enumEntries, F f) {
+			static int VisitFlags(void* obj1, void* obj2, hh::fnd::RflClassMember::Type type, const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>* enumEntries, F f) {
 				return f(obj1, obj2);
 			}
 			template<typename F>

@@ -15,6 +15,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& configFlags == other.configFlags
 		&& debugCameraMouseSensitivityX == other.debugCameraMouseSensitivityX
 		&& debugCameraMouseSensitivityY == other.debugCameraMouseSensitivityY
+		&& rflDefaultFloatStep == other.rflDefaultFloatStep
 		&& rflMinFloatStep == other.rflMinFloatStep
 		&& rflSliderCutOffRange == other.rflSliderCutOffRange
 		&& debugRenderingRenderGOCVisualDebugDraw == other.debugRenderingRenderGOCVisualDebugDraw
@@ -98,7 +99,7 @@ void SettingsManager::Render() {
 					ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
 					ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
 					ImGui::SeparatorText("Reflection editor");
-					ImGui::DragFloat("Default step size for float values", &tempSettings.rflDefaultFloatStep, 0.01f);
+					ImGui::DragFloat("Default step size for float values", &tempSettings.rflDefaultFloatStep, 0.001f);
 					ImGui::SetItemTooltip("Default precision for float values if the game does not specify a precision.");
 					ImGui::DragFloat("Minimum step size for float values", &tempSettings.rflMinFloatStep, 0.01f);
 					ImGui::SetItemTooltip("The drag control's precision for float values will be capped to this value if the game specifies a smaller precision. Intended to correct for the game often specifying the excessively precise value 0.001.");

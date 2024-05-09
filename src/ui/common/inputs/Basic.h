@@ -1,7 +1,7 @@
 #pragma once
 #include <imgui_internal.h>
 
-inline static float defaultFloatStep{ 0.01f };
+inline float defaultFloatStep{ 0.01f };
 
 template<typename T, typename = void> class imgui_datatype;
 template<> class imgui_datatype<uint8_t> { public: static constexpr ImGuiDataType dtype = ImGuiDataType_U8; static constexpr int components = 1; };

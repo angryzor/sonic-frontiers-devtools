@@ -9,7 +9,6 @@ target_sources(implot
     PRIVATE
         implot/implot.cpp
         implot/implot_items.cpp
-        implot/implot_demo.cpp
     PUBLIC FILE_SET HEADERS BASE_DIRS implot FILES
         implot/implot.h
 )

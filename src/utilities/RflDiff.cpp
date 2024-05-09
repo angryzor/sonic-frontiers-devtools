@@ -152,11 +152,8 @@ bool PrimitiveMatches(const void* obj1, const void* obj2, const RflClassMember* 
 	case RflClassMember::TYPE_QUATERNION: return Matches<csl::math::Quaternion>(obj1, obj2);
 	case RflClassMember::TYPE_MATRIX34: return Matches<csl::math::Matrix34>(obj1, obj2);
 	case RflClassMember::TYPE_MATRIX44: return Matches<csl::math::Matrix44>(obj1, obj2);
-	case RflClassMember::TYPE_CSTRING: return strcmp(static_cast<const char*>(obj1), static_cast<const char*>(obj2)) ? 1 : 0;
-	case RflClassMember::TYPE_STRING: return strcmp(
-		static_cast<const csl::ut::VariableString*>(obj1)->c_str() == nullptr ? "" : static_cast<const csl::ut::VariableString*>(obj1)->c_str(),
-		static_cast<const csl::ut::VariableString*>(obj2)->c_str() == nullptr ? "" : static_cast<const csl::ut::VariableString*>(obj2)->c_str()
-	) ? 1 : 0;
+	case RflClassMember::TYPE_CSTRING: return strcmp(static_cast<const char*>(obj1), static_cast<const char*>(obj2)) == 0;
+	case RflClassMember::TYPE_STRING: return strcmp(static_cast<const csl::ut::VariableString*>(obj1)->c_str(), static_cast<const csl::ut::VariableString*>(obj2)->c_str()) == 0;
 	case RflClassMember::TYPE_OBJECT_ID: return Matches<hh::game::ObjectId>(obj1, obj2);
 	case RflClassMember::TYPE_COLOR_BYTE: return Matches<csl::ut::Color8>(obj1, obj2);
 	case RflClassMember::TYPE_COLOR_FLOAT: return Matches<csl::ut::Color<float>>(obj1, obj2);

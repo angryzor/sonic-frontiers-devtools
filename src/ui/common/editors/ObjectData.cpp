@@ -2,6 +2,7 @@
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/editors/Reflection.h>
+#include <ui/common/viewers/Basic.h>
 #include <ui/common/viewers/ObjectData.h>
 #include <utilities/ObjectDataUtils.h>
 #include "ObjectData.h"
@@ -25,10 +26,10 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	bool edited{};
 	auto* objSystem = GameObjectSystem::GetInstance();
 
-	ImGui::Text("Id: %016zx%016zx", obj.id.groupId, obj.id.objectId);
+	Viewer("Id", obj.id);
 	edited |= Editor("Name", obj.name);
 	ImGui::Text("Class: %s", obj.gameObjectClass);
-	ImGui::Text("Parent object id: %016zx%016zx", obj.parentID.groupId, obj.parentID.objectId);
+	Viewer("Parent object id", obj.parentID);
 
 	ImGui::SeparatorText("Transform");
 	Viewer("Transform", obj.transform);

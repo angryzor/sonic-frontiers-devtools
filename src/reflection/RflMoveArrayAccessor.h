@@ -13,9 +13,9 @@ protected:
 	};
 
 	RflMoveArray& underlying;
+public:
 	const hh::fnd::RflClassMember* member;
 
-public:
 	class iterator {
 		const RflMoveArrayAccessor& accessor;
 		size_t idx{};

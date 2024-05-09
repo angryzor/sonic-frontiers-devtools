@@ -23,8 +23,35 @@ void EndVectorViewerTable() {
 	ImGui::EndTable();
 }
 
+void Viewer(const char* label, bool obj)
+{
+	ImGui::Text("%s: %s", label, obj ? "true" : "false");
+}
+
+void Viewer(const char* label, const hh::game::ObjectId& obj)
+{
+	ImGui::Text("%s: %016zx%016zx", label, obj.groupId, obj.objectId);
+}
+
 void Viewer(const char* label, void* const& obj) {
 	ImGui::Text("%s: %zx", obj);
+}
+
+void Viewer(const char* label, const Eigen::Quaternionf& quat)
+{
+	IM_ASSERT(ImGui::GetStateStorage()->GetBool(ImGui::GetID("WithW")));
+
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.x());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.y());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.z());
+	ImGui::TableNextColumn();
+	ImGui::Text("%f", quat.w());
+	ImGui::TableNextColumn();
+	ImGui::Text(label);
 }
 
 void Viewer(const char* label, const hh::fnd::WorldPosition& worldPos) {
@@ -42,4 +69,14 @@ void Viewer(const char* label, const csl::math::Transform& transform) {
 		Viewer("Scale", transform.scale);
 		EndVectorViewerTable();
 	}
+}
+
+void Viewer(const char* label, const csl::ut::Color8& color)
+{
+	ImGui::Text("%s: R: %d, G: %d, B: %d, A: %d", color.r, color.g, color.b, color.a);
+}
+
+void Viewer(const char* label, const csl::ut::Color<float>& color)
+{
+	ImGui::Text("%s: R: %f, G: %f, B: %f, A: %f", color.r, color.g, color.b, color.a);
 }

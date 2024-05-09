@@ -18,10 +18,10 @@ bool Editor(const char* label, hh::gfnd::ViewportData& viewport)
 	ImGui::EndGroup();
 
 	ImGui::SeparatorText("Projection settings");
-	Viewer("Aspect ratio: %f", viewport.aspectRatio);
-	Viewer("FOV: %f", viewport.fov);
-	Viewer("Near clipping plane: %f", viewport.nearClip);
-	Viewer("Far clipping plane: %f", viewport.farClip);
+	Viewer("Aspect ratio", viewport.aspectRatio);
+	Viewer("FOV", viewport.fov);
+	Viewer("Near clipping plane", viewport.nearClip);
+	Viewer("Far clipping plane", viewport.farClip);
 
 	ImGui::SeparatorText("View matrix");
 	Viewer("View matrix", viewport.viewMatrix);
