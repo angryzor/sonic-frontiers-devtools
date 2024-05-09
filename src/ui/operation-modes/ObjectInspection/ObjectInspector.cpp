@@ -107,7 +107,7 @@ void ObjectInspector::Render() {
 							ImGui::TreePop();
 						}
 
-						if (ImGui::TreeNode("Blend tree")) {
+						if (cameraFrame->blendTree && ImGui::TreeNode("Blend tree")) {
 							RenderCameraBlendTree(cameraFrame->blendTree);
 							ImGui::TreePop();
 						}
