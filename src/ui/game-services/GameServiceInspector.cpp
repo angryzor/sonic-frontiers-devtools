@@ -2,8 +2,13 @@
 #include <imgui_internal.h>
 #include <ui/Desktop.h>
 #include <ui/resources/editors/ResObjectWorldEditor.h>
-#include <ui/common/ObjectDataEditor.h>
-#include <ui/common/SimpleWidgets.h>
+#include <ui/common/viewers/Basic.h>
+#include <ui/common/editors/Basic.h>
+#include <ui/common/editors/ObjectData.h>
+#include <ui/common/editors/LevelInfo.h>
+#include <ui/common/editors/GraphicsContext.h>
+#include <ui/common/editors/Reflection.h>
+#include <ui/common/inputs/Basic.h>
 
 using namespace hh::game;
 
@@ -41,6 +46,12 @@ void GameServiceInspector::RenderServiceInspector(hh::game::GameService& service
 	else if (service.pStaticClass == app::trr::TerrainManager::GetClass()) {
 		RenderTerrainManagerInspector(static_cast<app::trr::TerrainManager&>(service));
 	}
+	else if (service.pStaticClass == hh::game::CameraManager::GetClass()) {
+		RenderCameraManagerInspector(static_cast<hh::game::CameraManager&>(service));
+	}
+	else if (service.pStaticClass == app::camera::CameraService::GetClass()) {
+		RenderCameraServiceInspector(static_cast<app::camera::CameraService&>(service));
+	}
 	else {
 		RenderUnknownServiceInspector(service);
 	}
@@ -52,18 +63,16 @@ void GameServiceInspector::RenderObjectWorldInspector(hh::game::ObjectWorld& obj
 		if (ImGui::TreeNode(chunk, "Chunk %d", i++)) {
 			bool editorMode = chunk->IsStatusEditor();
 
-			ImGui::Checkbox("Editor mode", &editorMode);
-
-			chunk->SetEditorStatus(editorMode);
+			if (ImGui::Checkbox("Editor mode", &editorMode))
+				chunk->SetEditorStatus(editorMode);
 
 			if (ImGui::CollapsingHeader("Layers")) {
 				for (auto* layer : chunk->GetLayers()) {
 					if (ImGui::TreeNode(layer, layer->GetName())) {
 						bool enabled = layer->IsEnable();
 
-						ImGui::Checkbox("Enabled", &enabled);
-
-						chunk->SetLayerEnabled(layer->GetName(), enabled);
+						if (ImGui::Checkbox("Enabled", &enabled))
+							chunk->SetLayerEnabled(layer->GetName(), enabled);
 
 						if (ImGui::Button("Edit resource"))
 							ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), layer->GetResource());
@@ -76,19 +85,15 @@ void GameServiceInspector::RenderObjectWorldInspector(hh::game::ObjectWorld& obj
 			if (ImGui::CollapsingHeader("Object statuses")) {
 				for (auto& status : chunk->GetObjectStatuses()) {
 					if (ImGui::TreeNode(&status, status.objectData->name)) {
-						auto flags = static_cast<unsigned int>(status.flags.m_dummy);
+						CheckboxFlags("Enabled", status.flags, WorldObjectStatus::Flag::ENABLED);
+						CheckboxFlags("Is alive", status.flags, WorldObjectStatus::Flag::IS_ALIVE);
+						CheckboxFlags("Started", status.flags, WorldObjectStatus::Flag::STARTED);
+						CheckboxFlags("No restart", status.flags, WorldObjectStatus::Flag::NO_RESTART);
 
-						ImGui::CheckboxFlags("Enabled", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::ENABLED));
-						ImGui::CheckboxFlags("Is alive", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::IS_ALIVE));
-						ImGui::CheckboxFlags("Started", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::STARTED));
-						ImGui::CheckboxFlags("No restart", &flags, 1 << static_cast<uint8_t>(WorldObjectStatus::Flag::NO_RESTART));
-
-						status.flags.m_dummy = flags;
-
-						ImGui::InputInt("Spawn priority", &status.spawnPriority);
+						Editor("Spawn priority", status.spawnPriority);
 
 						ImGui::SeparatorText("Object Data");
-						ObjectDataEditor::Render(status.objectData);
+						Editor("Object data", *status.objectData);
 
 						ImGui::TreePop();
 					}
@@ -104,7 +109,7 @@ void GameServiceInspector::RenderStageInfoInspector(app::level::StageInfo& servi
 	ImGui::SeparatorText("Stages");
 	for (auto& stage : service.stages) {
 		if (ImGui::TreeNodeEx(stage, ImGuiTreeNodeFlags_None, "%s", stage->name.c_str())) {
-			RenderStageDataInspector(*stage);
+			Editor("Stage data", *stage);
 			ImGui::TreePop();
 		}
 	}
@@ -115,132 +120,9 @@ void GameServiceInspector::RenderLevelInfoInspector(app::level::LevelInfo& servi
 	auto* stageData = service.GetStageData();
 	ImGui::SeparatorText("Stage data");
 	if (stageData)
-		RenderStageDataInspector(*stageData);
+		Editor("Stage data", *stageData);
 	else
 		ImGui::Text("No stage data loaded.");
-}
-
-static const char* chunkTypeNames[] = { "INITIAL", "AFTER" };
-static const char* cyberModeNames[] = { "UNKNOWN", "LOW_GRAVITY", "TIME_EXTEND", "SPEED_SCALE", "NITRO", "MAX_SPEED_CHALLENGE" };
-
-void GameServiceInspector::RenderStageDataInspector(app::level::StageData& data)
-{
-	ImGui::PushID(&data);
-
-	InputText("Name", &data.name);
-	InputText("Stage", &data.stage);
-	InputText("Cyber name", &data.cyberName);
-	InputText("SceneParam name", &data.sceneParamName);
-	InputText("SceneParam stage", &data.sceneParamStage);
-	InputText("Gedit resource name", &data.geditResourceName);
-
-	ImGui::DragInt("World index", &data.worldIndex, 1.0f, -1);
-	ImGui::DragInt("Stage index", &data.stageIndex, 1.0f, -1);
-	ImGui::DragInt("Cyber stage index", &data.cyberStageIndex, 1.0f, -1);
-	ImGui::DragScalar("Default SceneParam index", ImGuiDataType_U32, &data.defaultSceneParamIndex);
-
-	if (ImGui::TreeNode("Attributes")) {
-		CheckboxFlags("Unknown", &data.attributeFlags, static_cast<app::level::StageData::AttributeFlags>(0));
-		CheckboxFlags("Cyber", &data.attributeFlags, app::level::StageData::AttributeFlags::CYBER);
-		CheckboxFlags("Minigame", &data.attributeFlags, app::level::StageData::AttributeFlags::MINIGAME);
-		CheckboxFlags("Hacking", &data.attributeFlags, app::level::StageData::AttributeFlags::HACKING);
-		CheckboxFlags("Last boss", &data.attributeFlags, app::level::StageData::AttributeFlags::LAST_BOSS);
-		CheckboxFlags("Master trial", &data.attributeFlags, app::level::StageData::AttributeFlags::MASTER_TRIAL);
-		CheckboxFlags("Tutorial", &data.attributeFlags, app::level::StageData::AttributeFlags::TUTORIAL);
-		CheckboxFlags("Navmesh", &data.attributeFlags, app::level::StageData::AttributeFlags::NAVMESH);
-		CheckboxFlags("Height field", &data.attributeFlags, app::level::StageData::AttributeFlags::HEIGHT_FIELD);
-		CheckboxFlags("Point cloud", &data.attributeFlags, app::level::StageData::AttributeFlags::POINT_CLOUD);
-		CheckboxFlags("Autosave", &data.attributeFlags, app::level::StageData::AttributeFlags::AUTOSAVE);
-		CheckboxFlags("Diving", &data.attributeFlags, app::level::StageData::AttributeFlags::DIVING);
-		CheckboxFlags("Side step", &data.attributeFlags, app::level::StageData::AttributeFlags::SIDE_STEP);
-		CheckboxFlags("Athletic", &data.attributeFlags, app::level::StageData::AttributeFlags::ATHLETIC);
-		CheckboxFlags("Boarding", &data.attributeFlags, app::level::StageData::AttributeFlags::BOARDING);
-		CheckboxFlags("Drift", &data.attributeFlags, app::level::StageData::AttributeFlags::DRIFT);
-		CheckboxFlags("Side view", &data.attributeFlags, app::level::StageData::AttributeFlags::SIDE_VIEW);
-		CheckboxFlags("Lava", &data.attributeFlags, app::level::StageData::AttributeFlags::LAVA);
-		CheckboxFlags("Sonic", &data.attributeFlags, app::level::StageData::AttributeFlags::SONIC);
-		CheckboxFlags("Tails", &data.attributeFlags, app::level::StageData::AttributeFlags::TAILS);
-		CheckboxFlags("Amy", &data.attributeFlags, app::level::StageData::AttributeFlags::AMY);
-		CheckboxFlags("Knuckles", &data.attributeFlags, app::level::StageData::AttributeFlags::KNUCKLES);
-		CheckboxFlags("Battle rush", &data.attributeFlags, app::level::StageData::AttributeFlags::BATTLE_RUSH);
-		CheckboxFlags("Boss rush", &data.attributeFlags, app::level::StageData::AttributeFlags::BOSS_RUSH);
-		CheckboxFlags("Extra", &data.attributeFlags, app::level::StageData::AttributeFlags::EXTRA);
-		CheckboxFlags("Delete fall dead collision", &data.attributeFlags, app::level::StageData::AttributeFlags::DELETE_FALL_DEAD_COLLISION);
-		CheckboxFlags("Delete air wall collision", &data.attributeFlags, app::level::StageData::AttributeFlags::DELETE_AIR_WALL_COLLISION);
-		CheckboxFlags("Delete grind rail", &data.attributeFlags, app::level::StageData::AttributeFlags::DELETE_GRIND_RAIL);
-		CheckboxFlags("Change new collision", &data.attributeFlags, app::level::StageData::AttributeFlags::CHANGE_NEW_COLLISION);
-		CheckboxFlags("Restrict debris", &data.attributeFlags, app::level::StageData::AttributeFlags::RESTRICT_DEBRIS);
-		CheckboxFlags("Special parry effect", &data.attributeFlags, app::level::StageData::AttributeFlags::SPECIAL_PARRY_EFFECT);
-		ImGui::TreePop();
-	}
-
-	if (ImGui::TreeNode("Mission flags")) {
-		CheckboxFlags("Unknown", &data.missionFlags, static_cast<app::level::StageData::MissionFlags>(0));
-		CheckboxFlags("Goal", &data.missionFlags, app::level::StageData::MissionFlags::GOAL);
-		CheckboxFlags("Rank", &data.missionFlags, app::level::StageData::MissionFlags::RANK);
-		CheckboxFlags("Ring", &data.missionFlags, app::level::StageData::MissionFlags::RING);
-		CheckboxFlags("Red ring", &data.missionFlags, app::level::StageData::MissionFlags::RED_RING);
-		CheckboxFlags("Number ring", &data.missionFlags, app::level::StageData::MissionFlags::NUMBER_RING);
-		CheckboxFlags("Silver moon ring", &data.missionFlags, app::level::StageData::MissionFlags::SILVER_MOON_RING);
-		CheckboxFlags("Hide goal", &data.missionFlags, app::level::StageData::MissionFlags::HIDE_GOAL);
-		CheckboxFlags("Shadow tails", &data.missionFlags, app::level::StageData::MissionFlags::SHADOW_TAILS);
-		CheckboxFlags("Mine", &data.missionFlags, app::level::StageData::MissionFlags::MINE);
-		CheckboxFlags("Animal", &data.missionFlags, app::level::StageData::MissionFlags::ANIMAL);
-		ImGui::TreePop();
-	}
-
-	ComboEnum("Chunk type", &data.chunkType, chunkTypeNames);
-	ImGui::DragFloat("Time limit", &data.timeLimit, 0.01f);
-	ImGui::DragFloat("Death plane height", &data.deathPlaneHeight, 0.001f);
-	ImGui::DragFloat("Noise time", &data.noiseTime, 0.01f);
-	//ImGui::Text("Unk6: %d", data.unk6);
-	if (ImGui::TreeNode("Red Ring mission thresholds")) {
-		ImGui::DragScalar("S rank", ImGuiDataType_U8, &data.redRingMissionThreshold[0]);
-		ImGui::DragScalar("A rank", ImGuiDataType_U8, &data.redRingMissionThreshold[1]);
-		ImGui::DragScalar("B rank", ImGuiDataType_U8, &data.redRingMissionThreshold[2]);
-		ImGui::DragScalar("C rank", ImGuiDataType_U8, &data.redRingMissionThreshold[3]);
-		ImGui::TreePop();
-	}
-	//ImGui::Text("Unk7: %d", data.unk7);
-	ImGui::InputScalar("Ring mission threshold: %d", ImGuiDataType_U32, &data.ringMissionThreshold);
-	ComboEnum("Cyber mode", &data.cyberMode, cyberModeNames);
-
-	//csl::ut::MoveArray<uint8_t> staticSectors;
-	//csl::ut::MoveArray<uint8_t> dynamicSectors;
-
-	if (ImGui::TreeNode("Rank times")) {
-		if (ImGui::TreeNode("Normal")) {
-			ImGui::DragScalar("S rank", ImGuiDataType_U32, &data.rankTimes[0]);
-			ImGui::DragScalar("A rank", ImGuiDataType_U32, &data.rankTimes[1]);
-			ImGui::DragScalar("B rank", ImGuiDataType_U32, &data.rankTimes[2]);
-			ImGui::DragScalar("C rank", ImGuiDataType_U32, &data.rankTimes[3]);
-			ImGui::TreePop();
-		}
-		if (ImGui::TreeNode("Very hard")) {
-			ImGui::DragScalar("S rank", ImGuiDataType_U32, &data.rankTimesVeryHard[0]);
-			ImGui::DragScalar("A rank", ImGuiDataType_U32, &data.rankTimesVeryHard[1]);
-			ImGui::DragScalar("B rank", ImGuiDataType_U32, &data.rankTimesVeryHard[2]);
-			ImGui::DragScalar("C rank", ImGuiDataType_U32, &data.rankTimesVeryHard[3]);
-			ImGui::TreePop();
-		}
-		if (ImGui::TreeNode("Challenge")) {
-			ImGui::DragScalar("S rank", ImGuiDataType_U32, &data.rankTimesChallenge[0]);
-			ImGui::DragScalar("A rank", ImGuiDataType_U32, &data.rankTimesChallenge[1]);
-			ImGui::DragScalar("B rank", ImGuiDataType_U32, &data.rankTimesChallenge[2]);
-			ImGui::DragScalar("C rank", ImGuiDataType_U32, &data.rankTimesChallenge[3]);
-			ImGui::TreePop();
-		}
-		if (ImGui::TreeNode("Challenge all")) {
-			ImGui::DragScalar("S rank", ImGuiDataType_U32, &data.rankTimesChallengeAll[0]);
-			ImGui::DragScalar("A rank", ImGuiDataType_U32, &data.rankTimesChallengeAll[1]);
-			ImGui::DragScalar("B rank", ImGuiDataType_U32, &data.rankTimesChallengeAll[2]);
-			ImGui::DragScalar("C rank", ImGuiDataType_U32, &data.rankTimesChallengeAll[3]);
-			ImGui::TreePop();
-		}
-		ImGui::TreePop();
-	}
-
-	ImGui::PopID();
 }
 
 void GameServiceInspector::RenderGameModeResourceManagerInspector(app::game::GameModeResourceManager& service)
@@ -261,13 +143,64 @@ void GameServiceInspector::RenderGameModeResourceManagerInspector(app::game::Gam
 
 void GameServiceInspector::RenderTerrainManagerInspector(app::trr::TerrainManager& service)
 {
-	ImGui::Text("Unk11: %d", service.currentTerrain);
-	ImGui::Text("Unk10 count: %d", service.unk10.size());
+	Viewer("Unk11", service.currentTerrain);
+	Viewer("Unk10 count", service.unk10.size());
 	//ImGui::SeparatorText("Unk13s:");
 	//if (service.unk13.)
 	//for (auto i = service.unk13.begin(); i != service.unk13.end(); i++) {
 	//	ImGui::Text("%s", i.key());
 	//}
+}
+
+void GameServiceInspector::RenderCameraManagerInspector(hh::game::CameraManager& service)
+{
+	ImGui::SeparatorText("Components");
+	for (auto* component : service.GetComponents()) {
+		if (ImGui::TreeNode(component, component->name)) {
+			ImGui::Text("Viewport ID: %d", component->viewportId);
+			Editor("Viewport data", component->viewportData);
+			ImGui::TreePop();
+		}
+	}
+
+	ImGui::SeparatorText("Camera stacks");
+	for (int i = 0; i < service.GetCameraCount(); i++) {
+		ImGui::PushID(i);
+		if (ImGui::TreeNode("Camera stack", "Camera stack %d", i)) {
+			csl::ut::MoveArray<CameraComponent*> components{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			service.GetComponents(i, components);
+
+			if (components.size() > 0) {
+				ImGui::SeparatorText("Components");
+
+				for (auto* component : components) {
+					if (ImGui::TreeNode(component, component->name)) {
+						ImGui::Text("Viewport ID: %d", component->viewportId);
+						Editor("Viewport data", component->viewportData);
+						ImGui::TreePop();
+					}
+				}
+			}
+
+			ImGui::TreePop();
+		}
+		ImGui::PopID();
+	}
+}
+
+void GameServiceInspector::RenderCameraServiceInspector(app::camera::CameraService& service)
+{
+	for (auto& bridgeUnit : service.cameraBridges) {
+		if (bridgeUnit.cameraBridge.cameraFrameId != -1 && bridgeUnit.cameraComponent != nullptr && ImGui::TreeNodeEx(&bridgeUnit, ImGuiTreeNodeFlags_None, "%d", bridgeUnit.cameraBridge.cameraFrameId)) {
+			ImGui::Text("Camera frame: %d - %s", bridgeUnit.cameraBridge.cameraFrameId, bridgeUnit.cameraBridge.cameraFrame->name.c_str());
+			if (ImGui::TreeNodeEx("Component", ImGuiTreeNodeFlags_None, "%s", bridgeUnit.cameraComponent->name.c_str())) {
+				ImGui::Text("Viewport ID: %d", bridgeUnit.cameraComponent->viewportId);
+				Editor("Viewport data", bridgeUnit.cameraComponent->viewportData);
+				ImGui::TreePop();
+			}
+			ImGui::TreePop();
+		}
+	}
 }
 
 
@@ -322,15 +255,15 @@ void GameServiceInspector::RenderFxParamManagerInspector(app::gfx::FxParamManage
 	for (size_t i = 0; i < 2; i++) {
 		if (auto* sceneParameters = service.sceneParameters[i]) {
 			if (ImGui::TreeNode(sceneParameters, "%d", i)) {
-				ReflectionEditor::Render(*sceneParameters->GetSceneData());
+				Editor("Scene data", *sceneParameters->GetSceneData());
 				ImGui::TreePop();
 			}
 		}
 	}
 
 	ImGui::SeparatorText("Interpolated parameters");
-	ReflectionEditor::Render(service.parameters);
-	ReflectionEditor::Render(service.sceneConfig);
+	Editor("NeedleFxParameter", service.parameters);
+	Editor("NeedleFxSceneConfig", service.sceneConfig);
 
 	ImGui::SeparatorText("Interpolators");
 
@@ -394,6 +327,8 @@ void GameServiceInspector::RenderFxParamManagerInspector(app::gfx::FxParamManage
 	//	ImGui::Text("%zx", extension->GetRuntimeTypeInfo());
 	//}
 }
+
+
 
 void GameServiceInspector::RenderUnknownServiceInspector(hh::game::GameService& service) {
 	ImGui::Text("Inspector for this service not yet implemented");

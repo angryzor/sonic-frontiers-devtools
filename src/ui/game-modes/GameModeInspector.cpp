@@ -2,8 +2,6 @@
 #include <imgui_internal.h>
 #include <ui/Desktop.h>
 #include <ui/resources/editors/ResObjectWorldEditor.h>
-#include <ui/common/ObjectDataEditor.h>
-#include <ui/common/SimpleWidgets.h>
 
 using namespace hh::game;
 

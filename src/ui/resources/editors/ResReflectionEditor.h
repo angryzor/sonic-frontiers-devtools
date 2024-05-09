@@ -1,7 +1,5 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
-#include <ui/common/ReflectionEditor.h>
-#include <reflection/serialization/ReflectionSerializer.h>
 
 class ResReflectionEditor : public StandaloneWindow {
 	hh::fnd::Reference<hh::fnd::ResReflection<void>> resource;

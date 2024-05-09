@@ -1,5 +1,7 @@
 #include "ResMaterialEditor.h"
-#include <ui/common/SimpleWidgets.h>
+#include <ui/common/inputs/Basic.h>
+#include <ui/common/inputs/Needle.h>
+#include <ui/common/editors/Needle.h>
 
 using namespace hh::needle;
 
@@ -93,8 +95,8 @@ static const char* wrapModes[] = { "WRAP", "MIRROR", "CLAMP", "MIRRORONCE", "BOR
 void ResMaterialEditor::RenderSamplerParameterEditor(size_t idx, hh::needle::ParameterSamplerValue* data)
 {
 	ImGui::Text("%s", data->name->nameProbably);
-	ComboEnum("Wrap mode U", &data->wrapModeU, wrapModes);
-	ComboEnum("Wrap mode V", &data->wrapModeV, wrapModes);
+	ComboEnum("Wrap mode U", data->wrapModeU, wrapModes);
+	ComboEnum("Wrap mode V", data->wrapModeV, wrapModes);
 	ImGui::DragScalar("TexCoord index", ImGuiDataType_U8, &data->texCoordIndex);
 	ImGui::Text("TexCoord index name %s", data->texCoordIndexName->nameProbably);
 	ImGui::Text("TexCoord mtx name %s", data->texCoordMtxName->nameProbably);
@@ -102,7 +104,7 @@ void ResMaterialEditor::RenderSamplerParameterEditor(size_t idx, hh::needle::Par
 
 void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)
 {
-	RsFlagMaskEditor("Render options", &data->rsFlagMask);
+	Editor("Render options", data->rsFlagMask);
 }
 
 void ResMaterialEditor::RenderShaderNameParameterEditor(size_t idx, hh::needle::ParameterShaderNameValue* data)

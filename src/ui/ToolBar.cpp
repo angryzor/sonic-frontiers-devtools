@@ -49,8 +49,6 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GraphicsContext"))
 				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
-			if (ImGui::MenuItem("CameraManager"))
-				new (Desktop::instance->GetAllocator()) CameraManagerInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("Memory"))
 				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GameMode"))
@@ -73,6 +71,8 @@ void ToolBar::Render() {
 				Desktop::instance->SwitchToObjectInspectionMode();
 			if (ImGui::MenuItem("Level Editor"))
 				Desktop::instance->SwitchToLevelEditorMode();
+			if (ImGui::MenuItem("SurfRide Editor"))
+				Desktop::instance->SwitchToSurfRideEditorMode();
 			ImGui::EndMenu();
 		}
 		if (ImGui::MenuItem("Settings"))

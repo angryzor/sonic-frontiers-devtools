@@ -10,17 +10,24 @@ target_sources(devtools
         debug-rendering/GOCVisualDebugDrawRenderer.cpp
         hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
+        reflection/RflMoveArrayAccessor.cpp
         reflection/serialization/ReflectionSerializer.cpp
         reflection/serialization/resource-rfls/ResObjectWorld.cpp
-        ui/common/ObjectDataEditor.cpp
-        ui/common/ReflectionEditor.cpp
-        ui/common/SimpleWidgets.cpp
+        ui/common/editors/Basic.cpp
+        ui/common/editors/Camera.cpp
+        ui/common/editors/ObjectData.cpp
+        ui/common/editors/Reflection.cpp
+        ui/common/editors/GraphicsContext.cpp
+        ui/common/editors/LevelInfo.cpp
+        ui/common/editors/Needle.cpp
+        ui/common/viewers/Basic.cpp
+        ui/common/viewers/ObjectData.cpp
+        ui/common/inputs/Basic.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/Textures.cpp
         ui/common/Theme.cpp
         ui/common/Translations.cpp
         ui/Context.cpp
-        ui/core-services/CameraManagerInspector.cpp
         ui/core-services/GameUpdaterInspector.cpp
         ui/core-services/GraphicsContextInspector.cpp
         ui/core-services/MemoryInspector.cpp
@@ -34,6 +41,9 @@ target_sources(devtools
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
         ui/operation-modes/ObjectInspection/ObjectInspector.cpp
         ui/operation-modes/ObjectInspection/ObjectList.cpp
+        ui/operation-modes/SurfRideEditor/Timeline.cpp
+        ui/operation-modes/SurfRideEditor/ProjectTree.cpp
+        ui/operation-modes/SurfRideEditor/ElementInspector.cpp
         ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResEffectEditor.cpp
@@ -58,20 +68,28 @@ target_sources(devtools
         debug-rendering/GOCVisualDebugDrawRenderer.h
         hot-reload/ReloadManager.h
         reflection/ReflectiveOperations.h
+        reflection/RflMoveArrayAccessor.h
         reflection/serialization/EndianSwaps.h
         reflection/serialization/ReflectionSerializer.h
         reflection/serialization/resource-rfls/ResourceRfls.h
+        ui/common/editors/Basic.h
+        ui/common/editors/Camera.h
+        ui/common/editors/ObjectData.h
+        ui/common/editors/Reflection.h
+        ui/common/editors/GraphicsContext.h
+        ui/common/editors/LevelInfo.h
+        ui/common/editors/Needle.h
+        ui/common/viewers/Basic.h
+        ui/common/viewers/ObjectData.h
+        ui/common/inputs/Basic.h
+        ui/common/inputs/Needle.h
         ui/common/icons.h
-        ui/common/ObjectDataEditor.h
-        ui/common/ReflectionEditor.h
-        ui/common/SimpleWidgets.h
         ui/common/StandaloneWindow.h
         ui/common/Textures.h
         ui/common/Theme.h
         ui/common/Translations.h
         ui/common/TreeView.h
         ui/Context.h
-        ui/core-services/CameraManagerInspector.h
         ui/core-services/GameUpdaterInspector.h
         ui/core-services/GraphicsContextInspector.h
         ui/core-services/MemoryInspector.h
@@ -87,6 +105,9 @@ target_sources(devtools
         ui/operation-modes/ObjectInspection/ObjectInspection.h
         ui/operation-modes/ObjectInspection/ObjectInspector.h
         ui/operation-modes/ObjectInspection/ObjectList.h
+        ui/operation-modes/SurfRideEditor/Timeline.h
+        ui/operation-modes/SurfRideEditor/ProjectTree.h
+        ui/operation-modes/SurfRideEditor/ElementInspector.h
         ui/operation-modes/SurfRideEditor/SurfRideEditor.h
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h

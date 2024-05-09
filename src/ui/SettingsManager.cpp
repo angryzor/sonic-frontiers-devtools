@@ -1,5 +1,6 @@
 #include "SettingsManager.h"
-#include <ui/common/ReflectionEditor.h>
+#include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Reflection.h>
 #include <ui/Desktop.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
@@ -217,9 +218,9 @@ void SettingsManager::ApplySettings() {
 	Theme::themes[settings.theme].Load();
 	Translations::SetCurrentLanguage(settings.language);
 	ImGui::GetIO().ConfigFlags = settings.configFlags | ImGuiConfigFlags_DockingEnable;
-	ReflectionEditor::defaultFloatStep = settings.rflDefaultFloatStep;
-	ReflectionEditor::minFloatStep = settings.rflMinFloatStep;
-	ReflectionEditor::sliderCutOff = settings.rflSliderCutOffRange;
+	defaultFloatStep = settings.rflDefaultFloatStep;
+	rflMinFloatStep = settings.rflMinFloatStep;
+	rflSliderCutOff = settings.rflSliderCutOffRange;
 	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
 	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
 	GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;

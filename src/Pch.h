@@ -24,3 +24,4 @@
 
 #include <utilities/Helpers.h>
 #undef max
+#undef min

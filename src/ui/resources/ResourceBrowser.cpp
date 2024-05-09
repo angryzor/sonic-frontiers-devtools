@@ -7,6 +7,7 @@
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
 #include <utilities/ResourceTypes.h>
+#include <reflection/serialization/ReflectionSerializer.h>
 #include <reflection/serialization/resource-rfls/ResourceRfls.h>
 
 using namespace hh::fnd;

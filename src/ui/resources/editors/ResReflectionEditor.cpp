@@ -1,4 +1,6 @@
 #include "ResReflectionEditor.h"
+#include <reflection/serialization/ReflectionSerializer.h>
+#include <ui/common/editors/Reflection.h>
 
 using namespace hh::fnd;
 
@@ -52,7 +54,7 @@ void ResReflectionEditor::RenderContents() {
 	}
 
 	if (rflClass != nullptr) {
-		ReflectionEditor::Render(resource->reflectionData, rflClass);
+		ReflectionEditor("Properties", resource->reflectionData, rflClass);
 
 		if (clicked_export) {
 			IGFD::FileDialogConfig cfg{};

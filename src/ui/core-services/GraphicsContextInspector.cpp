@@ -1,5 +1,5 @@
 #include "GraphicsContextInspector.h"
-#include <ui/common/SimpleWidgets.h>
+#include <ui/common/editors/GraphicsContext.h>
 
 GraphicsContextInspector::GraphicsContextInspector(csl::fnd::IAllocator* allocator) : StandaloneWindow{ allocator }
 {
@@ -26,13 +26,13 @@ void GraphicsContextInspector::RenderContents()
 		int i = 0;
 
 		if (ImGui::TreeNode("Default viewport")) {
-			ViewportDataInfo(gfxContext->defaultViewportData);
+			Editor("Viewport data", gfxContext->defaultViewportData);
 			ImGui::TreePop();
 		}
 
 		for (auto& viewport : gfxContext->viewportDatas) {
 			if (ImGui::TreeNode(&viewport, "Viewport %d", i++)) {
-				ViewportDataInfo(viewport);
+				Editor("Viewport data", viewport);
 				ImGui::TreePop();
 			}
 		}

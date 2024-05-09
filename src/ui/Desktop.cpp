@@ -6,6 +6,7 @@
 #include "game-services/GameServiceInspector.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
 #include "operation-modes/LevelEditor/LevelEditor.h"
+#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
 #include "reflection/serialization/ReflectionSerializer.h"
 
 using namespace hh::fnd;
@@ -53,18 +54,68 @@ void Desktop::Render() {
 
 	SettingsManager::Render();
 
-	if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
-		ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
-		ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
-	}
+	//if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
+	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
+	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
+	//}
 
-	if (ImGui::Button("Add island objinfo")) {
+	//if (ImGui::Button("Add island objinfo")) {
 
-		auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-		auto* islandObjInfo = new (moduleAllocator) app::IslandObjInfo(moduleAllocator);
-		GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
+	//	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+	//	auto* islandObjInfo = new (moduleAllocator) app::IslandObjInfo(moduleAllocator);
+	//	GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
 
-	}
+	//}
+
+	//if (ImGui::Button("Viewport")) {
+	//	if (auto* fxParamMgr = GameManager::GetInstance()->GetService<app::gfx::FxParamManager>()) {
+	//		auto& stageConfig = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig;
+	//		if (auto* camSrv = GameManager::GetInstance()->GetService<app::camera::CameraService>()) {
+	//			camSrv->CreateDefaultCameraFrame(2, 1, 0, stageConfig.camera.zNear, stageConfig.camera.zFar, stageConfig.camera.fovy);
+	//		}
+	//	}
+	//}
+
+	//if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
+	//	ImGui::OpenPopup("SpawnCharacter");
+	//}
+
+	//if (ImGui::BeginPopup("SpawnCharacter")) {
+	//	const char* charaNames[] = {"Sonic", "Amy", "Knuckles", "Tails"};
+	//	app::level::StageData::AttributeFlags charaAttrFlags[] = {
+	//		app::level::StageData::AttributeFlags::SONIC,
+	//		app::level::StageData::AttributeFlags::TAILS,
+	//		app::level::StageData::AttributeFlags::KNUCKLES,
+	//		app::level::StageData::AttributeFlags::AMY,
+	//	};
+
+	//	auto* gameManager = GameManager::GetInstance();
+
+	//	for (uint8_t i = 0; i < 4; i++) {
+	//		if (ImGui::Selectable(charaNames[i])) {
+	//			if (auto* levelInfo = gameManager->GetService<app::level::LevelInfo>()) {
+	//				if (auto* fxParamMgr = gameManager->GetService<app::gfx::FxParamManager>()) {
+	//					if (levelInfo->stageData->attributeFlags.test(charaAttrFlags[i])) {
+	//						app::player::Player::Kill(gameManager, 1);
+	//						app::player::Player::PlayerSetupInfo psi;
+	//						psi.playerId = 1;
+	//						psi.characterId = static_cast<app::player::CharacterIdU8>(i);
+	//						psi.worldPos.m_Position = pickedLocation;
+	//						psi.worldPos.m_Rotation = csl::math::Quaternion::Identity;
+	//						psi.deadFallTime = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig.common.deadFallTime;
+	//						psi.deadline = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig.common.deadline;
+	//						psi.oceanSurface = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig.common.oceanSurface;
+	//						psi.unk6 = 1;
+	//						psi.startType = app::player::Player::StartType::STAND;
+	//						app::player::Player::Spawn(gameManager, psi);
+	//					}
+	//				}
+	//			}
+	//			ImGui::CloseCurrentPopup();
+	//		}
+	//	}
+	//	ImGui::EndPopup();
+	//}
 
 	//if (ImGui::Button("Export")) {
 	//	auto* sonicRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::SonicParameters>>("player_common");
@@ -302,4 +353,9 @@ void Desktop::SwitchToObjectInspectionMode()
 void Desktop::SwitchToLevelEditorMode()
 {
 	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
+}
+
+void Desktop::SwitchToSurfRideEditorMode()
+{
+	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
 }

@@ -1,5 +1,5 @@
 #include "ResObjectWorldEditor.h"
-#include <ui/common/ObjectDataEditor.h>
+#include <ui/common/editors/ObjectData.h>
 
 using namespace hh::game;
 
@@ -18,7 +18,7 @@ void ResObjectWorldEditor::RenderContents()
 {
 	for (auto* obj : resource->GetObjects()) {
 		if (ImGui::TreeNode(obj, "%s", obj->name)) {
-			ObjectDataEditor::Render(obj);
+			Editor("Object data", *obj);
 			ImGui::TreePop();
 		}
 	}

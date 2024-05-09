@@ -1,5 +1,4 @@
 #include "ObjectInspection.h"
-#include <ui/common/SimpleWidgets.h>
 #include <ui/Desktop.h>
 #include <utilities/math/MathUtils.h>
 #include <utilities/BoundingBoxes.h>

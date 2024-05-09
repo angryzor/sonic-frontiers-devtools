@@ -1,6 +1,6 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
-#include <ui/common/ReflectionEditor.h>
+#include <ui/common/editors/Reflection.h>
 
 class GameServiceInspector : public StandaloneWindow
 {
@@ -12,9 +12,10 @@ public:
     static void RenderObjectWorldInspector(hh::game::ObjectWorld& service);
     static void RenderStageInfoInspector(app::level::StageInfo& service);
     static void RenderLevelInfoInspector(app::level::LevelInfo& service);
-    static void RenderStageDataInspector(app::level::StageData& data);
     static void RenderGameModeResourceManagerInspector(app::game::GameModeResourceManager& service);
     static void RenderTerrainManagerInspector(app::trr::TerrainManager& service);
+    static void RenderCameraManagerInspector(hh::game::CameraManager& service);
+    static void RenderCameraServiceInspector(app::camera::CameraService& service);
     static void RenderUnknownServiceInspector(hh::game::GameService& service);
     template<typename Rfl> static void RenderFxParamManagerInterpolatorInspector(const char* name, app::gfx::FxParamManager::Interpolator<Rfl>& interpolator) {
         if (ImGui::TreeNode(name)) {
@@ -34,7 +35,7 @@ public:
                     ImGui::Text("Tween duration: %f", 1 / interpolationJob.tweenPositionIncrementPerSecond);
                     ImGui::SliderFloat("Current time", &interpolationJob.currentTweenPosition, 0.0f, 1.0f);
                     ImGui::SeparatorText("Target parameters");
-                    ReflectionEditor::Render(interpolationJob.parameters);
+                    Editor("Target parameters", interpolationJob.parameters);
                     ImGui::TreePop();
                 }
             }

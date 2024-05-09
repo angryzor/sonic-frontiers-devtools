@@ -120,11 +120,31 @@ HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::Rende
 	return originalCreateRenderingDeviceDX11(renderingDevice, renderingDeviceContext, deviceCreationSetting, displaySwapDevice, D3D11_CREATE_DEVICE_DEBUG);
 }
 
+static app::level::PlayerInformation* playerInfos[7]{};
+HOOK(app::level::PlayerInformation*, __fastcall, LevelInfo_GetPlayerInformation, 0x140260290, app::level::LevelInfo* self, uint8_t playerId)
+{
+	if (playerId == 0) return originalLevelInfo_GetPlayerInformation(self, playerId);
+	else return playerInfos[playerId - 1];
+}
+
+HOOK(bool, __fastcall, GOCCamera_PushController, 0x14D39B880, app_cmn::camera::GOCCamera* self, hh::fnd::Handle<hh::fnd::Messenger>& cameraFrame, unsigned int controllerId, unsigned int unkParam1, app_cmn::camera::CameraInterpolator* interpolator)
+{
+	if (self->owner->objectClass == app::player::Sonic::GetClass() || self->owner->objectClass == app::player::Amy::GetClass() || self->owner->objectClass == app::player::Knuckles::GetClass() || self->owner->objectClass == app::player::Tails::GetClass()) {
+		auto* player = static_cast<app::player::Player*>(self->owner);
+		hh::fnd::Handle<hh::fnd::Messenger> cameraFrame2 = hh::game::GameManager::GetInstance()->GetService<app::camera::CameraService>()->GetCameraFrame(player->setupInfo.playerId * 2);
+		return originalGOCCamera_PushController(self, cameraFrame2, controllerId, unkParam1, interpolator);
+	}
+	else
+		return originalGOCCamera_PushController(self, cameraFrame, controllerId, unkParam1, interpolator);
+}
+
 void Context::install_hooks()
 {
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	INSTALL_HOOK(MouseHookUpdate);
+	INSTALL_HOOK(LevelInfo_GetPlayerInformation);
+	INSTALL_HOOK(GOCCamera_PushController);
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
 	GOCVisualDebugDrawRenderer::InstallHooks();
 }
@@ -169,6 +189,7 @@ void Context::init() {
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
 
+	playerInfos[0] = new (moduleAllocator) app::level::PlayerInformation{ moduleAllocator };
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
@@ -195,7 +216,7 @@ void Context::update()
 
 	//ImGui::PushFont(firaCode);
 	//ImGui::ShowDemoWindow();
-	//ImPlot::ShowDemoWindow();
+	ImPlot::ShowDemoWindow();
 	Desktop::instance->Render();
 
 	ImGui::Render();

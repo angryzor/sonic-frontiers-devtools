@@ -30,4 +30,5 @@ public:
     const csl::math::Vector3* GetPickedLocation() const;
     void SwitchToObjectInspectionMode();
     void SwitchToLevelEditorMode();
+    void SwitchToSurfRideEditorMode();
 };

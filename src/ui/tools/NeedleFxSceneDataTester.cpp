@@ -1,5 +1,4 @@
 #include "NeedleFxSceneDataTester.h"
-#include <ui/common/ReflectionEditor.h>
 
 using namespace hh::fnd;
 

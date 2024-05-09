@@ -1,6 +1,6 @@
 #include "ObjectDataInspector.h"
 #include "LevelEditor.h"
-#include <ui/common/ObjectDataEditor.h>
+#include <ui/common/editors/ObjectData.h>
 #include <imgui_internal.h>
 
 using namespace hh::fnd;
@@ -25,9 +25,9 @@ void ObjectDataInspector::Render() {
 		}
 		else {
 			auto focusedObject = levelEditor.focusedObjects[0];
-			ObjectDataEditor::Render(focusedObject);
+			bool edited = Editor("Focused object", *focusedObject);
 
-			if (ImGui::IsItemEdited() || ImGui::IsItemDeactivatedAfterEdit()) {
+			if (edited || ImGui::IsItemDeactivatedAfterEdit()) {
 				hh::dbg::MsgParamChangedInEditor msg{};
 
 				levelEditor.NotifyActiveObject(msg);

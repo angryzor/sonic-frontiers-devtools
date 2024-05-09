@@ -1,6 +1,9 @@
 #include "ObjectInspector.h"
 #include "ObjectInspection.h"
-#include <ui/common/SimpleWidgets.h>
+#include <ui/common/viewers/Basic.h>
+#include <ui/common/editors/Basic.h>
+#include <ui/common/editors/Camera.h>
+#include <ui/common/inputs/Basic.h>
 #include <ui/resources/editors/ResReflectionEditor.h>
 #include <utilities/math/EulerTransform.h>
 #include <utilities/math/MathUtils.h>
@@ -11,6 +14,33 @@ using namespace hh::game;
 
 ObjectInspector::ObjectInspector(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : BaseObject{ allocator }, objectInspection{ objectInspection }
 {
+}
+
+void RenderCameraBlendTree(app_cmn::camera::CameraFrame::BlendNode* node) {
+	if (ImGui::TreeNode("Controller")) {
+		ImGui::Text("Name: %s", node->controller->name.c_str());
+		if (ImGui::TreeNode("Parameters")) {
+			Editor("Parameters", node->controller->parameter);
+			ImGui::TreePop();
+		}
+		ImGui::TreePop();
+	}
+	if (node->interpolator && ImGui::TreeNode("Interpolator")) {
+		ImGui::Text("Frame id %d, name %s, address %zx", node->interpolator->cameraFrame->id, node->interpolator->cameraFrame->name.c_str(), node->interpolator->cameraFrame);
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("Parameters")) {
+		Editor("Parameters", node->controller->parameter);
+		ImGui::TreePop();
+	}
+	if (node->child1 && ImGui::TreeNode("Child 1")) {
+		RenderCameraBlendTree(node->child1);
+		ImGui::TreePop();
+	}
+	if (node->child2 && ImGui::TreeNode("Child 2")) {
+		RenderCameraBlendTree(node->child2);
+		ImGui::TreePop();
+	}
 }
 
 void ObjectInspector::Render() {
@@ -50,29 +80,76 @@ void ObjectInspector::Render() {
 					ImGui::EndChild();
 					ImGui::EndTabItem();
 				}
+				if (ImGui::BeginTabItem("Details")) {
+					if (focusedObject->objectClass == app_cmn::camera::CameraFrame::GetClass()) {
+						auto* cameraFrame = static_cast<app_cmn::camera::CameraFrame*>(&*focusedObject);
+
+						ImGui::Text("Id: %d", cameraFrame->id);
+						ImGui::Text("Name: %s", cameraFrame->name.c_str());
+						if (ImGui::TreeNode("Parameters 1")) {
+							Editor("Parameters 1", cameraFrame->cameraParameter1);
+							ImGui::TreePop();
+						}
+						if (ImGui::TreeNode("Parameters 2")) {
+							Editor("Parameters 2", cameraFrame->cameraParameter2);
+							ImGui::TreePop();
+						}
+						if (ImGui::TreeNode("Frustum 1")) {
+							Editor("Frustum 1", cameraFrame->frustumParameter1);
+							ImGui::TreePop();
+						}
+						if (ImGui::TreeNode("Frustum 2")) {
+							Editor("Frustum 2", cameraFrame->frustumParameter2);
+							ImGui::TreePop();
+						}
+						if (ImGui::TreeNode("Pose")) {
+							Editor("Pose", cameraFrame->pose);
+							ImGui::TreePop();
+						}
+
+						if (ImGui::TreeNode("Blend tree")) {
+							RenderCameraBlendTree(cameraFrame->blendTree);
+							ImGui::TreePop();
+						}
+
+						ImGui::SeparatorText("Controllers");
+						for (auto& controllerUnit : cameraFrame->controllers) {
+							ImGui::PushID(&controllerUnit);
+							ImGui::Text("Addr: %zx", controllerUnit.controller);
+							ImGui::Text("Name: %s", controllerUnit.controller->name.c_str());
+							ImGui::Text("Priority: %d", controllerUnit.priority);
+							if (ImGui::TreeNode("Parameters")) {
+								Editor("Parameters", controllerUnit.controller->parameter);
+								ImGui::TreePop();
+							}
+							ImGui::PopID();
+						}
+					}
+					ImGui::EndTabItem();
+				}
 				if (ImGui::BeginTabItem("Update configuration")) {
 					if (ImGui::BeginChild("Content")) {
 						ImGui::Text("GameObject requested update phases:");
 						ImGui::BeginGroup();
-						CheckboxFlagsLT32("PreAnim", &focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);
+						CheckboxFlags("PreAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);
 						if (ImGui::IsItemEdited())
 							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
 						ImGui::SameLine();
-						CheckboxFlagsLT32("PostAnim", &focusedObject->forcedUpdateFlags, UpdatingPhase::POST_ANIM);
+						CheckboxFlags("PostAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::POST_ANIM);
 						if (ImGui::IsItemEdited())
 							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
 						ImGui::SameLine();
-						CheckboxFlagsLT32("Final", &focusedObject->forcedUpdateFlags, UpdatingPhase::FINAL);
+						CheckboxFlags("Final", focusedObject->forcedUpdateFlags, UpdatingPhase::FINAL);
 						if (ImGui::IsItemEdited())
 							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
 						ImGui::EndGroup();
 						ImGui::Text("Real update phases due to components:");
 						ImGui::BeginDisabled();
-						CheckboxFlagsLT32("PreAnim", &focusedObject->updateFlags, UpdatingPhase::PRE_ANIM);
+						CheckboxFlags("PreAnim", focusedObject->updateFlags, UpdatingPhase::PRE_ANIM);
 						ImGui::SameLine();
-						CheckboxFlagsLT32("PostAnim", &focusedObject->updateFlags, UpdatingPhase::POST_ANIM);
+						CheckboxFlags("PostAnim", focusedObject->updateFlags, UpdatingPhase::POST_ANIM);
 						ImGui::SameLine();
-						CheckboxFlagsLT32("Final", &focusedObject->updateFlags, UpdatingPhase::FINAL);
+						CheckboxFlags("Final", focusedObject->updateFlags, UpdatingPhase::FINAL);
 						ImGui::EndDisabled();
 						ImGui::SeparatorText("Component update configuration");
 						for (auto* component : focusedObject->components) {
@@ -85,7 +162,7 @@ void ObjectInspector::Render() {
 								ImGui::Text("Update phases");
 								//ImGui::BeginDisabled();
 								ImGui::BeginGroup();
-								CheckboxFlagsLT32("PreAnim", &component->updateFlags, UpdatingPhase::PRE_ANIM);
+								CheckboxFlags("PreAnim", component->updateFlags, UpdatingPhase::PRE_ANIM);
 								if (ImGui::IsItemDeactivatedAfterEdit()) {
 									if (component->updateFlags.test(UpdatingPhase::PRE_ANIM)) {
 										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
@@ -101,7 +178,7 @@ void ObjectInspector::Render() {
 									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
 								}
 								ImGui::SameLine();
-								CheckboxFlagsLT32("PostAnim", &component->updateFlags, UpdatingPhase::POST_ANIM);
+								CheckboxFlags("PostAnim", component->updateFlags, UpdatingPhase::POST_ANIM);
 								if (ImGui::IsItemDeactivatedAfterEdit()) {
 									if (component->updateFlags.test(UpdatingPhase::POST_ANIM)) {
 										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
@@ -117,7 +194,7 @@ void ObjectInspector::Render() {
 									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
 								}
 								ImGui::SameLine();
-								CheckboxFlagsLT32("Final", &component->updateFlags, UpdatingPhase::FINAL);
+								CheckboxFlags("Final", component->updateFlags, UpdatingPhase::FINAL);
 								if (ImGui::IsItemDeactivatedAfterEdit()) {
 									if (component->updateFlags.test(UpdatingPhase::FINAL)) {
 										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
@@ -172,6 +249,10 @@ void ObjectInspector::RenderComponentInspector(GOComponent& component) {
 		RenderGOCEventCollisionInspector(static_cast<app::game::GOCEventCollision&>(component));
 	} else if (component.pStaticClass == app::player::GOCPlayerKinematicParams::GetClass()) {
 		RenderGOCPlayerKinematicParamsInspector(static_cast<app::player::GOCPlayerKinematicParams&>(component));
+	} else if (component.pStaticClass == app::player::GOCPlayerBlackboard::GetClass()) {
+		RenderGOCPlayerBlackboardInspector(static_cast<app::player::GOCPlayerBlackboard&>(component));
+	} else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass()) {
+		RenderGOCCameraInspector(static_cast<app_cmn::camera::GOCCamera&>(component));
 	} else {
 		RenderUnknownComponentInspector(component);
 	}
@@ -207,8 +288,8 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 		break;
 	}
 
-	ComboEnum("Mode", &component.mode, playerParameterModes);
-	ComboEnum("Super state", &component.superState, playerParameterSuperStates);
+	ComboEnum("Mode", component.mode, playerParameterModes);
+	ComboEnum("Super state", component.superState, playerParameterSuperStates);
 
 	if (ImGui::Button("Edit character parameters..."))
 		switch (component.characterId) {
@@ -233,7 +314,7 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 		ImGui::SeparatorText("Mode packages");
 		RenderModeParameterInspector("Mode packages", component.modePackages);
 		if (ImGui::TreeNode("Water mode package")) {
-			ReflectionEditor::Render(*component.waterModePackage);
+			Editor("Parameters", *component.waterModePackage);
 			ImGui::TreePop();
 		}
 		ImGui::SeparatorText("Parameters");
@@ -250,23 +331,51 @@ void ObjectInspector::RenderGOCPlayerParameterInspector(app::player::GOCPlayerPa
 
 void ObjectInspector::RenderGOCPlayerKinematicParamsInspector(app::player::GOCPlayerKinematicParams& component)
 {
-	VectorEditor("Position", component.position);
-	QuaternionEditor("Rotation", component.rotation);
-	VectorEditor("Scale", component.scale);
+	Editor("Position", component.position);
+	Editor("Rotation", component.rotation);
+	Editor("Scale", component.scale);
 	ImGui::PushID("WorldPos");
 	ImGui::SeparatorText("World position");
 	ImGui::PopID();
-	WorldPositionEditor(component.worldPosition);
+	Editor("World position", component.worldPosition);
 	ImGui::SeparatorText("Physics");
-	VectorEditor("Velocity", component.velocity);
-	VectorEditor("Unk1", component.unk1);
-	VectorEditor("Unk2", component.unk2);
-	VectorEditor("Unk3", component.unk3);
-	VectorEditor("Unk4", component.unk4);
-	VectorEditor("Unk5", component.unk5);
-	VectorEditor("Unk6", component.unk6);
+	Editor("Velocity", component.velocity);
+	Editor("Unk1", component.unk1);
+	Editor("Unk2", component.unk2);
+	Editor("Unk3", component.unk3);
+	Editor("Unk4", component.unk4);
+	Editor("Unk5", component.unk5);
+	Editor("Unk6", component.unk6);
 	ImGui::Text("Unk7");
-	MatrixValues(component.unk7);
+	Viewer("Unk7", component.unk7);
+}
+
+const char* GetBlackboardName(unsigned int nameHash) {
+	switch (nameHash) {
+		case csl::ut::HashString("BlackboardAmy"): return "BlackboardAmy";
+		case csl::ut::HashString("BlackboardSpeed"): return "BlackboardSpeed";
+		case csl::ut::HashString("BlackboardItem"): return "BlackboardItem";
+		case csl::ut::HashString("BlackboardBattle"): return "BlackboardBattle";
+		case csl::ut::HashString("BlackboardStatus"): return "BlackboardStatus";
+		case csl::ut::HashString("BlackboardTails"): return "BlackboardTails";
+		default: return "Unknown";
+	}
+}
+void ObjectInspector::RenderGOCPlayerBlackboardInspector(app::player::GOCPlayerBlackboard& component)
+{
+	for (auto& content : component.blackboard->contents) {
+		if (ImGui::TreeNode(&*content, "%s", GetBlackboardName(content->GetNameHash()))) {
+			switch (content->GetNameHash()) {
+			case csl::ut::HashString("BlackboardAmy"): RenderBlackboardAmyInspector(static_cast<app::player::BlackboardAmy&>(*content)); break;
+			case csl::ut::HashString("BlackboardSpeed"): RenderBlackboardSpeedInspector(static_cast<app::player::BlackboardSpeed&>(*content)); break;
+			case csl::ut::HashString("BlackboardItem"): RenderBlackboardItemInspector(static_cast<app::player::BlackboardItem&>(*content)); break;
+			case csl::ut::HashString("BlackboardBattle"): RenderBlackboardBattleInspector(static_cast<app::player::BlackboardBattle&>(*content)); break;
+			case csl::ut::HashString("BlackboardStatus"): RenderBlackboardStatusInspector(static_cast<app::player::BlackboardStatus&>(*content)); break;
+			case csl::ut::HashString("BlackboardTails"): RenderBlackboardTailsInspector(static_cast<app::player::BlackboardTails&>(*content)); break;
+			}
+			ImGui::TreePop();
+		}
+	}
 }
 
 void ObjectInspector::RenderGOCColliderInspector(hh::physics::GOCCollider& component)
@@ -297,8 +406,8 @@ void ObjectInspector::RenderGOCColliderInspector(hh::physics::GOCCollider& compo
 
 	ImGui::SeparatorText("Local world position (editable form)");
 	ImGui::BeginGroup();
-	WorldPositionEditor(component.localWorldPosition);
-	VectorEditor("Scale", component.scale);
+	Editor("Local world position", component.localWorldPosition);
+	Editor("Scale", component.scale);
 	ImGui::EndGroup();
 
 	if (ImGui::IsItemEdited()) {
@@ -307,25 +416,25 @@ void ObjectInspector::RenderGOCColliderInspector(hh::physics::GOCCollider& compo
 	}
 
 	ImGui::SeparatorText("Local world position (internal representation)");
-	WorldPositionViewer("Local world position", component.localWorldPosition);
+	Viewer("Local world position", component.localWorldPosition);
 
 	ImGui::SeparatorText("Transformed world position");
-	WorldPositionViewer("Transformed world position", component.transformedWorldPosition);
+	Viewer("Transformed world position", component.transformedWorldPosition);
 
 	if (component.frame) {
 		ImGui::SeparatorText("HFrame 1 local transform");
-		TransformViewer("HFrameTransformLocal", component.frame->localTransform);
+		Viewer("HFrameTransformLocal", component.frame->localTransform);
 
 		ImGui::SeparatorText("HFrame 1 full transform");
-		TransformViewer("HFrameTransformFull", component.frame->fullTransform);
+		Viewer("HFrameTransformFull", component.frame->fullTransform);
 	}
 
 	if (component.frame2) {
 		ImGui::SeparatorText("HFrame 2 local transform");
-		TransformViewer("HFrameTransformLocal", component.frame2->localTransform);
+		Viewer("HFrameTransformLocal", component.frame2->localTransform);
 
 		ImGui::SeparatorText("HFrame 2 full transform");
-		TransformViewer("HFrameTransformFull", component.frame2->fullTransform);
+		Viewer("HFrameTransformFull", component.frame2->fullTransform);
 	}
 }
 
@@ -341,7 +450,7 @@ void ObjectInspector::RenderGOCBoxColliderInspector(hh::physics::GOCBoxCollider&
 	ImGui::SeparatorText("Parameters");
 	if (BeginVectorViewerTable("Dimensions", false))
 	{
-		VectorViewerTableItem("Dimensions", component.dimensions);
+		Viewer("Dimensions", component.dimensions);
 		EndVectorViewerTable();
 	}
 	RenderGOCColliderInspector(component);
@@ -449,9 +558,9 @@ void ObjectInspector::RenderGOCAnimatorInspector(hh::anim::GOCAnimator& componen
 
 void ObjectInspector::RenderGOCEventInspector(app::game::GOCEvent& component)
 {
-	CheckboxFlagsLT32("Triggered", &component.flags, app::game::GOCEvent::Flag::ENABLED);
-	CheckboxFlagsLT32("Unknown 1", &component.flags, app::game::GOCEvent::Flag::UNK1);
-	CheckboxFlagsLT32("Deactivate after event (maybe)", &component.flags, app::game::GOCEvent::Flag::MAYBE_DEACTIVATE_AFTER_EVENT);
+	CheckboxFlags("Triggered", component.flags, app::game::GOCEvent::Flag::ENABLED);
+	CheckboxFlags("Unknown 1", component.flags, app::game::GOCEvent::Flag::UNK1);
+	CheckboxFlags("Deactivate after event (maybe)", component.flags, app::game::GOCEvent::Flag::MAYBE_DEACTIVATE_AFTER_EVENT);
 }
 
 const char* gocEventCollisionConditions[] = { "ON_TRIGGER", "ON_STAY", "UNKNOWN", "PULSE" };
@@ -461,25 +570,45 @@ void ObjectInspector::RenderGOCEventCollisionInspector(app::game::GOCEventCollis
 	ImGui::SliderFloat("Time left", &component.timeLeft, 0, component.lifetime);
 	ImGui::DragFloat("Lifetime", &component.lifetime);
 	ImGui::Checkbox("Lifetime reached", &component.lifetimeReached);
-	ComboEnum("Condition", &component.collisionListener.condition, gocEventCollisionConditions);
+	ComboEnum("Condition", component.collisionListener.condition, gocEventCollisionConditions);
+}
+
+void ObjectInspector::RenderGOCCameraInspector(app_cmn::camera::GOCCamera& component)
+{
+	for (auto& unit : component.controllerUnits) {
+		if (ImGui::TreeNodeEx(&unit, ImGuiTreeNodeFlags_None, "Controller unit %d", unit.id)) {
+			if (auto* cameraFrame = static_cast<app_cmn::camera::CameraFrame*>(MessageManager::GetMessengerByHandle(unit.cameraFrame))) {
+				ImGui::Text("Camera frame: %s", cameraFrame->name.c_str());
+			}
+
+			ImGui::SeparatorText("Controller");
+			ImGui::Text("Addr: %zx", unit.controller);
+			ImGui::Text("Name: %s", unit.controller->name.c_str());
+			if (ImGui::TreeNode("Parameters")) {
+				Editor("Parameters", unit.controller->parameter);
+				ImGui::TreePop();
+			}
+
+			ImGui::TreePop();
+		}
+	}
 }
 
 void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {
 	auto transform = component.transform;
 
 	ImGui::SeparatorText("Main local transform (editable form)");
-	TransformEditor(transform);
-	if (ImGui::IsItemEdited())
+	if (Editor("GOCTransformTransformEditable", transform))
 		component.SetLocalTransform(transform);
 
 	ImGui::SeparatorText("Main local transform (internal representation)");
-	TransformViewer("GOCTransformTransform", component.transform);
+	Viewer("GOCTransformTransform", component.transform);
 
 	ImGui::SeparatorText("HFrame local transform");
-	TransformViewer("HFrameTransformLocal", component.frame->localTransform);
+	Viewer("HFrameTransformLocal", component.frame->localTransform);
 
 	ImGui::SeparatorText("HFrame full transform");
-	TransformViewer("HFrameTransformFull", component.frame->fullTransform);
+	Viewer("HFrameTransformFull", component.frame->fullTransform);
 }
 
 //void ObjectInspector::RenderGOCInputInspector(GOCInput& component) {
@@ -490,3 +619,480 @@ void ObjectInspector::RenderGOCTransformInspector(GOCTransform& component) {
 //	ImGui::SeparatorText("Axis monitors (%d):", inputComponent->axisMonitors.size());
 //
 //}
+
+void ObjectInspector::RenderBlackboardAmyInspector(app::player::BlackboardAmy& blackboard) {
+	ImGui::Text("Unk1: %zx", blackboard.unk1);
+	ImGui::Text("Unk2: %x", blackboard.unk2);
+}
+
+void ObjectInspector::RenderBlackboardSpeedInspector(app::player::BlackboardSpeed& blackboard) {
+	ImGui::Text("Unk1: %x", blackboard.speed);
+	ImGui::Text("Unk2: %x", blackboard.speed2);
+}
+
+void ObjectInspector::RenderBlackboardItemInspector(app::player::BlackboardItem& blackboard) {
+	static uint32_t zero{};
+
+	ImGui::DragScalar("Ring capacity", ImGuiDataType_U32, &blackboard.ringCapacity);
+	ImGui::SliderScalar("Ring count", ImGuiDataType_U32, &blackboard.ringCount, &zero, &blackboard.ringCapacity);
+	ImGui::DragScalar("Unk1", ImGuiDataType_U32, &blackboard.unk1);
+	ImGui::DragScalar("unk2", ImGuiDataType_U16, &blackboard.unk2);
+	ImGui::DragScalar("unk3", ImGuiDataType_U8, &blackboard.unk3);
+	ImGui::DragScalar("unk3b", ImGuiDataType_U8, &blackboard.unk3b);
+	ImGui::DragScalar("unk4", ImGuiDataType_U8, &blackboard.unk4);
+	ImGui::DragScalar("unk5", ImGuiDataType_U8, &blackboard.unk5);
+	ImGui::DragScalar("unk5b", ImGuiDataType_U8, &blackboard.unk5b);
+	ImGui::DragScalar("unk5c", ImGuiDataType_U8, &blackboard.unk5c);
+	ImGui::DragScalar("unk6", ImGuiDataType_U16, &blackboard.unk6);
+	ImGui::DragScalar("unk7", ImGuiDataType_U16, &blackboard.unk7);
+	ImGui::DragScalar("unk8", ImGuiDataType_U8, &blackboard.unk8);
+}
+
+void ObjectInspector::RenderBlackboardBattleInspector(app::player::BlackboardBattle& blackboard) {
+	ImGui::DragScalar("powerLevel", ImGuiDataType_U8, &blackboard.powerLevel);
+	ImGui::DragScalar("defenseLevel", ImGuiDataType_U8, &blackboard.defenseLevel);
+	ImGui::DragScalar("unk1", ImGuiDataType_U8, &blackboard.unk1);
+	ImGui::DragScalar("unk2", ImGuiDataType_U8, &blackboard.unk2);
+	Editor("unk3", blackboard.unk3);
+	csl::ut::MoveArray<void*> debugArray1;
+	csl::ut::MoveArray<void*> debugArray2;
+	csl::ut::MoveArray<void*> unk4;
+	ImGui::DragScalar("Unk5", ImGuiDataType_U32, &blackboard.unk5);
+	ImGui::DragScalar("unk6", ImGuiDataType_U16, &blackboard.unk6);
+	ImGui::DragScalar("unk7", ImGuiDataType_U8, &blackboard.unk7);
+	ImGui::DragScalar("Combo count", ImGuiDataType_U32, &blackboard.comboCount);
+	ImGui::DragFloat("Phantom rush amount", &blackboard.phantomRushAmount);
+	Editor("Unk9", blackboard.unk9);
+	ImGui::DragFloat("Unk10", &blackboard.unk10);
+	ImGui::DragFloat("Quick Cyloop amount", &blackboard.quickCyloopAmount);
+	ImGui::Text("%zx", blackboard.unkself12);
+	ImGui::Text("%zx", blackboard.unk12);
+	ImGui::Text("%zx", blackboard.unk13);
+	ImGui::Text("%zx", blackboard.unk14);
+	ImGui::Text("Unk16: %s", blackboard.unk16.c_str());
+	ImGui::DragScalar("unk17", ImGuiDataType_U16, &blackboard.unk17);
+}
+
+const char* difficultyNames[]{ "EASY", "NORMAL", "HARD", "EXTREME" };
+
+const char* stateFlagNames[64]{
+	"BOOST",
+	nullptr,
+	nullptr,
+	nullptr,
+	"AIR_BOOST",
+	nullptr,
+	"GRIND_JUMP",
+	"GRIND",
+	"JUMP",
+	"DOUBLE_JUMP",
+	"BOUNCE_JUMP",
+	"FALL",
+	"STOMP",
+	"DIVING",
+	"DIVING_BOOST",
+	nullptr,
+
+	nullptr,
+	"CYLOOP",
+	"CYLOOP_END",
+	"DRIFT",
+	nullptr,
+	nullptr,
+	nullptr,
+	"HOMING",
+	"PARRY",
+	"WALL_CLIMB",
+	"IDLE",
+	nullptr,
+	"WALL_CLIMB_IDLE",
+	nullptr,
+	"BOARDING",
+	nullptr,
+
+	nullptr,
+	"SPRING_JUMP",
+	"SPIN_DASH",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+};
+
+const char* combatFlagNames[128]{
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"SIDE_STEP",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"PARRY",
+
+	"PERFECT_PARRY",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"AIR_TRICK",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	"GRAND_SLAM",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"QUICK_CYLOOP",
+	nullptr,
+	"PHANTOM_RUSH",
+	"CYCLONE_KICK",
+	"RECOVERY_SMASH",
+	nullptr,
+	"SONIC_BOOM",
+	"WILD_RUSH",
+
+	"LOOP_KICK",
+	"SPIN_SLASH",
+	"STOMP_ATTACK",
+	nullptr,
+	"HOMING_SHOT",
+	"CROSS_SLASH",
+	nullptr,
+	nullptr,
+	nullptr,
+	"AUTO_COMBO",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"SPIN_DASH",
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+};
+
+const char* worldFlagNames[128]{
+	nullptr,
+	"KILLED",
+	"DAMAGED_OR_REPELLED",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"OUT_OF_CONTROL",
+	nullptr,
+	nullptr,
+	"AUTO_RUN",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"CYBER_SPACE",
+	nullptr,
+
+	nullptr,
+	nullptr,
+	"WALL_JUMP_LAND",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"POWER_BOOST",
+	nullptr,
+	"AIR_TRICK",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	"HEIGHT_MAP_COLLISION",
+	"NO_CLIP",
+	nullptr,
+	"BATTLE",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	"NITRO_BOOST",
+	"MAX_SPEED_CHALLENGE",
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+	nullptr,
+};
+
+void ObjectInspector::RenderBlackboardStatusInspector(app::player::BlackboardStatus& blackboard) {
+	ImGui::DragScalar("word20", ImGuiDataType_U16, &blackboard.word20);
+	ImGui::DragScalar("dword24", ImGuiDataType_U32, &blackboard.dword24);
+
+	if (ImGui::TreeNode("Combat flags")) {
+		for (size_t i = 0; i < 64; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(combatFlagNames[i] == nullptr ? idxName : combatFlagNames[i], blackboard.combatFlags[0], static_cast<app::player::BlackboardStatus::CombatFlag>(i));
+		}
+		for (size_t i = 64; i < 128; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(combatFlagNames[i] == nullptr ? idxName : combatFlagNames[i], blackboard.combatFlags[1], static_cast<app::player::BlackboardStatus::CombatFlag>(i - 64));
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("State flags")) {
+		for (size_t i = 0; i < 64; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(stateFlagNames[i] == nullptr ? idxName : stateFlagNames[i], blackboard.stateFlags, static_cast<app::player::BlackboardStatus::StateFlag>(i));
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("World flags")) {
+		for (size_t i = 0; i < 64; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(worldFlagNames[i] == nullptr ? idxName : worldFlagNames[i], blackboard.worldFlags[0], static_cast<app::player::BlackboardStatus::WorldFlag>(i));
+		}
+		for (size_t i = 64; i < 128; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(worldFlagNames[i] == nullptr ? idxName : worldFlagNames[i], blackboard.worldFlags[1], static_cast<app::player::BlackboardStatus::WorldFlag>(i - 64));
+		}
+		ImGui::TreePop();
+	}
+
+	ImGui::Text("Out of control time: %f", blackboard.outOfControlTime);
+	ImGui::Text("In control time: %f", blackboard.inControlTime);
+	ImGui::Text("%zx", blackboard.qword58);
+	ImGui::Text("%zx", blackboard.qword60);
+	//ut::PriorityList<bool, hh::fnd::Handle<hh::fnd::Messenger>> qword68;
+	//csl::ut::InplaceMoveArray<uint32_t, 4> qword90;
+	//csl::ut::InplaceMoveArray<uint32_t, 4> qwordC0;
+	//csl::ut::InplaceMoveArray<uint32_t, 4> qwordF0;
+	ImGui::Text("%zx", blackboard.qword120);
+	ImGui::DragScalar("dword128", ImGuiDataType_U32, &blackboard.dword128);
+	//ut::PriorityList<Dimension, hh::fnd::Handle<hh::fnd::Messenger>> qword130;
+	Editor("oword160", blackboard.oword160);
+	ImGui::DragScalar("dword170", ImGuiDataType_U32, &blackboard.dword170);
+	ImGui::DragScalar("qword174", ImGuiDataType_U32, &blackboard.qword174);
+	ImGui::DragScalar("qword178", ImGuiDataType_U32, &blackboard.qword178);
+	ImGui::DragScalar("dword17C", ImGuiDataType_U32, &blackboard.dword17C);
+	ComboEnum("Difficulty", blackboard.byte180, difficultyNames);
+	ImGui::DragScalar("qword184", ImGuiDataType_U32, &blackboard.qword184);
+	DragScalar("qword188", blackboard.qword188);
+}
+
+void ObjectInspector::RenderBlackboardTailsInspector(app::player::BlackboardTails& blackboard) {
+	ImGui::DragScalar("Unk1", ImGuiDataType_U32, &blackboard.unk1);
+	ImGui::DragScalar("Unk2", ImGuiDataType_U32, &blackboard.unk2);
+	ImGui::DragScalar("Unk3", ImGuiDataType_U32, &blackboard.unk3);
+	ImGui::DragScalar("Unk4", ImGuiDataType_U32, &blackboard.unk4);
+	ImGui::DragScalar("Unk5", ImGuiDataType_U32, &blackboard.unk5);
+	ImGui::DragScalar("Unk6", ImGuiDataType_U32, &blackboard.unk6);
+}

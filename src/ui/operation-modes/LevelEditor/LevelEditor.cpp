@@ -1,5 +1,4 @@
 #include "LevelEditor.h"
-#include <ui/common/SimpleWidgets.h>
 #include <ui/Desktop.h>
 #include <utilities/ObjectDataUtils.h>
 #include <utilities/BoundingBoxes.h>
