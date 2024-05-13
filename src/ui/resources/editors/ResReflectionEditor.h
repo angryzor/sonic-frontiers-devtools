@@ -24,6 +24,8 @@ public:
 	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource, const hh::fnd::RflClass* rflClass);
 	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource);
 
+	static void RenderExportDialog();
+
 	void MakeOriginalCopy();
 	void FreeOriginalCopy();
 	

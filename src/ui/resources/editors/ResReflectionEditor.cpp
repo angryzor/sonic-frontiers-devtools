@@ -112,22 +112,29 @@ void ResReflectionEditor::RenderContents() {
 			ImGui::EndChild();
 		}
 
-
 		if (clicked_export) {
 			IGFD::FileDialogConfig cfg{};
 			cfg.path = ".";
 			cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
+			cfg.userDatas = this;
 			ImGuiFileDialog::Instance()->OpenDialog("ResReflectionExportDialog", "Choose File", ".rfl", cfg);
 		}
 
-		if (ImGuiFileDialog::Instance()->Display("ResReflectionExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
-			if (ImGuiFileDialog::Instance()->IsOk()) {
-				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-				std::wstring wFilePath(filePath.begin(), filePath.end());
+		RenderExportDialog();
+	}
+}
 
-				ReflectionSerializer::SerializeToFile(wFilePath.c_str(), resource->reflectionData, *rflClass);
-			}
-			ImGuiFileDialog::Instance()->Close();
+void ResReflectionEditor::RenderExportDialog()
+{
+	if (ImGuiFileDialog::Instance()->Display("ResReflectionExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			auto* self = static_cast<ResReflectionEditor*>(ImGuiFileDialog::Instance()->GetUserDatas());
+
+			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+			std::wstring wFilePath(filePath.begin(), filePath.end());
+
+			ReflectionSerializer::SerializeToFile(wFilePath.c_str(), self->resource->reflectionData, *self->rflClass);
 		}
+		ImGuiFileDialog::Instance()->Close();
 	}
 }
