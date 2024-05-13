@@ -42,29 +42,37 @@ void ProjectTree::Render()
 			return;
 		}
 
-		const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 		for (auto* scene : editor.gocSprite->GetProject()->scenes) {
-			bool isOpen = ImGui::TreeNode(scene, "%s", scene->sceneData->pName);
+			ImGuiTreeNodeFlags itemNodeFlags = nodeFlags;
+			SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::SCENE, scene };
 
-			if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-				editor.focusedElements.clear();
-				editor.focusedElements.push_back({ SurfRideEditor::Selection::Type::SCENE, scene });
-			}
+			if (editor.focusedElements.find(selection) != -1)
+				itemNodeFlags |= ImGuiTreeNodeFlags_Selected;
+
+			bool isOpen = ImGui::TreeNode(scene, "%s", scene->sceneData->name);
+
+			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+				editor.Select(selection);
 
 			if (isOpen) {
-				if (ImGui::TreeNode("Cameras")) {
-					for (size_t i = 0; i < scene->sceneData->CameraCount; i++) {
-						ImGui::TreeNodeEx(&scene->sceneData->pCameras[i], ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", scene->sceneData->pCameras[i].pName);
+				if (ImGui::TreeNodeEx("Cameras", nodeFlags)) {
+					for (size_t i = 0; i < scene->sceneData->cameraCount; i++) {
+						ImGuiTreeNodeFlags itemNodeFlags = nodeFlags;
+						SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::CAMERA_DATA, &scene->sceneData->cameras[i] };
 
-						if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-							editor.focusedElements.clear();
-							editor.focusedElements.push_back({ SurfRideEditor::Selection::Type::CAMERA_DATA, &scene->sceneData->pCameras[i] });
-						}
+						if (editor.focusedElements.find(selection) != -1)
+							itemNodeFlags |= ImGuiTreeNodeFlags_Selected;
+
+						ImGui::TreeNodeEx(&scene->sceneData->cameras[i], nodeFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", scene->sceneData->cameras[i].name);
+
+						if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+							editor.Select(selection);
 					}
 					ImGui::TreePop();
 				}
-				if (ImGui::TreeNode("Layers")) {
+				if (ImGui::TreeNodeEx("Layers", nodeFlags)) {
 					for (auto* layer : scene->layers)
 						RenderLayer(layer);
 					ImGui::TreePop();
@@ -78,15 +86,19 @@ void ProjectTree::Render()
 
 void ProjectTree::RenderLayer(SurfRide::Layer* layer)
 {
-	bool isOpen = ImGui::TreeNode(layer, "%s", layer->layerData->pName);
+	ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+	SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::LAYER, layer };
 
-	if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-		editor.focusedElements.clear();
-		editor.focusedElements.push_back({ SurfRideEditor::Selection::Type::LAYER, layer });
-	}
+	if (editor.focusedElements.find(selection) != -1)
+		nodeFlags |= ImGuiTreeNodeFlags_Selected;
+
+	bool isOpen = ImGui::TreeNodeEx(layer, nodeFlags, "%s", layer->layerData->name);
+
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+		editor.Select(selection);
 
 	if (isOpen) {
-		for (auto* cast : layer->casts)
+		for (auto* cast : layer->topLevelCasts)
 			RenderCast(cast);
 		ImGui::TreePop();
 	}
@@ -95,19 +107,28 @@ void ProjectTree::RenderLayer(SurfRide::Layer* layer)
 void ProjectTree::RenderCast(SurfRide::Cast* cast)
 {
 	bool isOpen{ false };
-	if (cast->children.size() == 0)
-		ImGui::TreeNodeEx(cast, ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", cast->castData->m_pName);
-	else
-		isOpen = ImGui::TreeNode(cast, "%s", cast->castData->m_pName);
+	ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+	SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::CAST, cast };
+	SurfRide::Layer* refLayer{ static_cast<SurfRide::SRS_CASTNODE::Type>(cast->flags & 0xF) == SurfRide::SRS_CASTNODE::Type::REFERENCE ? static_cast<SurfRide::ReferenceCast*>(cast)->layer : nullptr };
 
-	if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
-		editor.focusedElements.clear();
-		editor.focusedElements.push_back({ SurfRideEditor::Selection::Type::CAST, cast });
-	}
+	if (editor.focusedElements.find(selection) != -1)
+		nodeFlags |= ImGuiTreeNodeFlags_Selected;
+
+	if (cast->children.size() == 0 && !refLayer)
+		ImGui::TreeNodeEx(cast, nodeFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", cast->castData->name);
+	else
+		isOpen = ImGui::TreeNodeEx(cast, nodeFlags, "%s", cast->castData->name);
+
+	if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
+		editor.Select(selection);
 	
 	if (isOpen) {
+		if (refLayer)
+			RenderLayer(refLayer);
+
 		for (auto* child : cast->children)
 			RenderCast(child);
+
 		ImGui::TreePop();
 	}
 }

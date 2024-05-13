@@ -18,18 +18,18 @@ public:
 
 	template<typename T>
 	static inline SurfRide::Key<T>& GetKeyFrame(SurfRide::SRS_TRACK& track, size_t i) {
-		switch (static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.Flags) & 0xF)) {
+		switch (static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF)) {
 		case SurfRide::SRE_TRACK_FLAG::CONSTANT:
-			return static_cast<SurfRide::KeyLinear<T>*>(track.pKeyFrame)[i];
+			return static_cast<SurfRide::KeyLinear<T>*>(track.keyFrame)[i];
 		case SurfRide::SRE_TRACK_FLAG::LINEAR:
-			return static_cast<SurfRide::KeyLinear<T>*>(track.pKeyFrame)[i];
+			return static_cast<SurfRide::KeyLinear<T>*>(track.keyFrame)[i];
 		case SurfRide::SRE_TRACK_FLAG::HERMITE:
-			return static_cast<SurfRide::KeyHermite<T>*>(track.pKeyFrame)[i];
+			return static_cast<SurfRide::KeyHermite<T>*>(track.keyFrame)[i];
 		case SurfRide::SRE_TRACK_FLAG::INDIVIDUAL:
-			return static_cast<SurfRide::KeyIndividual<T>*>(track.pKeyFrame)[i];
+			return static_cast<SurfRide::KeyIndividual<T>*>(track.keyFrame)[i];
 		default:
 			assert(false);
-			return static_cast<SurfRide::KeyLinear<T>*>(track.pKeyFrame)[i];
+			return static_cast<SurfRide::KeyLinear<T>*>(track.keyFrame)[i];
 		}
 	}
 
@@ -48,29 +48,29 @@ public:
 		auto& track = *static_cast<SurfRide::SRS_TRACK*>(userData);
 
 		if (i-- == 0)
-			return ImPlotPoint(track.FirstFrame, Selector(GetKeyFrame<T>(track, 0).value));
+			return ImPlotPoint(track.firstFrame, Selector(GetKeyFrame<T>(track, 0).value));
 
 		auto segment = i / POINTS_PER_SEGMENT;
 		auto point = i % POINTS_PER_SEGMENT;
-		auto interpType = static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.Flags) & 0xF) == SurfRide::SRE_TRACK_FLAG::INDIVIDUAL ? static_cast<SurfRide::KeyIndividual<T>&>(GetKeyFrame<T>(track, segment)).interpolationType : static_cast<SRE_INTERPOLATION_TYPE>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.Flags) & 0xF);
+		auto interpType = static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF) == SurfRide::SRE_TRACK_FLAG::INDIVIDUAL ? static_cast<SurfRide::KeyIndividual<T>&>(GetKeyFrame<T>(track, segment)).interpolationType : static_cast<SurfRide::SRE_INTERPOLATION_TYPE>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF);
 		auto& kf = GetKeyFrame<T>(track, segment);
 
-		if (segment == track.KeyCount - 1)
-			return ImPlotPoint(point == 0 ? kf.Frame : track.LastFrame, Selector(kf.value));
+		if (segment == track.keyCount - 1)
+			return ImPlotPoint(point == 0 ? kf.frame : track.lastFrame, Selector(kf.value));
 
 		auto& nextKf = GetKeyFrame<T>(track, segment + 1);
 
 		auto t = static_cast<double>(point) / static_cast<double>(POINTS_PER_SEGMENT - 1);
-		auto dx = static_cast<double>(nextKf.Frame - kf.Frame);
+		auto dx = static_cast<double>(nextKf.frame - kf.frame);
 
 		switch (interpType) {
-		case SRE_INTERPOLATION_TYPE::CONSTANT:
-			return ImPlotPoint(kf.Frame + dx * t, Selector(kf.value));
-		case SRE_INTERPOLATION_TYPE::LINEAR:
-			return ImPlotPoint(kf.Frame + dx * t, Selector(kf.value) + (Selector(nextKf.value) - Selector(kf.value)) * t);
-		case SRE_INTERPOLATION_TYPE::HERMITE:
+		case SurfRide::SRE_INTERPOLATION_TYPE::CONSTANT:
+			return ImPlotPoint(kf.frame + dx * t, Selector(kf.value));
+		case SurfRide::SRE_INTERPOLATION_TYPE::LINEAR:
+			return ImPlotPoint(kf.frame + dx * t, Selector(kf.value) + (Selector(nextKf.value) - Selector(kf.value)) * t);
+		case SurfRide::SRE_INTERPOLATION_TYPE::HERMITE:
 			return ImPlotPoint(
-				kf.Frame + dx * t,
+				kf.frame + dx * t,
 				Selector(kf.value) * (1.0 + 2.0 * t) * (1.0 - t) * (1.0 - t) +
 				Selector(static_cast<SurfRide::KeyHermite<T>&>(kf).derivativeOut) * (dx * t) * (1.0 - t) * (1.0 - t) +
 				Selector(nextKf.value) * (1.0 + 2.0 * (1.0 - t)) * t * t +
@@ -113,7 +113,7 @@ public:
 	template<typename T>
 	static void RenderKeyFrameEditor(SurfRide::SRS_TRACK& track, SurfRide::SRS_KEYFRAME& keyFrame)
 	{
-		auto trackInterpType = static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.Flags) & 0xF);
+		auto trackInterpType = static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF);
 
 		RenderValueEditor("Value", static_cast<SurfRide::Key<T>&>(keyFrame).value, 0.01f);
 
@@ -135,7 +135,7 @@ public:
 	static void SetupFloatingYAxis(SurfRide::SRS_TRACK& track) {
 		T min = std::numeric_limits<T>::max(), max = std::numeric_limits<T>::lowest();
 
-		for (size_t i = 0; i < track.KeyCount; i++) {
+		for (size_t i = 0; i < track.keyCount; i++) {
 			T val = GetKeyFrame<T>(track, i).value;
 			min = std::min(min, val);
 			max = std::max(max, val);
@@ -147,9 +147,9 @@ public:
 	template<typename T, double (*Selector)(const T& x) = DefaultSelector, void (*Setter)(T& x, double y) = DefaultSetter>
 	static void RenderDragPoints(SurfRide::SRS_TRACK& track, double min, double max, const char* id = "Points", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f)) {
 		ImGui::PushID(id);
-		for (size_t i = 0; i < track.KeyCount; i++) {
+		for (size_t i = 0; i < track.keyCount; i++) {
 			auto& kf = GetKeyFrame<T>(track, i);
-			double frame = kf.Frame;
+			double frame = kf.frame;
 			double value = Selector(kf.value);
 			bool clicked;
 			bool hovered;
@@ -157,15 +157,15 @@ public:
 
 			ImGui::PushID(&kf);
 			if (ImPlot::DragPoint(i, &frame, &value, color, 4.0f, 0, &clicked, &hovered, &held)) {
-				frame = std::clamp(frame, static_cast<double>(i == 0 ? track.FirstFrame : GetKeyFrame<T>(track, i - 1).Frame + 1), static_cast<double>(i == track.KeyCount - 1 ? track.LastFrame : GetKeyFrame<T>(track, i + 1).Frame - 1));
+				frame = std::clamp(frame, static_cast<double>(i == 0 ? track.firstFrame : GetKeyFrame<T>(track, i - 1).frame + 1), static_cast<double>(i == track.keyCount - 1 ? track.lastFrame : GetKeyFrame<T>(track, i + 1).frame - 1));
 				value = std::clamp(value, min, max);
 
-				kf.Frame = static_cast<uint32_t>(std::round(frame));
+				kf.frame = static_cast<uint32_t>(std::round(frame));
 				Setter(kf.value, value);
 			}
 
 			if (hovered || held) {
-				ImGui::SetTooltip("Frame: %d\nValue: %f", kf.Frame, value);
+				ImGui::SetTooltip("Frame: %d\nValue: %f", kf.frame, value);
 			}
 
 			if (clicked && !ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
@@ -191,6 +191,6 @@ public:
 		ImPlot::SetNextLineStyle(color);
 		if (shaded)
 			ImPlot::SetNextFillStyle(color, 0.3f);
-		ImPlot::PlotLineG("R", GeneratePlotLine<T, Selector>, &track, (track.KeyCount - 1) * POINTS_PER_SEGMENT + 3, shaded ? ImPlotLineFlags_Shaded : ImPlotLineFlags_None);
+		ImPlot::PlotLineG("R", GeneratePlotLine<T, Selector>, &track, (track.keyCount - 1) * POINTS_PER_SEGMENT + 3, shaded ? ImPlotLineFlags_Shaded : ImPlotLineFlags_None);
 	}
 };

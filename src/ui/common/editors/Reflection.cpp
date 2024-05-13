@@ -57,7 +57,7 @@ public:
 
 	template<typename T, typename R, bool allowSliders = true>
 	static bool InputRflScalar(T* obj) {
-		if (const auto* rangeAttr = currentMember->GetAttribute(rfl_range_info<typename R>::name)) {
+		if (const auto* rangeAttr = currentMember->GetAttribute(rfl_range_info<R>::name)) {
 			auto rangeValues = reinterpret_cast<const R*>(rangeAttr->GetData());
 			auto rangeMin = static_cast<T>(rangeValues[0]);
 			auto rangeMax = static_cast<T>(rangeValues[1]);

@@ -315,6 +315,7 @@ void LevelEditor::SpawnObject() {
 		objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
 	}
 
+	// FIXME: We're leaking memory here because the spawnerData does not get freed.
 	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 20 };
 	auto* rangeSpawning = new (GetAllocator()) ComponentData{ GetAllocator(), GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName("RangeSpawning"), rangeSpawningData };
 	objData->componentData.push_back(rangeSpawning);
@@ -361,12 +362,14 @@ void LevelEditor::Deselect()
 
 void LevelEditor::NotifySelectedObject()
 {
-	NotifyActiveObject(hh::dbg::MsgStartActiveObjectInEditor{});
+	hh::dbg::MsgStartActiveObjectInEditor msg{};
+	NotifyActiveObject(msg);
 }
 
 void LevelEditor::NotifyUpdatedObject()
 {
-	NotifyActiveObject(hh::dbg::MsgUpdateActiveObjectInEditor{});
+	hh::dbg::MsgUpdateActiveObjectInEditor msg{};
+	NotifyActiveObject(msg);
 
 	for (auto* obj : GameManager::GetInstance()->objects) {
 		if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
@@ -381,7 +384,8 @@ void LevelEditor::NotifyUpdatedObject()
 
 void LevelEditor::NotifyDeselectedObject()
 {
-	NotifyActiveObject(hh::dbg::MsgFinishActiveObjectInEditor{});
+	hh::dbg::MsgFinishActiveObjectInEditor msg{};
+	NotifyActiveObject(msg);
 }
 
 void LevelEditor::NotifyActiveObject(Message& msg)

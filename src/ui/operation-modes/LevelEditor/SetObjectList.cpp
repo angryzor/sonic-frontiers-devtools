@@ -10,7 +10,13 @@ using namespace hh::game;
 SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, ObjectData* objData) : list{ list }, type { SetObjectListTreeViewNode::Type::OBJECT }, object{ objData } {}
 SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, ObjectWorldChunkLayer* layer) : list{ list }, type{ SetObjectListTreeViewNode::Type::LAYER }, layer{ layer } {}
 SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, const char* label) : list{ list }, type{ SetObjectListTreeViewNode::Type::GROUP }, group{ label } {}
-SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectListTreeViewNode&& other) : list{ other.list }, type { other.type }, object{ other.object }, layer{ other.layer }, group{ other.group } {}
+SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectListTreeViewNode&& other) : list{ other.list }, type { other.type } {
+	switch (type) {
+	case SetObjectListTreeViewNode::Type::OBJECT: object = other.object;
+	case SetObjectListTreeViewNode::Type::LAYER: layer = other.layer;
+	case SetObjectListTreeViewNode::Type::GROUP: group = other.group;
+	}
+}
 
 const void* SetObjectListTreeViewNode::GetID() const {
 	switch (type) {

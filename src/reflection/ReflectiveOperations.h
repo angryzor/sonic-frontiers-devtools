@@ -1,5 +1,6 @@
 #pragma once
 #include "RflMoveArrayAccessor.h"
+#include <tuple>
 
 namespace rflops {
 	namespace traversals {
@@ -56,8 +57,10 @@ namespace rflops {
 
 			static typename V::result_type ProcessArray(RflObj<S>... objs, const hh::fnd::RflClassMember* member)
 			{
+				std::tuple<RflObj<S, RflMoveArrayAccessor>...> arrs{ { *static_cast<csl::ut::MoveArray<void*>*>(objs), member }... };
+
 				return V::VisitArray(
-					RflMoveArrayAccessor{ *static_cast<csl::ut::MoveArray<void*>*>(objs), member }...,
+					std::get<S>(arrs)...,
 					[member]() {
 						void* obj = new (std::align_val_t(16), hh::fnd::MemoryRouter::GetModuleAllocator()) char[member->GetSubTypeSizeInBytes()];
 

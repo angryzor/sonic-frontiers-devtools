@@ -4,10 +4,49 @@
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/viewers/ObjectData.h>
+#include <reflection/ReflectiveOperations.h>
 #include <utilities/ObjectDataUtils.h>
 #include "ObjectData.h"
 
 using namespace hh::game;
+
+struct GOCVisualModelSpawner {
+	csl::ut::VariableString resModel;
+
+	GOCVisualModelSpawner(csl::fnd::IAllocator* allocator) : resModel{ allocator } {}
+};
+
+struct GOCSimpleAnimationSpawner {
+	csl::ut::VariableString resSkeleton;
+	csl::ut::VariableString resAnimation;
+
+	GOCSimpleAnimationSpawner(csl::fnd::IAllocator* allocator) : resSkeleton{ allocator }, resAnimation{ allocator } {}
+};
+
+struct GOCActivatorSpawner {
+	float m_range{};
+	float m_distance{};
+};
+
+ComponentData* CreateComponentData(const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
+	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+
+	// We're placing both in 1 block here because TerminateObjectData only calls free on the ComponentData.
+	// If we had 2 allocations the spawner data would not be freed.
+	void* buf = new (std::align_val_t(16), allocator) char[sizeof(ComponentData) + gocRegItem->rflClass->GetSizeInBytes()];
+	void* spawnerData = reinterpret_cast<void*>(reinterpret_cast<size_t>(buf) + sizeof(ComponentData));
+
+	if (!strcmp(gocRegItem->name, "Model"))
+		new (spawnerData) GOCVisualModelSpawner{ allocator };
+	else if (!strcmp(gocRegItem->name, "SimpleAnimation"))
+		new (spawnerData) GOCSimpleAnimationSpawner{ allocator };
+	else if (!strcmp(gocRegItem->name, "RangeSpawning"))
+		new (spawnerData) GOCActivatorSpawner{};
+	else
+		assert(false);
+
+	return new (buf) ComponentData{ allocator, gocRegItem, spawnerData };
+}
 
 bool Editor(const char* label, hh::game::ObjectTransformData& obj)
 {
@@ -54,19 +93,34 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 		}
 	}
 
-	//if (ImGui::Button("Add component..."))
-	//	ImGui::OpenPopup("ComponentConfigSelection");
+	if (ImGui::Button("Add component..."))
+		ImGui::OpenPopup("ComponentConfigSelection");
 
-	//if (ImGui::BeginPopup("ComponentConfigSelection")) {
-	//	for (auto* componentConfig : objSystem->goComponentRegistry->GetComponents()) {
-	//		if (ImGui::Selectable(componentConfig->name)) {
-	//			if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
-	//				obj.flags.set(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION);
-	//			obj.componentData.push_back()
-	//		}
-	//	}
-	//	ImGui::EndPopup();
-	//}
+	if (ImGui::BeginPopup("ComponentConfigSelection")) {
+		for (auto* gocRegItem : objSystem->goComponentRegistry->GetComponents()) {
+			if (ImGui::Selectable(gocRegItem->name)) {
+				auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+
+				if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
+
+					csl::ut::MoveArray<ComponentData*> componentDatas{ allocator };
+
+					for (auto* origCData : obj.componentData) {
+						auto* gocRegItem = GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(origCData->type);
+						auto* componentData = CreateComponentData(gocRegItem);
+						rflops::Copy::Apply(componentData->data, origCData->data, gocRegItem->rflClass);
+						componentDatas.push_back(componentData);
+					}
+
+					obj.componentData = std::move(componentDatas);
+					obj.flags.set(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION);
+				}
+
+				obj.componentData.push_back(CreateComponentData(gocRegItem));
+			}
+		}
+		ImGui::EndPopup();
+	}
 
 	if (obj.spawnerData) {
 		auto* objClass = objSystem->gameObjectRegistry->GetGameObjectClassByName(obj.gameObjectClass);

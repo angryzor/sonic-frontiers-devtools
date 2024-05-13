@@ -141,7 +141,7 @@ void ReflectionSerializer::WriteRflClass(void* obj, const RflClass& rflClass) {
 					EnqueueChunk({ arr->begin(), obj, &member, arr->size() }),
 					arr->size(),
 					arr->capacity(),
-					0ui64,
+					0ull,
 				};
 
 				writer.write_obj(offsetarr);

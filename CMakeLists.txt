@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.18
+project(devtools VERSION 0.1.19
                  DESCRIPTION "Sonic Frontiers DevTools"
                  LANGUAGES CXX)
 
@@ -26,7 +26,7 @@ add_subdirectory(${RANGERS_SDK_PATH} rangers-sdk EXCLUDE_FROM_ALL)
 # DevTools
 add_library(devtools SHARED)
 target_compile_features(devtools PRIVATE cxx_std_17)
-target_compile_options(devtools PRIVATE /ZI)
+target_compile_options(devtools PRIVATE /ZI /permissive-)
 target_compile_definitions(devtools
     PRIVATE
         DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:devtools>

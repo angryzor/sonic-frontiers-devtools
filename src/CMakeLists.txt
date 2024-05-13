@@ -20,6 +20,7 @@ target_sources(devtools
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/LevelInfo.cpp
         ui/common/editors/Needle.cpp
+        ui/common/editors/SurfRide.cpp
         ui/common/viewers/Basic.cpp
         ui/common/viewers/ObjectData.cpp
         ui/common/viewers/RflDiff.cpp
@@ -60,6 +61,7 @@ target_sources(devtools
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
+        utilities/math/Frustum.cpp
         utilities/math/MathUtils.cpp
         utilities/ObjectDataUtils.cpp
         utilities/ResourceTypes.cpp
@@ -80,6 +82,7 @@ target_sources(devtools
         ui/common/editors/GraphicsContext.h
         ui/common/editors/LevelInfo.h
         ui/common/editors/Needle.h
+        ui/common/editors/SurfRide.h
         ui/common/viewers/Basic.h
         ui/common/viewers/ObjectData.h
         ui/common/viewers/RflDiff.h
@@ -127,6 +130,8 @@ target_sources(devtools
         utilities/Helpers.h
         utilities/math/EulerTransform.h
         utilities/math/MathUtils.h
+        utilities/math/Frustum.h
+        utilities/math/Ray.h
         utilities/ObjectDataUtils.h
         utilities/ResourceTypes.h
         utilities/RflDiff.h

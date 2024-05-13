@@ -21,16 +21,16 @@ bool Editor(const char* label, hh::needle::RsFlagMask& mask)
 
 	ImGui::SeparatorText(label);
 	ImGui::Text("Mask: %zx", mask.flags);
-	edited |= BitFieldEditor("Blend mode 1", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 28ui64, 4ui64);
-	edited |= BitFieldEditor("Blend mode 2", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 23ui64, 4ui64);
-	edited |= BitFieldEditor("Blend op", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 19ui64, 3ui64);
-	edited |= BitFieldEditor("Alpha blend mode 1", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 14ui64, 4ui64);
-	edited |= BitFieldEditor("Alpha blend mode 2", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 9ui64, 4ui64);
-	edited |= BitFieldEditor("Alpha blend op", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 5ui64, 3ui64);
-	edited |= ImGui::CheckboxFlags("Enable blending", reinterpret_cast<uint64_t*>(&mask.flags), 1ui64 << 46ui64);
-	edited |= ImGui::CheckboxFlags("Cull front", reinterpret_cast<uint64_t*>(&mask.flags), 1ui64 << 41ui64);
-	edited |= ImGui::CheckboxFlags("Cull back", reinterpret_cast<uint64_t*>(&mask.flags), 1ui64 << 40ui64);
-	edited |= ImGui::CheckboxFlags("Cull unknown", reinterpret_cast<uint64_t*>(&mask.flags), 1ui64 << 39ui64);
+	edited |= BitFieldEditor("Blend mode 1", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 28ull, 4ull);
+	edited |= BitFieldEditor("Blend mode 2", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 23ull, 4ull);
+	edited |= BitFieldEditor("Blend op", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 19ull, 3ull);
+	edited |= BitFieldEditor("Alpha blend mode 1", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 14ull, 4ull);
+	edited |= BitFieldEditor("Alpha blend mode 2", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 9ull, 4ull);
+	edited |= BitFieldEditor("Alpha blend op", ImGuiDataType_U64, reinterpret_cast<uint64_t*>(&mask.flags), 5ull, 3ull);
+	edited |= ImGui::CheckboxFlags("Enable blending", reinterpret_cast<uint64_t*>(&mask.flags), 1ull << 46ull);
+	edited |= ImGui::CheckboxFlags("Cull front", reinterpret_cast<uint64_t*>(&mask.flags), 1ull << 41ull);
+	edited |= ImGui::CheckboxFlags("Cull back", reinterpret_cast<uint64_t*>(&mask.flags), 1ull << 40ull);
+	edited |= ImGui::CheckboxFlags("Cull unknown", reinterpret_cast<uint64_t*>(&mask.flags), 1ull << 39ull);
 	ImGui::Text("Mask: %zx", mask.flags);
 
 	return edited;

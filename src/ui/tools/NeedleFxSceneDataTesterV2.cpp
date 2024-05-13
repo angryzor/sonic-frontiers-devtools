@@ -32,9 +32,9 @@ void NeedleFxSceneDataTesterV2::PreRender() {
 	ImGui::SetNextWindowSize(ImVec2(600, 350), ImGuiCond_Always);
 }
 
-constexpr size_t rootJobId = 0x31744634ui64;
-constexpr size_t timeJobId = 0x56235675ui64;
-constexpr size_t weatherJobId = 0x76894421ui64;
+constexpr size_t rootJobId = 0x31744634ull;
+constexpr size_t timeJobId = 0x56235675ull;
+constexpr size_t weatherJobId = 0x76894421ull;
 
 void NeedleFxSceneDataTesterV2::RenderContents()
 {

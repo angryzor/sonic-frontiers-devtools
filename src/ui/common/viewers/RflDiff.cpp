@@ -1,6 +1,8 @@
 #include "RflDiff.h"
 #include <ui/common/viewers/Basic.h>
 #include <reflection/ReflectiveOperations.h>
+#include <sstream>
+#include <regex>
 
 class RenderRflDiffChange {
 public:
@@ -110,47 +112,75 @@ void Viewer(const char* label, const RflDiffResult& diff, void* obj, const hh::f
 	}
 }
 
+//std::regex escapes{ "\\" };
+//std::regex quotes{ "\"" };
+//
 //class RenderRflDiffChangeRfl2HMM {
 //public:
 //	constexpr static size_t arity = 1;
 //	typedef bool result_type;
 //	inline static RflDiffChange* change;
 //	inline static int64_t pathIdx;
-//	inline static std::string code;
+//
+//	struct RFL2HMMParamValue {
+//		std::string str{};
+//
+//		RFL2HMMParamValue& operator|=(RFL2HMMParamValue&& other) {
+//			str = std::move(other.str);
+//		}
+//	};
+//
+//	static RFL2HMMParamValue VisitPrimitive(const char* obj) {
+//		RFL2HMMParamValue val{};
+//		std::string sval{ obj };
+//		std::ostringstream oss{};
+//
+//		sval = std::regex_replace(sval, escapes, "\\\\");
+//		sval = std::regex_replace(sval, quotes, "\\\"");
+//
+//		oss << "\"" << sval << "\"";
+//
+//		val.str = std::move(oss.str());
+//
+//		return std::move(val);
+//	}
+//
+//	static RFL2HMMParamValue VisitPrimitive(csl::ut::VariableString* obj) {
+//		return VisitPrimitive(obj->c_str());
+//	}
 //
 //	template<typename T>
-//	static bool VisitPrimitive(T* obj) {
-//		if (pathIdx >= 0)
-//			ImGui::Text("An error occurred.");
+//	static RFL2HMMParamValue VisitPrimitive(T* obj) {
+//		RFL2HMMParamValue val{};
+//		std::ostringstream oss{};
 //
-//		Viewer("Old value", *obj);
-//		Viewer("New value", *static_cast<const T*>(change->value));
-//		return false;
+//		oss << *obj;
+//		val.str = std::move(oss.str());
+//
+//		return std::move(val);
 //	}
 //
 //	template<typename F, typename C, typename D>
-//	static bool VisitArray(RflMoveArrayAccessor& arr, C c, D d, F f) {
+//	static RFL2HMMParamValue VisitArray(RflMoveArrayAccessor& arr, C c, D d, F f) {
 //		void* obj = arr[change->path[pathIdx].arrayIdx];
 //		pathIdx--;
-//		f(obj);
+//		RFL2HMMParamValue&& val = f(obj);
 //		pathIdx++;
-//		return false;
+//		return val;
 //	}
 //
 //	template<typename F>
-//	static bool VisitEnum(void* obj, hh::fnd::RflClassMember::Type type, const hh::fnd::RflClassEnum* enumClass, F f) {
-//		f(obj);
-//		return false;
+//	static RFL2HMMParamValue VisitEnum(void* obj, hh::fnd::RflClassMember::Type type, const hh::fnd::RflClassEnum* enumClass, F f) {
+//		return f(obj);
 //	}
 //
 //	template<typename F>
-//	static bool VisitFlags(void* obj, hh::fnd::RflClassMember::Type type, const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>* enumEntries, F f) {
-//		f(obj);
-//		return false;
+//	static RFL2HMMParamValue VisitFlags(void* obj, hh::fnd::RflClassMember::Type type, const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>* enumEntries, F f) {
+//		return f(obj);
 //	}
 //
 //	template<typename F>
-//	static bool VisitClassMember(void* obj, const hh::fnd::RflClassMember* member, F f) {
+//	static RFL2HMMParamValue VisitClassMember(void* obj, const hh::fnd::RflClassMember* member, F f) {
 //		if (strcmp(member->GetName(), change->path[pathIdx].propertyName) == 0) {
 //			pathIdx--;
 //			f(obj);
@@ -160,7 +190,7 @@ void Viewer(const char* label, const RflDiffResult& diff, void* obj, const hh::f
 //	}
 //
 //	template<typename F>
-//	static bool VisitArrayClassMember(void* obj, const hh::fnd::RflClassMember* member, size_t size, F f) {
+//	static RFL2HMMParamValue VisitArrayClassMember(void* obj, const hh::fnd::RflClassMember* member, size_t size, F f) {
 //		if (strcmp(member->GetName(), change->path[pathIdx].propertyName) == 0) {
 //			pathIdx--;
 //			f(obj);
@@ -170,7 +200,7 @@ void Viewer(const char* label, const RflDiffResult& diff, void* obj, const hh::f
 //	}
 //
 //	template<typename F>
-//	static bool VisitArrayClassMemberItem(void* obj, size_t idx, F f) {
+//	static RFL2HMMParamValue VisitArrayClassMemberItem(void* obj, size_t idx, F f) {
 //		if (idx == change->path[pathIdx].arrayIdx) {
 //			pathIdx--;
 //			f(obj);
@@ -180,7 +210,7 @@ void Viewer(const char* label, const RflDiffResult& diff, void* obj, const hh::f
 //	}
 //
 //	template<typename F>
-//	static bool VisitStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
+//	static RFL2HMMParamValue VisitStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
 //		f(obj);
 //		return false;
 //	}

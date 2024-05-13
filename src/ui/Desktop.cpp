@@ -8,6 +8,7 @@
 #include "operation-modes/LevelEditor/LevelEditor.h"
 #include "operation-modes/SurfRideEditor/SurfRideEditor.h"
 #include "reflection/serialization/ReflectionSerializer.h"
+#include <utilities/math/MathUtils.h>
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -32,6 +33,7 @@ namespace app::game {
 	};
 }
 void Desktop::Render() {
+	RenderOverlayWindow();
 	HandleMousePicking();
 
 	ToolBar::Render();
@@ -134,6 +136,24 @@ void Desktop::Render() {
 	//}
 }
 
+void Desktop::RenderOverlayWindow()
+{
+	auto* ivp = ImGui::GetMainViewport();
+
+	ImGui::SetNextWindowSize(ivp->Size);
+	ImGui::SetNextWindowPos(ivp->Pos);
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
+	ImGui::PushStyleColor(ImGuiCol_Border, 0);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
+	ImGui::Begin("Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
+}
+
 void Desktop::AddStandaloneWindow(StandaloneWindow* window) {
 	this->windows.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
 }
@@ -156,68 +176,20 @@ void Desktop::HandleMousePicking()
 		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 			auto* gameManager = GameManager::GetInstance();
 			if (auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0)) {
-				auto cameraMatrix{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
-				auto inverseCameraMatrix{ cameraMatrix.inverse() };
-				auto* ivp = ImGui::GetMainViewport();
 				auto mouseStart = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
 				auto mouseEnd = ImGui::GetMousePos();
-				auto topLeft = ImVec2{ std::fminf(mouseStart.x, mouseEnd.x), std::fminf(mouseStart.y, mouseEnd.y) };
-				auto botRight = ImVec2{ std::fmaxf(mouseStart.x, mouseEnd.x), std::fmaxf(mouseStart.y, mouseEnd.y) };
+				auto frustum = ScreenRectToFrustum(mouseStart, mouseEnd, (camera->viewportData.projMatrix * camera->viewportData.viewMatrix).inverse());
 
-				ImGui::SetNextWindowSize(ivp->Size);
-				ImGui::SetNextWindowPos(ivp->Pos);
-
-				ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
-				ImGui::PushStyleColor(ImGuiCol_Border, 0);
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
-				ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-
-				ImGui::Begin("Overlay", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
-
-				auto* drawList = ImGui::GetWindowDrawList();
-				drawList->AddRectFilled(ImGui::GetMousePos() - ImGui::GetMouseDragDelta(), ImGui::GetMousePos(), 0x40FFFFFF);
-
+				ImGui::Begin("Overlay");
+				ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
 				ImGui::End();
-				ImGui::PopStyleVar();
-				ImGui::PopStyleColor(3);
-
-				ImVec2 ndcPosTopLeft{ 2 * topLeft.x / io.DisplaySize.x - 1, 1 - 2 * topLeft.y / io.DisplaySize.y };
-				ImVec2 ndcPosBotRight{ 2 * botRight.x / io.DisplaySize.x - 1, 1 - 2 * botRight.y / io.DisplaySize.y };
-
-				Eigen::Vector3f nearTopLeft{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosTopLeft.x, ndcPosTopLeft.y, 0, 1 }).hnormalized() };
-				Eigen::Vector3f nearTopRight{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosBotRight.x, ndcPosTopLeft.y, 0, 1 }).hnormalized() };
-				Eigen::Vector3f nearBotRight{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosBotRight.x, ndcPosBotRight.y, 0, 1 }).hnormalized() };
-				Eigen::Vector3f nearBotLeft{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosTopLeft.x, ndcPosBotRight.y, 0, 1 }).hnormalized() };
-				Eigen::Vector3f farTopLeft{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosTopLeft.x, ndcPosTopLeft.y, 1, 1 }).hnormalized() };
-				Eigen::Vector3f farTopRight{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosBotRight.x, ndcPosTopLeft.y, 1, 1 }).hnormalized() };
-				Eigen::Vector3f farBotRight{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosBotRight.x, ndcPosBotRight.y, 1, 1 }).hnormalized() };
-				Eigen::Vector3f farBotLeft{ (inverseCameraMatrix * Eigen::Vector4f{ ndcPosTopLeft.x, ndcPosBotRight.y, 1, 1 }).hnormalized() };
-
-				Eigen::Hyperplane<float, 3> frustum[]{
-					{ (farBotLeft - nearBotLeft).cross(nearTopLeft - nearBotLeft), nearBotLeft },
-					{ (farTopLeft - nearTopLeft).cross(nearTopRight - nearTopLeft), nearTopLeft },
-					{ (farTopRight - nearTopRight).cross(nearBotRight - nearTopRight), nearTopRight },
-					{ (farBotRight - nearBotRight).cross(nearBotLeft - nearBotRight), nearBotRight },
-					{ (nearBotLeft - nearBotRight).cross(nearTopRight - nearBotRight), nearBotRight },
-					{ (farBotRight - farBotLeft).cross(farTopLeft - farBotLeft), farBotLeft },
-				};
 
 				pickedObjects.clear();
-				for (auto* object : gameManager->objects) {
-					if (auto* gocTransform = object->GetComponent<GOCTransform>()) {
-						bool foundCounter{ false };
-
-						for (size_t i = 0; i < 6; i++) {
-							if (frustum[i].signedDistance(gocTransform->frame->fullTransform.position) < 0) {
-								foundCounter = true;
-								break;
-							}
-						}
-
-						if (!foundCounter)
+				for (auto* object : gameManager->objects)
+					if (auto* gocTransform = object->GetComponent<GOCTransform>())
+						if (frustum.Test(gocTransform->frame->fullTransform.position))
 							pickedObjects.push_back(object);
-					}
-				}
+
 				locationPicked = false;
 				pickerClicked = true;
 			}

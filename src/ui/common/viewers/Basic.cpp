@@ -28,13 +28,18 @@ void Viewer(const char* label, bool obj)
 	ImGui::Text("%s: %s", label, obj ? "true" : "false");
 }
 
+void Viewer(const char* label, const char* str)
+{
+	ImGui::Text("%s: %s", label, str);
+}
+
 void Viewer(const char* label, const hh::game::ObjectId& obj)
 {
 	ImGui::Text("%s: %016zx%016zx", label, obj.groupId, obj.objectId);
 }
 
 void Viewer(const char* label, void* const& obj) {
-	ImGui::Text("%s: %zx", obj);
+	ImGui::Text("%s: %zx", label, obj);
 }
 
 void Viewer(const char* label, const Eigen::Quaternionf& quat)

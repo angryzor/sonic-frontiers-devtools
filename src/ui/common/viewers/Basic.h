@@ -4,8 +4,12 @@
 
 template<typename T, std::enable_if_t<std::is_fundamental_v<T>, bool> = true>
 static void Viewer(const char* label, const T& obj) {
-	if constexpr (std::numeric_limits<T>::is_integer)
-		ImGui::Text("%s: %zd", label, obj);
+	if constexpr (std::numeric_limits<T>::is_integer) {
+		if constexpr (std::is_same_v<uint64_t, T> || std::is_same_v<int64_t, T>)
+			ImGui::Text("%s: %zd", label, obj);
+		else
+			ImGui::Text("%s: %d", label, obj);
+	}
 	else
 		ImGui::Text("%s: %f", label, obj);
 }
@@ -36,6 +40,7 @@ static void Viewer(const char* label, const Eigen::Matrix<T, Dim, 1>& vec) {
 }
 
 void Viewer(const char* label, bool obj);
+void Viewer(const char* label, const char* str);
 void Viewer(const char* label, const hh::game::ObjectId& obj);
 void Viewer(const char* label, void* const& obj);
 void Viewer(const char* label, const Eigen::Quaternionf& quat);

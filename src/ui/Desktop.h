@@ -23,6 +23,7 @@ public:
     Desktop(csl::fnd::IAllocator* allocator);
     ~Desktop();
     void Render();
+    void RenderOverlayWindow();
     void OpenStandaloneWindow(StandaloneWindow* window);
     void HandleMousePicking();
     bool IsPickerMouseReleased() const;

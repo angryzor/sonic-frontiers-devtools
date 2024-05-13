@@ -45,8 +45,8 @@ void Timeline::Render()
 		}
 
 		if (ImGui::BeginChild("Animation list", ImVec2(100.0f, 0.0f))) {
-			for (size_t i = 0; i < focusedLayer->layerData->AnimationCount; i++) {
-				if (ImGui::Selectable(focusedLayer->layerData->pAnimations[i].pName, focusedLayer->currentAnimationIndex == i))
+			for (size_t i = 0; i < focusedLayer->layerData->animationCount; i++) {
+				if (ImGui::Selectable(focusedLayer->layerData->animations[i].name, focusedLayer->currentAnimationIndex == i))
 					focusedLayer->StartAnimation(i, 0, false);
 				if (focusedLayer->currentAnimationIndex == i)
 					ImGui::SetItemDefaultFocus();
@@ -54,7 +54,7 @@ void Timeline::Render()
 		}
 		ImGui::EndChild();
 
-		auto& animation = focusedLayer->layerData->pAnimations[focusedLayer->currentAnimationIndex];
+		auto& animation = focusedLayer->layerData->animations[focusedLayer->currentAnimationIndex];
 
 		ImGui::SameLine();
 		if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
@@ -64,12 +64,12 @@ void Timeline::Render()
 			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 			if (ImGui::BeginTable("Timeline", 2, ImGuiTableFlags_BordersInnerH)) {
 				ImGui::TableSetupColumn("Cast name", ImGuiTableColumnFlags_WidthFixed, 100.0f);
-				ImGui::TableSetupColumn("Timeline", ImGuiTableColumnFlags_WidthFixed, animation.FrameCount * zoom);
+				ImGui::TableSetupColumn("Timeline", ImGuiTableColumnFlags_WidthFixed, animation.frameCount * zoom);
 				ImGui::TableHeadersRow();
 
-				for (size_t i = 0; i < animation.LinkCount; i++) {
+				for (size_t i = 0; i < animation.motionCount; i++) {
 					ImGui::TableNextRow();
-					RenderMotion(*focusedLayer, animation, animation.pLinks[i]);
+					RenderMotion(*focusedLayer, animation, animation.motions[i]);
 				}
 
 				ImGui::EndTable();
@@ -87,47 +87,45 @@ void Timeline::RenderMotion(Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& 
 	ImGui::TableNextColumn();
 
 	SRS_CASTNODE* cast{};
-	for (size_t i = 0; i < layer.layerData->CastCount; i++)
-		if (layer.layerData->pCasts[i].m_ID == motion.CastId)
-			cast = &layer.layerData->pCasts[i];
+	for (size_t i = 0; i < layer.layerData->castCount; i++)
+		if (layer.layerData->casts[i].id == motion.castId)
+			cast = &layer.layerData->casts[i];
 
-	ImGui::Text("%s", cast == nullptr ? "MISSINGNO." : cast->m_pName);
+	ImGui::Text("%s", cast == nullptr ? "MISSINGNO." : cast->name);
 	ImGui::TableNextColumn();
 	auto cellPos = ImGui::GetCursorPos();
 	auto cellScreenPos = ImGui::GetCursorScreenPos();
-	auto playHeadFrame = std::fminf(layer.currentFrame3, animation.FrameCount);
-	for (size_t i = 0; i < motion.TrackCount; i++) {
-		RenderTrack(layer, animation, motion, motion.pTracks[i]);
+	auto playHeadFrame = std::fminf(layer.currentFrame3, animation.frameCount);
+	for (size_t i = 0; i < motion.trackCount; i++) {
+		RenderTrack(layer, animation, motion, motion.tracks[i]);
 	}
 
-	auto sliceCount = animation.FrameCount / 60;
-	auto sliceRemainder = animation.FrameCount % 60;
+	auto sliceCount = animation.frameCount / 60;
+	auto sliceRemainder = animation.frameCount % 60;
 
 	for (size_t i = 0; i < sliceCount; i++)
 		ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImVec2(cellScreenPos.x + i * 60 * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + (i * 60 + 30) * zoom, ImGui::GetCursorScreenPos().y), 0x20FFFFFF);
 	if (sliceRemainder > 0)
-		ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImVec2(cellScreenPos.x + sliceCount * 60 * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + (sliceCount * 60 + std::min(30ui32, sliceRemainder)) * zoom, ImGui::GetCursorScreenPos().y), 0x20FFFFFF);
+		ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImVec2(cellScreenPos.x + sliceCount * 60 * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + (sliceCount * 60 + std::min(30u, sliceRemainder)) * zoom, ImGui::GetCursorScreenPos().y), 0x20FFFFFF);
 	ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(cellScreenPos.x + playHeadFrame * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + playHeadFrame * zoom, ImGui::GetCursorScreenPos().y), 0xFFFFFFFF);
 }
 
 void Timeline::RenderTrack(Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
 {
-	auto width = (track.LastFrame - track.FirstFrame) * zoom;
+	auto width = (track.lastFrame - track.firstFrame) * zoom;
 	auto posBefore = ImGui::GetCursorPos();
-	ImGui::SetCursorPosX(posBefore.x + track.FirstFrame * zoom);
+	ImGui::SetCursorPosX(posBefore.x + track.firstFrame * zoom);
 	ImGui::PushID(&track);
 	if (width == 0) {
 		if (ImGui::BeginChild("TimelineItem", ImVec2(20, 20))) {
-
 			ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImGui::GetCursorScreenPos() + ImVec2(0, 10), 5, 0xFF5A6AED);
 			ImGui::GetCurrentWindow()->DrawList->AddCircle(ImGui::GetCursorScreenPos() + ImVec2(0, 10), 5, 0xFF000000);
-
 		}
 		ImGui::EndChild();
 		//if (ImGui::IsItemClicked()) {
 		//	ImGui::OpenPopup("Editor");
 		//}
-		//assert(track.KeyCount == 1);
+		//assert(track.keyCount == 1);
 		//if (ImGui::BeginPopup("Editor")) {
 		//	RenderKeyFrameValueEditor(track, track.pKeyFrame[0]);
 		//	ImGui::EndPopup();
@@ -145,7 +143,7 @@ void Timeline::RenderTrack(Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& m
 			if (ImPlot::BeginPlot("##Track", ImVec2(width, height), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
 				ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations);
 				ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
-				ImPlot::SetupAxisLimits(ImAxis_X1, track.FirstFrame, track.LastFrame, ImPlotCond_Always);
+				ImPlot::SetupAxisLimits(ImAxis_X1, track.firstFrame, track.lastFrame, ImPlotCond_Always);
 				RenderPlotLines(track);
 				ImPlot::EndPlot();
 			}
@@ -178,12 +176,12 @@ void SetA(Color& color, double y) { color.a = static_cast<uint8_t>(std::round(y)
 
 void Timeline::RenderPlotLines(SRS_TRACK& track)
 {
-	if (track.KeyCount == 0)
+	if (track.keyCount == 0)
 		return;
 
-	switch (static_cast<SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SRE_TRACK_FLAG>>(track.Flags) & 0xF0)) {
+	switch (static_cast<SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SRE_TRACK_FLAG>>(track.flags) & 0xF0)) {
 	case SRE_TRACK_FLAG::FLOAT:
-		switch (track.TrackType) {
+		switch (track.trackType) {
 		case SRE_CURVE_TYPE::MaterialColorR:
 		case SRE_CURVE_TYPE::MaterialColorG:
 		case SRE_CURVE_TYPE::MaterialColorB:
@@ -211,11 +209,10 @@ void Timeline::RenderPlotLines(SRS_TRACK& track)
 			SetupYAxis(0, 1);
 			RenderDragPoints<float>(track, 0.0f, 1.0f);
 			break;
-		default: {
+		default:
 			SetupFloatingYAxis<float>(track);
 			RenderDragPoints<float>(track);
 			break;
-		}
 		}
 
 		RenderPlotLine<float>(track);
@@ -253,7 +250,7 @@ void Timeline::RenderPlotLines(SRS_TRACK& track)
 
 const char* Timeline::TrackName(SRS_TRACK& track)
 {
-	switch (track.TrackType) {
+	switch (track.trackType) {
 	case SRE_CURVE_TYPE::TranslationX: return "Translation X";
 	case SRE_CURVE_TYPE::TranslationY: return "Translation Y";
 	case SRE_CURVE_TYPE::TranslationZ: return "Translation Z";
