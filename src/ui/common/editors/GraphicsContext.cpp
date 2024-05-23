@@ -13,8 +13,8 @@ bool Editor(const char* label, hh::gfnd::ViewportData& viewport)
 	edited |= Editor("Y", viewport.viewportDimensions.y);
 	edited |= Editor("Width", viewport.viewportDimensions.width);
 	edited |= Editor("Height", viewport.viewportDimensions.height);
-	edited |= Editor("Render width", viewport.viewportDimensions.maybeRenderWidth);
-	edited |= Editor("Render height", viewport.viewportDimensions.maybeRenderHeight);
+	Viewer("Render width", viewport.viewportDimensions.maybeRenderWidth);
+	Viewer("Render height", viewport.viewportDimensions.maybeRenderHeight);
 	ImGui::EndGroup();
 
 	ImGui::SeparatorText("Projection settings");
@@ -31,6 +31,14 @@ bool Editor(const char* label, hh::gfnd::ViewportData& viewport)
 
 	ImGui::SeparatorText("Projection matrix");
 	Viewer("Projection matrix", viewport.projMatrix);
+
+	if (BeginVectorViewerTable("LookAt position", false)) {
+		Viewer("LookAt position", viewport.lookAtPos);
+		EndVectorViewerTable();
+	}
+	//Editor("Unk5", viewport.unk5);
+	//Editor("Unk7", viewport.unk7);
+	//Editor("Unk8", viewport.unk8);
 
 	ImGui::PopID();
 

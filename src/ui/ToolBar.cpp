@@ -7,6 +7,8 @@
 #include "game-services/GameServiceInspector.h"
 #include "core-services/GameUpdaterInspector.h"
 #include "core-services/GraphicsContextInspector.h"
+#include "core-services/RenderManagerInspector.h"
+#include "core-services/RenderingEngineInspector.h"
 #include "core-services/CameraManagerInspector.h"
 #include "core-services/MemoryInspector.h"
 #include "tools/NeedleFxSceneDataTester.h"
@@ -49,6 +51,10 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GraphicsContext"))
 				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RenderManager"))
+				new (Desktop::instance->GetAllocator()) RenderManagerInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RenderingEngine"))
+				new (Desktop::instance->GetAllocator()) RenderingEngineInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("Memory"))
 				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GameMode"))

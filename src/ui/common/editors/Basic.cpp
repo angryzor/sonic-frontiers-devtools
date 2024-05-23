@@ -1,6 +1,9 @@
 #include "Basic.h"
 #include <utilities/math/MathUtils.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/Desktop.h>
+#include <ui/operation-modes/ObjectInspection/ObjectInspection.h>
+#include <ui/operation-modes/LevelEditor/LevelEditor.h>
 
 bool Editor(const char* label, Eigen::Quaternionf& quat) {
 	auto euler = MatrixToEuler(quat.toRotationMatrix());
@@ -95,7 +98,7 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 			for (auto* chunk : objWorld->GetWorldChunks()) {
 				for (auto* layers : chunk->GetLayers()) {
 					for (auto* obj : layers->GetResource()->GetObjects()) {
-						if (edited = ImGui::Selectable(obj->name))
+						if (edited |= ImGui::Selectable(obj->name))
 							id = obj->id;
 
 						if (id == obj->id)
@@ -108,6 +111,35 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 	}
     
     return edited;
+}
+
+bool Editor(const char* label, hh::game::GameObject*& gameObject)
+{
+	bool edited{};
+
+	if (gameObject == nullptr) ImGui::BeginDisabled();
+	if (ImGui::Button("Select")) {
+		if (auto* opMode = dynamic_cast<ObjectInspection*>(&*Desktop::instance->operationMode))
+			opMode->Select(gameObject);
+		else if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+			opMode->Select(gameObject);
+	}
+	if (gameObject == nullptr) ImGui::EndDisabled();
+
+	ImGui::SameLine();
+
+	if (ImGui::BeginCombo(label, gameObject == nullptr ? "<none>" : gameObject->name)) {
+		for (auto* obj : hh::game::GameManager::GetInstance()->objects) {
+			if (edited |= ImGui::Selectable(obj->name))
+				gameObject = obj;
+
+			if (gameObject == obj)
+				ImGui::SetItemDefaultFocus();
+		}
+		ImGui::EndCombo();
+	}
+
+	return edited;
 }
 
 bool Editor(const char* label, csl::ut::VariableString& str) {

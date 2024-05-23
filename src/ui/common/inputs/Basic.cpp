@@ -21,7 +21,7 @@ bool InputText(const char* label, hh::needle::intrusive_ptr<hh::needle::CNameIDO
 {
 	char name[256];
 
-	strcpy_s(name, str->nameProbably);
+	strcpy_s(name, str->name);
 
 	bool edited = ImGui::InputText(label, name, sizeof(name));
 

@@ -115,16 +115,9 @@ HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, fl
 	}
 }
 
-HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::RenderingDevice** renderingDevice, hh::needle::RenderingDeviceContext** renderingDeviceContext, void* deviceCreationSetting, void** displaySwapDevice, unsigned int creationFlags)
-{
-	return originalCreateRenderingDeviceDX11(renderingDevice, renderingDeviceContext, deviceCreationSetting, displaySwapDevice, D3D11_CREATE_DEVICE_DEBUG);
-}
-
-//static app::level::PlayerInformation* playerInfos[7]{};
-//HOOK(app::level::PlayerInformation*, __fastcall, LevelInfo_GetPlayerInformation, 0x140260290, app::level::LevelInfo* self, uint8_t playerId)
+//HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::RenderingDevice** renderingDevice, hh::needle::RenderingDeviceContext** renderingDeviceContext, void* deviceCreationSetting, void** displaySwapDevice, unsigned int creationFlags)
 //{
-//	if (playerId == 0) return originalLevelInfo_GetPlayerInformation(self, playerId);
-//	else return playerInfos[playerId - 1];
+//	return originalCreateRenderingDeviceDX11(renderingDevice, renderingDeviceContext, deviceCreationSetting, displaySwapDevice, D3D11_CREATE_DEVICE_DEBUG);
 //}
 
 //HOOK(bool, __fastcall, GOCCamera_PushController, 0x14D39B880, app_cmn::camera::GOCCamera* self, hh::fnd::Handle<hh::fnd::Messenger>& cameraFrame, unsigned int controllerId, unsigned int unkParam1, app_cmn::camera::CameraInterpolator* interpolator)
@@ -143,7 +136,6 @@ void Context::install_hooks()
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	INSTALL_HOOK(MouseHookUpdate);
-	//INSTALL_HOOK(LevelInfo_GetPlayerInformation);
 	//INSTALL_HOOK(GOCCamera_PushController);
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
 	GOCVisualDebugDrawRenderer::InstallHooks();
@@ -153,8 +145,7 @@ void Context::init() {
 	if (inited)
 		return;
 
-	hh::gfnd::GraphicsContext* gfx = hh::gfnd::GraphicsContext::GetInstance();
-	device = static_cast<ID3D11Device*>(gfx->renderingDevice->deviceObject->objContainer->d3dDevice);
+	device = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice()->GetNativeDevice();
 
 	device->GetImmediateContext(&deviceContext);
 
@@ -188,8 +179,6 @@ void Context::init() {
 	ReloadManager::instance = new (allocator) ReloadManager(allocator);
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
-
-	//playerInfos[0] = new (moduleAllocator) app::level::PlayerInformation{ moduleAllocator };
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);

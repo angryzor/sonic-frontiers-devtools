@@ -64,3 +64,18 @@ static void Viewer(const char* label, const Eigen::Matrix<T, Rows, Cols>& mat) {
 		EndVectorViewerTable();
 	}
 }
+
+template<typename T, size_t Len>
+static void Viewer(const char* label, const T(&arr)[Len]) {
+	char name[200];
+	snprintf(name, sizeof(name), "%s[0..%zd]", label, Len);
+
+	if (ImGui::TreeNode(name)) {
+		for (size_t i = 0; i < Len; i++) {
+			snprintf(name, sizeof(name), "%s[%zd]", label, i);
+			Viewer(name, arr[i]);
+		}
+
+		ImGui::TreePop();
+	}
+}

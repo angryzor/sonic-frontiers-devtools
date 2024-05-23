@@ -62,17 +62,22 @@ bool InputText(const char* label, char (&str)[Len], ImGuiInputTextFlags flags = 
 bool InputText(const char* label, csl::ut::VariableString& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 bool InputText(const char* label, csl::ut::String& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
+template<typename T>
+bool CheckboxFlags(const char* label, T& v, T value) {
+	if constexpr (sizeof(T) < sizeof(unsigned int)) {
+		unsigned int v2 = v;
+		bool edited = ImGui::CheckboxFlags(label, &v2, value);
+		v = static_cast<T>(v2);
+		return edited;
+	}
+	else {
+		return ImGui::CheckboxFlags(label, &v, value);
+	}
+}
+
 template<typename T, typename U>
 bool CheckboxFlags(const char* label, csl::ut::Bitset<T, U>& v, T value) {
-	if constexpr (sizeof(U) < sizeof(unsigned int)) {
-        unsigned int v2 = v.m_dummy;
-        bool edited = ImGui::CheckboxFlags(label, &v2, static_cast<U>(1) << static_cast<U>(value));
-        v.m_dummy = static_cast<U>(v2);
-		return edited;
-    }
-    else {
-        return ImGui::CheckboxFlags(label, &v.m_dummy, static_cast<U>(1) << static_cast<U>(value));
-    }
+	return CheckboxFlags<U>(label, v.m_dummy, static_cast<U>(1) << static_cast<U>(value));
 }
 
 template<typename T, size_t count>

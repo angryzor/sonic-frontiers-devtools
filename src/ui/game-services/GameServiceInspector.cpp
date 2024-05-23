@@ -123,6 +123,20 @@ void GameServiceInspector::RenderLevelInfoInspector(app::level::LevelInfo& servi
 		Editor("Stage data", *stageData);
 	else
 		ImGui::Text("No stage data loaded.");
+
+	if (ImGui::TreeNode("PlayerInformation")) {
+		for (size_t i = 0; i < 2; i++) {
+			auto* playerInfo = service.GetPlayerInformation(i);
+			char nodeName[50];
+			snprintf(nodeName, sizeof(nodeName), "Player %zd", i);
+
+			if (ImGui::TreeNode(nodeName)) {
+				Editor(nodeName, *playerInfo);
+				ImGui::TreePop();
+			}
+		}
+		ImGui::TreePop();
+	}
 }
 
 void GameServiceInspector::RenderGameModeResourceManagerInspector(app::game::GameModeResourceManager& service)
@@ -192,7 +206,8 @@ void GameServiceInspector::RenderCameraServiceInspector(app::camera::CameraServi
 {
 	for (auto& bridgeUnit : service.cameraBridges) {
 		if (bridgeUnit.cameraBridge.cameraFrameId != -1 && bridgeUnit.cameraComponent != nullptr && ImGui::TreeNodeEx(&bridgeUnit, ImGuiTreeNodeFlags_None, "%d", bridgeUnit.cameraBridge.cameraFrameId)) {
-			ImGui::Text("Camera frame: %d - %s", bridgeUnit.cameraBridge.cameraFrameId, bridgeUnit.cameraBridge.cameraFrame->name.c_str());
+			ImGui::Text("Camera frame ID: %d - %s", bridgeUnit.cameraBridge.cameraFrameId, bridgeUnit.cameraBridge.cameraFrame->name.c_str());
+			Editor("CameraFrame", bridgeUnit.cameraBridge.cameraFrame);
 			if (ImGui::TreeNodeEx("Component", ImGuiTreeNodeFlags_None, "%s", bridgeUnit.cameraComponent->name.c_str())) {
 				ImGui::Text("Viewport ID: %d", bridgeUnit.cameraComponent->viewportId);
 				Editor("Viewport data", bridgeUnit.cameraComponent->viewportData);

@@ -163,6 +163,12 @@ void ObjectInspection::CheckSelectionHotkeys() {
 	}
 }
 
+void ObjectInspection::Select(hh::game::GameObject* gameObject)
+{
+	focusedObjects.clear();
+	focusedObjects.push_back(gameObject);
+}
+
 void ObjectInspection::DeleteFocusedObject() {
 	for (auto& focusedObject : focusedObjects)
 		focusedObject->Kill();

@@ -2,13 +2,14 @@
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/common/StandaloneWindow.h>
 
-class Desktop : public hh::fnd::BaseObject {
+class Desktop : public hh::fnd::BaseObject, public hh::game::GameStepListener {
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
     csl::ut::MoveArray<hh::physics::PhysicsQueryResult> pickerResults{ GetAllocator() };
     bool pickerClicked{ false };
     bool locationPicked{ false };
+    volatile uint32_t cameraId;
     csl::ut::MoveArray<hh::game::GameObject*> pickedObjects{ GetAllocator() };
     csl::math::Vector3 pickedLocation;
     void AddStandaloneWindow(StandaloneWindow* window);
@@ -32,4 +33,5 @@ public:
     void SwitchToObjectInspectionMode();
     void SwitchToLevelEditorMode();
     void SwitchToSurfRideEditorMode();
+    virtual void PreStepCallback(hh::game::GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo);
 };

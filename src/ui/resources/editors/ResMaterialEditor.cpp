@@ -68,14 +68,14 @@ void ResMaterialEditor::RenderFloatParameterEditor(size_t idx, ParameterFloatVal
 
 	for (size_t i = 0; i < (info.sizeInDwords - 2) / 4; i++) {
 		char buf[256];
-		snprintf(buf, sizeof(buf), "%s[%zd]", data->name->nameProbably, i);
+		snprintf(buf, sizeof(buf), "%s[%zd]", data->name->name, i);
 		ImGui::DragFloat4(buf, reinterpret_cast<float*>(&(&data->values)[i]), 0.01);
 	}
 }
 
 void ResMaterialEditor::RenderBoolParameterEditor(size_t idx, hh::needle::ParameterBoolValue* data)
 {
-	ImGui::Text("%s, %x", data->name->nameProbably, &data->value);
+	ImGui::Text("%s, %x", data->name->name, &data->value);
 }
 
 void ResMaterialEditor::RenderIntParameterEditor(size_t idx, hh::needle::ParameterIntValue* data)
@@ -84,7 +84,7 @@ void ResMaterialEditor::RenderIntParameterEditor(size_t idx, hh::needle::Paramet
 
 	for (size_t i = 0; i < (info.sizeInDwords - 2) / 4; i++) {
 		char buf[256];
-		snprintf(buf, sizeof(buf), "%s[%zd]", data->name->nameProbably, i);
+		snprintf(buf, sizeof(buf), "%s[%zd]", data->name->name, i);
 		ImGui::DragInt4(buf, reinterpret_cast<int*>(&(&data->uintVector)[i]));
 	}
 }
@@ -94,12 +94,12 @@ static const char* wrapModes[] = { "WRAP", "MIRROR", "CLAMP", "MIRRORONCE", "BOR
 
 void ResMaterialEditor::RenderSamplerParameterEditor(size_t idx, hh::needle::ParameterSamplerValue* data)
 {
-	ImGui::Text("%s", data->name->nameProbably);
+	ImGui::Text("%s", data->name->name);
 	ComboEnum("Wrap mode U", data->wrapModeU, wrapModes);
 	ComboEnum("Wrap mode V", data->wrapModeV, wrapModes);
 	ImGui::DragScalar("TexCoord index", ImGuiDataType_U8, &data->texCoordIndex);
-	ImGui::Text("TexCoord index name %s", data->texCoordIndexName->nameProbably);
-	ImGui::Text("TexCoord mtx name %s", data->texCoordMtxName->nameProbably);
+	ImGui::Text("TexCoord index name %s", data->texCoordIndexName->name);
+	ImGui::Text("TexCoord mtx name %s", data->texCoordMtxName->name);
 }
 
 void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)

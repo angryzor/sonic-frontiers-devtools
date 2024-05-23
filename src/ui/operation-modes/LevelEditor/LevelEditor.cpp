@@ -347,6 +347,16 @@ void LevelEditor::Select(const csl::ut::MoveArray<ObjectData*>& objectDatas)
 	NotifySelectedObject();
 }
 
+void LevelEditor::Select(hh::game::GameObject* gameObject)
+{
+	Deselect();
+	auto* status = gameObject->GetWorldObjectStatus();
+
+	if (status != nullptr && focusedChunk->GetObjectIndexById(status->objectData->id) != -1)
+		focusedObjects.push_back(status->objectData);
+	NotifySelectedObject();
+}
+
 void LevelEditor::Select(ObjectData* objectData)
 {
 	Deselect();

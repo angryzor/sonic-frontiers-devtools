@@ -162,6 +162,29 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 				}
 			}
 		}
+
+		auto renderParam = static_cast<RenderingEngineRangers*>(static_cast<RenderManager*>(RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->renderParam;
+		for (size_t i = 0; i < renderParam.numViewports; i++) {
+			auto inverseMat = (renderParam.viewports[i].camera->GetProjectionMatrix() * renderParam.viewports[i].camera->GetViewMatrix()).inverse();
+			auto frustumRays = ScreenRectToFrustumRays(Eigen::Vector2f{ -1, -1 }, Eigen::Vector2f{ 1, 1 }, inverseMat);
+			hh::gfnd::DrawVertex vertices[8]{
+				{ frustumRays.topLeft.start.x(), frustumRays.topLeft.start.y(), frustumRays.topLeft.start.z(), 0xFFFFFFFF },
+				{ frustumRays.topLeft.end.x(), frustumRays.topLeft.end.y(), frustumRays.topLeft.end.z(), 0xFFFFFFFF },
+				{ frustumRays.topRight.start.x(), frustumRays.topRight.start.y(), frustumRays.topRight.start.z(), 0xFFFFFFFF },
+				{ frustumRays.topRight.end.x(), frustumRays.topRight.end.y(), frustumRays.topRight.end.z(), 0xFFFFFFFF },
+				{ frustumRays.botRight.start.x(), frustumRays.botRight.start.y(), frustumRays.botRight.start.z(), 0xFFFFFFFF },
+				{ frustumRays.botRight.end.x(), frustumRays.botRight.end.y(), frustumRays.botRight.end.z(), 0xFFFFFFFF },
+				{ frustumRays.botLeft.start.x(), frustumRays.botLeft.start.y(), frustumRays.botLeft.start.z(), 0xFFFFFFFF },
+				{ frustumRays.botLeft.end.x(), frustumRays.botLeft.end.y(), frustumRays.botLeft.end.z(), 0xFFFFFFFF },
+			};
+			unsigned short indices[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
+
+
+			//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> ggeom = hh::gfnd::DrawSystem::CreateGraphicsGeometry(nullptr, hh::fnd::MemoryRouter::GetTempAllocator());
+			//ggeom->InitializeEdge
+
+			renderer->drawContext->DrawPrimitive(hh::gfnd::PrimitiveType::LINE_LIST, vertices, indices, 8);
+		}
 	}
 
 	for (auto* debugRenderable : renderer->additionalRenderables)

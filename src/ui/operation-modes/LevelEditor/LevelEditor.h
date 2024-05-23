@@ -42,6 +42,7 @@ public:
     void SpawnObject();
     void Select(const csl::ut::MoveArray<hh::game::GameObject*>& objs);
     void Select(const csl::ut::MoveArray<hh::game::ObjectData*>& objectDatas);
+    void Select(hh::game::GameObject* gameObject);
     void Select(hh::game::ObjectData* objectData);
     void Deselect();
     void NotifySelectedObject();

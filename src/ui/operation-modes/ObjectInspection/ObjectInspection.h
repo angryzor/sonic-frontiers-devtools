@@ -25,4 +25,5 @@ public:
     void HandleObjectManipulation();
     void CheckGizmoHotkeys();
     void CheckSelectionHotkeys();
+    void Select(hh::game::GameObject* gameObject);
 };

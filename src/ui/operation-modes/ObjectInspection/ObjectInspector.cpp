@@ -117,12 +117,31 @@ void ObjectInspector::Render() {
 							ImGui::PushID(&controllerUnit);
 							ImGui::Text("Addr: %zx", controllerUnit.controller);
 							ImGui::Text("Name: %s", controllerUnit.controller->name.c_str());
+							Editor("Camera frame", controllerUnit.controller->cameraFrame);
 							ImGui::Text("Priority: %d", controllerUnit.priority);
 							if (ImGui::TreeNode("Parameters")) {
 								Editor("Parameters", controllerUnit.controller->parameter);
 								ImGui::TreePop();
 							}
 							ImGui::PopID();
+						}
+					}
+					if (focusedObject->objectClass == app::ObjCameraVolume::GetClass()) {
+						auto* cameraVolume = static_cast<app::ObjCameraVolume*>(&*focusedObject);
+
+						ImGui::SeparatorText("Players inside volume");
+						for (size_t i = 0; i < std::min(8ull, cameraVolume->enterCountPerPlayer.size()); i++) {
+							char txt[20];
+							snprintf(txt, sizeof(txt), "Player %zd", i);
+							CheckboxFlags(txt, cameraVolume->playersInsideFlags, static_cast<uint8_t>(1 << i));
+						}
+
+						size_t i{};
+						ImGui::SeparatorText("Player entry count");
+						for (auto& count : cameraVolume->enterCountPerPlayer) {
+							char txt[20];
+							snprintf(txt, sizeof(txt), "Player %zd", i++);
+							Editor(txt, count);
 						}
 					}
 					ImGui::EndTabItem();

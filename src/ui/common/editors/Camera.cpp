@@ -56,7 +56,7 @@ bool Editor(const char* label, FrustumParameter& parameter) {
     
 	edited |= Editor("Near clipping plane", parameter.nearClip);
 	edited |= Editor("Far clipping plane", parameter.farClip);
-	edited |= Editor("Field Of View:", parameter.fov);
+	edited |= Editor("Field of View", parameter.fov);
 
     ImGui::PopID();
     return edited;

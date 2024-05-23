@@ -220,11 +220,6 @@ void BindMapsDetour(hh::game::GameManager* a1, hh::hid::InputMapSettings* a2) {
 	//a2->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30006u, 1.0, -1);
 }
 
-HOOK(void, __fastcall, InputManager_Setup, 0x150547840, hh::game::InputManager* self, hh::game::InputManager::SetupInfo& setupInfo)
-{
-	setupInfo.internalPlayerInputCount = 2;
-	return originalInputManager_Setup(self, setupInfo);
-}
 
 
 BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID reserved)
@@ -243,7 +238,6 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID res
 		DetourAttach(&(PVOID&)pGameModeBootInit, &GameModeBootInitDetour);
 		DetourAttach(&(PVOID&)pBindMaps, &BindMapsDetour);
 		DetourTransactionCommit();
-		INSTALL_HOOK(InputManager_Setup);
 	break;
 	case DLL_PROCESS_DETACH:
 		ImGui_ImplDX11_Shutdown();

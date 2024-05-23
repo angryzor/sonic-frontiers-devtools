@@ -9,6 +9,7 @@
 #include "operation-modes/SurfRideEditor/SurfRideEditor.h"
 #include "reflection/serialization/ReflectionSerializer.h"
 #include <utilities/math/MathUtils.h>
+#include "common/editors/Basic.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -25,6 +26,8 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 	Translations::Init(allocator);
 
 	SwitchToObjectInspectionMode();
+
+	GameManager::GetInstance()->RegisterGameStepListener(*this);
 }
 
 namespace app::game {
@@ -68,6 +71,10 @@ void Desktop::Render() {
 	//	GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
 
 	//}
+
+	uint32_t cId{ cameraId };
+	Editor("camera id", cId);
+	cameraId = cId;
 
 	//if (ImGui::Button("Viewport")) {
 	//	if (auto* fxParamMgr = GameManager::GetInstance()->GetService<app::gfx::FxParamManager>()) {
@@ -330,4 +337,9 @@ void Desktop::SwitchToLevelEditorMode()
 void Desktop::SwitchToSurfRideEditorMode()
 {
 	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
+}
+
+void Desktop::PreStepCallback(GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo)
+{
+	static_cast<hh::gfx::RenderingEngineRangers*>(static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->cameraId = cameraId;
 }

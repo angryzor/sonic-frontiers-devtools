@@ -32,6 +32,8 @@ target_sources(devtools
         ui/Context.cpp
         ui/core-services/GameUpdaterInspector.cpp
         ui/core-services/GraphicsContextInspector.cpp
+        ui/core-services/RenderManagerInspector.cpp
+        ui/core-services/RenderingEngineInspector.cpp
         ui/core-services/MemoryInspector.cpp
         ui/Desktop.cpp
         ui/game-modes/GameModeInspector.cpp
@@ -97,6 +99,8 @@ target_sources(devtools
         ui/Context.h
         ui/core-services/GameUpdaterInspector.h
         ui/core-services/GraphicsContextInspector.h
+        ui/core-services/RenderManagerInspector.h
+        ui/core-services/RenderingEngineInspector.h
         ui/core-services/MemoryInspector.h
         ui/Desktop.h
         ui/fonts/FiraCode.h

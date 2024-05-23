@@ -54,5 +54,11 @@ bool Editor(const char* label, Eigen::Quaternionf& quat);
 bool Editor(const char* label, csl::ut::Color<float>& color);
 bool Editor(const char* label, csl::ut::Color8& color);
 bool Editor(const char* label, hh::game::ObjectId& id);
+bool Editor(const char* label, hh::game::GameObject*& gameObject);
 bool Editor(const char* label, hh::fnd::WorldPosition& worldPos);
 bool Editor(const char* label, csl::math::Transform& transform);
+
+template<typename T, std::enable_if_t<std::is_base_of_v<hh::game::GameObject, T>, bool> = true>
+static bool Editor(const char* label, T*& gameObject) {
+	return Editor(label, reinterpret_cast<hh::game::GameObject*&>(gameObject));
+}
