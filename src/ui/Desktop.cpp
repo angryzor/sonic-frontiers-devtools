@@ -26,8 +26,6 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
 	Translations::Init(allocator);
 
 	SwitchToObjectInspectionMode();
-
-	GameManager::GetInstance()->RegisterGameStepListener(*this);
 }
 
 namespace app::game {
@@ -59,6 +57,21 @@ void Desktop::Render() {
 
 	SettingsManager::Render();
 
+	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
+		ImGui::OpenPopup("WorldContext");
+	}
+
+	if (ImGui::BeginPopup("WorldContext")) {
+		if (ImGui::Selectable("Teleport player")) {
+			if (auto* levelInfo = hh::game::GameManager::GetInstance()->GetService<app::level::LevelInfo>())
+			if (auto* player = static_cast<app::player::Player*>(hh::fnd::MessageManager::GetInstance()->GetMessengerByHandle(levelInfo->GetPlayerObject(0))))
+			if (auto* playerKine = player->GetComponent<app::player::GOCPlayerKinematicParams>()) {
+				playerKine->SetPosition({ pickedLocation.x(), pickedLocation.y(), pickedLocation.z(), 0.0f });
+			}
+		}
+		ImGui::EndPopup();
+	};
+
 	//if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
@@ -72,10 +85,6 @@ void Desktop::Render() {
 
 	//}
 
-	uint32_t cId{ cameraId };
-	Editor("camera id", cId);
-	cameraId = cId;
-
 	//if (ImGui::Button("Viewport")) {
 	//	if (auto* fxParamMgr = GameManager::GetInstance()->GetService<app::gfx::FxParamManager>()) {
 	//		auto& stageConfig = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig;
@@ -85,18 +94,7 @@ void Desktop::Render() {
 	//	}
 	//}
 
-	//if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
-	//	ImGui::OpenPopup("SpawnCharacter");
-	//}
 
-	//if (ImGui::BeginPopup("SpawnCharacter")) {
-	//	const char* charaNames[] = {"Sonic", "Amy", "Knuckles", "Tails"};
-	//	app::level::StageData::AttributeFlags charaAttrFlags[] = {
-	//		app::level::StageData::AttributeFlags::SONIC,
-	//		app::level::StageData::AttributeFlags::TAILS,
-	//		app::level::StageData::AttributeFlags::KNUCKLES,
-	//		app::level::StageData::AttributeFlags::AMY,
-	//	};
 
 	//	auto* gameManager = GameManager::GetInstance();
 
@@ -213,18 +211,6 @@ void Desktop::HandleMousePicking()
 					Eigen::Vector4f worldSpaceOrigin = inverseMat * csl::math::Vector4{ ndcPos.x, ndcPos.y, 0, 1 };
 					Eigen::Vector4f worldSpaceTarget = inverseMat * csl::math::Vector4{ ndcPos.x, ndcPos.y, 1, 1 };
 
-					//PhysicsQueryResult result{};
-					//if (physicsWorld->RayCastClosest({ worldSpaceOrigin.hnormalized() }, { worldSpaceTarget.hnormalized() }, 0xFDFFFFFF, result)) {
-					//	auto* collider = result.collider.Get(*(rangerssdk::GetAddress(&hh::game::GameObjectSystem::handleManager)));
-
-					//	pickedObject = collider ? collider->GetOwnerGameObject() : nullptr;
-					//	pickedLocation = result.hitLocation;
-					//}
-					//else {
-					//	pickedObject = nullptr;
-					//	pickedLocation = csl::math::Vector3{};
-					//}
-
 					csl::ut::MoveArray<PhysicsQueryResult> results{ hh::fnd::MemoryRouter::GetTempAllocator() };
 					if (physicsWorld->RayCastAllHits({ worldSpaceOrigin.hnormalized() }, { worldSpaceTarget.hnormalized() }, 0xFFFFFFFF, results)) {
 						if (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) {
@@ -276,8 +262,6 @@ void Desktop::HandleMousePicking()
 			}
 		}
 	}
-	//}
-
 
 	if (ImGui::BeginPopup("Picker results")) {
 		for (auto& result : pickerResults) {
@@ -337,9 +321,4 @@ void Desktop::SwitchToLevelEditorMode()
 void Desktop::SwitchToSurfRideEditorMode()
 {
 	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
-}
-
-void Desktop::PreStepCallback(GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo)
-{
-	static_cast<hh::gfx::RenderingEngineRangers*>(static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->cameraId = cameraId;
 }

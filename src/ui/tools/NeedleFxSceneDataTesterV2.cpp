@@ -54,28 +54,29 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), resource);
 
 			if (ImGui::Checkbox("Set Scene Config", &setConfig)) {
-				if (setConfig) {
+				if (setConfig)
 					fxParamManager->AddNeedleFxSceneConfigInterpolationJob(rootJobId, &resource->reflectionData->config, 20000, 0.0f);
-				}
-				else {
+				else
 					fxParamManager->RemoveNeedleFxSceneConfigInterpolationJob(rootJobId, 0.0f);
-				}
 			}
+
+			if (setConfig) {
+				fxParamManager->UpdateNeedleFxSceneConfigInterpolationJob(rootJobId, &resource->reflectionData->config);
+			}
+
 			if (ImGui::Checkbox("Set NeedleFX Parameter", &setParam)) {
-				if (setParam) {
+				if (setParam)
 					fxParamManager->AddNeedleFxParameterInterpolationJob(rootJobId, &resource->reflectionData->items[itemId], 20000, 0.0f);
-				}
-				else {
+				else
 					fxParamManager->RemoveNeedleFxParameterInterpolationJob(rootJobId, 0.0f);
-				}
 			}
 
 			if (setParam) {
+				fxParamManager->UpdateNeedleFxParameterInterpolationJob(rootJobId, &resource->reflectionData->items[itemId]);
+
 				ImGui::Indent();
-				if (ImGui::SliderInt("Item ID", &itemId, 0, 15))
-					fxParamManager->UpdateNeedleFxParameterInterpolationJob(rootJobId, &resource->reflectionData->items[itemId]);
-			}
-			if(true) {
+				ImGui::SliderInt("Item ID", &itemId, 0, 15);
+
 				if (ImGui::Checkbox("Overlay time parameters", &setTimeParam)) {
 					if (setTimeParam) {
 						app::rfl::FxAtmosphereParameter atmosphereParam;
@@ -238,12 +239,6 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 				}
 				ImGui::Unindent();
 			}
-
-			//auto* renderingEngine = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice();
-			//if (setConfig)
-			//	renderingEngine->SetSceneConfig(&resource->reflectionData->config);
-			//if (setParam)
-			//	renderingEngine->SetFXParameter(&resource->reflectionData->items[itemId], 0);
 		}
 	}
 	ImGui::EndChild();

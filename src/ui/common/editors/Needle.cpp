@@ -107,11 +107,12 @@ bool Editor(const char* label, hh::needle::PipelineInfo& pipelineInfo, hh::needl
 	edited |= Editor("qword20", pipelineInfo.qword20);
 	edited |= Editor("Render parameters", pipelineInfo.renderParam);
 	edited |= Editor("qword138", pipelineInfo.qword138);
-	edited |= Editor("qword140", pipelineInfo.qword140);
 	edited |= Editor("qword148", pipelineInfo.qword148);
 	edited |= Editor("qword150", pipelineInfo.qword150);
-	Viewer("renderUnitNameId", pipelineInfo.renderUnitNameId->name);
-	Viewer("sceneNameId", pipelineInfo.sceneNameId->name);
+	if (pipelineInfo.renderUnitNameId)
+		Viewer("renderUnitNameId", pipelineInfo.renderUnitNameId->name);
+	if (pipelineInfo.sceneNameId)
+		Viewer("sceneNameId", pipelineInfo.sceneNameId->name);
 	edited |= Editor("Camera ID", pipelineInfo.cameraId);
 	//edited |= Editor("sceneParamContainer", pipelineInfo.sceneParamContainer);
 	edited |= Editor("qword178", pipelineInfo.qword178);
@@ -220,6 +221,7 @@ bool Editor(const char* label, hh::needle::RenderUnit& renderUnit)
 	edited |= Editor("unk17", renderUnit.unk17);
 	edited |= Editor("unk18", renderUnit.unk18);
 	edited |= Editor("flags", renderUnit.flags);
+	edited |= Editor("execContext.pipelineinfo", renderUnit.renderingPipelineExecContext->pipelineInfo, *renderUnit.pipeline);
 	//pipelineInfo
 	//renderingPipelineExecContext
 	//sceneParamContainer

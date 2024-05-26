@@ -96,6 +96,15 @@ VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, ResizeBuffers, UINT BufferCount, UI
 	return originalIDXGISwapChainResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 }
 
+HOOK(void, __fastcall, RenderingEngineRangers_SetupMainRenderUnit, 0x14F2C0DF0, hh::gfx::RenderingEngineRangers* self) {
+	originalRenderingEngineRangers_SetupMainRenderUnit(self);
+
+	//auto* renderingEngine = static_cast<hh::gfx::RenderingEngineRangers*>(static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice());
+
+	static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->implementation->numMainViewports = 2;
+	self->mainRenderUnit->pipelineInfo->cameraId = 1;
+}
+
 HOOK(void*, __fastcall, SwapChainHook, 0x155D23F80, void* in_pThis, IDXGISwapChain* in_pSwapChain)
 {
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, Present, 8);
@@ -136,6 +145,7 @@ void Context::install_hooks()
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	INSTALL_HOOK(MouseHookUpdate);
+	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
 	//INSTALL_HOOK(GOCCamera_PushController);
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
 	GOCVisualDebugDrawRenderer::InstallHooks();
