@@ -7,67 +7,69 @@ target_sources(devtools
         devtools.rc
         DllMain.cpp
         Mod.cpp
-        debug-rendering/GOCVisualDebugDrawRenderer.cpp
-        hot-reload/ReloadManager.cpp
+        # debug-rendering/GOCVisualDebugDrawRenderer.cpp
+        # hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/RflMoveArrayAccessor.cpp
         reflection/serialization/ReflectionSerializer.cpp
-        reflection/serialization/resource-rfls/ResObjectWorld.cpp
+        # reflection/serialization/resource-rfls/ResObjectWorld.cpp
         ui/common/editors/Basic.cpp
-        ui/common/editors/Camera.cpp
-        ui/common/editors/ObjectData.cpp
-        ui/common/editors/Reflection.cpp
-        ui/common/editors/GraphicsContext.cpp
-        ui/common/editors/LevelInfo.cpp
-        ui/common/editors/Needle.cpp
-        ui/common/editors/SurfRide.cpp
+        # ui/common/editors/Camera.cpp
+        # ui/common/editors/ObjectData.cpp
+        # ui/common/editors/Reflection.cpp
+        # ui/common/editors/GraphicsContext.cpp
+        # ui/common/editors/LevelInfo.cpp
+        # ui/common/editors/Needle.cpp
+        # ui/common/editors/SurfRide.cpp
         ui/common/viewers/Basic.cpp
-        ui/common/viewers/ObjectData.cpp
-        ui/common/viewers/RflDiff.cpp
+        # ui/common/viewers/ObjectData.cpp
+        # ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
+        # ui/common/inputs/Needle.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/Textures.cpp
         ui/common/Theme.cpp
         ui/common/Translations.cpp
         ui/Context.cpp
-        ui/core-services/GameUpdaterInspector.cpp
-        ui/core-services/GraphicsContextInspector.cpp
-        ui/core-services/RenderManagerInspector.cpp
-        ui/core-services/RenderingEngineInspector.cpp
-        ui/core-services/MemoryInspector.cpp
+        # ui/core-services/GameUpdaterInspector.cpp
+        # ui/core-services/GraphicsContextInspector.cpp
+        # ui/core-services/RenderManagerInspector.cpp
+        # ui/core-services/RenderingEngineInspector.cpp
+        # ui/core-services/MemoryInspector.cpp
         ui/Desktop.cpp
-        ui/game-modes/GameModeInspector.cpp
-        ui/game-services/GameServiceInspector.cpp
-        ui/operation-modes/LevelEditor/LevelEditor.cpp
-        ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
-        ui/operation-modes/LevelEditor/ObjectLibrary.cpp
-        ui/operation-modes/LevelEditor/SetObjectList.cpp
+        # ui/game-modes/GameModeInspector.cpp
+        # ui/game-services/GameServiceInspector.cpp
+        # ui/operation-modes/LevelEditor/LevelEditor.cpp
+        # ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
+        # ui/operation-modes/LevelEditor/ObjectLibrary.cpp
+        # ui/operation-modes/LevelEditor/SetObjectList.cpp
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
         ui/operation-modes/ObjectInspection/ObjectInspector.cpp
         ui/operation-modes/ObjectInspection/ObjectList.cpp
-        ui/operation-modes/SurfRideEditor/Timeline.cpp
-        ui/operation-modes/SurfRideEditor/ProjectTree.cpp
-        ui/operation-modes/SurfRideEditor/ElementInspector.cpp
-        ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
+        # ui/operation-modes/SurfRideEditor/Timeline.cpp
+        # ui/operation-modes/SurfRideEditor/ProjectTree.cpp
+        # ui/operation-modes/SurfRideEditor/ElementInspector.cpp
+        # ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
         ui/operation-modes/OperationMode.cpp
-        ui/resources/editors/ResEffectEditor.cpp
-        ui/resources/editors/ResObjectWorldEditor.cpp
-        ui/resources/editors/ResMaterialEditor.cpp
-        ui/resources/editors/ResReflectionEditor.cpp
-        ui/resources/editors/ResSurfRideProjectEditor.cpp
-        ui/resources/ResourceBrowser.cpp
+        # ui/resources/editors/ResEffectEditor.cpp
+        # ui/resources/editors/ResObjectWorldEditor.cpp
+        # ui/resources/editors/ResMaterialEditor.cpp
+        # ui/resources/editors/ResReflectionEditor.cpp
+        # ui/resources/editors/ResSurfRideProjectEditor.cpp
+        # ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
-        ui/tools/NeedleFxSceneDataTester.cpp
-        ui/tools/NeedleFxSceneDataTesterV2.cpp
-        ui/tools/RflComparer.cpp
-        utilities/BoundingBoxes.cpp
+        # ui/tools/NeedleFxSceneDataTester.cpp
+        # ui/tools/NeedleFxSceneDataTesterV2.cpp
+        # ui/tools/RflComparer.cpp
+        # utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
         utilities/math/Frustum.cpp
         utilities/math/MathUtils.cpp
-        utilities/ObjectDataUtils.cpp
-        utilities/ResourceTypes.cpp
-        utilities/RflDiff.cpp
+        # utilities/ObjectDataUtils.cpp
+        # utilities/ResourceTypes.cpp
+        # utilities/RflDiff.cpp
+        utilities/CompatibleObject.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/GOCVisualDebugDrawRenderer.h
@@ -139,4 +141,5 @@ target_sources(devtools
         utilities/ObjectDataUtils.h
         utilities/ResourceTypes.h
         utilities/RflDiff.h
+        utilities/CompatibleObject.h
 )

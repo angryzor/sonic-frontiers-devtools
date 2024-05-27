@@ -13,7 +13,7 @@
 
 #include <d3d11.h>
 #include <random>
-#include <rangers-sdk.h>
+#include <wars-sdk.h>
 
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>

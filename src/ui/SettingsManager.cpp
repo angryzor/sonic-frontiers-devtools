@@ -2,7 +2,7 @@
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/Desktop.h>
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+//#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
 SettingsManager::Settings SettingsManager::settings{};
@@ -222,22 +222,22 @@ void SettingsManager::ApplySettings() {
 	defaultFloatStep = settings.rflDefaultFloatStep;
 	rflMinFloatStep = settings.rflMinFloatStep;
 	rflSliderCutOff = settings.rflSliderCutOffRange;
-	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
-	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
-	GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
+	//GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
+	//GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
+	//GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
 
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
 			Desktop::selectionColliderFilters[i][j] = settings.selectionColliderFilters[i][j];
 	
-	for (size_t i = 0; i < 32; i++)
-		for (size_t j = 0; j < 32; j++)
-			GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
+	//for (size_t i = 0; i < 32; i++)
+	//	for (size_t j = 0; j < 32; j++)
+	//		GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
 
 	auto* gameManager = hh::game::GameManager::GetInstance();
 	
-	if (gameManager && gameManager->GetService<hh::game::InputManager>())
-		gameManager->ReloadInputSettings(true);
+	//if (gameManager && gameManager->GetService<hh::game::InputManager>())
+	//	gameManager->ReloadInputSettings(true);
 }
 
 void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)

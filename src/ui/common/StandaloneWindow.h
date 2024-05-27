@@ -1,5 +1,8 @@
 #pragma once
-class StandaloneWindow : public hh::fnd::ReferencedObject
+
+#include <utilities/CompatibleObject.h>
+
+class StandaloneWindow : public CompatibleObject
 {
 	csl::ut::VariableString title{ GetAllocator() };
 protected:

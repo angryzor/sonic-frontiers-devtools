@@ -3,7 +3,7 @@
 #include <ui/common/inputs/Basic.h>
 #include <ui/Desktop.h>
 #include <ui/operation-modes/ObjectInspection/ObjectInspection.h>
-#include <ui/operation-modes/LevelEditor/LevelEditor.h>
+// #include <ui/operation-modes/LevelEditor/LevelEditor.h>
 
 bool Editor(const char* label, Eigen::Quaternionf& quat) {
 	auto euler = MatrixToEuler(quat.toRotationMatrix());
@@ -76,39 +76,39 @@ bool Editor(const char* label, csl::ut::Color8& color) {
 
 bool Editor(const char* label, hh::game::ObjectId& id) {
     bool edited{};
-	auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
+	//auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
 
-	if (objWorld == nullptr) {
+	//if (objWorld == nullptr) {
 		ImGui::Text("%s: %016zx%016zx", label, id.groupId, id.objectId);
-	}
-	else {
-		char unkNameBuf[50];
-		sprintf_s(unkNameBuf, 50, "<%016zx%016zx>", id.groupId, id.objectId);
+	//}
+	//else {
+	//	char unkNameBuf[50];
+	//	sprintf_s(unkNameBuf, 50, "<%016zx%016zx>", id.groupId, id.objectId);
 
-		const char* name = unkNameBuf;
+	//	const char* name = unkNameBuf;
 
-		for (auto* chunk : objWorld->GetWorldChunks()) {
-			int idx = chunk->GetObjectIndexById(id);
+	//	for (auto* chunk : objWorld->GetWorldChunks()) {
+	//		int idx = chunk->GetObjectIndexById(id);
 
-			if (idx != -1)
-				name = chunk->GetWorldObjectStatusByIndex(idx).objectData->name;
-		}
+	//		if (idx != -1)
+	//			name = chunk->GetWorldObjectStatusByIndex(idx).objectData->name;
+	//	}
 
-		if (ImGui::BeginCombo(label, name)) {
-			for (auto* chunk : objWorld->GetWorldChunks()) {
-				for (auto* layers : chunk->GetLayers()) {
-					for (auto* obj : layers->GetResource()->GetObjects()) {
-						if (edited |= ImGui::Selectable(obj->name))
-							id = obj->id;
+	//	if (ImGui::BeginCombo(label, name)) {
+	//		for (auto* chunk : objWorld->GetWorldChunks()) {
+	//			for (auto* layers : chunk->GetLayers()) {
+	//				for (auto* obj : layers->GetResource()->GetObjects()) {
+	//					if (edited |= ImGui::Selectable(obj->name))
+	//						id = obj->id;
 
-						if (id == obj->id)
-							ImGui::SetItemDefaultFocus();
-					}
-				}
-			}
-			ImGui::EndCombo();
-		}
-	}
+	//					if (id == obj->id)
+	//						ImGui::SetItemDefaultFocus();
+	//				}
+	//			}
+	//		}
+	//		ImGui::EndCombo();
+	//	}
+	//}
     
     return edited;
 }
@@ -121,8 +121,8 @@ bool Editor(const char* label, hh::game::GameObject*& gameObject)
 	if (ImGui::Button("Select")) {
 		if (auto* opMode = dynamic_cast<ObjectInspection*>(&*Desktop::instance->operationMode))
 			opMode->Select(gameObject);
-		else if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-			opMode->Select(gameObject);
+		// else if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+		// 	opMode->Select(gameObject);
 	}
 	if (gameObject == nullptr) ImGui::EndDisabled();
 

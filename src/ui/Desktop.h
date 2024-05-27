@@ -1,8 +1,9 @@
 #pragma once
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/common/StandaloneWindow.h>
+#include <utilities/CompatibleObject.h>
 
-class Desktop : public hh::fnd::ReferencedObject {
+class Desktop : public CompatibleObject {
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
@@ -25,7 +26,7 @@ public:
     void Render();
     void RenderOverlayWindow();
     void OpenStandaloneWindow(StandaloneWindow* window);
-    void HandleMousePicking();
+    //void HandleMousePicking();
     bool IsPickerMouseReleased() const;
     const csl::ut::MoveArray<hh::game::GameObject*>& GetPickedObjects() const;
     const csl::math::Vector3* GetPickedLocation() const;

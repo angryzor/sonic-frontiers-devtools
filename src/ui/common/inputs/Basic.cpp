@@ -17,20 +17,6 @@ bool InputText(const char* label, csl::ut::String& str, ImGuiInputTextFlags flag
 	return ImGui::InputText(label, str.c_str() == nullptr ? dummy : str.c_str(), str.size(), flags | ImGuiInputTextFlags_CallbackResize, StringResizeCallback, &str);
 }
 
-bool InputText(const char* label, hh::needle::intrusive_ptr<hh::needle::CNameIDObject>& str, ImGuiInputTextFlags flags)
-{
-	char name[256];
-
-	strcpy_s(name, str->name);
-
-	bool edited = ImGui::InputText(label, name, sizeof(name));
-
-	if (edited)
-		str = hh::needle::CNameIDObject::RegisterUniqueObject(name, nullptr);
-
-	return edited;
-}
-
 // This is a completely nonstandard hack around the fact that these things don't have resizeable buffers
 // (instead they are always allocated to the exact string length) but it shouldn't cause issues.
 class ResizeableVariableString : public csl::ut::VariableString {

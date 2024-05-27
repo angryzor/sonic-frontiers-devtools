@@ -1,6 +1,7 @@
 #include <hedgelib/hl_internal.h>
 #include "EndianSwaps.h"
 #include <hedgelib/io/hl_bina.h>
+#include <utilities/CompatibleObject.h>
 
 struct WorkQueueEntry {
 	size_t id;
@@ -14,7 +15,7 @@ struct WorkQueueEntry {
 	WorkQueueEntry(void* ptr, void* parentPtr, const hh::fnd::RflClassMember* member, size_t size) : ptr{ ptr }, parentPtr{ parentPtr }, member{ member }, size{ size }, dbgExpectedOffset{ 0 } {}
 };
 
-class ReflectionSerializer : public hh::fnd::BaseObject {
+class ReflectionSerializer : public CompatibleObject {
 	hl::stream& stream;
 	hl::bina::v2::writer64 writer{ stream };
 	hl::off_table offTable{};
@@ -39,6 +40,6 @@ public:
 	static void SerializeToFile(const hl::nchar* filename, void* obj, const hh::fnd::RflClass& rflClass);
 	template<typename T>
 	static void SerializeToFile(const hl::nchar* filename, T* obj) {
-		SerializeToFile(filename, obj, *rangerssdk::GetAddress(&T::rflClass));
+		SerializeToFile(filename, obj, RESOLVE_STATIC_VARIABLE(T::rflClass));
 	}
 };

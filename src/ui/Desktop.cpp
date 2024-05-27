@@ -2,23 +2,24 @@
 #include "Desktop.h"
 #include "ToolBar.h"
 #include "SettingsManager.h"
-#include "resources/ResourceBrowser.h"
-#include "game-services/GameServiceInspector.h"
+//#include "resources/ResourceBrowser.h"
+//#include "game-services/GameServiceInspector.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
-#include "operation-modes/LevelEditor/LevelEditor.h"
-#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
+//#include "operation-modes/LevelEditor/LevelEditor.h"
+//#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
 #include "reflection/serialization/ReflectionSerializer.h"
 #include <utilities/math/MathUtils.h>
+#include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
-using namespace hh::physics;
+//using namespace hh::physics;
 
 Desktop* Desktop::instance{};
 bool Desktop::selectionColliderFilters[32][32]{ true };
 
-Desktop::Desktop(csl::fnd::IAllocator* allocator) : BaseObject{ allocator }
+Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }
 {
 	resourceLoader = hh::fnd::ResourceLoader::Create(allocator);
 	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac", 0);
@@ -35,11 +36,11 @@ namespace app::game {
 }
 void Desktop::Render() {
 	RenderOverlayWindow();
-	HandleMousePicking();
+	//HandleMousePicking();
 
 	ToolBar::Render();
 	operationMode->Render();
-	ResourceBrowser::RenderDialogs();
+	//ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
@@ -57,20 +58,20 @@ void Desktop::Render() {
 
 	SettingsManager::Render();
 
-	if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
-		ImGui::OpenPopup("WorldContext");
-	}
+	//if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
+	//	ImGui::OpenPopup("WorldContext");
+	//}
 
-	if (ImGui::BeginPopup("WorldContext")) {
-		if (ImGui::Selectable("Teleport player")) {
-			if (auto* levelInfo = hh::game::GameManager::GetInstance()->GetService<app::level::LevelInfo>())
-			if (auto* player = static_cast<app::player::Player*>(hh::fnd::MessageManager::GetInstance()->GetMessengerByHandle(levelInfo->GetPlayerObject(0))))
-			if (auto* playerKine = player->GetComponent<app::player::GOCPlayerKinematicParams>()) {
-				playerKine->SetPosition({ pickedLocation.x(), pickedLocation.y(), pickedLocation.z(), 0.0f });
-			}
-		}
-		ImGui::EndPopup();
-	};
+	//if (ImGui::BeginPopup("WorldContext")) {
+	//	if (ImGui::Selectable("Teleport player")) {
+	//		if (auto* levelInfo = hh::game::GameManager::GetInstance()->GetService<app::level::LevelInfo>())
+	//		if (auto* player = static_cast<app::player::Player*>(hh::fnd::MessageManager::GetInstance()->GetMessengerByHandle(levelInfo->GetPlayerObject(0))))
+	//		if (auto* playerKine = player->GetComponent<app::player::GOCPlayerKinematicParams>()) {
+	//			playerKine->SetPosition({ pickedLocation.x(), pickedLocation.y(), pickedLocation.z(), 0.0f });
+	//		}
+	//	}
+	//	ImGui::EndPopup();
+	//};
 
 	//if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
@@ -171,6 +172,7 @@ void Desktop::OpenStandaloneWindow(StandaloneWindow* window) {
 	this->windowsThatOpened.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
 }
 
+/*
 void Desktop::HandleMousePicking()
 {
 	auto& io = ImGui::GetIO();
@@ -279,6 +281,7 @@ void Desktop::HandleMousePicking()
 		ImGui::EndPopup();
 	}
 }
+*/
 
 Desktop::~Desktop()
 {
@@ -313,12 +316,12 @@ void Desktop::SwitchToObjectInspectionMode()
 	operationMode = new (GetAllocator()) ObjectInspection(GetAllocator());
 }
 
-void Desktop::SwitchToLevelEditorMode()
-{
-	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
-}
-
-void Desktop::SwitchToSurfRideEditorMode()
-{
-	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
-}
+//void Desktop::SwitchToLevelEditorMode()
+//{
+//	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
+//}
+//
+//void Desktop::SwitchToSurfRideEditorMode()
+//{
+//	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
+//}

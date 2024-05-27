@@ -1,7 +1,7 @@
 #include "StandaloneWindow.h"
 #include <ui/Desktop.h>
 
-StandaloneWindow::StandaloneWindow(csl::fnd::IAllocator* allocator) : hh::fnd::ReferencedObject{ allocator, true } {
+StandaloneWindow::StandaloneWindow(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator } {
 	Desktop::instance->OpenStandaloneWindow(this);
 }
 

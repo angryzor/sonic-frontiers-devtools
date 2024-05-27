@@ -6,7 +6,7 @@
 using namespace hh::fnd;
 using namespace hh::game;
 
-ObjectList::ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : BaseObject{ allocator }, objectInspection{ objectInspection }
+ObjectList::ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : CompatibleObject{ allocator }, objectInspection{ objectInspection }
 {
 }
 
@@ -39,10 +39,10 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
 
 				if (obj != child) {
-					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->frame->fullTransform);
-					auto childAbsoluteTransform = TransformToAffine3f(childTransform->frame->fullTransform);
+					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
+					auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
 
-					childTransform->transform = Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+					childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
 					childTransform->SetParent(objTransform);
 				}
 			}
@@ -77,10 +77,10 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
 
 				if (obj != child) {
-					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->frame->fullTransform);
-					auto childAbsoluteTransform = TransformToAffine3f(childTransform->frame->fullTransform);
+					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
+					auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
 
-					childTransform->transform = Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+					childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
 					childTransform->SetParent(objTransform);
 				}
 			}
@@ -140,10 +140,10 @@ void ObjectList::Render() {
 										GOCTransform* childTransform = child->GetComponent<GOCTransform>();
 
 										if (obj != child) {
-											auto parentAbsoluteTransform = TransformToAffine3f(objTransform->frame->fullTransform);
-											auto childAbsoluteTransform = TransformToAffine3f(childTransform->frame->fullTransform);
+											auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
+											auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
 
-											childTransform->transform = Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+											childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
 											childTransform->SetParent(objTransform);
 										}
 									}

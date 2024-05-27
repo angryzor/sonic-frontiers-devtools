@@ -251,7 +251,7 @@ void ReflectionSerializer::Write(void* obj, const RflClass& rflClass) {
 }
 
 ReflectionSerializer::ReflectionSerializer(csl::fnd::IAllocator* allocator, hl::stream& stream)
-	: BaseObject{ allocator }
+	: CompatibleObject{ allocator }
 	, stream{ stream }
 {
 }

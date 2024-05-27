@@ -3,8 +3,8 @@
 #include "Context.h"
 #include "Desktop.h"
 #include "SettingsManager.h"
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
-#include <hot-reload/ReloadManager.h>
+//#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+//#include <hot-reload/ReloadManager.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -17,27 +17,23 @@ bool Context::passThroughMouse = false;
 bool Context::inited = false;
 bool Context::alreadyRendering = false;
 
-//SIG_SCAN
-//(
-//    sigSwapChainHook,
-//
-//    0x15575A930,
-//
-//    "\x48\x89\x5C\x24\x10\x48\x89\x6C\x24\x18\x56\x57\x41\x56\x48\x81\xEC\xF0\x02", "xxxxxxxxxxxxxxxxxxx"
-//);
-//
-//SIG_SCAN
-//(
-//    sigWndProcHook,
-//
-//    0x140BFF2B0,
-//
-//    "\x48\x89\x5C\x24\x10\x48\x89\x74\x24\x18\x48\x89\x7C\x24\x20\x55\x41\x56\x41\x57\x48\x8B\xEC\x48\x83\xEC\x70\x48\x83", "xxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
-//);
+HOOK(uint64_t, __fastcall, ApplicationStart, 0x145400300, hh::game::GameApplication* application) {
+	auto res = originalApplicationStart(application);
+
+	auto allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+	auto* resourceLoader = new (allocator) hh::fnd::ResourceLoader();
+	resourceLoader->LoadPackfile("mods/debugtools/segafont_art.pac", true);
+
+	//auto service = gameModeBoot->gameManager->CreateService<DevEventInfo>(allocator);
+	//gameModeBoot->gameManager->RegisterService(service);
+	Context::init();
+
+	return res;
+}
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-HOOK(LRESULT, __fastcall, WndProcHook, 0x140D68F80, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+HOOK(LRESULT, __fastcall, WndProcHook, 0x1406EC680, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_KEYDOWN && wParam == VK_F8) {
 		Context::visible = !Context::visible;
@@ -96,16 +92,7 @@ VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, ResizeBuffers, UINT BufferCount, UI
 	return originalIDXGISwapChainResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 }
 
-HOOK(void, __fastcall, RenderingEngineRangers_SetupMainRenderUnit, 0x14F2C0DF0, hh::gfx::RenderingEngineRangers* self) {
-	originalRenderingEngineRangers_SetupMainRenderUnit(self);
-
-	//auto* renderingEngine = static_cast<hh::gfx::RenderingEngineRangers*>(static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice());
-
-	static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->implementation->numMainViewports = 2;
-	self->mainRenderUnit->pipelineInfo->cameraId = 1;
-}
-
-HOOK(void*, __fastcall, SwapChainHook, 0x155D23F80, void* in_pThis, IDXGISwapChain* in_pSwapChain)
+HOOK(void*, __fastcall, SwapChainHook, 0x14082EE90, void* in_pThis, IDXGISwapChain* in_pSwapChain)
 {
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, Present, 8);
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, ResizeBuffers, 13);
@@ -113,16 +100,16 @@ HOOK(void*, __fastcall, SwapChainHook, 0x155D23F80, void* in_pThis, IDXGISwapCha
 	return originalSwapChainHook(in_pThis, in_pSwapChain);
 }
 
-HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, float a2)
-{
-	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
-		originalMouseHookUpdate(a1, a2);
-	}
-	else {
-		a1->unk103 = a1->unk101;
-		a1->unk105 = 0;
-	}
-}
+//HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, float a2)
+//{
+//	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
+//		originalMouseHookUpdate(a1, a2);
+//	}
+//	else {
+//		a1->unk103 = a1->unk101;
+//		a1->unk105 = 0;
+//	}
+//}
 
 //HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::RenderingDevice** renderingDevice, hh::needle::RenderingDeviceContext** renderingDeviceContext, void* deviceCreationSetting, void** displaySwapDevice, unsigned int creationFlags)
 //{
@@ -142,13 +129,14 @@ HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, fl
 
 void Context::install_hooks()
 {
+	INSTALL_HOOK(ApplicationStart);
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
-	INSTALL_HOOK(MouseHookUpdate);
+	//INSTALL_HOOK(MouseHookUpdate);
 	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
 	//INSTALL_HOOK(GOCCamera_PushController);
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
-	GOCVisualDebugDrawRenderer::InstallHooks();
+	//GOCVisualDebugDrawRenderer::InstallHooks();
 }
 
 void Context::init() {
@@ -182,12 +170,13 @@ void Context::init() {
 	io.Fonts->Build();
 
 	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-	static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
-	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
-	auto* allocator = &devtoolsAllocator;
+	auto* allocator = moduleAllocator;
+	//static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
+	//devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
+	//auto* allocator = &devtoolsAllocator;
 
-	ReloadManager::instance = new (allocator) ReloadManager(allocator);
-	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
+	//ReloadManager::instance = new (allocator) ReloadManager(allocator);
+	//GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
 
 	// Setup Platform/Renderer backends

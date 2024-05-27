@@ -5,7 +5,6 @@
 
 using namespace hh::fnd;
 using namespace hh::game;
-using namespace hh::physics;
 
 ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator) : OperationMode{ allocator }
 {
@@ -19,7 +18,7 @@ void ObjectInspection::Render() {
 		if (focusedObjects.size() > 1 && gizmoOperation & ImGuizmo::SCALE)
 			gizmoOperation = ImGuizmo::TRANSLATE;
 
-		haveSelectionAabb = CalcApproxAabb(reinterpret_cast<csl::ut::MoveArray<GameObject*>&>(focusedObjects), selectionAabb);
+		// haveSelectionAabb = CalcApproxAabb(reinterpret_cast<csl::ut::MoveArray<GameObject*>&>(focusedObjects), selectionAabb);
 		HandleObjectManipulation();
 	} else
 		haveSelectionAabb = false;
@@ -27,13 +26,13 @@ void ObjectInspection::Render() {
 	HandleObjectSelection();
 }
 
-void ObjectInspection::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
-{
-	if (haveSelectionAabb) {
-		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
-		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 140, 255, 255, 255 });
-	}
-}
+//void ObjectInspection::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
+//{
+//	if (haveSelectionAabb) {
+//		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
+//		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 140, 255, 255, 255 });
+//	}
+//}
 
 void ObjectInspection::HandleObjectSelection() {
 	if (Desktop::instance->IsPickerMouseReleased()) {
@@ -61,7 +60,7 @@ void ObjectInspection::HandleObjectManipulation() {
 		if (focusedObjects.size() > 1 && haveSelectionAabb)
 			pivotTransform.fromPositionOrientationScale((selectionAabb.m_Min + selectionAabb.m_Max) / 2.0f, Eigen::Quaternionf::Identity(), Eigen::Vector3f{ 1.0f, 1.0f, 1.0f });
 		else
-			pivotTransform = TransformToAffine3f(firstObjGocTransform->frame->fullTransform);
+			pivotTransform = TransformToAffine3f(firstObjGocTransform->GetFrame().fullTransform);
 
 		csl::ut::MoveArray<GameObject*> objsToMove{ hh::fnd::MemoryRouter::GetTempAllocator() };
 		for (auto& object : focusedObjects) {
@@ -86,8 +85,8 @@ void ObjectInspection::HandleObjectManipulation() {
 
 		for (auto& object : objsToMove) {
 			auto* gocTransform = object->GetComponent<GOCTransform>();
-			auto absoluteTransform = TransformToAffine3f(gocTransform->frame->fullTransform);
-			auto localTransform = TransformToAffine3f(gocTransform->transform);
+			auto absoluteTransform = TransformToAffine3f(gocTransform->GetFrame().fullTransform);
+			auto localTransform = TransformToAffine3f(gocTransform->GetTransform());
 			postTransforms.push_back(localTransform * absoluteTransform.inverse());
 			preTransforms.push_back(pivotTransform.inverse() * absoluteTransform);
 		}
