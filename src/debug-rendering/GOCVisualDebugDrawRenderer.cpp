@@ -30,8 +30,8 @@ GOCMyVisualDebugDraw* GOCMyVisualDebugDraw::Create(csl::fnd::IAllocator* allocat
 
 GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator)
 	: GOCVisualDebugDraw{ allocator }
-	//, geometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
-	, fillGeometry{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry))(nullptr, allocator) }
+	//, geometry{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry)(nullptr, allocator) }
+	, fillGeometry{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry)(nullptr, allocator) }
 {
 }
 
@@ -77,12 +77,12 @@ void GOCVisualDebugDrawRenderer::InstallHooks() {
 }
 
 GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator)
-	: ReferencedObject{ allocator, true }
+	: CompatibleObject{ allocator }
 	, memCtx{ true }
 	, unk2{ &memCtx }
 	, unk3{ &unk2 }
-	//, sharedDDRes{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystem::CreateSharedDebugDrawResource))(allocator) }
-	, drawContext{ (*rangerssdk::GetAddress(&hh::gfnd::DrawSystem::CreateDrawContext))(allocator, &unk3) }
+	//, sharedDDRes{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateSharedDebugDrawResource)(allocator) }
+	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator, &unk3) }
 	, renderable{ new (allocator) Renderable(allocator, this) }
 {
 	renderable->name = "DevTools Debug Overlay";
@@ -98,8 +98,7 @@ void GOCVisualDebugDrawRenderer::RemoveGOC(GOCMyVisualDebugDraw* goc) {
 }
 
 Eigen::Matrix4f GetColliderTransform(hh::physics::GOCCollider* collider) {
-	Eigen::Affine3f affine{};
-	return affine.fromPositionOrientationScale(collider->transformedWorldPosition.m_Position, collider->transformedWorldPosition.m_Rotation, collider->scale).matrix();
+	return collider->worldTransform;
 }
 
 void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderableParameter* renderableParameter) {
@@ -132,59 +131,55 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 	}
 
 	if (renderer->enabled) {
-		if (renderColliders) {
-			for (auto* gameObject : gameManager->objects) {
-				//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {
-				//	renderer->drawContext->DrawOBB(gocV->worldMatrix, { 1, 1, 1 }, { 255, 255, 255, 0 });
-				//	renderer->drawContext->DrawAABB(gocV->transformedAabb.m_Min, gocV->transformedAabb.m_Max, { 255, 255, 255, 255 });
-				//}
-				for (auto* goc : gameObject->components) {
-					if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
-						auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
-						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawSphere({ GetColliderTransform(cGoc) }, cGoc->radius, { 255, 255, 255, 0 });
-					}
-					else if (goc->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
-						auto* cGoc = static_cast<hh::physics::GOCBoxCollider*>(goc);
-						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawOBB({ GetColliderTransform(cGoc) }, cGoc->dimensions, { 255, 255, 255, 0 });
-					}
-					else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
-						auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
-						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawCapsule({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
-					}
-					else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
-						auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);
-						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawCylinder({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
-					}
-				}
-			}
-		}
+		//if (renderColliders) {
+		//	for (auto* gameObject : gameManager->objects) {
+		//		//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {
+		//		//	renderer->drawContext->DrawOBB(gocV->worldMatrix, { 1, 1, 1 }, { 255, 255, 255, 0 });
+		//		//	renderer->drawContext->DrawAABB(gocV->transformedAabb.m_Min, gocV->transformedAabb.m_Max, { 255, 255, 255, 255 });
+		//		//}
+		//		for (auto* goc : gameObject->components) {
+		//			if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
+		//				auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
+		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+		//					renderer->drawContext->DrawSphere({ GetColliderTransform(cGoc) }, cGoc->radius, { 255, 255, 255, 0 });
+		//			}
+		//			else if (goc->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
+		//				auto* cGoc = static_cast<hh::physics::GOCBoxCollider*>(goc);
+		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+		//					renderer->drawContext->DrawOBB({ GetColliderTransform(cGoc) }, cGoc->dimensions, { 255, 255, 255, 0 });
+		//			}
+		//			else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
+		//				auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
+		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+		//					renderer->drawContext->DrawCapsule({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
+		//			}
+		//			else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
+		//				auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);
+		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+		//					renderer->drawContext->DrawCylinder({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
+		//			}
+		//		}
+		//	}
+		//}
 
-		auto renderParam = static_cast<RenderingEngineRangers*>(static_cast<RenderManager*>(RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->renderParam;
-		for (size_t i = 0; i < renderParam.numViewports; i++) {
-			auto inverseMat = (renderParam.viewports[i].camera->GetProjectionMatrix() * renderParam.viewports[i].camera->GetViewMatrix()).inverse();
-			auto frustumRays = ScreenRectToFrustumRays(Eigen::Vector2f{ -1, -1 }, Eigen::Vector2f{ 1, 1 }, inverseMat);
-			hh::gfnd::DrawVertex vertices[8]{
-				{ frustumRays.topLeft.start.x(), frustumRays.topLeft.start.y(), frustumRays.topLeft.start.z(), 0xFFFFFFFF },
-				{ frustumRays.topLeft.end.x(), frustumRays.topLeft.end.y(), frustumRays.topLeft.end.z(), 0xFFFFFFFF },
-				{ frustumRays.topRight.start.x(), frustumRays.topRight.start.y(), frustumRays.topRight.start.z(), 0xFFFFFFFF },
-				{ frustumRays.topRight.end.x(), frustumRays.topRight.end.y(), frustumRays.topRight.end.z(), 0xFFFFFFFF },
-				{ frustumRays.botRight.start.x(), frustumRays.botRight.start.y(), frustumRays.botRight.start.z(), 0xFFFFFFFF },
-				{ frustumRays.botRight.end.x(), frustumRays.botRight.end.y(), frustumRays.botRight.end.z(), 0xFFFFFFFF },
-				{ frustumRays.botLeft.start.x(), frustumRays.botLeft.start.y(), frustumRays.botLeft.start.z(), 0xFFFFFFFF },
-				{ frustumRays.botLeft.end.x(), frustumRays.botLeft.end.y(), frustumRays.botLeft.end.z(), 0xFFFFFFFF },
-			};
-			unsigned short indices[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
+		//auto renderParam = static_cast<RenderingEngineRangers*>(static_cast<RenderManager*>(RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->renderParam;
+		//for (size_t i = 0; i < renderParam.numViewports; i++) {
+		//	auto inverseMat = (renderParam.viewports[i].camera->GetProjectionMatrix() * renderParam.viewports[i].camera->GetViewMatrix()).inverse();
+		//	auto frustumRays = ScreenRectToFrustumRays(Eigen::Vector2f{ -1, -1 }, Eigen::Vector2f{ 1, 1 }, inverseMat);
+		//	hh::gfnd::DrawVertex vertices[8]{
+		//		{ frustumRays.topLeft.start.x(), frustumRays.topLeft.start.y(), frustumRays.topLeft.start.z(), 0xFFFFFFFF },
+		//		{ frustumRays.topLeft.end.x(), frustumRays.topLeft.end.y(), frustumRays.topLeft.end.z(), 0xFFFFFFFF },
+		//		{ frustumRays.topRight.start.x(), frustumRays.topRight.start.y(), frustumRays.topRight.start.z(), 0xFFFFFFFF },
+		//		{ frustumRays.topRight.end.x(), frustumRays.topRight.end.y(), frustumRays.topRight.end.z(), 0xFFFFFFFF },
+		//		{ frustumRays.botRight.start.x(), frustumRays.botRight.start.y(), frustumRays.botRight.start.z(), 0xFFFFFFFF },
+		//		{ frustumRays.botRight.end.x(), frustumRays.botRight.end.y(), frustumRays.botRight.end.z(), 0xFFFFFFFF },
+		//		{ frustumRays.botLeft.start.x(), frustumRays.botLeft.start.y(), frustumRays.botLeft.start.z(), 0xFFFFFFFF },
+		//		{ frustumRays.botLeft.end.x(), frustumRays.botLeft.end.y(), frustumRays.botLeft.end.z(), 0xFFFFFFFF },
+		//	};
+		//	unsigned short indices[8]{ 0, 1, 2, 3, 4, 5, 6, 7 };
 
-
-			//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> ggeom = hh::gfnd::DrawSystem::CreateGraphicsGeometry(nullptr, hh::fnd::MemoryRouter::GetTempAllocator());
-			//ggeom->InitializeEdge
-
-			renderer->drawContext->DrawPrimitive(hh::gfnd::PrimitiveType::LINE_LIST, vertices, indices, 8);
-		}
+		//	renderer->drawContext->DrawPrimitive(hh::gfnd::PrimitiveType::LINE_LIST, vertices, indices, 8);
+		//}
 	}
 
 	for (auto* debugRenderable : renderer->additionalRenderables)

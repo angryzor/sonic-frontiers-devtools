@@ -7,7 +7,7 @@ class Desktop : public CompatibleObject {
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
-    //csl::ut::MoveArray<hh::physics::PhysicsQueryResult> pickerResults{ GetAllocator() };
+    csl::ut::MoveArray<hh::physics::PhysicsQueryResult> pickerResults{ GetAllocator() };
     bool pickerClicked{ false };
     bool locationPicked{ false };
     csl::ut::MoveArray<hh::game::GameObject*> pickedObjects{ GetAllocator() };
@@ -26,7 +26,7 @@ public:
     void Render();
     void RenderOverlayWindow();
     void OpenStandaloneWindow(StandaloneWindow* window);
-    //void HandleMousePicking();
+    void HandleMousePicking();
     bool IsPickerMouseReleased() const;
     const csl::ut::MoveArray<hh::game::GameObject*>& GetPickedObjects() const;
     const csl::math::Vector3* GetPickedLocation() const;

@@ -3,7 +3,7 @@
 Translations::Language Translations::currentLanguage{ Language::VAR_NAMES };
 
 void Translations::Init(csl::fnd::IAllocator* allocator) {
-	translationMap = new csl::ut::PointerMap<const char*, const char*>{ allocator };
+	translationMap = new (allocator) csl::ut::PointerMap<const char*, const char*>{ allocator };
 	for (size_t i = 0; i < TRANSLATION_COUNT; i++)
 		translationMap->Insert(reinterpret_cast<const char*>(translations[i].originalStrAddr), translations[i].translation);
 }

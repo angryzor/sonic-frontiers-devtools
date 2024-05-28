@@ -79,7 +79,7 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 	//auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
 
 	//if (objWorld == nullptr) {
-		ImGui::Text("%s: %016zx%016zx", label, id.groupId, id.objectId);
+		ImGui::Text("%s: %016zx%016zx", label, id.id);
 	//}
 	//else {
 	//	char unkNameBuf[50];

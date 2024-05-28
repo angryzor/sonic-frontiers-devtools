@@ -1,7 +1,9 @@
 #pragma once
+#include <utilities/CompatibleObject.h>
+
 class GOCMyVisualDebugDraw;
 class DebugRenderable;
-class GOCVisualDebugDrawRenderer : public hh::fnd::ReferencedObject
+class GOCVisualDebugDrawRenderer : public CompatibleObject
 {
 	class Renderable : public hh::gfnd::Renderable {
 		GOCVisualDebugDrawRenderer* renderer;

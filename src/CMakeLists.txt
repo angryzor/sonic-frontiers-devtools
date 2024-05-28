@@ -16,7 +16,7 @@ target_sources(devtools
         ui/common/editors/Basic.cpp
         # ui/common/editors/Camera.cpp
         # ui/common/editors/ObjectData.cpp
-        # ui/common/editors/Reflection.cpp
+        ui/common/editors/Reflection.cpp
         # ui/common/editors/GraphicsContext.cpp
         # ui/common/editors/LevelInfo.cpp
         # ui/common/editors/Needle.cpp
@@ -43,6 +43,8 @@ target_sources(devtools
         # ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
         # ui/operation-modes/LevelEditor/ObjectLibrary.cpp
         # ui/operation-modes/LevelEditor/SetObjectList.cpp
+        ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.cpp
+        ui/operation-modes/ObjectInspection/component-inspectors/wars/GOCPlayerParameter.cpp
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
         ui/operation-modes/ObjectInspection/ObjectInspector.cpp
         ui/operation-modes/ObjectInspection/ObjectList.cpp
@@ -113,6 +115,8 @@ target_sources(devtools
         ui/operation-modes/LevelEditor/ObjectDataInspector.h
         ui/operation-modes/LevelEditor/ObjectLibrary.h
         ui/operation-modes/LevelEditor/SetObjectList.h
+        ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.h
+        ui/operation-modes/ObjectInspection/component-inspectors/wars/GOCPlayerParameter.h
         ui/operation-modes/ObjectInspection/ObjectInspection.h
         ui/operation-modes/ObjectInspection/ObjectInspector.h
         ui/operation-modes/ObjectInspection/ObjectList.h

@@ -18,7 +18,7 @@ template<> class imgui_datatype<double> { public: static constexpr ImGuiDataType
 //template<> class imgui_datatype<csl::math::Vector3> { public: static constexpr ImGuiDataType dtype = ImGuiDataType_Float; static constexpr int components = 3; };
 //template<> class imgui_datatype<csl::math::Vector4> { public: static constexpr ImGuiDataType dtype = ImGuiDataType_Float; static constexpr int components = 4; };
 //template<> class imgui_datatype<csl::math::Position> { public: static constexpr ImGuiDataType dtype = ImGuiDataType_Float; static constexpr int components = 3; };
-template<typename T> class imgui_datatype<T, std::enable_if_t<std::is_base_of_v<Eigen::Quaternion<typename T::Scalar>, T>>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<typename T::Scalar>::dtype; static constexpr int components = 4; };
+//template<typename T> class imgui_datatype<T, std::enable_if_t<std::is_base_of_v<Eigen::Quaternion<typename T::Scalar>, T>>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<typename T::Scalar>::dtype; static constexpr int components = 4; };
 template<typename T> class imgui_datatype<T, std::enable_if_t<std::is_base_of_v<Eigen::Matrix<typename T::Scalar, T::RowsAtCompileTime, 1>, T>>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<typename T::Scalar>::dtype; static constexpr int components = T::RowsAtCompileTime; };
 template<typename U> class imgui_datatype<csl::ut::Color<U>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<U>::dtype; static constexpr int components = 4; };
 

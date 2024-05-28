@@ -7,11 +7,42 @@
 #include <utilities/math/MathUtils.h>
 #include <imgui_internal.h>
 
+#include "component-inspectors/GOCTransform.h"
+#include "component-inspectors/wars/GOCPlayerParameter.h"
+
 using namespace hh::fnd;
 using namespace hh::game;
 
+
+
 void RenderComponentInspector(GOComponent& component) {
-	ImGui::Text("Inspector for this component not yet implemented");
+	 if (component.pStaticClass == hh::game::GOCTransform::GetClass()) {
+	 	RenderComponentInspector(static_cast<GOCTransform&>(component));
+	 } else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
+	 	RenderComponentInspector(static_cast<app::player::GOCPlayerParameter&>(component));
+	 // } else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
+	 // 	RenderGOCPlayerParameterInspector(static_cast<app::player::GOCPlayerParameter&>(component));
+	 // } else if (component.pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
+	 // 	RenderGOCSphereColliderInspector(static_cast<hh::physics::GOCSphereCollider&>(component));
+	 // } else if (component.pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
+	 // 	RenderGOCBoxColliderInspector(static_cast<hh::physics::GOCBoxCollider&>(component));
+	 // } else if (component.pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
+	 // 	RenderGOCCapsuleColliderInspector(static_cast<hh::physics::GOCCapsuleCollider&>(component));
+	 // } else if (component.pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
+	 // 	RenderGOCCylinderColliderInspector(static_cast<hh::physics::GOCCylinderCollider&>(component));
+	 // } else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass()) {
+	 // 	RenderGOCAnimatorInspector(static_cast<hh::anim::GOCAnimator&>(component));
+	 // } else if (component.pStaticClass == app::game::GOCEventCollision::GetClass()) {
+	 // 	RenderGOCEventCollisionInspector(static_cast<app::game::GOCEventCollision&>(component));
+	 // } else if (component.pStaticClass == app::player::GOCPlayerKinematicParams::GetClass()) {
+	 // 	RenderGOCPlayerKinematicParamsInspector(static_cast<app::player::GOCPlayerKinematicParams&>(component));
+	 // } else if (component.pStaticClass == app::player::GOCPlayerBlackboard::GetClass()) {
+	 // 	RenderGOCPlayerBlackboardInspector(static_cast<app::player::GOCPlayerBlackboard&>(component));
+	 // } else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass()) {
+	 // 	RenderGOCCameraInspector(static_cast<app_cmn::camera::GOCCamera&>(component));
+	 } else {
+		 ImGui::Text("Inspector for this component not yet implemented");
+	 }
 }
 
 ObjectInspector::ObjectInspector(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : CompatibleObject{ allocator }, objectInspection{ objectInspection }
@@ -166,34 +197,3 @@ void ObjectInspector::Render() {
 	}
 	ImGui::End();
 }
-
-//void ObjectInspector::RenderComponentInspector(GOComponent& component) {
-	// if (component.pStaticClass == hh::game::GOCTransform::GetClass()) {
-	// 	RenderGOCTransformInspector(static_cast<GOCTransform&>(component));
-	// } else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
-	// 	RenderGOCPlayerParameterInspector(static_cast<app::player::GOCPlayerParameter&>(component));
-	// } else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
-	// 	RenderGOCPlayerParameterInspector(static_cast<app::player::GOCPlayerParameter&>(component));
-	// } else if (component.pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
-	// 	RenderGOCSphereColliderInspector(static_cast<hh::physics::GOCSphereCollider&>(component));
-	// } else if (component.pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
-	// 	RenderGOCBoxColliderInspector(static_cast<hh::physics::GOCBoxCollider&>(component));
-	// } else if (component.pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
-	// 	RenderGOCCapsuleColliderInspector(static_cast<hh::physics::GOCCapsuleCollider&>(component));
-	// } else if (component.pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
-	// 	RenderGOCCylinderColliderInspector(static_cast<hh::physics::GOCCylinderCollider&>(component));
-	// } else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass()) {
-	// 	RenderGOCAnimatorInspector(static_cast<hh::anim::GOCAnimator&>(component));
-	// } else if (component.pStaticClass == app::game::GOCEventCollision::GetClass()) {
-	// 	RenderGOCEventCollisionInspector(static_cast<app::game::GOCEventCollision&>(component));
-	// } else if (component.pStaticClass == app::player::GOCPlayerKinematicParams::GetClass()) {
-	// 	RenderGOCPlayerKinematicParamsInspector(static_cast<app::player::GOCPlayerKinematicParams&>(component));
-	// } else if (component.pStaticClass == app::player::GOCPlayerBlackboard::GetClass()) {
-	// 	RenderGOCPlayerBlackboardInspector(static_cast<app::player::GOCPlayerBlackboard&>(component));
-	// } else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass()) {
-	// 	RenderGOCCameraInspector(static_cast<app_cmn::camera::GOCCamera&>(component));
-	// } else {
-		//RenderUnknownComponentInspector(component);
-	// }
-//}
-

@@ -14,7 +14,7 @@
 
 using namespace hh::fnd;
 using namespace hh::game;
-//using namespace hh::physics;
+using namespace hh::physics;
 
 Desktop* Desktop::instance{};
 bool Desktop::selectionColliderFilters[32][32]{ true };
@@ -36,7 +36,7 @@ namespace app::game {
 }
 void Desktop::Render() {
 	RenderOverlayWindow();
-	//HandleMousePicking();
+	HandleMousePicking();
 
 	ToolBar::Render();
 	operationMode->Render();
@@ -172,7 +172,6 @@ void Desktop::OpenStandaloneWindow(StandaloneWindow* window) {
 	this->windowsThatOpened.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
 }
 
-/*
 void Desktop::HandleMousePicking()
 {
 	auto& io = ImGui::GetIO();
@@ -194,7 +193,7 @@ void Desktop::HandleMousePicking()
 				pickedObjects.clear();
 				for (auto* object : gameManager->objects)
 					if (auto* gocTransform = object->GetComponent<GOCTransform>())
-						if (frustum.Test(gocTransform->frame->fullTransform.position))
+						if (frustum.Test(gocTransform->GetFrame().fullTransform.position))
 							pickedObjects.push_back(object);
 
 				locationPicked = false;
@@ -206,9 +205,9 @@ void Desktop::HandleMousePicking()
 
 			auto* gameManager = GameManager::GetInstance();
 
-			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorldBullet>()) {
+			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
 				if (auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0)) {
-					auto inverseMat = camera->viewportData.inverseViewMatrix * camera->viewportData.projMatrix.inverse();
+					auto inverseMat = camera->viewportData.GetInverseViewMatrix() * camera->viewportData.projMatrix.inverse();
 
 					Eigen::Vector4f worldSpaceOrigin = inverseMat * csl::math::Vector4{ ndcPos.x, ndcPos.y, 0, 1 };
 					Eigen::Vector4f worldSpaceTarget = inverseMat * csl::math::Vector4{ ndcPos.x, ndcPos.y, 1, 1 };
@@ -221,7 +220,7 @@ void Desktop::HandleMousePicking()
 							pickerResults.clear();
 
 							for (auto& result : results) {
-								if (auto* collider = result.collider.Get(*(rangerssdk::GetAddress(&hh::game::GameObjectSystem::handleManager)))) {
+								if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
 									auto* gameObject = collider->GetOwnerGameObject();
 
 									if (unique.Find(gameObject) == unique.end())
@@ -236,7 +235,7 @@ void Desktop::HandleMousePicking()
 						}
 						else {
 							for (auto& result : results) {
-								if (auto* collider = result.collider.Get(*(rangerssdk::GetAddress(&hh::game::GameObjectSystem::handleManager)))) {
+								if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
 									auto* gameObject = collider->GetOwnerGameObject();
 
 									if (selectionColliderFilters[gameObject->layer][collider->filterCategory]) {
@@ -267,7 +266,7 @@ void Desktop::HandleMousePicking()
 
 	if (ImGui::BeginPopup("Picker results")) {
 		for (auto& result : pickerResults) {
-			if (auto* collider = result.collider.Get(*(rangerssdk::GetAddress(&hh::game::GameObjectSystem::handleManager)))) {
+			if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
 				auto* gameObject = collider->GetOwnerGameObject();
 
 				if (ImGui::Selectable(gameObject->name)) {
@@ -281,7 +280,6 @@ void Desktop::HandleMousePicking()
 		ImGui::EndPopup();
 	}
 }
-*/
 
 Desktop::~Desktop()
 {
