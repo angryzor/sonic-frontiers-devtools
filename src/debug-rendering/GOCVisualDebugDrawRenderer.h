@@ -20,10 +20,11 @@ public:
 	static bool colliderFilters[32][32];
 	static bool renderGOCVisualDebugDraw;
 	static bool renderColliders;
+	static bool renderOcclusionCapsules;
 	static uint8_t gocVisualDebugDrawOpacity;
-	hh::needle::CScratchMemoryContext memCtx;
-	hh::gfnd::DrawContext::Unk2 unk2;
-	hh::gfnd::DrawContext::Unk3 unk3;
+	//hh::needle::CScratchMemoryContext memCtx;
+	//hh::gfnd::DrawContext::Unk2 unk2;
+	//hh::gfnd::DrawContext::Unk3 unk3;
 	hh::gfnd::DrawContext* drawContext;
 	csl::ut::MoveArray<DebugRenderable*> additionalRenderables{ GetAllocator() };
 	GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator);

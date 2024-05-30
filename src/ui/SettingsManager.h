@@ -87,6 +87,7 @@ class SettingsManager
         };
         bool debugRenderingRenderGOCVisualDebugDraw{ true };
         bool debugRenderingRenderColliders{ true };
+        bool debugRenderingRenderOcclusionCapsules{ true };
         uint8_t debugRenderingGOCVisualDebugDrawOpacity{ 80 };
 
         bool operator==(const Settings& other) const;

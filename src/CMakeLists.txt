@@ -7,7 +7,7 @@ target_sources(devtools
         devtools.rc
         DllMain.cpp
         Mod.cpp
-        # debug-rendering/GOCVisualDebugDrawRenderer.cpp
+        debug-rendering/GOCVisualDebugDrawRenderer.cpp
         # hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/RflMoveArrayAccessor.cpp
@@ -38,7 +38,8 @@ target_sources(devtools
         # ui/core-services/MemoryInspector.cpp
         ui/Desktop.cpp
         # ui/game-modes/GameModeInspector.cpp
-        # ui/game-services/GameServiceInspector.cpp
+        ui/game-services/game-service-inspectors/FxParamManager.cpp
+        ui/game-services/GameServiceInspector.cpp
         # ui/operation-modes/LevelEditor/LevelEditor.cpp
         # ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
         # ui/operation-modes/LevelEditor/ObjectLibrary.cpp
@@ -110,6 +111,7 @@ target_sources(devtools
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
         ui/game-modes/GameModeInspector.h
+        ui/game-services/game-service-inspectors/FxParamManager.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/LevelEditor/LevelEditor.h
         ui/operation-modes/LevelEditor/ObjectDataInspector.h

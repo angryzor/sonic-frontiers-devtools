@@ -2,7 +2,7 @@
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/Desktop.h>
-//#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
 SettingsManager::Settings SettingsManager::settings{};
@@ -20,6 +20,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& rflSliderCutOffRange == other.rflSliderCutOffRange
 		&& debugRenderingRenderGOCVisualDebugDraw == other.debugRenderingRenderGOCVisualDebugDraw
 		&& debugRenderingRenderColliders == other.debugRenderingRenderColliders
+		&& debugRenderingRenderOcclusionCapsules == other.debugRenderingRenderOcclusionCapsules
 		&& debugRenderingGOCVisualDebugDrawOpacity == other.debugRenderingGOCVisualDebugDrawOpacity;
 
 	for (size_t i = 0; i < 32; i++)
@@ -160,6 +161,7 @@ void SettingsManager::Render() {
 							constexpr uint8_t maxAlpha{ 255 };
 							ImGui::Checkbox("Render GOCVisualDebugDraw visuals", &tempSettings.debugRenderingRenderGOCVisualDebugDraw);
 							ImGui::Checkbox("Render colliders", &tempSettings.debugRenderingRenderColliders);
+							ImGui::Checkbox("Render occlusion capsules", &tempSettings.debugRenderingRenderOcclusionCapsules);
 							ImGui::SliderScalar("GOCVisualDebugDraw opacity (requires stage restart)", ImGuiDataType_U8, &tempSettings.debugRenderingGOCVisualDebugDrawOpacity, &minAlpha, &maxAlpha);
 							ImGui::EndTabItem();
 						}
@@ -222,17 +224,18 @@ void SettingsManager::ApplySettings() {
 	defaultFloatStep = settings.rflDefaultFloatStep;
 	rflMinFloatStep = settings.rflMinFloatStep;
 	rflSliderCutOff = settings.rflSliderCutOffRange;
-	//GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
-	//GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
-	//GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
+	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
+	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
+	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;
+	GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
 
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
 			Desktop::selectionColliderFilters[i][j] = settings.selectionColliderFilters[i][j];
 	
-	//for (size_t i = 0; i < 32; i++)
-	//	for (size_t j = 0; j < 32; j++)
-	//		GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
+	for (size_t i = 0; i < 32; i++)
+		for (size_t j = 0; j < 32; j++)
+			GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
 
 	auto* gameManager = hh::game::GameManager::GetInstance();
 	
@@ -271,6 +274,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "SliderCutOffRange=%u", &u) == 1) { settings.rflSliderCutOffRange = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderGOCVisualDebugDraw=%u", &u) == 1) { settings.debugRenderingRenderGOCVisualDebugDraw = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderColliders=%u", &u) == 1) { settings.debugRenderingRenderColliders = u; return; }
+	if (sscanf_s(line, "DebugRenderingRenderOcclusionCapsules=%u", &u) == 1) { settings.debugRenderingRenderOcclusionCapsules = u; return; }
 	if (sscanf_s(line, "DebugRenderingGOCVisualDebugDrawOpacity=%u", &u) == 1) { settings.debugRenderingGOCVisualDebugDrawOpacity = u; return; }
 	if (sscanf_s(line, "SelectionColliderFilters=%256s", s, 300) == 1 && strlen(s) == 256) {
 		for (size_t i = 0; i < 32; i++) {
@@ -312,6 +316,7 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("SliderCutOffRange=%u\n", settings.rflSliderCutOffRange);
 	out_buf->appendf("DebugRenderingRenderGOCVisualDebugDraw=%u\n", settings.debugRenderingRenderGOCVisualDebugDraw);
 	out_buf->appendf("DebugRenderingRenderColliders=%u\n", settings.debugRenderingRenderColliders);
+	out_buf->appendf("DebugRenderingRenderOcclusionCapsules=%u\n", settings.debugRenderingRenderOcclusionCapsules);
 	out_buf->appendf("DebugRenderingGOCVisualDebugDrawOpacity=%u\n", settings.debugRenderingGOCVisualDebugDrawOpacity);
 
 	out_buf->appendf("SelectionColliderFilters=");

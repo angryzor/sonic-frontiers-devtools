@@ -7,6 +7,7 @@ using namespace hh::gfx;
 bool GOCVisualDebugDrawRenderer::colliderFilters[32][32]{ false };
 bool GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw{ true };
 bool GOCVisualDebugDrawRenderer::renderColliders{ true };
+bool GOCVisualDebugDrawRenderer::renderOcclusionCapsules{ true };
 uint8_t GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity{ 80 };
 
 class GOCMyVisualDebugDraw : public GOCVisualDebugDraw {
@@ -24,12 +25,12 @@ public:
 	GOCOMPONENT_CLASS_DECLARATION(GOCMyVisualDebugDraw)
 };
 
-GOCMyVisualDebugDraw* GOCMyVisualDebugDraw::Create(csl::fnd::IAllocator* allocator) {
+hh::game::GOComponent* GOCMyVisualDebugDraw::Create(csl::fnd::IAllocator* allocator) {
 	return new (std::align_val_t(alignof(GOCMyVisualDebugDraw)), allocator) GOCMyVisualDebugDraw(allocator);
 }
 
 GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator)
-	: GOCVisualDebugDraw{ allocator }
+	: GOCVisualDebugDraw{}
 	//, geometry{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry)(nullptr, allocator) }
 	, fillGeometry{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry)(nullptr, allocator) }
 {
@@ -45,10 +46,10 @@ void GOCMyVisualDebugDraw::OnGOCEvent(GOCEvent event, GameObject& ownerGameObjec
 }
 
 void GOCMyVisualDebugDraw::InstallHooks() {
-	WRITE_MEMORY(0x143CECB00 + offsetof(hh::game::GOComponentClass, instantiator), void*, &GOCMyVisualDebugDraw::Create);
+	reinterpret_cast<hh::game::GOComponentClass*>(reinterpret_cast<size_t>(hh::gfx::GOCVisualDebugDraw::GetClass()))->instantiator = &GOCMyVisualDebugDraw::Create;
 }
 
-HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140D06320, GOCMyVisualDebugDraw* gocVisual, const GOCVisualDebugDraw::SetupInfo& setupInfo) {
+HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140682D50, GOCMyVisualDebugDraw* gocVisual, const GOCVisualDebugDraw::SetupInfo& setupInfo) {
 	bool ret = originalVisualDebugDrawSetup(gocVisual, setupInfo);
 
 	if (setupInfo.geometry != nullptr) {
@@ -58,7 +59,7 @@ HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140D06320, GOCMyVisualDebugDraw* 
 		csl::ut::Color8 fillColor{ setupInfo.color };
 		//fillColor.a = 80;
 		fillColor.a = GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity;
-		gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
+		gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry, {});
 		gocVisual->fillGeometry->SetColor(fillColor);
 
 		gocVisual->hasGeometry = true;
@@ -72,17 +73,17 @@ HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140D06320, GOCMyVisualDebugDraw* 
 hh::fnd::Reference<GOCVisualDebugDrawRenderer> GOCVisualDebugDrawRenderer::instance = nullptr;
 
 void GOCVisualDebugDrawRenderer::InstallHooks() {
-	INSTALL_HOOK(VisualDebugDrawSetup);
-	GOCMyVisualDebugDraw::InstallHooks();
+	//INSTALL_HOOK(VisualDebugDrawSetup);
+	//GOCMyVisualDebugDraw::InstallHooks();
 }
 
 GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator)
 	: CompatibleObject{ allocator }
-	, memCtx{ true }
-	, unk2{ &memCtx }
-	, unk3{ &unk2 }
+	//, memCtx{ true }
+	//, unk2{ &memCtx }
+	//, unk3{ &unk2 }
 	//, sharedDDRes{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateSharedDebugDrawResource)(allocator) }
-	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator, &unk3) }
+	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator) }//, & unk3) }
 	, renderable{ new (allocator) Renderable(allocator, this) }
 {
 	renderable->name = "DevTools Debug Overlay";
@@ -127,40 +128,56 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 			continue;
 
 		//goc->geometry->Render(renderer->drawContext, goc->worldMatrix);
-		goc->fillGeometry->Render(renderer->drawContext, goc->worldMatrix);
+		goc->fillGeometry->SetTransform(goc->worldMatrix);
+		goc->fillGeometry->Render(renderer->drawContext);
 	}
 
 	if (renderer->enabled) {
-		//if (renderColliders) {
-		//	for (auto* gameObject : gameManager->objects) {
-		//		//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {
-		//		//	renderer->drawContext->DrawOBB(gocV->worldMatrix, { 1, 1, 1 }, { 255, 255, 255, 0 });
-		//		//	renderer->drawContext->DrawAABB(gocV->transformedAabb.m_Min, gocV->transformedAabb.m_Max, { 255, 255, 255, 255 });
-		//		//}
-		//		for (auto* goc : gameObject->components) {
-		//			if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
-		//				auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
-		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-		//					renderer->drawContext->DrawSphere({ GetColliderTransform(cGoc) }, cGoc->radius, { 255, 255, 255, 0 });
-		//			}
-		//			else if (goc->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
-		//				auto* cGoc = static_cast<hh::physics::GOCBoxCollider*>(goc);
-		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-		//					renderer->drawContext->DrawOBB({ GetColliderTransform(cGoc) }, cGoc->dimensions, { 255, 255, 255, 0 });
-		//			}
-		//			else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
-		//				auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
-		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-		//					renderer->drawContext->DrawCapsule({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
-		//			}
-		//			else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
-		//				auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);
-		//				if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-		//					renderer->drawContext->DrawCylinder({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 255, 255, 255, 0 });
-		//			}
-		//		}
-		//	}
-		//}
+		if (renderColliders) {
+			for (auto* gameObject : gameManager->objects) {
+				//if (auto* gocV = gameObject->GetComponent<GOCVisualTransformed>()) {
+				//	renderer->drawContext->DrawOBB(gocV->worldMatrix, { 1, 1, 1 }, { 255, 255, 255, 0 });
+				//	renderer->drawContext->DrawAABB(gocV->transformedAabb.m_Min, gocV->transformedAabb.m_Max, { 255, 255, 255, 255 });
+				//}
+				for (auto* goc : gameObject->components) {
+					if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
+						auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
+						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+							renderer->drawContext->DrawSphere({ GetColliderTransform(cGoc) }, cGoc->radius, { 0, 255, 255, 255 });
+					}
+					else if (goc->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
+						auto* cGoc = static_cast<hh::physics::GOCBoxCollider*>(goc);
+						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+							renderer->drawContext->DrawOBB({ GetColliderTransform(cGoc) }, cGoc->dimensions, { 0, 255, 255, 255 });
+					}
+					else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
+						auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
+						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+							renderer->drawContext->DrawCapsule({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 0, 255, 255, 255 });
+					}
+					else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
+						auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);
+						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
+							renderer->drawContext->DrawCylinder({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 0, 255, 255, 255 });
+					}
+				}
+			}
+		}
+		if (renderOcclusionCapsules) {
+			for (auto* gameObject : gameManager->objects) {
+				for (auto* goc : gameObject->components) {
+					if (goc->pStaticClass == hh::gfx::GOCOcclusionCapsule::GetClass()) {
+						auto* cGoc = static_cast<hh::gfx::GOCOcclusionCapsule*>(goc);
+						if (cGoc->frame == nullptr)
+							continue;
+
+						Eigen::Affine3f affine;
+						affine.fromPositionOrientationScale(cGoc->worldPos.m_Position, cGoc->worldPos.m_Rotation, cGoc->scale);
+						renderer->drawContext->DrawSphereFixed({ (TransformToAffine3f(cGoc->frame->fullTransform) * affine).matrix() }, 1, { 255, 0, 255, 255 });
+					}
+				}
+			}
+		}
 
 		//auto renderParam = static_cast<RenderingEngineRangers*>(static_cast<RenderManager*>(RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->renderParam;
 		//for (size_t i = 0; i < renderParam.numViewports; i++) {
@@ -189,7 +206,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 	renderer->drawContext->EndScene();
 }
 
-GOCVisualDebugDrawRenderer::Renderable::Renderable(csl::fnd::IAllocator* allocator, GOCVisualDebugDrawRenderer* renderer) : hh::gfnd::Renderable{ allocator }, renderer{ renderer }
+GOCVisualDebugDrawRenderer::Renderable::Renderable(csl::fnd::IAllocator* allocator, GOCVisualDebugDrawRenderer* renderer) : hh::gfnd::Renderable{}, renderer{ renderer }
 {
 }
 

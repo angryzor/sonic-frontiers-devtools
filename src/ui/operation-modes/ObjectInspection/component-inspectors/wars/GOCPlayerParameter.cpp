@@ -27,32 +27,12 @@ void RenderModeParameterInspector(const char* label, R (&parameters)[4]) {
     }
 }
 
-const char* playerParameterModes[] = { "Normal", "Water", "Cyberspace Forward View", "Cyberspace Side View" };
-const char* playerParameterSuperStates[] = { "Normal", "Super Sonic", "Super Sonic 2" };
+const char* playerParameterModes[] = { "Forward view", "Side view", "Forward view water", "Side view water" };
 
 void RenderComponentInspector(app::player::GOCPlayerParameter& component) {
 	auto* obj = component.owner;
 
 	ComboEnum("Mode", component.mode, playerParameterModes);
-
-	//if (ImGui::Button("Edit character parameters..."))
-	//	switch (component.characterId) {
-	//	case app::player::CharacterId::SONIC:
-	//		ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->sonic);
-	//		break;
-	//	case app::player::CharacterId::AMY:
-	//		ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->amy);
-	//		break;
-	//	case app::player::CharacterId::KNUCKLES:
-	//		ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->knuckles);
-	//		break;
-	//	case app::player::CharacterId::TAILS:
-	//		ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->tails);
-	//		break;
-	//	}
-
-	//if (ImGui::Button("Edit Camera Set parameters..."))
-	//	ResReflectionEditor::Create(GetAllocator(), &*component.cameraSetParameters);
 
 	if (ImGui::TreeNode("Currently loaded parameters")) {
 		ImGui::SeparatorText("Parameters");
