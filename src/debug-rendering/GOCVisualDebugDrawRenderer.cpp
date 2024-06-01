@@ -59,7 +59,7 @@ HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140682D50, GOCMyVisualDebugDraw* 
 		csl::ut::Color8 fillColor{ setupInfo.color };
 		//fillColor.a = 80;
 		fillColor.a = GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity;
-		gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry, {});
+		gocVisual->fillGeometry->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, *setupInfo.geometry);
 		gocVisual->fillGeometry->SetColor(fillColor);
 
 		gocVisual->hasGeometry = true;
@@ -124,8 +124,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 			continue;
 
 		//goc->geometry->Render(renderer->drawContext, goc->worldMatrix);
-		goc->fillGeometry->SetTransform(goc->worldMatrix);
-		goc->fillGeometry->Render(renderer->drawContext);
+		goc->fillGeometry->Render(renderer->drawContext, goc->worldMatrix);
 	}
 
 	if (renderer->enabled) {
@@ -169,7 +168,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 
 						Eigen::Affine3f affine;
 						affine.fromPositionOrientationScale(cGoc->worldPos.m_Position, cGoc->worldPos.m_Rotation, cGoc->scale);
-						renderer->drawContext->DrawSphereFixed({ TransformToAffine3f(cGoc->frame->fullTransform) * affine }, 1, { 255, 0, 255, 255 });
+						renderer->drawContext->DrawSphere({ TransformToAffine3f(cGoc->frame->fullTransform) * affine }, 1, { 255, 0, 255, 255 });
 					}
 				}
 			}

@@ -9,55 +9,77 @@ set(PROJECT_LONG_DESCRIPTION "In-engine development kit for Sonic Forces")
 set(PROJECT_COPYRIGHT "Copyright (c) 2024 angryzor - Licensed under GPL3")
 string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
 
-set(DEVTOOLS_GAME_FOLDER "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicForces" CACHE STRING "The location of your game folder.")
-cmake_path(SET DEVTOOLS_GAME_FOLDER_NORMALIZED NORMALIZE ${DEVTOOLS_GAME_FOLDER})
-cmake_path(APPEND DEVTOOLS_GAME_FOLDER_NORMALIZED "build/main/projects/exec/Sonic Forces.exe" OUTPUT_VARIABLE SONIC_FORCES_GAME_EXECUTABLE)
 
-if(DEFINED ENV{SONIC_FORCES_SDK})
-    message("SONIC_FORCES_SDK environment variable found. Using this version instead of the local submodule.")
-    cmake_path(SET WARS_SDK_PATH NORMALIZE $ENV{SONIC_FORCES_SDK})
-else()
-    set(WARS_SDK_PATH wars-sdk)
-endif()
 
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
-add_subdirectory(${WARS_SDK_PATH} wars-sdk EXCLUDE_FROM_ALL)
 
-# DevTools
-add_library(devtools SHARED)
-target_compile_features(devtools PRIVATE cxx_std_17)
-target_compile_options(devtools PRIVATE /ZI /permissive-)
-target_compile_definitions(devtools
-    PRIVATE
-        DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:devtools>
-        DEVTOOLS_PROJECT_AUTHOR="${PROJECT_AUTHOR}"
-        DEVTOOLS_PROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}"
-        DEVTOOLS_PROJECT_LONG_DESCRIPTION="${PROJECT_LONG_DESCRIPTION}"
-        DEVTOOLS_PROJECT_COPYRIGHT="${PROJECT_COPYRIGHT}"
-        DEVTOOLS_BUILD_DATE="${PROJECT_BUILD_DATE}"
-        DEVTOOLS_VERSION=${PROJECT_VERSION}
-        DEVTOOLS_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
-        DEVTOOLS_VERSION_MINOR=${PROJECT_VERSION_MINOR}
-        DEVTOOLS_VERSION_PATCH=${PROJECT_VERSION_PATCH}
-)
-set_target_properties(devtools
-    PROPERTIES
-        VS_DEBUGGER_COMMAND ${SONIC_FORCES_GAME_EXECUTABLE}
-        VS_DEBUGGER_WORKING_DIRECTORY "${DEVTOOLS_GAME_FOLDER_NORMALIZED}/build/main/projects/exec"
-)
+# Settings for target sdks
+set(SDK_VAR_wars "SONIC_FORCES_SDK")
+set(GAME_FOLDER_DEFAULT_wars "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicForces")
+set(GAME_EXECUTABLE_wars "build/main/projects/exec/Sonic Forces.exe")
+set(WORKING_DIRECTORY_wars "build/main/projects/exec")
+set(MOD_SUBFOLDER_wars "build/main/projects/exec/Mods/devtools")
 
-foreach(LIB wars-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
-    target_link_libraries(devtools PRIVATE ${LIB})
+set(SDK_VAR_rangers "SONIC_FRONTIERS_SDK")
+set(GAME_FOLDER_DEFAULT_rangers "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicFrontiers")
+set(GAME_EXECUTABLE_rangers "Sonic Frontiers.exe")
+set(WORKING_DIRECTORY_rangers "")
+set(MOD_SUBFOLDER_rangers "Mods/devtools")
+
+# The main target
+foreach(DEVTOOLS_TARGET_SDK rangers wars)
+    set(GAME_FOLDER ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
+    set(DEVTOOLS_TARGET devtools-${DEVTOOLS_TARGET_SDK})
+    cmake_path(SET GAME_FOLDER_NORMALIZED NORMALIZE ${GAME_FOLDER})
+    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${GAME_EXECUTABLE_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE GAME_EXECUTABLE)
+    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${WORKING_DIRECTORY_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE WORKING_DIRECTORY)
+    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${MOD_SUBFOLDER_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE MOD_FOLDER)
+
+    if(DEFINED ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
+        message("${SDK_VAR_${DEVTOOLS_TARGET_SDK}} environment variable found. Using this version instead of the local submodule.")
+        cmake_path(SET SDK_PATH NORMALIZE $ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
+    else()
+        set(SDK_PATH ${DEVTOOLS_TARGET_SDK}-sdk)
+    endif()
+
+    add_subdirectory(${SDK_PATH} ${DEVTOOLS_TARGET_SDK}-sdk EXCLUDE_FROM_ALL)
+
+    add_library(${DEVTOOLS_TARGET} SHARED)
+    target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_17)
+    target_compile_options(${DEVTOOLS_TARGET} PRIVATE /ZI /permissive-)
+    target_compile_definitions(${DEVTOOLS_TARGET}
+        PRIVATE
+            DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:${DEVTOOLS_TARGET}>
+            DEVTOOLS_TARGET_SDK="${DEVTOOLS_TARGET_SDK}"
+            DEVTOOLS_TARGET_SDK_${DEVTOOLS_TARGET_SDK}=1
+            DEVTOOLS_PROJECT_AUTHOR="${PROJECT_AUTHOR}"
+            DEVTOOLS_PROJECT_DESCRIPTION="${PROJECT_DESCRIPTION}"
+            DEVTOOLS_PROJECT_LONG_DESCRIPTION="${PROJECT_LONG_DESCRIPTION}"
+            DEVTOOLS_PROJECT_COPYRIGHT="${PROJECT_COPYRIGHT}"
+            DEVTOOLS_BUILD_DATE="${PROJECT_BUILD_DATE}"
+            DEVTOOLS_VERSION=${PROJECT_VERSION}
+            DEVTOOLS_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
+            DEVTOOLS_VERSION_MINOR=${PROJECT_VERSION_MINOR}
+            DEVTOOLS_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+    )
+    set_target_properties(${DEVTOOLS_TARGET}
+        PROPERTIES
+            OUTPUT_NAME "devtools"
+            VS_DEBUGGER_COMMAND ${GAME_EXECUTABLE}
+            VS_DEBUGGER_WORKING_DIRECTORY ${WORKING_DIRECTORY}
+    )
+
+    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
+        target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})
+    endforeach()
+
+    add_subdirectory(src ${DEVTOOLS_TARGET}/src)
+    add_subdirectory(natvis ${DEVTOOLS_TARGET}/natvis)
+    configure_file(Mod.ini.in Mod.ini)
+
+    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DEVTOOLS_TARGET})
+
+    install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${MOD_FOLDER}")
+    install(DIRECTORY resources/ DESTINATION "${MOD_FOLDER}")
+    install(FILES LICENSE.txt "${CMAKE_CURRENT_BINARY_DIR}/Mod.ini" DESTINATION "${MOD_FOLDER}")
 endforeach()
-
-add_subdirectory(src)
-add_subdirectory(natvis)
-configure_file(Mod.ini.in Mod.ini)
-
-set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT devtools)
-
-cmake_path(APPEND DEVTOOLS_GAME_FOLDER_NORMALIZED "build/main/projects/exec/Mods/devtools" OUTPUT_VARIABLE MOD_FOLDER)
-
-install(TARGETS devtools RUNTIME DESTINATION "${MOD_FOLDER}")
-install(DIRECTORY resources/ DESTINATION "${MOD_FOLDER}")
-install(FILES LICENSE.txt "${CMAKE_CURRENT_BINARY_DIR}/Mod.ini" DESTINATION "${MOD_FOLDER}")

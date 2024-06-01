@@ -17,7 +17,7 @@ ResObjectWorldEditor* ResObjectWorldEditor::Create(csl::fnd::IAllocator* allocat
 void ResObjectWorldEditor::RenderContents()
 {
 	for (auto* obj : resource->GetObjects()) {
-		if (ImGui::TreeNode(obj, "%s", obj->name.c_str())) {
+		if (ImGui::TreeNode(obj, "%s", obj->GetName())) {
 			Editor("Object data", *obj);
 			ImGui::TreePop();
 		}

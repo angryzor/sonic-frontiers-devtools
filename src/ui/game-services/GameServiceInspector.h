@@ -8,5 +8,4 @@ class GameServiceInspector : public StandaloneWindow
 public:
     GameServiceInspector(csl::fnd::IAllocator* allocator);
     virtual void RenderContents() override;
-    static void RenderServiceInspector(hh::game::GameService& service);
 };

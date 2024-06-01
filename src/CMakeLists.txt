@@ -1,8 +1,8 @@
-target_precompile_headers(devtools
+target_precompile_headers(${DEVTOOLS_TARGET}
     PRIVATE
         Pch.h
 )
-target_sources(devtools
+target_sources(${DEVTOOLS_TARGET}
     PRIVATE
         devtools.rc
         DllMain.cpp
@@ -17,8 +17,8 @@ target_sources(devtools
         # ui/common/editors/Camera.cpp
         ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
-        # ui/common/editors/GraphicsContext.cpp
-        # ui/common/editors/LevelInfo.cpp
+        ui/common/editors/GraphicsContext.cpp
+        ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
         # ui/common/editors/Needle.cpp
         # ui/common/editors/SurfRide.cpp
         ui/common/viewers/Basic.cpp
@@ -38,14 +38,17 @@ target_sources(devtools
         # ui/core-services/MemoryInspector.cpp
         ui/Desktop.cpp
         # ui/game-modes/GameModeInspector.cpp
-        ui/game-services/game-service-inspectors/FxParamManager.cpp
+        ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
+        ui/game-services/game-service-inspectors/ObjectWorld.cpp
+        ui/game-services/game-service-inspectors/StageInfo.cpp
+        ui/game-services/game-service-inspectors/CameraManager.cpp
         ui/game-services/GameServiceInspector.cpp
         ui/operation-modes/LevelEditor/LevelEditor.cpp
         ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
         ui/operation-modes/LevelEditor/ObjectLibrary.cpp
         ui/operation-modes/LevelEditor/SetObjectList.cpp
         ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.cpp
-        ui/operation-modes/ObjectInspection/component-inspectors/wars/GOCPlayerParameter.cpp
+        ui/operation-modes/ObjectInspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.cpp
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
         ui/operation-modes/ObjectInspection/ObjectInspector.cpp
         ui/operation-modes/ObjectInspection/ObjectList.cpp
@@ -55,7 +58,7 @@ target_sources(devtools
         # ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
         ui/operation-modes/OperationMode.cpp
         # ui/resources/editors/ResEffectEditor.cpp
-        # ui/resources/editors/ResObjectWorldEditor.cpp
+        ui/resources/editors/ResObjectWorldEditor.cpp
         # ui/resources/editors/ResMaterialEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
         # ui/resources/editors/ResSurfRideProjectEditor.cpp
@@ -112,13 +115,16 @@ target_sources(devtools
         ui/fonts/Inter.h
         ui/game-modes/GameModeInspector.h
         ui/game-services/game-service-inspectors/FxParamManager.h
+        ui/game-services/game-service-inspectors/ObjectWorld.h
+        ui/game-services/game-service-inspectors/StageInfo.h
+        ui/game-services/game-service-inspectors/CameraManager.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/LevelEditor/LevelEditor.h
         ui/operation-modes/LevelEditor/ObjectDataInspector.h
         ui/operation-modes/LevelEditor/ObjectLibrary.h
         ui/operation-modes/LevelEditor/SetObjectList.h
         ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.h
-        ui/operation-modes/ObjectInspection/component-inspectors/wars/GOCPlayerParameter.h
+        ui/operation-modes/ObjectInspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.h
         ui/operation-modes/ObjectInspection/ObjectInspection.h
         ui/operation-modes/ObjectInspection/ObjectInspector.h
         ui/operation-modes/ObjectInspection/ObjectList.h

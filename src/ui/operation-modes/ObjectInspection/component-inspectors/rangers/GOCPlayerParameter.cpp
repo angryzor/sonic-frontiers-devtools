@@ -1,6 +1,8 @@
 #include "GOCPlayerParameter.h"
 #include <ui/common/inputs/Basic.h>
-//#include <ui/resources/editors/ResReflectionEditor.h>
+#include <ui/common/editors/Reflection.h>
+#include <ui/Desktop.h>
+#include <ui/resources/editors/ResReflectionEditor.h>
 
 template<typename R>
 void RenderModeParameterInspector(const char* label, R (&parameters)[4]) {
@@ -57,21 +59,21 @@ void RenderComponentInspector(app::player::GOCPlayerParameter& component) {
 	if (ImGui::Button("Edit character parameters..."))
 		switch (component.characterId) {
 		case app::player::CharacterId::SONIC:
-			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->sonic);
+			ResReflectionEditor::Create(Desktop::instance->GetAllocator(), &component.characterParameters->sonic);
 			break;
 		case app::player::CharacterId::AMY:
-			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->amy);
+			ResReflectionEditor::Create(Desktop::instance->GetAllocator(), &component.characterParameters->amy);
 			break;
 		case app::player::CharacterId::KNUCKLES:
-			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->knuckles);
+			ResReflectionEditor::Create(Desktop::instance->GetAllocator(), &component.characterParameters->knuckles);
 			break;
 		case app::player::CharacterId::TAILS:
-			ResReflectionEditor::Create(GetAllocator(), &component.characterParameters->tails);
+			ResReflectionEditor::Create(Desktop::instance->GetAllocator(), &component.characterParameters->tails);
 			break;
 		}
 
 	if (ImGui::Button("Edit Camera Set parameters..."))
-		ResReflectionEditor::Create(GetAllocator(), &*component.cameraSetParameters);
+		ResReflectionEditor::Create(Desktop::instance->GetAllocator(), &*component.cameraSetParameters);
 
 	if (ImGui::TreeNode("Currently loaded mode parameters")) {
 		ImGui::SeparatorText("Mode packages");

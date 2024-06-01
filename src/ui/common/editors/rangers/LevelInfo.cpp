@@ -1,5 +1,5 @@
-#include "LevelInfo.h"
-#include "Basic.h"
+#include <ui/game-services/game-service-inspectors/LevelInfo.h>
+#include <ui/common/editors/Basic.h>
 #include <ui/common/inputs/Basic.h>
 
 static const char* chunkTypeNames[] = { "INITIAL", "AFTER" };

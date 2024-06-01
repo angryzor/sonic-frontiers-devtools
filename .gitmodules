@@ -5,7 +5,7 @@
 	path = vendor/filewatch/filewatch
 	url = https://github.com/ThomasMonkman/filewatch.git
 [submodule "rangers-sdk"]
-	path = rangers-sdk
+	path = sdks/rangers-sdk
 	url = https://github.com/angryzor/rangers-sdk.git
 [submodule "vendor/hedgelib/HedgeLib"]
 	path = vendor/hedgelib/HedgeLib
@@ -22,3 +22,6 @@
 [submodule "vendor/implot/implot"]
 	path = vendor/implot/implot
 	url = https://github.com/epezent/implot.git
+[submodule "sdks/wars-sdk"]
+	path = sdks/wars-sdk
+	url = https://github.com/angryzor/wars-sdk.git

@@ -28,6 +28,13 @@ struct GOCActivatorSpawner {
 	float m_distance{};
 };
 
+hh::fnd::RflClassMember gocActivatorSpawnerMembers[]{
+	{ "m_range", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_range), nullptr },
+	{ "m_distance", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_distance), nullptr },
+};
+
+hh::fnd::RflClass gocActivatorSpawnerClass{ "GOCActivatorSpawner", nullptr, sizeof(GOCActivatorSpawner), nullptr, 0, gocActivatorSpawnerMembers, 2, nullptr };
+
 //ComponentData* CreateComponentData(const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
 //	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 //
@@ -82,7 +89,14 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	if (editedTransform)
 		UpdateLocalTransform(ObjectTransformDataToAffine3f(localTransformData), obj);
 
-	//ImGui::SeparatorText("Component configuration");
+	ImGui::SeparatorText("Component configuration");
+	for (auto* componentConfig : obj.componentData) {
+		if (ImGui::CollapsingHeader(componentConfig->type)) {
+			ImGui::Text("Configuration:");
+			if (!strcmp(componentConfig->type, "RangeSpawning"))
+				edited |= ReflectionEditor("Component properties", componentConfig->data, &gocActivatorSpawnerClass);
+		}
+	}
 
 	//for (auto* componentConfig : obj.componentData) {
 	//	auto* gocInfo = objSystem->goComponentRegistry->GetComponentInformationByName(componentConfig->type);

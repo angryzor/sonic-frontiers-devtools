@@ -8,25 +8,6 @@ static bool Editor(const char* label, T& obj) {
 	return DragScalar(label, obj);
 }
 
-template<typename T, size_t Len>
-static bool Editor(const char* label, T(&arr)[Len]) {
-	bool edited{};
-	char name[200];
-	snprintf(name, sizeof(name), "%s[0..%zd]", label, Len);
-
-	if (ImGui::TreeNode(name)) {
-		for (size_t i = 0; i < Len; i++) {
-			snprintf(name, sizeof(name), "%s[%zd]", label, i);
-			edited |= Editor(name, arr[i]);
-		}
-
-		ImGui::TreePop();
-	}
-
-	return edited;
-}
-
-
 template<typename T, int Rows, int Cols>
 static bool Editor(const char* label, Eigen::Matrix<T, Rows, Cols>& mat) {
 	bool edited{};
@@ -67,4 +48,22 @@ bool Editor(const char* label, csl::math::Transform& transform);
 template<typename T, std::enable_if_t<std::is_base_of_v<hh::game::GameObject, T>, bool> = true>
 static bool Editor(const char* label, T*& gameObject) {
 	return Editor(label, reinterpret_cast<hh::game::GameObject*&>(gameObject));
+}
+
+template<typename T, size_t Len>
+static bool Editor(const char* label, T(&arr)[Len]) {
+	bool edited{};
+	char name[200];
+	snprintf(name, sizeof(name), "%s[0..%zd]", label, Len);
+
+	if (ImGui::TreeNode(name)) {
+		for (size_t i = 0; i < Len; i++) {
+			snprintf(name, sizeof(name), "%s[%zd]", label, i);
+			edited |= Editor(name, arr[i]);
+		}
+
+		ImGui::TreePop();
+	}
+
+	return edited;
 }

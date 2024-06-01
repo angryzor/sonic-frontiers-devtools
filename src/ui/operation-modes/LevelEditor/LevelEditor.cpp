@@ -27,7 +27,7 @@ LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ alloc
 	box.CreateBox({ 0, 0, 0 }, { 0.3, 0.3, 0.3 }, csl::math::Quaternion::Identity);
 
 	targetBox = RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateGraphicsGeometry)(nullptr, allocator);
-	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box, {});
+	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
 	targetBox->SetColor({ 255, 0, 255, 255 });
 }
 
@@ -52,8 +52,7 @@ void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 			auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
 
 			if (gameObject && ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>())) {
-				targetBox->SetTransform({ ObjectTransformDataToAffine3f(status.objectData->transform) });
-				targetBox->Render(&ctx);
+				targetBox->Render(&ctx, { ObjectTransformDataToAffine3f(status.objectData->transform) });
 			}
 		}
 	}
@@ -295,7 +294,8 @@ void LevelEditor::SpawnObject() {
 	auto* resource = placeTargetLayer->GetResource();
 	auto* alloc = resource->GetAllocator();
 
-	char name[200];
+	// FIXME: We're leaking memory here because the string does not get freed.
+	auto name = new char[100];
 	snprintf(name, sizeof(name), "%s_%zd", objectClassToPlace->name, resource->GetObjects().size());
 
 	auto* objData = new (alloc) ObjectData{
@@ -316,7 +316,7 @@ void LevelEditor::SpawnObject() {
 	}
 
 	// FIXME: We're leaking memory here because the spawnerData does not get freed.
-	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 20 };
+	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 500, 200 };
 	auto* rangeSpawning = new (GetAllocator()) ComponentData{ "RangeSpawning", rangeSpawningData };
 	objData->componentData.push_back(rangeSpawning);
 
@@ -333,7 +333,7 @@ void LevelEditor::Select(const csl::ut::MoveArray<GameObject*>& objs)
 	for (auto* object : objs) {
 		auto* status = object->GetWorldObjectStatus();
 
-		if (status != nullptr && focusedChunk->GetObjectIndexById(status->objectData->id) != -1)
+		if (status != nullptr && focusedChunk->GetObjectIndexByObjectData(status->objectData) != -1)
 			focusedObjects.push_back(status->objectData);
 	}
 	NotifySelectedObject();
@@ -352,7 +352,7 @@ void LevelEditor::Select(hh::game::GameObject* gameObject)
 	Deselect();
 	auto* status = gameObject->GetWorldObjectStatus();
 
-	if (status != nullptr && focusedChunk->GetObjectIndexById(status->objectData->id) != -1)
+	if (status != nullptr && focusedChunk->GetObjectIndexByObjectData(status->objectData) != -1)
 		focusedObjects.push_back(status->objectData);
 	NotifySelectedObject();
 }
