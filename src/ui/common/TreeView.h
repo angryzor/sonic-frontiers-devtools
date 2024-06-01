@@ -1,4 +1,5 @@
 #pragma once
+#include <utilities/CompatibleObject.h>
 
 template<typename T>
 class TreeView;
@@ -77,12 +78,12 @@ protected:
 };
 
 template<typename T>
-class TreeView : public hh::fnd::ReferencedObject {
+class TreeView : public CompatibleObject {
 public:
 	TreeViewNode<T> rootNode;
 	char searchStr[200]{ "" };
 
-	TreeView(csl::fnd::IAllocator* allocator, TreeViewNode<T>&& rootNode) : hh::fnd::ReferencedObject{ allocator, true }, rootNode{ std::move(rootNode) } {}
+	TreeView(csl::fnd::IAllocator* allocator, TreeViewNode<T>&& rootNode) : CompatibleObject{ allocator }, rootNode{ std::move(rootNode) } {}
 
 	void Render(const char* id) {
 		ImGui::PushID(id);

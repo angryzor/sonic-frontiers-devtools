@@ -22,8 +22,8 @@ bool CalcApproxAabb(const csl::ut::MoveArray<hh::game::GameObject*>& objects, cs
 			for (auto* component : object->components) {
 				if (component->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
 					auto* coll = static_cast<hh::physics::GOCSphereCollider*>(component);
-					tempAabb.m_Min = Eigen::Vector3f{ coll->transformedWorldPosition.m_Position - coll->scale * coll->radius };
-					tempAabb.m_Max = Eigen::Vector3f{ coll->transformedWorldPosition.m_Position + coll->scale * coll->radius };
+					tempAabb.m_Min = coll->GetWorldTransform() * Eigen::Vector3f{ -coll->radius, -coll->radius, -coll->radius };
+					tempAabb.m_Max = coll->GetWorldTransform() * Eigen::Vector3f{ coll->radius, coll->radius, coll->radius };
 					colliderCount++;
 					if (colliderCount > 1)
 						break;
@@ -40,12 +40,12 @@ bool CalcApproxAabb(const csl::ut::MoveArray<hh::game::GameObject*>& objects, cs
 				found = true;
 			}
 			else if (auto* gocTransform = object->GetComponent<hh::game::GOCTransform>()) {
-				aabb.m_Min.x() = std::fminf(aabb.m_Min.x(), gocTransform->frame->fullTransform.position.x());
-				aabb.m_Min.y() = std::fminf(aabb.m_Min.y(), gocTransform->frame->fullTransform.position.y());
-				aabb.m_Min.z() = std::fminf(aabb.m_Min.z(), gocTransform->frame->fullTransform.position.z());
-				aabb.m_Max.x() = std::fmaxf(aabb.m_Max.x(), gocTransform->frame->fullTransform.position.x());
-				aabb.m_Max.y() = std::fmaxf(aabb.m_Max.y(), gocTransform->frame->fullTransform.position.y());
-				aabb.m_Max.z() = std::fmaxf(aabb.m_Max.z(), gocTransform->frame->fullTransform.position.z());
+				aabb.m_Min.x() = std::fminf(aabb.m_Min.x(), gocTransform->GetFrame().fullTransform.position.x());
+				aabb.m_Min.y() = std::fminf(aabb.m_Min.y(), gocTransform->GetFrame().fullTransform.position.y());
+				aabb.m_Min.z() = std::fminf(aabb.m_Min.z(), gocTransform->GetFrame().fullTransform.position.z());
+				aabb.m_Max.x() = std::fmaxf(aabb.m_Max.x(), gocTransform->GetFrame().fullTransform.position.x());
+				aabb.m_Max.y() = std::fmaxf(aabb.m_Max.y(), gocTransform->GetFrame().fullTransform.position.y());
+				aabb.m_Max.z() = std::fmaxf(aabb.m_Max.z(), gocTransform->GetFrame().fullTransform.position.z());
 				found = true;
 			}
 		}

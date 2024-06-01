@@ -42,6 +42,12 @@ static bool Editor(const char* label, Eigen::Matrix<T, Rows, Cols>& mat) {
 
 	return edited;
 }
+
+template<typename T, int Dim, int Mode>
+static bool Editor(const char* label, Eigen::Transform<T, Dim, Mode>& mat) {
+	return Editor(label, mat.matrix());
+}
+
 template<size_t Len>
 static bool Editor(const char* label, char (&str)[Len]) {
     return InputText(label, str);

@@ -130,7 +130,8 @@ constexpr IconAtlas<AssetIconId, 28> assetIcons = { 324, 389, "angryzor_devtools
 template<typename Atlas>
 void RenderIcon(const Atlas& atlas, typename Atlas::Id_t id, ImVec2 size) {
     auto& uv = atlas.uvs[static_cast<size_t>(id)];
-    auto texture = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::gfnd::ResTexture>(atlas.atlasFile);
+    auto packFile = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::Packfile>("devtools");
+    auto texture = packFile->GetResourceByName<hh::gfnd::ResTexture>(atlas.atlasFile);
 
     ImGui::Image(GetTextureIDFromResTexture(texture), size, ImVec2(uv.x / atlas.width, uv.y / atlas.height), ImVec2((uv.x + uv.w) / atlas.width, (uv.y + uv.h) / atlas.height));
 }

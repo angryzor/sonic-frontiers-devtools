@@ -1,8 +1,9 @@
 #pragma once
 #include "utilities/FileWatch.hpp"
+#include "utilities/CompatibleObject.h"
 
-class ReloadManager : public hh::fnd::ReferencedObject, public hh::game::GameStepListener {
-    struct ReloadRequest : public hh::fnd::BaseObject {
+class ReloadManager : public CompatibleObject, public hh::game::GameStepListener {
+    struct ReloadRequest : public CompatibleObject {
         std::wstring path;
         hh::fnd::Reference<hh::fnd::ManagedResource> resource;
     public:

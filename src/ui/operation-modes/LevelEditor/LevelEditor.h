@@ -20,7 +20,7 @@ class LevelEditor : public OperationMode, public hh::game::GameManagerListener, 
     ImGuizmo::MODE gizmoMode{ ImGuizmo::LOCAL };
     bool haveSelectionAabb{ false };
     csl::geom::Aabb selectionAabb{};
-    std::mt19937_64 mt;
+    std::mt19937 mt;
 
 public:
     LevelEditor(csl::fnd::IAllocator* allocator);

@@ -32,7 +32,7 @@ const void* SetObjectListTreeViewNode::GetID() const {
 const char* SetObjectListTreeViewNode::GetLabel() const {
 	switch (type) {
 	case SetObjectListTreeViewNode::Type::OBJECT:
-		return object.object->name.c_str();
+		return object.object->GetName();
 	case SetObjectListTreeViewNode::Type::LAYER:
 		return layer.layer->GetName();
 	case SetObjectListTreeViewNode::Type::GROUP:
@@ -106,7 +106,7 @@ bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	return isOpen;
 }
 
-SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }
+SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : CompatibleObject{ allocator }, levelEditor{ levelEditor }
 {
 }
 
@@ -177,7 +177,7 @@ void SetObjectList::Render() {
 size_t count = 0;
 
 TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildTreeNode(csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>>& childMaps, ObjectData* objData) {
-	auto objId = objData == nullptr ? ObjectId{ 0, 0 } : objData->id;
+	auto objId = objData == nullptr ? ObjectId{} : objData->id;
 	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
 
 	for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
@@ -211,7 +211,7 @@ TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerTreeNode(
 TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerRootNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer) {
 	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, layer } };
 
-	auto childMapIt = childMap.Find(ObjectId{ 0, 0 });
+	auto childMapIt = childMap.Find({});
 
 	if (childMapIt == childMap.end())
 		return node;
@@ -231,13 +231,13 @@ void SetObjectList::RebuildTree() {
 		csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>> childMaps{ GetAllocator() };
 
 		for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
-			auto& childMap = *childMaps.Insert(layer, { GetAllocator() });
+			auto& childMap = *childMaps.InsertAndGet(layer, { GetAllocator() });
 
 			for (auto* object : layer->GetResource()->GetObjects()) {
 				auto parentIt = childMap.Find(object->parentID);
 
 				if (parentIt == childMap.end())
-					parentIt = childMap.Insert(object->parentID, { GetAllocator() });
+					parentIt = childMap.InsertAndGet(object->parentID, { GetAllocator() });
 
 				parentIt->push_back(object);
 			}

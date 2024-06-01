@@ -20,10 +20,6 @@ bool Context::alreadyRendering = false;
 HOOK(uint64_t, __fastcall, ApplicationStart, 0x145400300, hh::game::GameApplication* application) {
 	auto res = originalApplicationStart(application);
 
-	auto allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-	auto* resourceLoader = new (allocator) hh::fnd::ResourceLoader();
-	resourceLoader->LoadPackfile("mods/debugtools/segafont_art.pac", true);
-
 	//auto service = gameModeBoot->gameManager->CreateService<DevEventInfo>(allocator);
 	//gameModeBoot->gameManager->RegisterService(service);
 	Context::init();

@@ -2,7 +2,7 @@
 #include "common/Theme.h"
 #include "Desktop.h"
 #include "SettingsManager.h"
-//#include "resources/ResourceBrowser.h"
+#include "resources/ResourceBrowser.h"
 //#include "game-modes/GameModeInspector.h"
 #include "game-services/GameServiceInspector.h"
 //#include "core-services/GameUpdaterInspector.h"
@@ -35,8 +35,8 @@ void ToolBar::Render() {
 	}
 
 	if (ImGui::BeginMenuBar()) {
-		//if (ImGui::MenuItem("Resource Browser"))
-		//	new (Desktop::instance->GetAllocator()) ResourceBrowser(Desktop::instance->GetAllocator());
+		if (ImGui::MenuItem("Resource Browser"))
+			new (Desktop::instance->GetAllocator()) ResourceBrowser(Desktop::instance->GetAllocator());
 
 		if (ImGui::BeginMenu("Inspectors")) {
 			if (ImGui::MenuItem("GameService"))
@@ -69,8 +69,8 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Mode")) {
 			if (ImGui::MenuItem("Object Inspection"))
 				Desktop::instance->SwitchToObjectInspectionMode();
-			//if (ImGui::MenuItem("Level Editor"))
-			//	Desktop::instance->SwitchToLevelEditorMode();
+			if (ImGui::MenuItem("Level Editor"))
+				Desktop::instance->SwitchToLevelEditorMode();
 			//if (ImGui::MenuItem("SurfRide Editor"))
 			//	Desktop::instance->SwitchToSurfRideEditorMode();
 			ImGui::EndMenu();

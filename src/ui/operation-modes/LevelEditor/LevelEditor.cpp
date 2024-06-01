@@ -10,7 +10,7 @@ using namespace hh::physics;
 
 namespace app::gfx {
 	class GOCVisualGeometryInstance : public GOComponent {
-		GOCOMPONENT_CLASS_DECLARATION(GOCVisualGeometryInstance)
+		GOCOMPONENT_CLASS_DECLARATION_INLINE_GETCLASS(GOCVisualGeometryInstance)
 	};
 }
 
@@ -26,9 +26,9 @@ LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ alloc
 	hh::fnd::Geometry box{ allocator };
 	box.CreateBox({ 0, 0, 0 }, { 0.3, 0.3, 0.3 }, csl::math::Quaternion::Identity);
 
-	targetBox = (*rangerssdk::GetAddress(&hh::gfnd::DrawSystem::CreateGraphicsGeometry))(nullptr, allocator);
-	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
-	targetBox->SetColor({ 255, 255, 0, 255 });
+	targetBox = RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateGraphicsGeometry)(nullptr, allocator);
+	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box, {});
+	targetBox->SetColor({ 255, 0, 255, 255 });
 }
 
 LevelEditor::~LevelEditor() {
@@ -44,7 +44,7 @@ void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 {
 	if (haveSelectionAabb) {
 		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
-		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 140, 255, 255, 255 });
+		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 255, 255, 255, 140 });
 	}
 
 	if (focusedChunk) {
@@ -52,7 +52,8 @@ void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 			auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
 
 			if (gameObject && ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>())) {
-				targetBox->Render(&ctx, { ObjectTransformDataToAffine3f(status.objectData->transform).matrix() });
+				targetBox->SetTransform({ ObjectTransformDataToAffine3f(status.objectData->transform) });
+				targetBox->Render(&ctx);
 			}
 		}
 	}
@@ -63,7 +64,7 @@ void LevelEditor::Render() {
 	objectDataInspector.Render();
 	objectLibrary.Render();
 
-	if (ImGui::Begin("Sonic Frontiers Devtools")) {
+	if (ImGui::Begin("Sonic Forces Devtools")) {
 		ImGui::SameLine();
 		ImGui::Checkbox("Render debug comments", &renderDebugComments);
 	}
@@ -118,7 +119,7 @@ void LevelEditor::RenderDebugComments()
 				if (msgGetDbgCmt.comment[0] == 0)
 					continue;
 
-				Eigen::Matrix4f fullMatrix{ cameraMatrix * TransformToAffine3f(gocTransform->frame->fullTransform).matrix() };
+				Eigen::Matrix4f fullMatrix{ cameraMatrix * TransformToAffine3f(gocTransform->GetFrame().fullTransform).matrix() };
 				Eigen::Vector4f clipSpaceOrigin{ fullMatrix * Eigen::Vector4f{ 0.0f, 0.0f, 0.0f, 1.0f } };
 
 				// Cull
@@ -173,7 +174,7 @@ void LevelEditor::HandleObjectManipulation() {
 			ObjectData* obj = object;
 			bool keepLooking{ true };
 			while (keepLooking) {
-				if (obj->parentID != ObjectId{ 0, 0 }) {
+				if (obj->parentID != ObjectId{}) {
 					for (auto& obj2 : focusedObjects) {
 						if (obj2->id == obj->parentID) {
 							keepLooking = false;
@@ -300,16 +301,15 @@ void LevelEditor::SpawnObject() {
 	auto* objData = new (alloc) ObjectData{
 		alloc,
 		objectClassToPlace,
-		{ mt(), mt() },
+		{ mt() },
 		name,
 		focusedObjects.size() == 1 ? focusedObjects[0] : nullptr,
 		{ csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0, 0, 0 } }
 	};
 
-	if (auto* objInfoAttribute = objectClassToPlace->GetAttribute("objinfo")) {
+	if (auto* objInfoName = static_cast<const char*>(objectClassToPlace->GetAttributeValue("objinfo"))) {
 		auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
-		auto* objInfoName = static_cast<const char*>(objInfoAttribute->m_Value);
-		auto* objInfoClass = (*rangerssdk::GetAddress(&ObjInfoRegistry::instance))->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
+		auto* objInfoClass = RESOLVE_STATIC_VARIABLE(ObjInfoRegistry::instance)->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
 		auto* objInfo = objInfoClass->Create(GetAllocator());
 
 		objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
@@ -317,11 +317,11 @@ void LevelEditor::SpawnObject() {
 
 	// FIXME: We're leaking memory here because the spawnerData does not get freed.
 	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 50, 20 };
-	auto* rangeSpawning = new (GetAllocator()) ComponentData{ GetAllocator(), GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName("RangeSpawning"), rangeSpawningData };
+	auto* rangeSpawning = new (GetAllocator()) ComponentData{ "RangeSpawning", rangeSpawningData };
 	objData->componentData.push_back(rangeSpawning);
 
 	resource->AddObject(objData);
-	focusedChunk->AddWorldObjectStatus(objData, true, 0);
+	focusedChunk->AddWorldObjectStatus(objData, true);
 	Select(objData);
 
 	setObjectList.InvalidateTree();
@@ -381,15 +381,15 @@ void LevelEditor::NotifyUpdatedObject()
 	hh::dbg::MsgUpdateActiveObjectInEditor msg{};
 	NotifyActiveObject(msg);
 
-	for (auto* obj : GameManager::GetInstance()->objects) {
-		if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
-			hh::dbg::MsgUpdateActiveObjectInEditor msg;
-			obj->SendMessageImm(msg);
-			void* updater = *reinterpret_cast<void**>(reinterpret_cast<size_t>(grind) + 168);
-			uint8_t* flag = reinterpret_cast<uint8_t*>(reinterpret_cast<size_t>(updater) + 172);
-			*flag |= 2;
-		}
-	}
+	//for (auto* obj : GameManager::GetInstance()->objects) {
+	//	if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
+	//		hh::dbg::MsgUpdateActiveObjectInEditor msg;
+	//		obj->SendMessageImm(msg);
+	//		void* updater = *reinterpret_cast<void**>(reinterpret_cast<size_t>(grind) + 168);
+	//		uint8_t* flag = reinterpret_cast<uint8_t*>(reinterpret_cast<size_t>(updater) + 172);
+	//		*flag |= 2;
+	//	}
+	//}
 }
 
 void LevelEditor::NotifyDeselectedObject()

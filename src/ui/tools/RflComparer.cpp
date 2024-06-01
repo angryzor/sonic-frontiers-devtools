@@ -24,8 +24,8 @@ void RflComparer::RenderContents()
 			auto* res = *static_cast<ManagedResource**>(payload->Data);
 			const ResourceTypeInfo* typeInfo = &res->GetClass();
 
-			if (typeInfo == ResReflection<void>::GetTypeInfo())
-				resource1 = static_cast<ResReflection<void>*>(res);
+			if (typeInfo == ResReflection::GetTypeInfo())
+				resource1 = static_cast<ResReflection*>(res);
 		}
 		ImGui::EndDragDropTarget();
 	}
@@ -45,8 +45,8 @@ void RflComparer::RenderContents()
 			auto* res = *static_cast<ManagedResource**>(payload->Data);
 			const ResourceTypeInfo* typeInfo = &res->GetClass();
 
-			if (typeInfo == ResReflection<void>::GetTypeInfo())
-				resource2 = static_cast<ResReflection<void>*>(res);
+			if (typeInfo == ResReflection::GetTypeInfo())
+				resource2 = static_cast<ResReflection*>(res);
 		}
 		ImGui::EndDragDropTarget();
 	}

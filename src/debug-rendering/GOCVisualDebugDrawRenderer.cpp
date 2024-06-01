@@ -98,10 +98,6 @@ void GOCVisualDebugDrawRenderer::RemoveGOC(GOCMyVisualDebugDraw* goc) {
 	gocs.remove(gocs.find(goc));
 }
 
-Eigen::Matrix4f GetColliderTransform(hh::physics::GOCCollider* collider) {
-	return collider->worldTransform;
-}
-
 void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderableParameter* renderableParameter) {
 	auto* gameManager = hh::game::GameManager::GetInstance();
 	if (!gameManager)
@@ -143,22 +139,22 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 					if (goc->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCSphereCollider*>(goc);
 						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawSphere({ GetColliderTransform(cGoc) }, cGoc->radius, { 0, 255, 255, 255 });
+							renderer->drawContext->DrawSphere(cGoc->GetWorldTransform(), cGoc->radius, { 0, 255, 255, 255 });
 					}
 					else if (goc->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCBoxCollider*>(goc);
 						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawOBB({ GetColliderTransform(cGoc) }, cGoc->dimensions, { 0, 255, 255, 255 });
+							renderer->drawContext->DrawOBB(cGoc->GetWorldTransform(), cGoc->dimensions, { 0, 255, 255, 255 });
 					}
 					else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
 						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawCapsule({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 0, 255, 255, 255 });
+							renderer->drawContext->DrawCapsule(cGoc->GetWorldTransform(), cGoc->height, cGoc->radius, { 0, 255, 255, 255 });
 					}
 					else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);
 						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawCylinder({ GetColliderTransform(cGoc) }, cGoc->height, cGoc->radius, { 0, 255, 255, 255 });
+							renderer->drawContext->DrawCylinder(cGoc->GetWorldTransform(), cGoc->height, cGoc->radius, { 0, 255, 255, 255 });
 					}
 				}
 			}
@@ -173,7 +169,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 
 						Eigen::Affine3f affine;
 						affine.fromPositionOrientationScale(cGoc->worldPos.m_Position, cGoc->worldPos.m_Rotation, cGoc->scale);
-						renderer->drawContext->DrawSphereFixed({ (TransformToAffine3f(cGoc->frame->fullTransform) * affine).matrix() }, 1, { 255, 0, 255, 255 });
+						renderer->drawContext->DrawSphereFixed({ TransformToAffine3f(cGoc->frame->fullTransform) * affine }, 1, { 255, 0, 255, 255 });
 					}
 				}
 			}

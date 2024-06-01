@@ -65,6 +65,11 @@ static void Viewer(const char* label, const Eigen::Matrix<T, Rows, Cols>& mat) {
 	}
 }
 
+template<typename T, int Dim, int Mode>
+static void Viewer(const char* label, const Eigen::Transform<T, Dim, Mode>& mat) {
+	Viewer(label, mat.matrix());
+}
+
 template<typename T, size_t Len>
 static void Viewer(const char* label, const T(&arr)[Len]) {
 	char name[200];

@@ -3,8 +3,8 @@
 #include <utilities/RflDiff.h>
 
 class RflComparer : public StandaloneWindow {
-	hh::fnd::Reference<hh::fnd::ResReflection<void>> resource1{};
-	hh::fnd::Reference<hh::fnd::ResReflection<void>> resource2{};
+	hh::fnd::Reference<hh::fnd::ResReflection> resource1{};
+	hh::fnd::Reference<hh::fnd::ResReflection> resource2{};
 	const hh::fnd::RflClass* rflClass{};
 	RflDiffResult diffResult{ GetAllocator() };
 public:

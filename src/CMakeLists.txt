@@ -8,22 +8,22 @@ target_sources(devtools
         DllMain.cpp
         Mod.cpp
         debug-rendering/GOCVisualDebugDrawRenderer.cpp
-        # hot-reload/ReloadManager.cpp
+        hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/RflMoveArrayAccessor.cpp
         reflection/serialization/ReflectionSerializer.cpp
-        # reflection/serialization/resource-rfls/ResObjectWorld.cpp
+        reflection/serialization/resource-rfls/ResObjectWorld.cpp
         ui/common/editors/Basic.cpp
         # ui/common/editors/Camera.cpp
-        # ui/common/editors/ObjectData.cpp
+        ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
         # ui/common/editors/GraphicsContext.cpp
         # ui/common/editors/LevelInfo.cpp
         # ui/common/editors/Needle.cpp
         # ui/common/editors/SurfRide.cpp
         ui/common/viewers/Basic.cpp
-        # ui/common/viewers/ObjectData.cpp
-        # ui/common/viewers/RflDiff.cpp
+        ui/common/viewers/ObjectData.cpp
+        ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
         # ui/common/inputs/Needle.cpp
         ui/common/StandaloneWindow.cpp
@@ -40,10 +40,10 @@ target_sources(devtools
         # ui/game-modes/GameModeInspector.cpp
         ui/game-services/game-service-inspectors/FxParamManager.cpp
         ui/game-services/GameServiceInspector.cpp
-        # ui/operation-modes/LevelEditor/LevelEditor.cpp
-        # ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
-        # ui/operation-modes/LevelEditor/ObjectLibrary.cpp
-        # ui/operation-modes/LevelEditor/SetObjectList.cpp
+        ui/operation-modes/LevelEditor/LevelEditor.cpp
+        ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
+        ui/operation-modes/LevelEditor/ObjectLibrary.cpp
+        ui/operation-modes/LevelEditor/SetObjectList.cpp
         ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.cpp
         ui/operation-modes/ObjectInspection/component-inspectors/wars/GOCPlayerParameter.cpp
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
@@ -57,21 +57,21 @@ target_sources(devtools
         # ui/resources/editors/ResEffectEditor.cpp
         # ui/resources/editors/ResObjectWorldEditor.cpp
         # ui/resources/editors/ResMaterialEditor.cpp
-        # ui/resources/editors/ResReflectionEditor.cpp
+        ui/resources/editors/ResReflectionEditor.cpp
         # ui/resources/editors/ResSurfRideProjectEditor.cpp
-        # ui/resources/ResourceBrowser.cpp
+        ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
         # ui/tools/NeedleFxSceneDataTester.cpp
         # ui/tools/NeedleFxSceneDataTesterV2.cpp
-        # ui/tools/RflComparer.cpp
-        # utilities/BoundingBoxes.cpp
+        ui/tools/RflComparer.cpp
+        utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
         utilities/math/Frustum.cpp
         utilities/math/MathUtils.cpp
-        # utilities/ObjectDataUtils.cpp
-        # utilities/ResourceTypes.cpp
-        # utilities/RflDiff.cpp
+        utilities/ObjectDataUtils.cpp
+        utilities/ResourceTypes.cpp
+        utilities/RflDiff.cpp
         utilities/CompatibleObject.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h

@@ -6,7 +6,7 @@
 using namespace hh::fnd;
 using namespace hh::game;
 
-ObjectDataInspector::ObjectDataInspector(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }
+ObjectDataInspector::ObjectDataInspector(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : CompatibleObject{ allocator }, levelEditor{ levelEditor }
 {
 }
 

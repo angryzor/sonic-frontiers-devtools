@@ -1,5 +1,6 @@
 #pragma once
 #include <ui/common/TreeView.h>
+#include <utilities/CompatibleObject.h>
 
 class ObjectLibrary;
 struct ObjectLibraryTreeViewNode {
@@ -25,7 +26,7 @@ struct ObjectLibraryTreeViewNode {
 };
 
 class LevelEditor;
-class ObjectLibrary : public hh::fnd::BaseObject {
+class ObjectLibrary : public CompatibleObject {
 	friend class ObjectLibraryTreeViewNode;
     LevelEditor& levelEditor;
 	TreeView<ObjectLibraryTreeViewNode> tree;

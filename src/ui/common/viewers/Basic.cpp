@@ -35,7 +35,7 @@ void Viewer(const char* label, const char* str)
 
 void Viewer(const char* label, const hh::game::ObjectId& obj)
 {
-	ImGui::Text("%s: %016zx%016zx", label, obj.id);
+	ImGui::Text("%s: %x", label, obj.id);
 }
 
 void Viewer(const char* label, void* const& obj) {

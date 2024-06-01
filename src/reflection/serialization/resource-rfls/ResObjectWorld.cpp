@@ -36,7 +36,7 @@ using namespace hh::game;
 //};
 
 const RflClass* handleComponentDataData(void* obj) {
-    return GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
+    return nullptr;//GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
 }
 
 const RflClass* handleSpawnerData(void* obj) {

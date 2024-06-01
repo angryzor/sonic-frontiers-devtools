@@ -1,11 +1,6 @@
 #pragma once
 
 namespace heur::resources {
-    class ResAtomConfig { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
-    class ResAtomCueSheet { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
-    class ResMirageLight { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
-    class ResTerrainModel { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
-    class ResModel { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
     class ResComputeShader { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
     class ResFragmentShader { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };
     class ResVertexShader { public: static const hh::fnd::ResourceTypeInfo* GetTypeInfo(); };

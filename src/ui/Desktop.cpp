@@ -5,7 +5,7 @@
 //#include "resources/ResourceBrowser.h"
 //#include "game-services/GameServiceInspector.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
-//#include "operation-modes/LevelEditor/LevelEditor.h"
+#include "operation-modes/LevelEditor/LevelEditor.h"
 //#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
 #include "reflection/serialization/ReflectionSerializer.h"
 #include <utilities/math/MathUtils.h>
@@ -314,10 +314,10 @@ void Desktop::SwitchToObjectInspectionMode()
 	operationMode = new (GetAllocator()) ObjectInspection(GetAllocator());
 }
 
-//void Desktop::SwitchToLevelEditorMode()
-//{
-//	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
-//}
+void Desktop::SwitchToLevelEditorMode()
+{
+	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
+}
 //
 //void Desktop::SwitchToSurfRideEditorMode()
 //{

@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ui/common/TreeView.h>
+#include <utilities/CompatibleObject.h>
 
 class SetObjectList;
 struct SetObjectListTreeViewNode {
@@ -42,7 +43,7 @@ struct SetObjectListTreeViewNode {
 };
 
 class LevelEditor;
-class SetObjectList : public hh::fnd::BaseObject {
+class SetObjectList : public CompatibleObject {
 	friend struct SetObjectListTreeViewNode;
 
 	LevelEditor& levelEditor;

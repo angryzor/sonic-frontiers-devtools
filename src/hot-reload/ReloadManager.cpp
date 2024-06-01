@@ -11,7 +11,7 @@ using namespace hh::game;
 
 ReloadManager* ReloadManager::instance{};
 
-ReloadManager::ReloadManager(csl::fnd::IAllocator* allocator) : ReferencedObject{ allocator, true } {
+ReloadManager::ReloadManager(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator } {
     GameManager::GetInstance()->RegisterGameStepListener(*this);
 }
 
@@ -55,37 +55,37 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 		}
 
 		auto* gameManager = hh::game::GameManager::GetInstance();
-		if (gameManager) {
-			gameManager->PreResourceReloadCallback(request->resource);
-			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-				trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
-		}
+		//if (gameManager) {
+		//	gameManager->PreResourceReloadCallback(request->resource);
+		//	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+		//		trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
+		//}
 
 		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
 			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
-		else if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo())
-			ReloadByLoad(buffer, fileSize, request->resource);
+		//else if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo())
+		//	ReloadByLoad(buffer, fileSize, request->resource);
 		else
 			Reload(buffer, fileSize, request->resource);
 
-		if (gameManager) {
-			gameManager->PostResourceReloadCallback(request->resource);
-			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-				trrMgr->reloaderListener->PostResourceReloadCallback(request->resource);
-		}
+		//if (gameManager) {
+		//	gameManager->PostResourceReloadCallback(request->resource);
+		//	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+		//		trrMgr->reloaderListener->PostResourceReloadCallback(request->resource);
+		//}
 
-		if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo()
-			|| &request->resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
-			|| &request->resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
-			if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
-				for (auto& module : resMan->modules) {
-					if (module->GetNameHash() == 0x74DA1FC3) {
-						module->UnkFunc7();
-						module->Load();
-					}
-				}
-			}
-		}
+		//if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo()
+		//	|| &request->resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
+		//	|| &request->resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
+		//	if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
+		//		for (auto& module : resMan->modules) {
+		//			if (module->GetNameHash() == 0x74DA1FC3) {
+		//				module->UnkFunc7();
+		//				module->Load();
+		//			}
+		//		}
+		//	}
+		//}
 
 		delete request;
     }
@@ -122,8 +122,8 @@ void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWor
 						auto* allocator = layer->GetAllocator();
 						bool wasEnabled = layer->IsEnable();
 
-						if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-							levelEditor->Deselect();
+						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+						//	levelEditor->Deselect();
 
 						{
 							Reference<hh::game::ObjectWorldChunkLayer> l{ layer };
@@ -140,8 +140,8 @@ void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWor
 						chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, resource));
 						chunk->SetLayerEnabled(resource->GetName(), wasEnabled);
 
-						if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-							levelEditor->ReloadObjectWorldData();
+						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+						//	levelEditor->ReloadObjectWorldData();
 
 						success = true;
 						break;
@@ -202,6 +202,6 @@ void ReloadManager::WatchDirectory(const std::string& path) {
 
 
 ReloadManager::ReloadRequest::ReloadRequest(csl::fnd::IAllocator* allocator, const std::wstring& path, hh::fnd::ManagedResource* resource)
-	: BaseObject{ allocator }, path{ path }, resource{ resource }
+	: CompatibleObject{ allocator }, path{ path }, resource{ resource }
 {
 }

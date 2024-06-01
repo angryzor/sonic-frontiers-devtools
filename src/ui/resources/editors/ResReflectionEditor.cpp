@@ -6,13 +6,13 @@
 
 using namespace hh::fnd;
 
-ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection<void>* resource, const RflClass* rflClass) : StandaloneWindow{ allocator }, forcedRflClass{ true }, resource{ resource }, rflClass{ rflClass }, diffResult{ allocator } {
+ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource, const RflClass* rflClass) : StandaloneWindow{ allocator }, forcedRflClass{ true }, resource{ resource }, rflClass{ rflClass }, diffResult{ allocator } {
 	char namebuf[500];
 	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx) - using RflClass %s", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)&resource->reflectionData, rflClass->GetName());
 	SetTitle(namebuf);
 }
 
-ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection<void>* resource) : StandaloneWindow{ allocator }, forcedRflClass{ false }, resource{ resource }, rflClass{ nullptr }, diffResult{ allocator } {
+ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource) : StandaloneWindow{ allocator }, forcedRflClass{ false }, resource{ resource }, rflClass{ nullptr }, diffResult{ allocator } {
 	char namebuf[500];
 	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx)", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)&resource->reflectionData);
 	SetTitle(namebuf);
@@ -23,7 +23,7 @@ ResReflectionEditor::~ResReflectionEditor()
 	FreeOriginalCopy();
 }
 
-ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource, const hh::fnd::RflClass* rflClass) {
+ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection* resource, const hh::fnd::RflClass* rflClass) {
 	return new (allocator) ResReflectionEditor(allocator, resource, rflClass);
 }
 
@@ -42,7 +42,7 @@ void ResReflectionEditor::FreeOriginalCopy()
 	}
 }
 
-ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection<void>* resource) {
+ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection* resource) {
 	return new (allocator) ResReflectionEditor(allocator, resource);
 }
 

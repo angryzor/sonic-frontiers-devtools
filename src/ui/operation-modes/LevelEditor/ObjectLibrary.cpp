@@ -5,7 +5,7 @@
 using namespace hh::fnd;
 using namespace hh::game;
 
-ObjectLibrary::ObjectLibrary(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : BaseObject{ allocator }, levelEditor{ levelEditor }, tree{ BuildTree() }
+ObjectLibrary::ObjectLibrary(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : CompatibleObject{ allocator }, levelEditor{ levelEditor }, tree{ BuildTree() }
 {
 }
 
@@ -78,8 +78,8 @@ TreeView<ObjectLibraryTreeViewNode> ObjectLibrary::BuildTree()
 
 	for (auto* objClass : registry->GetGameObjectClasses()) {
 		TreeViewNode<ObjectLibraryTreeViewNode>* currentNode = &rootNode;
-		auto* categoryAttr = objClass->GetAttribute("category");
-		const char* category = categoryAttr == nullptr ? nullptr : static_cast<const char*>(categoryAttr->m_Value);
+		auto* categoryAttr = static_cast<const char*>(objClass->GetAttributeValue("category"));
+		const char* category = categoryAttr == nullptr ? nullptr : categoryAttr;
 
 		while (category != nullptr) {
 			const char* divider = strstr(category, "/");

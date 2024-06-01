@@ -1,8 +1,8 @@
 #include "Pch.h"
 #include "ResourceBrowser.h"
 #include "editors/ResReflectionEditor.h"
-#include "editors/ResObjectWorldEditor.h"
-#include "editors/ResMaterialEditor.h"
+//#include "editors/ResObjectWorldEditor.h"
+//#include "editors/ResMaterialEditor.h"
 #include <hot-reload/ReloadManager.h>
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
@@ -13,33 +13,33 @@
 using namespace hh::fnd;
 
 AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
-	if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
-	if (typeInfo == heur::resources::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;
-	if (typeInfo == heur::resources::ResAtomCueSheet::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
-	if (typeInfo == heur::resources::ResMirageLight::GetTypeInfo()) return AssetIconId::LIGHTING;
+	//if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
+	if (typeInfo == hh::snd::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;
+	if (typeInfo == hh::snd::ResAtomCueSheet::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
+	if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo()) return AssetIconId::LIGHTING;
 	if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) return AssetIconId::MATERIAL;
-	if (typeInfo == heur::resources::ResTerrainModel::GetTypeInfo()) return AssetIconId::TERRAIN_MODEL;
-	if (typeInfo == heur::resources::ResModel::GetTypeInfo()) return AssetIconId::MODEL;
-	if (typeInfo == heur::resources::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
-	if (typeInfo == heur::resources::ResFragmentShader::GetTypeInfo()) return AssetIconId::FRAGMENT_SHADER;
-	if (typeInfo == heur::resources::ResVertexShader::GetTypeInfo()) return AssetIconId::VERTEX_SHADER;
+	if (typeInfo == hh::gfx::ResTerrainModel::GetTypeInfo()) return AssetIconId::TERRAIN_MODEL;
+	if (typeInfo == hh::gfx::ResModel::GetTypeInfo()) return AssetIconId::MODEL;
+	//if (typeInfo == heur::resources::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
+	if (typeInfo == hh::gfnd::ResFragmentShader::GetTypeInfo()) return AssetIconId::FRAGMENT_SHADER;
+	if (typeInfo == hh::gfnd::ResVertexShader::GetTypeInfo()) return AssetIconId::VERTEX_SHADER;
 	if (typeInfo == hh::gfnd::ResTexture::GetTypeInfo()) return AssetIconId::TEXTURE;
-	if (typeInfo == heur::resources::ResLevel::GetTypeInfo()) return AssetIconId::LEVEL;
-	if (typeInfo == heur::resources::ResMasterLevel::GetTypeInfo()) return AssetIconId::MASTER_LEVEL;
+	//if (typeInfo == heur::resources::ResLevel::GetTypeInfo()) return AssetIconId::LEVEL;
+	//if (typeInfo == heur::resources::ResMasterLevel::GetTypeInfo()) return AssetIconId::MASTER_LEVEL;
 	if (typeInfo == hh::font::ResBitmapFont::GetTypeInfo()) return AssetIconId::BITMAP_FONT;
-	if (typeInfo == heur::resources::ResScalableFontSet::GetTypeInfo()) return AssetIconId::SCALABLE_FONT;
-	if (typeInfo == hh::fnd::ResReflection<void>::GetTypeInfo()) return AssetIconId::REFLECTION;
-	//if (typeInfo == Res::GetTypeInfo()) return AssetIconId::PACKFILE_LEVELS;
+	if (typeInfo == hh::font::ResScalableFontSet::GetTypeInfo()) return AssetIconId::SCALABLE_FONT;
+	if (typeInfo == hh::fnd::ResReflection::GetTypeInfo()) return AssetIconId::REFLECTION;
+	////if (typeInfo == Res::GetTypeInfo()) return AssetIconId::PACKFILE_LEVELS;
 	if (typeInfo == hh::fnd::Packfile::GetTypeInfo()) return AssetIconId::PACKFILE;
-	if (typeInfo == heur::resources::ResEffect::GetTypeInfo()) return AssetIconId::PARTICLESYSTEM;
-	if (typeInfo == heur::resources::ResPhysicalSkeleton::GetTypeInfo()) return AssetIconId::PHYSICS_BONE;
-	//if (typeInfo == heur::resources::ResSoftBody::GetTypeInfo()) return AssetIconId::SOFTBODY;
-	//if (typeInfo == heur::resources::ResHelperBone::GetTypeInfo()) return AssetIconId::HELPER_BONE;
-	//if (typeInfo == heur::resources::ResOrcaData::GetTypeInfo()) return AssetIconId::ORCA;
-	//if (typeInfo == Res::GetTypeInfo()) return AssetIconId::UI;
-	if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return AssetIconId::ANIMATION;
-	if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return AssetIconId::SKELETON;
-	if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return AssetIconId::DVSCENE;
+	if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) return AssetIconId::PARTICLESYSTEM;
+	//if (typeInfo == heur::resources::ResPhysicalSkeleton::GetTypeInfo()) return AssetIconId::PHYSICS_BONE;
+	////if (typeInfo == heur::resources::ResSoftBody::GetTypeInfo()) return AssetIconId::SOFTBODY;
+	////if (typeInfo == heur::resources::ResHelperBone::GetTypeInfo()) return AssetIconId::HELPER_BONE;
+	////if (typeInfo == heur::resources::ResOrcaData::GetTypeInfo()) return AssetIconId::ORCA;
+	////if (typeInfo == Res::GetTypeInfo()) return AssetIconId::UI;
+	//if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return AssetIconId::ANIMATION;
+	//if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return AssetIconId::SKELETON;
+	//if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return AssetIconId::DVSCENE;
 	return AssetIconId::MODEL;
 }
 
@@ -148,12 +148,12 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 				selectedResource = nullptr;
 				currentPath.push_back(static_cast<Packfile*>(resource));
 			}
-			else if (typeInfo == ResReflection<void>::GetTypeInfo()) {
-				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection<void>*>(resource));
+			else if (typeInfo == ResReflection::GetTypeInfo()) {
+				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection*>(resource));
 			}
-			else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
-				ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
-			}
+			//else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
+			//	ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
+			//}
 			//else if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo()) {
 			//	ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::game::ResObjectWorld*>(resource));
 			//}
