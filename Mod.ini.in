@@ -6,7 +6,7 @@ Description="${PROJECT_LONG_DESCRIPTION}"
 Date="${PROJECT_BUILD_DATE}"
 AuthorURL="https://github.com/angryzor"
 [Main]
-UpdateServer="https://raw.githubusercontent.com/angryzor/hmm-update-server/main/sonic-frontiers/devtools/"
+UpdateServer="https://raw.githubusercontent.com/angryzor/hmm-update-server/main/${UPDATE_SERVER_NAMESPACE}/devtools/"
 SaveFile=""
 ID="angryzor.devtools"
 IncludeDir0="."

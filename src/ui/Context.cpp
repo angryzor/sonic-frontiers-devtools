@@ -1,6 +1,7 @@
 #include "fonts/Inter.h"
 #include "common/Theme.h"
 #include "Context.h"
+#include "Input.h"
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
@@ -17,19 +18,29 @@ bool Context::passThroughMouse = false;
 bool Context::inited = false;
 bool Context::alreadyRendering = false;
 
-HOOK(uint64_t, __fastcall, ApplicationStart, 0x145400300, hh::game::GameApplication* application) {
-	auto res = originalApplicationStart(application);
+using namespace hh::game;
+using namespace hh::needle;
 
-	//auto service = gameModeBoot->gameManager->CreateService<DevEventInfo>(allocator);
-	//gameModeBoot->gameManager->RegisterService(service);
+#ifdef DEVTOOLS_TARGET_SDK_wars
+constexpr size_t appResetAddr = 0x145400300;
+constexpr size_t wndProcAddr = 0x1406EC680;
+constexpr size_t displaySwapDeviceConstructorAddr = 0x14082EE90;
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+constexpr size_t appResetAddr = 0x1501A41F0;
+constexpr size_t wndProcAddr = 0x140D68F80;
+constexpr size_t displaySwapDeviceConstructorAddr = 0x155D23F80;
+#endif
+
+HOOK(uint64_t, __fastcall, GameApplication_Reset, appResetAddr, hh::game::GameApplication* self) {
+	auto res = originalGameApplication_Reset(self);
 	Context::init();
-
 	return res;
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
 
-HOOK(LRESULT, __fastcall, WndProcHook, 0x1406EC680, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
+HOOK(LRESULT, __fastcall, WndProcHook, wndProcAddr, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
 	if (msg == WM_KEYDOWN && wParam == VK_F8) {
 		Context::visible = !Context::visible;
@@ -45,10 +56,10 @@ HOOK(LRESULT, __fastcall, WndProcHook, 0x1406EC680, HWND hWnd, UINT msg, WPARAM 
 
 		ImGuiIO& io = ImGui::GetIO();
 
-		if (io.WantCaptureMouse && msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST)
+		if (ShouldCaptureMouseInputs() && msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST)
 			return true;
 
-		if (io.WantCaptureKeyboard && msg >= WM_KEYFIRST && msg <= WM_KEYLAST)
+		if (ShouldCaptureKeyboardInputs() && msg >= WM_KEYFIRST && msg <= WM_KEYLAST)
 			return true;
 	}
 
@@ -88,7 +99,7 @@ VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, ResizeBuffers, UINT BufferCount, UI
 	return originalIDXGISwapChainResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
 }
 
-HOOK(void*, __fastcall, SwapChainHook, 0x14082EE90, void* in_pThis, IDXGISwapChain* in_pSwapChain)
+HOOK(void*, __fastcall, SwapChainHook, displaySwapDeviceConstructorAddr, void* in_pThis, IDXGISwapChain* in_pSwapChain)
 {
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, Present, 8);
 	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, ResizeBuffers, 13);
@@ -96,14 +107,13 @@ HOOK(void*, __fastcall, SwapChainHook, 0x14082EE90, void* in_pThis, IDXGISwapCha
 	return originalSwapChainHook(in_pThis, in_pSwapChain);
 }
 
-//HOOK(void, __fastcall, MouseHookUpdate, 0x140F16F00, hh::hid::MouseWin32* a1, float a2)
+//HOOK(float, __fastcall, MouseGetInputValue, 0x14076ED20, hh::hid::MouseWin32 * a1, unsigned int inputId)
 //{
 //	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
-//		originalMouseHookUpdate(a1, a2);
+//		return originalMouseGetInputValue(a1, inputId);
 //	}
 //	else {
-//		a1->unk103 = a1->unk101;
-//		a1->unk105 = 0;
+//		return 0.0f;
 //	}
 //}
 
@@ -123,144 +133,13 @@ HOOK(void*, __fastcall, SwapChainHook, 0x14082EE90, void* in_pThis, IDXGISwapCha
 //		return originalGOCCamera_PushController(self, cameraFrame, controllerId, unkParam1, interpolator);
 //}
 
-HOOK(hh::hid::InputMapSettings*, __fastcall, BindMaps, 0x1401862B0, csl::fnd::IAllocator* allocator) {
-	auto* inputSettings = originalBindMaps(allocator);
-
-	//inputSettings->BindActionMapping("DmenuFastStep", 0x10000u);
-	//inputSettings->BindActionMapping("DmenuFastStep", 0x10004u);
-	//inputSettings->BindActionMapping("DmenuCursorUp", 0x10001u);
-	//inputSettings->BindActionMapping("DmenuCursorDown", 0x10003u);
-	//inputSettings->BindActionMapping("DmenuCursorLeft", 0x10000u);
-	//inputSettings->BindActionMapping("DmenuCursorRight", 0x10002u);
-	//inputSettings->BindActionMapping("DmenuCursorUp", 0x20052u);
-	//inputSettings->BindActionMapping("DmenuCursorDown", 0x20051u);
-	//inputSettings->BindActionMapping("DmenuCursorLeft", 0x20050u);
-	//inputSettings->BindActionMapping("DmenuCursorRight", 0x2004Fu);
-	//inputSettings->BindActionMapping("DmenuDecide", 0x10004u);
-	//inputSettings->BindActionMapping("DmenuDecide", 0x20028u);
-	//inputSettings->BindActionMapping("DmenuDecide", 0x20058u);
-	//inputSettings->BindActionMapping("DmenuDecide", 0x10005u);
-	//inputSettings->BindActionMapping("DmenuCancel", 0x20029u);
-	//inputSettings->BindActionMapping("DmenuCancel", 0x40003u);
-
-	// Debug camera, gamepad bindings
-	//inputSettings->BindActionMapping("HHFreeCameraSwitchArcballCamera", 0x10007u);
-
-	inputSettings->BindActionMapping("HHFreeCameraSpeedChange", 0x10005u);
-	inputSettings->BindActionMapping("HHFreeCameraReset", 0x10004u);
-	inputSettings->BindActionMapping("HHFreeCameraRoll", 0x1000cu);
-	inputSettings->BindActionMapping("HHFreeCameraDistance", 0x1000du);
-	inputSettings->BindActionMapping("HHFreeCameraFovy", 0x1000fu);
-	inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x1000du);
-	inputSettings->BindActionMapping("HHFreeCameraSwitchViewport", 0x10006u);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x10001u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x10003u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x10000u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x10002u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x10009u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x10008u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x1000bu, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x1000au, 1.0);
-
-	//inputSettings->BindActionMapping("HHFreeCameraArcballCameraRotate", 0x2001fu);
-	//inputSettings->BindActionMapping("HHFreeCameraArcballCameraTransXY", 0x20020u);
-	//inputSettings->BindActionMapping("HHFreeCameraArcballCameraTransZ", 0x20021u);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20052u, 1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20051u, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x20050u, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x2004fu, 1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002du, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002eu, 1.0);
-
-	// Debug camera, keyboard bindings
-	//inputSettings->BindActionMapping("HHFreeCameraSwitchArcballCamera", 0x2001eu);
-
-	// Movement: WASD & arrows
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x20052u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x20051u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20050u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x2004fu, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x2001au, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x20016u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20004u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x20007u, 1.0);
-
-	// Look: keypad arrows
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20060u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2005au, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005cu, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x2005eu, 1.0);
-
-	// Up/down: hold ctrl + move & pgup/dn
-	inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x200e0u);
-	inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x200e4u);
-	inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x2004bu);
-	inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x2004eu);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x2004bu, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveVertical", 0x2004eu, -1.0);
-
-	// Speed
-	inputSettings->BindActionMapping("HHFreeCameraSpeedChange", 0x200e1u);
-	inputSettings->BindActionMapping("HHFreeCameraSpeedChange", 0x200e5u);
-
-	// Reset
-	inputSettings->BindActionMapping("HHFreeCameraReset", 0x2003au);
-
-	// Roll: q/e
-	inputSettings->BindActionMapping("HHFreeCameraRoll", 0x20014u);
-	inputSettings->BindActionMapping("HHFreeCameraRoll", 0x20008u);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x20014u, -1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x20008u, 1.0);
-
-	// Zoom: +/-
-	inputSettings->BindActionMapping("HHFreeCameraDistance", 0x2002eu);
-	inputSettings->BindActionMapping("HHFreeCameraDistance", 0x2002du);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2002eu, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2002du, -1.0);
-	inputSettings->BindActionMapping("HHFreeCameraDistance", 0x20057u);
-	inputSettings->BindActionMapping("HHFreeCameraDistance", 0x20056u);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20057u, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x20056u, -1.0);
-
-	// Fovy: home/end
-	inputSettings->BindActionMapping("HHFreeCameraFovy", 0x2004au);
-	inputSettings->BindActionMapping("HHFreeCameraFovy", 0x2004du);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2004au, 1.0);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x2004du, -1.0);
-
-	// Change viewport: KP *
-	inputSettings->BindActionMapping("HHFreeCameraSwitchViewport", 0x20055u);
-
-	//inputSettings->BindActionMapping("HHFreeCameraArcballCameraRotate", 0x2001fu);
-	//inputSettings->BindActionMapping("HHFreeCameraArcballCameraTransXY", 0x20020u);
-	//inputSettings->BindActionMapping("HHFreeCameraArcballCameraTransZ", 0x20021u);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20052u, 1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveVertical", 0x20051u, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x20050u, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraMoveHorizontal", 0x2004fu, 1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002du, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraArcballCameraZoom", 0x2002eu, 1.0);
-
-	// Mouse (to be used in conjuction with keyboard)
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubVertical", 0x40001u, -SettingsManager::settings.debugCameraMouseSensitivityY);
-	inputSettings->BindAxisMapping("HHFreeCameraMoveSubHorizontal", 0x40000u, SettingsManager::settings.debugCameraMouseSensitivityX);
-
-	// Move up/down
-	//inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x30005u);
-	//inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x30006u);
-	//inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30005u, -1.0);
-	//inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30006u, 1.0);
-
-	return inputSettings;
-}
-
 void Context::install_hooks()
 {
-	INSTALL_HOOK(ApplicationStart);
+	INSTALL_HOOK(GameApplication_Reset);
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
-	INSTALL_HOOK(BindMaps);
-	//INSTALL_HOOK(MouseHookUpdate);
+	InstallInputHooks();
+	//INSTALL_HOOK(MouseGetInputValue);
 	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
 	//INSTALL_HOOK(GOCCamera_PushController);
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);

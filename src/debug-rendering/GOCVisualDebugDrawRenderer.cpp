@@ -15,7 +15,7 @@ public:
 	//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> geometry;
 	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> fillGeometry;
 	csl::ut::Color<uint8_t> color{ 0, 0, 0, 0 };
-	bool hasGeometry;
+	bool hasGeometry{};
 
 	GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator);
 	virtual void OnGOCEvent(GOCEvent event, GameObject& ownerGameObject, void* data);
@@ -30,7 +30,11 @@ hh::game::GOComponent* GOCMyVisualDebugDraw::Create(csl::fnd::IAllocator* alloca
 }
 
 GOCMyVisualDebugDraw::GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator)
+#ifdef DEVTOOLS_TARGET_SDK_wars
 	: GOCVisualDebugDraw{}
+#else
+	: GOCVisualDebugDraw{ allocator }
+#endif
 	//, geometry{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry)(nullptr, allocator) }
 	, fillGeometry{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystemNeedle::CreateGraphicsGeometry)(nullptr, allocator) }
 {
@@ -77,14 +81,21 @@ void GOCVisualDebugDrawRenderer::InstallHooks() {
 	//GOCMyVisualDebugDraw::InstallHooks();
 }
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
 GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator)
 	: CompatibleObject{ allocator }
-	//, memCtx{ true }
-	//, unk2{ &memCtx }
-	//, unk3{ &unk2 }
-	//, sharedDDRes{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateSharedDebugDrawResource)(allocator) }
-	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator) }//, & unk3) }
+	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator) }
 	, renderable{ new (allocator) Renderable(allocator, this) }
+#else
+GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator)
+	: CompatibleObject{ allocator }
+	, memCtx{ true }
+	, unk2{ &memCtx }
+	, unk3{ &unk2 }
+	//, sharedDDRes{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateSharedDebugDrawResource)(allocator) }
+	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator, &unk3) }
+	, renderable{ new (allocator) Renderable(allocator, this) }
+#endif
 {
 	renderable->name = "DevTools Debug Overlay";
 	hh::gfnd::GraphicsContext::GetInstance()->AddRenderableToViewport(renderable, 7);// 5);
@@ -158,6 +169,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 				}
 			}
 		}
+#ifdef DEVTOOLS_TARGET_SDK_wars
 		if (renderOcclusionCapsules) {
 			for (auto* gameObject : gameManager->objects) {
 				for (auto* goc : gameObject->components) {
@@ -173,6 +185,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 				}
 			}
 		}
+#endif
 
 		//auto renderParam = static_cast<RenderingEngineRangers*>(static_cast<RenderManager*>(RenderManager::GetInstance())->GetNeedleResourceDevice())->mainRenderUnit->pipelineInfo->renderParam;
 		//for (size_t i = 0; i < renderParam.numViewports; i++) {
@@ -201,7 +214,13 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 	renderer->drawContext->EndScene();
 }
 
-GOCVisualDebugDrawRenderer::Renderable::Renderable(csl::fnd::IAllocator* allocator, GOCVisualDebugDrawRenderer* renderer) : hh::gfnd::Renderable{}, renderer{ renderer }
+GOCVisualDebugDrawRenderer::Renderable::Renderable(csl::fnd::IAllocator* allocator, GOCVisualDebugDrawRenderer* renderer)
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	: hh::gfnd::Renderable{}
+#else
+	: hh::gfnd::Renderable{ allocator }
+#endif
+	, renderer{ renderer }
 {
 }
 

@@ -16,10 +16,12 @@
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include <wars-sdk.h>
+#define he2sdk warssdk
 #endif
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include <rangers-sdk.h>
+#define he2sdk rangerssdk
 #endif
 
 #include <imgui.h>

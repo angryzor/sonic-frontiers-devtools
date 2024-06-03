@@ -1,4 +1,5 @@
 #include <ui/game-services/game-service-inspectors/FxParamManager.h>
+#include <ui/common/editors/Reflection.h>
 
 template<typename Rfl> static void RenderFxParamManagerInterpolatorInspector(const char* name, app::gfx::FxParamManager::Interpolator<Rfl>& interpolator) {
     if (ImGui::TreeNode(name)) {
@@ -46,57 +47,57 @@ void RenderGameServiceInspector(app::gfx::FxParamManager& service) {
 	ImGui::SeparatorText("Interpolators");
 
 	if (ImGui::TreeNode("NeedleFXParameter")) {
-		RenderFxParamManagerInterpolatorInspector("FxBloomParameter", service.paramInterpolators.bloomInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxDOFParameter", service.paramInterpolators.dofInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxColorContrastParameter", service.paramInterpolators.colorContrastInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxToneMapParameter", service.paramInterpolators.tonemapInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxCameraControlParameter", service.paramInterpolators.cameraControlInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxShadowMapParameter", service.paramInterpolators.shadowmapInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxShadowHeightMapParameter", service.paramInterpolators.shadowHeightMapInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxVolumetricShadowParameter", service.paramInterpolators.volShadowInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxScreenBlurParameter", service.paramInterpolators.blurInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxSSAOParameter", service.paramInterpolators.ssaoInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxSHLightFieldParameter", service.paramInterpolators.shlightfieldInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxLightScatteringParameter", service.paramInterpolators.lightscatteringInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxRLRParameter", service.paramInterpolators.rlrInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxSSGIParameter", service.paramInterpolators.ssgiInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxPlanarReflectionParameter", service.paramInterpolators.planarReflectionInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxOcclusionCapsuleParameter", service.paramInterpolators.occlusionCapsuleInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxGodrayParameter", service.paramInterpolators.godrayInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxScreenSpaceGodrayParameter", service.paramInterpolators.ssGodrayInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxHeatHazeParameter", service.paramInterpolators.heatHazeInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxSceneEnvironmentParameter", service.paramInterpolators.sceneEnvInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxRenderOption", service.paramInterpolators.renderOptionInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxSGGIParameter", service.paramInterpolators.sggiInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxTAAParameter", service.paramInterpolators.taaInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxEffectParameter", service.paramInterpolators.effectInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxAtmosphereParameter", service.paramInterpolators.atmosphereInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxDensityParameter", service.paramInterpolators.densityInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxWindComputeParameter", service.paramInterpolators.windInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxGpuEnvironmentParameter", service.paramInterpolators.gpuEnvironmentInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxInteractiveWaveParameter", service.paramInterpolators.interactiveWaveInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxChromaticAberrationParameter", service.paramInterpolators.chromaticAberrationInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxVignetteParameter", service.paramInterpolators.vignetteInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxTerrainMaterialBlendingParameter", service.paramInterpolators.terrainBlendInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxWeatherParameter", service.paramInterpolators.weatherInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxColorAccessibilityFilterParameter", service.paramInterpolators.colorAccessibilityInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxCyberNoiseEffectParameter", service.paramInterpolators.cyberNoiseInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxCyberSpaceStartNoiseParameter", service.paramInterpolators.cyberStartNoiseInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxCyberNPCSSEffectRenderParameter", service.paramInterpolators.cyberNPCSSInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxDentParameter", service.paramInterpolators.dentInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxFieldScanEffectRenderParameter", service.paramInterpolators.fieldScanInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxSeparableSSSParameter", service.paramInterpolators.ssssInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxBloomParameter", *service.paramInterpolators.bloomInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxDOFParameter", *service.paramInterpolators.dofInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxColorContrastParameter", *service.paramInterpolators.colorContrastInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxToneMapParameter", *service.paramInterpolators.tonemapInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxCameraControlParameter", *service.paramInterpolators.cameraControlInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxShadowMapParameter", *service.paramInterpolators.shadowmapInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxShadowHeightMapParameter", *service.paramInterpolators.shadowHeightMapInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxVolumetricShadowParameter", *service.paramInterpolators.volShadowInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxScreenBlurParameter", *service.paramInterpolators.blurInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxSSAOParameter", *service.paramInterpolators.ssaoInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxSHLightFieldParameter", *service.paramInterpolators.shlightfieldInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxLightScatteringParameter", *service.paramInterpolators.lightscatteringInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxRLRParameter", *service.paramInterpolators.rlrInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxSSGIParameter", *service.paramInterpolators.ssgiInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxPlanarReflectionParameter", *service.paramInterpolators.planarReflectionInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxOcclusionCapsuleParameter", *service.paramInterpolators.occlusionCapsuleInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxGodrayParameter", *service.paramInterpolators.godrayInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxScreenSpaceGodrayParameter", *service.paramInterpolators.ssGodrayInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxHeatHazeParameter", *service.paramInterpolators.heatHazeInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxSceneEnvironmentParameter", *service.paramInterpolators.sceneEnvInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxRenderOption", *service.paramInterpolators.renderOptionInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxSGGIParameter", *service.paramInterpolators.sggiInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxTAAParameter", *service.paramInterpolators.taaInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxEffectParameter", *service.paramInterpolators.effectInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxAtmosphereParameter", *service.paramInterpolators.atmosphereInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxDensityParameter", *service.paramInterpolators.densityInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxWindComputeParameter", *service.paramInterpolators.windInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxGpuEnvironmentParameter", *service.paramInterpolators.gpuEnvironmentInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxInteractiveWaveParameter", *service.paramInterpolators.interactiveWaveInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxChromaticAberrationParameter", *service.paramInterpolators.chromaticAberrationInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxVignetteParameter", *service.paramInterpolators.vignetteInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxTerrainMaterialBlendingParameter", *service.paramInterpolators.terrainBlendInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxWeatherParameter", *service.paramInterpolators.weatherInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxColorAccessibilityFilterParameter", *service.paramInterpolators.colorAccessibilityInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxCyberNoiseEffectParameter", *service.paramInterpolators.cyberNoiseInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxCyberSpaceStartNoiseParameter", *service.paramInterpolators.cyberStartNoiseInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxCyberNPCSSEffectRenderParameter", *service.paramInterpolators.cyberNPCSSInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxDentParameter", *service.paramInterpolators.dentInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxFieldScanEffectRenderParameter", *service.paramInterpolators.fieldScanInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxSeparableSSSParameter", *service.paramInterpolators.ssssInterpolator);
 		ImGui::TreePop();
 	}
 
 	if (ImGui::TreeNode("NeedleFXSceneConfig")) {
-		RenderFxParamManagerInterpolatorInspector("FxRenderTargetSetting", service.sceneConfigInterpolators.fxRenderTargetSettingInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxAntiAliasing", service.sceneConfigInterpolators.fxAntiAliasingInterpolator);
-		RenderFxParamManagerInterpolatorInspector("StageCommonAtmosphereParameter", service.sceneConfigInterpolators.stageCommonAtmosphereParameterInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxLODParameter", service.sceneConfigInterpolators.fxLODParameterInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxDetailParameter", service.sceneConfigInterpolators.fxDetailParameterInterpolator);
-		RenderFxParamManagerInterpolatorInspector("FxDynamicResolutionParameter", service.sceneConfigInterpolators.fxDynamicResolutionParameterInterpolator);
-		RenderFxParamManagerInterpolatorInspector("StageCommonTimeProgressParameter", service.sceneConfigInterpolators.stageCommonTimeProgressParameterInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxRenderTargetSetting", *service.sceneConfigInterpolators.fxRenderTargetSettingInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxAntiAliasing", *service.sceneConfigInterpolators.fxAntiAliasingInterpolator);
+		RenderFxParamManagerInterpolatorInspector("StageCommonAtmosphereParameter", *service.sceneConfigInterpolators.stageCommonAtmosphereParameterInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxLODParameter", *service.sceneConfigInterpolators.fxLODParameterInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxDetailParameter", *service.sceneConfigInterpolators.fxDetailParameterInterpolator);
+		RenderFxParamManagerInterpolatorInspector("FxDynamicResolutionParameter", *service.sceneConfigInterpolators.fxDynamicResolutionParameterInterpolator);
+		RenderFxParamManagerInterpolatorInspector("StageCommonTimeProgressParameter", *service.sceneConfigInterpolators.stageCommonTimeProgressParameterInterpolator);
 		ImGui::TreePop();
 	}
 

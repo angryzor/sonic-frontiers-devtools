@@ -12,6 +12,8 @@
 
 using namespace hh::fnd;
 
+
+
 AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
 	//if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
 	if (typeInfo == hh::snd::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;

@@ -31,6 +31,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/Theme.cpp
         ui/common/Translations.cpp
         ui/Context.cpp
+        ui/Input.cpp
         # ui/core-services/GameUpdaterInspector.cpp
         # ui/core-services/GraphicsContextInspector.cpp
         # ui/core-services/RenderManagerInspector.cpp
@@ -105,6 +106,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/Translations.h
         ui/common/TreeView.h
         ui/Context.h
+        ui/Input.h
         ui/core-services/GameUpdaterInspector.h
         ui/core-services/GraphicsContextInspector.h
         ui/core-services/RenderManagerInspector.h

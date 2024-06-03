@@ -66,7 +66,7 @@ void ObjectInspector::Render() {
 			auto focusedObject = objectInspection.focusedObjects[0];
 			ImGui::Text("Object name: %s", focusedObject->name.c_str());
 			ImGui::Text("Layer: %d", focusedObject->layer);
-			ImGui::Text("Class: %s", focusedObject->objectClass->name);
+			ImGui::Text("Class: %s", focusedObject->objectClass ? focusedObject->objectClass->name : "<none>");
 			ImGui::Separator();
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Properties")) {

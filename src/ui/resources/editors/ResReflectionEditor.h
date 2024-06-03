@@ -19,7 +19,7 @@ public:
 
 	template<typename T>
 	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflectionT<T>* resource) {
-		return Create(allocator, reinterpret_cast<hh::fnd::ResReflection*>(resource), *RESOLVE_STATIC_VARIABLE(T::rflClass));
+		return Create(allocator, reinterpret_cast<hh::fnd::ResReflection*>(resource), &RESOLVE_STATIC_VARIABLE(T::rflClass));
 	}
 	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection* resource, const hh::fnd::RflClass* rflClass);
 	static ResReflectionEditor* Create(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection* resource);

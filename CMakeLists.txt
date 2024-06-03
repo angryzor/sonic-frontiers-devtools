@@ -1,15 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.20
-                 DESCRIPTION "Sonic Forces DevTools"
+project(devtools VERSION 0.1.21
+                 DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
 set(PROJECT_AUTHOR "angryzor")
-set(PROJECT_LONG_DESCRIPTION "In-engine development kit for Sonic Forces")
 set(PROJECT_COPYRIGHT "Copyright (c) 2024 angryzor - Licensed under GPL3")
 string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
-
-
 
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
@@ -17,22 +14,29 @@ add_subdirectory(vendor EXCLUDE_FROM_ALL)
 set(SDK_VAR_wars "SONIC_FORCES_SDK")
 set(GAME_FOLDER_DEFAULT_wars "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicForces")
 set(GAME_EXECUTABLE_wars "build/main/projects/exec/Sonic Forces.exe")
-set(WORKING_DIRECTORY_wars "build/main/projects/exec")
+set(DEBUGGER_WORKING_DIRECTORY_wars "build/main/projects/exec")
 set(MOD_SUBFOLDER_wars "build/main/projects/exec/Mods/devtools")
+set(UPDATE_SERVER_NAMESPACE_wars "sonic-forces")
+set(FRIENDLY_GAME_NAME_wars "Sonic Forces")
 
 set(SDK_VAR_rangers "SONIC_FRONTIERS_SDK")
 set(GAME_FOLDER_DEFAULT_rangers "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicFrontiers")
 set(GAME_EXECUTABLE_rangers "Sonic Frontiers.exe")
-set(WORKING_DIRECTORY_rangers "")
+set(DEBUGGER_WORKING_DIRECTORY_rangers "")
 set(MOD_SUBFOLDER_rangers "Mods/devtools")
+set(UPDATE_SERVER_NAMESPACE_rangers "sonic-frontiers")
+set(FRIENDLY_GAME_NAME_rangers "Sonic Frontiers")
 
 # The main target
 foreach(DEVTOOLS_TARGET_SDK rangers wars)
-    set(GAME_FOLDER ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
+    set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
+    set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
+    set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
     set(DEVTOOLS_TARGET devtools-${DEVTOOLS_TARGET_SDK})
-    cmake_path(SET GAME_FOLDER_NORMALIZED NORMALIZE ${GAME_FOLDER})
+    set(UPDATE_SERVER_NAMESPACE ${UPDATE_SERVER_NAMESPACE_${DEVTOOLS_TARGET_SDK}})
+    cmake_path(SET GAME_FOLDER_NORMALIZED NORMALIZE ${GAME_FOLDER_${DEVTOOLS_TARGET_SDK}})
     cmake_path(APPEND GAME_FOLDER_NORMALIZED ${GAME_EXECUTABLE_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE GAME_EXECUTABLE)
-    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${WORKING_DIRECTORY_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE WORKING_DIRECTORY)
+    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${DEBUGGER_WORKING_DIRECTORY_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE DEBUGGER_WORKING_DIRECTORY)
     cmake_path(APPEND GAME_FOLDER_NORMALIZED ${MOD_SUBFOLDER_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE MOD_FOLDER)
 
     if(DEFINED ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
@@ -66,7 +70,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
         PROPERTIES
             OUTPUT_NAME "devtools"
             VS_DEBUGGER_COMMAND ${GAME_EXECUTABLE}
-            VS_DEBUGGER_WORKING_DIRECTORY ${WORKING_DIRECTORY}
+            VS_DEBUGGER_WORKING_DIRECTORY ${DEBUGGER_WORKING_DIRECTORY}
     )
 
     foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
@@ -75,11 +79,12 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 
     add_subdirectory(src ${DEVTOOLS_TARGET}/src)
     add_subdirectory(natvis ${DEVTOOLS_TARGET}/natvis)
-    configure_file(Mod.ini.in Mod.ini)
+    configure_file(Mod.ini.in ${DEVTOOLS_TARGET}/Mod.ini)
 
     set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DEVTOOLS_TARGET})
 
     install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${MOD_FOLDER}")
-    install(DIRECTORY resources/ DESTINATION "${MOD_FOLDER}")
-    install(FILES LICENSE.txt "${CMAKE_CURRENT_BINARY_DIR}/Mod.ini" DESTINATION "${MOD_FOLDER}")
+    install(DIRECTORY resources/common/ DESTINATION "${MOD_FOLDER}")
+    install(DIRECTORY resources/${DEVTOOLS_TARGET_SDK}/ DESTINATION "${MOD_FOLDER}")
+    install(FILES LICENSE.txt "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/Mod.ini" DESTINATION "${MOD_FOLDER}")
 endforeach()
