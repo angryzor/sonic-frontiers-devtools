@@ -2,6 +2,7 @@
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/Desktop.h>
+#include <ui/input/Input.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
@@ -237,10 +238,7 @@ void SettingsManager::ApplySettings() {
 		for (size_t j = 0; j < 32; j++)
 			GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
 
-	auto* gameManager = hh::game::GameManager::GetInstance();
-	
-	//if (gameManager && gameManager->GetService<hh::game::InputManager>())
-	//	gameManager->ReloadInputSettings(true);
+	ReloadInputSettings();
 }
 
 void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)

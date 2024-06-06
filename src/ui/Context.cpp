@@ -1,7 +1,7 @@
 #include "fonts/Inter.h"
 #include "common/Theme.h"
 #include "Context.h"
-#include "Input.h"
+#include "input/Input.h"
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>

@@ -1,4 +1,7 @@
 #include "GOCPlayerBlackboard.h"
+#include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Basic.h>
+#include <ui/common/viewers/Basic.h>
 
 void RenderBlackboardAmyInspector(app::player::BlackboardAmy& blackboard) {
 	ImGui::Text("Unk1: %zx", blackboard.unk1);

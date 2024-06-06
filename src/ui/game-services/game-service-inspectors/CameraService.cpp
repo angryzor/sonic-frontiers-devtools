@@ -1,4 +1,7 @@
 #include "CameraService.h"
+#include <ui/common/editors/Basic.h>
+#include <ui/common/editors/Camera.h>
+#include <ui/common/editors/GraphicsContext.h>
 
 void RenderGameServiceInspector(app::camera::CameraService& service)
 {

@@ -36,7 +36,11 @@ using namespace hh::game;
 //};
 
 const RflClass* handleComponentDataData(void* obj) {
-    return nullptr;//GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
+#ifdef DEVTOOLS_TARGET_SDK_wars
+    return nullptr;
+#else
+    return GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
+#endif
 }
 
 const RflClass* handleSpawnerData(void* obj) {

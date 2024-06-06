@@ -2,6 +2,7 @@
 #include <ui/Desktop.h>
 #include <ui/resources/editors/ResObjectWorldEditor.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Basic.h>
 #include <ui/common/editors/ObjectData.h>
 
 using namespace hh::game;
@@ -39,7 +40,9 @@ void RenderGameServiceInspector(hh::game::ObjectWorld& objWorld) {
 						CheckboxFlags("Started", status.flags, WorldObjectStatus::Flag::STARTED);
 						CheckboxFlags("No restart", status.flags, WorldObjectStatus::Flag::NO_RESTART);
 
-						//Editor("Spawn priority", status.spawnPriority);
+#ifndef DEVTOOLS_TARGET_SDK_wars
+						Editor("Spawn priority", status.spawnPriority);
+#endif
 
 						ImGui::SeparatorText("Object Data");
 						Editor("Object data", *status.objectData);

@@ -55,37 +55,43 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 		}
 
 		auto* gameManager = hh::game::GameManager::GetInstance();
-		//if (gameManager) {
-		//	gameManager->PreResourceReloadCallback(request->resource);
-		//	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-		//		trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
-		//}
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		if (gameManager) {
+			gameManager->PreResourceReloadCallback(request->resource);
+			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+				trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
+		}
+#endif
 
 		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
 			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
-		//else if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo())
-		//	ReloadByLoad(buffer, fileSize, request->resource);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		else if (&request->resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo())
+			ReloadByLoad(buffer, fileSize, request->resource);
+#endif
 		else
 			Reload(buffer, fileSize, request->resource);
 
-		//if (gameManager) {
-		//	gameManager->PostResourceReloadCallback(request->resource);
-		//	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-		//		trrMgr->reloaderListener->PostResourceReloadCallback(request->resource);
-		//}
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		if (gameManager) {
+			gameManager->PostResourceReloadCallback(request->resource);
+			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+				trrMgr->reloaderListener->PostResourceReloadCallback(request->resource);
+		}
 
-		//if (&request->resource->GetClass() == heur::resources::ResTerrainModel::GetTypeInfo()
-		//	|| &request->resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
-		//	|| &request->resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
-		//	if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
-		//		for (auto& module : resMan->modules) {
-		//			if (module->GetNameHash() == 0x74DA1FC3) {
-		//				module->UnkFunc7();
-		//				module->Load();
-		//			}
-		//		}
-		//	}
-		//}
+		if (&request->resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo()
+			|| &request->resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
+			|| &request->resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
+			if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
+				for (auto& module : resMan->modules) {
+					if (module->GetNameHash() == 0x74DA1FC3) {
+						module->UnkFunc7();
+						module->Load();
+					}
+				}
+			}
+		}
+#endif
 
 		delete request;
     }

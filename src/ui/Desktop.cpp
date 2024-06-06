@@ -2,11 +2,11 @@
 #include "Desktop.h"
 #include "ToolBar.h"
 #include "SettingsManager.h"
-//#include "resources/ResourceBrowser.h"
-//#include "game-services/GameServiceInspector.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
 #include "operation-modes/LevelEditor/LevelEditor.h"
-//#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
+#endif
 #include "reflection/serialization/ReflectionSerializer.h"
 #include <utilities/math/MathUtils.h>
 #include <utilities/CompatibleObject.h>
@@ -318,8 +318,10 @@ void Desktop::SwitchToLevelEditorMode()
 {
 	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
 }
-//
-//void Desktop::SwitchToSurfRideEditorMode()
-//{
-//	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
-//}
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+void Desktop::SwitchToSurfRideEditorMode()
+{
+	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
+}
+#endif

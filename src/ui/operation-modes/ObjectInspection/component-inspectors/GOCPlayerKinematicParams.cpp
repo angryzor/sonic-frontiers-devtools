@@ -1,4 +1,6 @@
 #include "GOCPlayerKinematicParams.h"
+#include <ui/common/editors/Basic.h>
+#include <ui/common/viewers/Basic.h>
 
 void RenderComponentInspector(app::player::GOCPlayerKinematicParams& component)
 {

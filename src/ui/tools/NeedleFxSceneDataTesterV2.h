@@ -2,7 +2,7 @@
 #include <ui/common/StandaloneWindow.h>
 
 class NeedleFxSceneDataTesterV2 : public StandaloneWindow {
-	hh::fnd::Reference<hh::fnd::ResReflection<app::rfl::NeedleFxSceneData>> resource{};
+	hh::fnd::Reference<hh::fnd::ResReflectionT<hh::needle::NeedleFxSceneData>> resource{};
 	//hh::fnd::Reference<app::gfx::FxParamManager> fxParamManager{};
 	//hh::fnd::Reference<app::gfx::FxColManager> fxColManager{};
 	bool setConfig{ false };

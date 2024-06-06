@@ -1,4 +1,5 @@
 #include "GOCEvent.h"
+#include <ui/common/inputs/Basic.h>
 
 void RenderComponentInspector(app::game::GOCEvent& component)
 {

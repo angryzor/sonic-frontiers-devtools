@@ -1,6 +1,7 @@
 #include "Basic.h"
 #include <utilities/math/MathUtils.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/common/viewers/Basic.h>
 #include <ui/Desktop.h>
 #include <ui/operation-modes/ObjectInspection/ObjectInspection.h>
 // #include <ui/operation-modes/LevelEditor/LevelEditor.h>
@@ -79,7 +80,7 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 	//auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
 
 	//if (objWorld == nullptr) {
-		ImGui::Text("%s: %x", label, id.id);
+		Viewer(label, id);
 	//}
 	//else {
 	//	char unkNameBuf[50];

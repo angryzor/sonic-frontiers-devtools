@@ -10,7 +10,11 @@ using namespace hh::physics;
 
 namespace app::gfx {
 	class GOCVisualGeometryInstance : public GOComponent {
+#ifdef DEVTOOLS_TARGET_SDK_wars
 		GOCOMPONENT_CLASS_DECLARATION_INLINE_GETCLASS(GOCVisualGeometryInstance)
+#else
+		GOCOMPONENT_CLASS_DECLARATION(GOCVisualGeometryInstance)
+#endif
 	};
 }
 

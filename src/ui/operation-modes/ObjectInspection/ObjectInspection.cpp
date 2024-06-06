@@ -18,7 +18,7 @@ void ObjectInspection::Render() {
 		if (focusedObjects.size() > 1 && gizmoOperation & ImGuizmo::SCALE)
 			gizmoOperation = ImGuizmo::TRANSLATE;
 
-		// haveSelectionAabb = CalcApproxAabb(reinterpret_cast<csl::ut::MoveArray<GameObject*>&>(focusedObjects), selectionAabb);
+		haveSelectionAabb = CalcApproxAabb(reinterpret_cast<csl::ut::MoveArray<GameObject*>&>(focusedObjects), selectionAabb);
 		HandleObjectManipulation();
 	} else
 		haveSelectionAabb = false;
@@ -26,13 +26,13 @@ void ObjectInspection::Render() {
 	HandleObjectSelection();
 }
 
-//void ObjectInspection::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
-//{
-//	if (haveSelectionAabb) {
-//		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
-//		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 140, 255, 255, 255 });
-//	}
-//}
+void ObjectInspection::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
+{
+	if (haveSelectionAabb) {
+		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
+		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 255, 255, 255, 140 });
+	}
+}
 
 void ObjectInspection::HandleObjectSelection() {
 	if (Desktop::instance->IsPickerMouseReleased()) {

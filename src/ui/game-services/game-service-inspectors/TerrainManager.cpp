@@ -1,3 +1,6 @@
+#include "TerrainManager.h"
+#include <ui/common/viewers/Basic.h>
+
 void RenderGameServiceInspector(app::trr::TerrainManager& service)
 {
 	Viewer("Unk11", service.currentTerrain);

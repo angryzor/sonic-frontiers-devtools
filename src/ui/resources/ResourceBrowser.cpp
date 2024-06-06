@@ -12,36 +12,36 @@
 
 using namespace hh::fnd;
 
-
-
 AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
-	//if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
 	if (typeInfo == hh::snd::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;
 	if (typeInfo == hh::snd::ResAtomCueSheet::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
 	if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo()) return AssetIconId::LIGHTING;
 	if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) return AssetIconId::MATERIAL;
 	if (typeInfo == hh::gfx::ResTerrainModel::GetTypeInfo()) return AssetIconId::TERRAIN_MODEL;
 	if (typeInfo == hh::gfx::ResModel::GetTypeInfo()) return AssetIconId::MODEL;
-	//if (typeInfo == heur::resources::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
 	if (typeInfo == hh::gfnd::ResFragmentShader::GetTypeInfo()) return AssetIconId::FRAGMENT_SHADER;
 	if (typeInfo == hh::gfnd::ResVertexShader::GetTypeInfo()) return AssetIconId::VERTEX_SHADER;
 	if (typeInfo == hh::gfnd::ResTexture::GetTypeInfo()) return AssetIconId::TEXTURE;
-	//if (typeInfo == heur::resources::ResLevel::GetTypeInfo()) return AssetIconId::LEVEL;
-	//if (typeInfo == heur::resources::ResMasterLevel::GetTypeInfo()) return AssetIconId::MASTER_LEVEL;
 	if (typeInfo == hh::font::ResBitmapFont::GetTypeInfo()) return AssetIconId::BITMAP_FONT;
 	if (typeInfo == hh::font::ResScalableFontSet::GetTypeInfo()) return AssetIconId::SCALABLE_FONT;
 	if (typeInfo == hh::fnd::ResReflection::GetTypeInfo()) return AssetIconId::REFLECTION;
-	////if (typeInfo == Res::GetTypeInfo()) return AssetIconId::PACKFILE_LEVELS;
 	if (typeInfo == hh::fnd::Packfile::GetTypeInfo()) return AssetIconId::PACKFILE;
 	if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) return AssetIconId::PARTICLESYSTEM;
-	//if (typeInfo == heur::resources::ResPhysicalSkeleton::GetTypeInfo()) return AssetIconId::PHYSICS_BONE;
-	////if (typeInfo == heur::resources::ResSoftBody::GetTypeInfo()) return AssetIconId::SOFTBODY;
-	////if (typeInfo == heur::resources::ResHelperBone::GetTypeInfo()) return AssetIconId::HELPER_BONE;
-	////if (typeInfo == heur::resources::ResOrcaData::GetTypeInfo()) return AssetIconId::ORCA;
-	////if (typeInfo == Res::GetTypeInfo()) return AssetIconId::UI;
-	//if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return AssetIconId::ANIMATION;
-	//if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return AssetIconId::SKELETON;
-	//if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return AssetIconId::DVSCENE;
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	if (typeInfo == hh::gfnd::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
+	if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
+	if (typeInfo == heur::resources::ResLevel::GetTypeInfo()) return AssetIconId::LEVEL;
+	if (typeInfo == heur::resources::ResMasterLevel::GetTypeInfo()) return AssetIconId::MASTER_LEVEL;
+	//if (typeInfo == Res::GetTypeInfo()) return AssetIconId::PACKFILE_LEVELS;
+	if (typeInfo == heur::resources::ResPhysicalSkeleton::GetTypeInfo()) return AssetIconId::PHYSICS_BONE;
+	//if (typeInfo == heur::resources::ResSoftBody::GetTypeInfo()) return AssetIconId::SOFTBODY;
+	//if (typeInfo == heur::resources::ResHelperBone::GetTypeInfo()) return AssetIconId::HELPER_BONE;
+	//if (typeInfo == heur::resources::ResOrcaData::GetTypeInfo()) return AssetIconId::ORCA;
+	//if (typeInfo == Res::GetTypeInfo()) return AssetIconId::UI;
+	if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return AssetIconId::ANIMATION;
+	if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return AssetIconId::SKELETON;
+	if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return AssetIconId::DVSCENE;
+#endif
 	return AssetIconId::MODEL;
 }
 

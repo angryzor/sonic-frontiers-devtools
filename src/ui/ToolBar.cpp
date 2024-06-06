@@ -3,17 +3,19 @@
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include "resources/ResourceBrowser.h"
-//#include "game-modes/GameModeInspector.h"
 #include "game-services/GameServiceInspector.h"
-//#include "core-services/GameUpdaterInspector.h"
-//#include "core-services/GraphicsContextInspector.h"
-//#include "core-services/RenderManagerInspector.h"
-//#include "core-services/RenderingEngineInspector.h"
-//#include "core-services/CameraManagerInspector.h"
-//#include "core-services/MemoryInspector.h"
-//#include "tools/NeedleFxSceneDataTester.h"
-//#include "tools/NeedleFxSceneDataTesterV2.h"
-//#include "tools/RflComparer.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include "game-modes/GameModeInspector.h"
+#include "core-services/GameUpdaterInspector.h"
+#include "core-services/GraphicsContextInspector.h"
+#include "core-services/RenderManagerInspector.h"
+#include "core-services/RenderingEngineInspector.h"
+#include "core-services/CameraManagerInspector.h"
+#include "core-services/MemoryInspector.h"
+#include "tools/NeedleFxSceneDataTester.h"
+#include "tools/NeedleFxSceneDataTesterV2.h"
+#endif
+#include "tools/RflComparer.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
 using namespace hh::game;
@@ -41,75 +43,79 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Inspectors")) {
 			if (ImGui::MenuItem("GameService"))
 				new (Desktop::instance->GetAllocator()) GameServiceInspector(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("GameUpdater"))
-		//		new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("GraphicsContext"))
-		//		new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("RenderManager"))
-		//		new (Desktop::instance->GetAllocator()) RenderManagerInspector(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("RenderingEngine"))
-		//		new (Desktop::instance->GetAllocator()) RenderingEngineInspector(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("Memory"))
-		//		new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("GameMode"))
-		//		new (Desktop::instance->GetAllocator()) GameModeInspector(Desktop::instance->GetAllocator());
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+			if (ImGui::MenuItem("GameUpdater"))
+				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("GraphicsContext"))
+				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RenderManager"))
+				new (Desktop::instance->GetAllocator()) RenderManagerInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RenderingEngine"))
+				new (Desktop::instance->GetAllocator()) RenderingEngineInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("Memory"))
+				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("GameMode"))
+				new (Desktop::instance->GetAllocator()) GameModeInspector(Desktop::instance->GetAllocator());
+#endif
 			ImGui::EndMenu();
 		}
 
-		//if (ImGui::BeginMenu("Tools")) {
-		//	if (ImGui::MenuItem("NeedleFxSceneData Tester") && ImGui::FindWindowByName("NeedleFxSceneData testing tool") == nullptr)
-		//		new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTester(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("NeedleFxSceneData Tester V2") && ImGui::FindWindowByName("NeedleFxSceneData testing tool V2") == nullptr)
-		//		new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTesterV2(Desktop::instance->GetAllocator());
-		//	if (ImGui::MenuItem("RFL Comparer"))
-		//		new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
-		//	ImGui::EndMenu();
-		//}
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		if (ImGui::BeginMenu("Tools")) {
+			if (ImGui::MenuItem("NeedleFxSceneData Tester") && ImGui::FindWindowByName("NeedleFxSceneData testing tool") == nullptr)
+				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTester(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("NeedleFxSceneData Tester V2") && ImGui::FindWindowByName("NeedleFxSceneData testing tool V2") == nullptr)
+				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTesterV2(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RFL Comparer"))
+				new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
+			ImGui::EndMenu();
+		}
+#endif
 
 		if (ImGui::BeginMenu("Mode")) {
 			if (ImGui::MenuItem("Object Inspection"))
 				Desktop::instance->SwitchToObjectInspectionMode();
 			if (ImGui::MenuItem("Level Editor"))
 				Desktop::instance->SwitchToLevelEditorMode();
-			//if (ImGui::MenuItem("SurfRide Editor"))
-			//	Desktop::instance->SwitchToSurfRideEditorMode();
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+			if (ImGui::MenuItem("SurfRide Editor"))
+				Desktop::instance->SwitchToSurfRideEditorMode();
+#endif
 			ImGui::EndMenu();
 		}
+
 		if (ImGui::MenuItem("Settings"))
 			SettingsManager::OpenConfigDialog();
-
-		//if (ImGui::MenuItem("Edit mode")) {
-		//	auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
-		//	seqExt->GetCurrentGameMode()->SetState(0x13);
-		//}
 
 		ImGui::EndMenuBar();
 	}
 
-	//auto& gameUpdater = GameApplication::GetInstance()->GetGameUpdater();
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	auto& gameUpdater = GameApplication::GetInstance()->GetGameUpdater();
 
-	//unsigned int gameUpdaterFlags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
+	unsigned int gameUpdaterFlags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
 
-	//ImGui::CheckboxFlags("Object pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::OBJECT_PAUSE));
-	//ImGui::SetItemTooltip("Pauses only standard object layers. Certain layers and services (e.g. weather service) keep running. (Hotkey: F3)");
-	//ImGui::SameLine();
-	//ImGui::CheckboxFlags("Debug pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::DEBUG_PAUSE));
-	//ImGui::SetItemTooltip("Pauses (almost) every object layer. (Hotkey: F4)");
-	//ImGui::SameLine();
+	ImGui::CheckboxFlags("Object pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::OBJECT_PAUSE));
+	ImGui::SetItemTooltip("Pauses only standard object layers. Certain layers and services (e.g. weather service) keep running. (Hotkey: F3)");
+	ImGui::SameLine();
+	ImGui::CheckboxFlags("Debug pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::DEBUG_PAUSE));
+	ImGui::SetItemTooltip("Pauses (almost) every object layer. (Hotkey: F4)");
+	ImGui::SameLine();
 
-	//gameUpdater.flags.m_dummy = gameUpdaterFlags;
+	gameUpdater.flags.m_dummy = gameUpdaterFlags;
 
-	//if (ImGui::Button("Step frame"))
-	//	gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
-	//ImGui::SetItemTooltip("When in debug pause, step through updates frame by frame. Note that if object pause is also enabled objects will not update even while stepping. (Hotkey: F5)");
-	//ImGui::SameLine();
+	if (ImGui::Button("Step frame"))
+		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
+	ImGui::SetItemTooltip("When in debug pause, step through updates frame by frame. Note that if object pause is also enabled objects will not update even while stepping. (Hotkey: F5)");
+	ImGui::SameLine();
 
-	//if (ImGui::IsKeyPressed(ImGuiKey_F3))
-	//	gameUpdater.flags.flip(GameUpdater::Flags::OBJECT_PAUSE);
-	//if (ImGui::IsKeyPressed(ImGuiKey_F4))
-	//	gameUpdater.flags.flip(GameUpdater::Flags::DEBUG_PAUSE);
-	//if (ImGui::IsKeyPressed(ImGuiKey_F5))
-	//	gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
+	if (ImGui::IsKeyPressed(ImGuiKey_F3))
+		gameUpdater.flags.flip(GameUpdater::Flags::OBJECT_PAUSE);
+	if (ImGui::IsKeyPressed(ImGuiKey_F4))
+		gameUpdater.flags.flip(GameUpdater::Flags::DEBUG_PAUSE);
+	if (ImGui::IsKeyPressed(ImGuiKey_F5))
+		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
+#endif
 
 	auto* debugCameraMgr = DebugCameraManager::GetInstance();
 

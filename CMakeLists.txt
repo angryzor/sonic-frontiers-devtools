@@ -21,7 +21,7 @@ set(FRIENDLY_GAME_NAME_wars "Sonic Forces")
 
 set(SDK_VAR_rangers "SONIC_FRONTIERS_SDK")
 set(GAME_FOLDER_DEFAULT_rangers "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicFrontiers")
-set(GAME_EXECUTABLE_rangers "Sonic Frontiers.exe")
+set(GAME_EXECUTABLE_rangers "SonicFrontiers.exe")
 set(DEBUGGER_WORKING_DIRECTORY_rangers "")
 set(MOD_SUBFOLDER_rangers "Mods/devtools")
 set(UPDATE_SERVER_NAMESPACE_rangers "sonic-frontiers")
@@ -68,7 +68,6 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
     )
     set_target_properties(${DEVTOOLS_TARGET}
         PROPERTIES
-            OUTPUT_NAME "devtools"
             VS_DEBUGGER_COMMAND ${GAME_EXECUTABLE}
             VS_DEBUGGER_WORKING_DIRECTORY ${DEBUGGER_WORKING_DIRECTORY}
     )
@@ -80,8 +79,6 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
     add_subdirectory(src ${DEVTOOLS_TARGET}/src)
     add_subdirectory(natvis ${DEVTOOLS_TARGET}/natvis)
     configure_file(Mod.ini.in ${DEVTOOLS_TARGET}/Mod.ini)
-
-    set_property(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR} PROPERTY VS_STARTUP_PROJECT ${DEVTOOLS_TARGET})
 
     install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${MOD_FOLDER}")
     install(DIRECTORY resources/common/ DESTINATION "${MOD_FOLDER}")

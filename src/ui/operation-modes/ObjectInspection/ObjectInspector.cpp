@@ -7,43 +7,70 @@
 #include <utilities/math/MathUtils.h>
 #include <imgui_internal.h>
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
 #include "component-inspectors/GOCTransform.h"
+#include "component-inspectors/GOCCollider.h"
 #include "component-inspectors/wars/GOCPlayerParameter.h"
+
+typedef std::tuple<
+	hh::game::GOCTransform,
+	hh::physics::GOCSphereCollider,
+	hh::physics::GOCBoxCollider,
+	hh::physics::GOCCapsuleCollider,
+	hh::physics::GOCCylinderCollider,
+	app::player::GOCPlayerParameter
+> InspectableComponents;
+#endif
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include "component-inspectors/GOCTransform.h"
+#include "component-inspectors/GOCCollider.h"
+#include "component-inspectors/GOCAnimator.h"
+#include "component-inspectors/GOCEvent.h"
+#include "component-inspectors/GOCPlayerBlackboard.h"
+#include "component-inspectors/GOCPlayerKinematicParams.h"
+#include "component-inspectors/GOCCamera.h"
+#include "component-inspectors/rangers/GOCPlayerParameter.h"
+
+typedef std::tuple<
+	hh::game::GOCTransform,
+	hh::physics::GOCSphereCollider,
+	hh::physics::GOCBoxCollider,
+	hh::physics::GOCCapsuleCollider,
+	hh::physics::GOCCylinderCollider,
+	hh::anim::GOCAnimator,
+	app_cmn::camera::GOCCamera,
+	app::game::GOCEventCollision,
+	app::player::GOCPlayerKinematicParams,
+	app::player::GOCPlayerBlackboard,
+	app::player::GOCPlayerParameter
+> InspectableComponents;
+#endif
 
 using namespace hh::fnd;
 using namespace hh::game;
 
 
+template<typename T>
+bool RenderComponentInspectorT(hh::game::GOComponent& service) {
+	bool result{ service.pStaticClass == T::GetClass() };
 
-void RenderComponentInspector(GOComponent& component) {
-	 if (component.pStaticClass == hh::game::GOCTransform::GetClass()) {
-	 	RenderComponentInspector(static_cast<GOCTransform&>(component));
-	 } else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
-	 	RenderComponentInspector(static_cast<app::player::GOCPlayerParameter&>(component));
-	 // } else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass()) {
-	 // 	RenderGOCPlayerParameterInspector(static_cast<app::player::GOCPlayerParameter&>(component));
-	 // } else if (component.pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
-	 // 	RenderGOCSphereColliderInspector(static_cast<hh::physics::GOCSphereCollider&>(component));
-	 // } else if (component.pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
-	 // 	RenderGOCBoxColliderInspector(static_cast<hh::physics::GOCBoxCollider&>(component));
-	 // } else if (component.pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
-	 // 	RenderGOCCapsuleColliderInspector(static_cast<hh::physics::GOCCapsuleCollider&>(component));
-	 // } else if (component.pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
-	 // 	RenderGOCCylinderColliderInspector(static_cast<hh::physics::GOCCylinderCollider&>(component));
-	 // } else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass()) {
-	 // 	RenderGOCAnimatorInspector(static_cast<hh::anim::GOCAnimator&>(component));
-	 // } else if (component.pStaticClass == app::game::GOCEventCollision::GetClass()) {
-	 // 	RenderGOCEventCollisionInspector(static_cast<app::game::GOCEventCollision&>(component));
-	 // } else if (component.pStaticClass == app::player::GOCPlayerKinematicParams::GetClass()) {
-	 // 	RenderGOCPlayerKinematicParamsInspector(static_cast<app::player::GOCPlayerKinematicParams&>(component));
-	 // } else if (component.pStaticClass == app::player::GOCPlayerBlackboard::GetClass()) {
-	 // 	RenderGOCPlayerBlackboardInspector(static_cast<app::player::GOCPlayerBlackboard&>(component));
-	 // } else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass()) {
-	 // 	RenderGOCCameraInspector(static_cast<app_cmn::camera::GOCCamera&>(component));
-	 } else {
-		 ImGui::Text("Inspector for this component not yet implemented");
-	 }
+	if (result) {
+		RenderComponentInspector(static_cast<T&>(service));
+	}
+
+	return result;
 }
+
+template<typename = InspectableComponents>
+class ComponentIterator;
+template<typename... T>
+class ComponentIterator<std::tuple<T...>> {
+public:
+	static void Render(hh::game::GOComponent& service) {
+		(RenderComponentInspectorT<T>(service) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
+	}
+};
 
 ObjectInspector::ObjectInspector(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : CompatibleObject{ allocator }, objectInspection{ objectInspection }
 {
@@ -78,7 +105,7 @@ void ObjectInspector::Render() {
 							snprintf(title, 200, "%s (%s)", component->pStaticClass->pName, component->pStaticClass->category);
 
 							if (ImGui::CollapsingHeader(title))
-								RenderComponentInspector(*component);
+								ComponentIterator<>::Render(*component);
 
 							ImGui::PopID();
 						}

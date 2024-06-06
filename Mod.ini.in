@@ -12,6 +12,6 @@ ID="angryzor.devtools"
 IncludeDir0="."
 IncludeDirCount=1
 DependsCount=0
-DLLFile="devtools.dll"
+DLLFile="${DEVTOOLS_TARGET}.dll"
 CodeFile=""
 ConfigSchemaFile=""

@@ -1,4 +1,5 @@
 #include "LevelInfo.h"
+#include <ui/common/editors/LevelInfo.h>
 
 void RenderGameServiceInspector(app::level::LevelInfo& service)
 {

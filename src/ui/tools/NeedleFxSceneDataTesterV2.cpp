@@ -55,53 +55,53 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 
 			if (ImGui::Checkbox("Set Scene Config", &setConfig)) {
 				if (setConfig)
-					fxParamManager->AddNeedleFxSceneConfigInterpolationJob(rootJobId, &resource->reflectionData->config, 20000, 0.0f);
+					fxParamManager->AddNeedleFxSceneConfigInterpolationJob(rootJobId, &resource->GetData()->config, 20000, 0.0f);
 				else
 					fxParamManager->RemoveNeedleFxSceneConfigInterpolationJob(rootJobId, 0.0f);
 			}
 
 			if (setConfig) {
-				fxParamManager->UpdateNeedleFxSceneConfigInterpolationJob(rootJobId, &resource->reflectionData->config);
+				fxParamManager->UpdateNeedleFxSceneConfigInterpolationJob(rootJobId, &resource->GetData()->config);
 			}
 
 			if (ImGui::Checkbox("Set NeedleFX Parameter", &setParam)) {
 				if (setParam)
-					fxParamManager->AddNeedleFxParameterInterpolationJob(rootJobId, &resource->reflectionData->items[itemId], 20000, 0.0f);
+					fxParamManager->AddNeedleFxParameterInterpolationJob(rootJobId, &resource->GetData()->items[itemId], 20000, 0.0f);
 				else
 					fxParamManager->RemoveNeedleFxParameterInterpolationJob(rootJobId, 0.0f);
 			}
 
 			if (setParam) {
-				fxParamManager->UpdateNeedleFxParameterInterpolationJob(rootJobId, &resource->reflectionData->items[itemId]);
+				fxParamManager->UpdateNeedleFxParameterInterpolationJob(rootJobId, &resource->GetData()->items[itemId]);
 
 				ImGui::Indent();
 				ImGui::SliderInt("Item ID", &itemId, 0, 15);
 
 				if (ImGui::Checkbox("Overlay time parameters", &setTimeParam)) {
 					if (setTimeParam) {
-						app::rfl::FxAtmosphereParameter atmosphereParam;
-						RESOLVE_STATIC_VARIABLE(app::rfl::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
-						atmosphereParam.enable = resource->reflectionData->items[itemId].atmosphere.enable;
-						atmosphereParam.sunParam = resource->reflectionData->items[itemId].atmosphere.sunParam;
-						atmosphereParam.moonParam = resource->reflectionData->items[itemId].atmosphere.moonParam;
-						atmosphereParam.commonSkyParam = resource->reflectionData->timeItems[timeItemId].atmosphere.commonSkyParam;
-						atmosphereParam.brunetonSkyParam = resource->reflectionData->timeItems[timeItemId].atmosphere.brunetonSkyParam;
-						atmosphereParam.sebastienSkyParam = resource->reflectionData->timeItems[timeItemId].atmosphere.sebastienSkyParam;
-						atmosphereParam.cloudParam = resource->reflectionData->timeItems[timeItemId].atmosphere.cloudParam;
-						atmosphereParam.crepuscularRayParam = resource->reflectionData->timeItems[timeItemId].atmosphere.crepuscularRayParam;
-						atmosphereParam.heightFogParam = resource->reflectionData->timeItems[timeItemId].atmosphere.heightFogParam;
+						hh::needle::FxAtmosphereParameter atmosphereParam;
+						RESOLVE_STATIC_VARIABLE(hh::needle::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
+						atmosphereParam.enable = resource->GetData()->items[itemId].atmosphere.enable;
+						atmosphereParam.sunParam = resource->GetData()->items[itemId].atmosphere.sunParam;
+						atmosphereParam.moonParam = resource->GetData()->items[itemId].atmosphere.moonParam;
+						atmosphereParam.commonSkyParam = resource->GetData()->timeItems[timeItemId].atmosphere.commonSkyParam;
+						atmosphereParam.brunetonSkyParam = resource->GetData()->timeItems[timeItemId].atmosphere.brunetonSkyParam;
+						atmosphereParam.sebastienSkyParam = resource->GetData()->timeItems[timeItemId].atmosphere.sebastienSkyParam;
+						atmosphereParam.cloudParam = resource->GetData()->timeItems[timeItemId].atmosphere.cloudParam;
+						atmosphereParam.crepuscularRayParam = resource->GetData()->timeItems[timeItemId].atmosphere.crepuscularRayParam;
+						atmosphereParam.heightFogParam = resource->GetData()->timeItems[timeItemId].atmosphere.heightFogParam;
 
 						fxParamManager->mutex.Lock();
-						fxParamManager->paramInterpolators.bloomInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].bloom, 0xFFFFFFFE, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.cameraControlInterpolator->AddJob(timeJobId, timeUseEventCameraControl ? &resource->reflectionData->timeItems[timeItemId].cameraControlEvent : &resource->reflectionData->timeItems[timeItemId].cameraControl, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.tonemapInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].tonemap, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.colorContrastInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].colorContrast, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.lightscatteringInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].lightscattering, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.effectInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].effect, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.ssGodrayInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].ssGodray, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.godrayInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].godray, 0xFFFFFFFC, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.heatHazeInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].heatHaze, 0xFFFFFFFF, 20001, 0.0f, -1);
-						fxParamManager->paramInterpolators.weatherInterpolator->AddJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].weather, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.bloomInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].bloom, 0xFFFFFFFE, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.cameraControlInterpolator->AddJob(timeJobId, timeUseEventCameraControl ? &resource->GetData()->timeItems[timeItemId].cameraControlEvent : &resource->GetData()->timeItems[timeItemId].cameraControl, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.tonemapInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].tonemap, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.colorContrastInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].colorContrast, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.lightscatteringInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].lightscattering, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.effectInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].effect, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.ssGodrayInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].ssGodray, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.godrayInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].godray, 0xFFFFFFFC, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.heatHazeInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].heatHaze, 0xFFFFFFFF, 20001, 0.0f, -1);
+						fxParamManager->paramInterpolators.weatherInterpolator->AddJob(timeJobId, &resource->GetData()->timeItems[timeItemId].weather, 0xFFFFFFFF, 20001, 0.0f, -1);
 						fxParamManager->paramInterpolators.atmosphereInterpolator->AddJob(timeJobId, &atmosphereParam, 0xFFFFFFFF, 20001, 0.0f, -1);
 						fxParamManager->mutex.Unlock();
 					}
@@ -127,29 +127,29 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 					ImGui::SliderInt("Time item ID", &timeItemId, 0, 23);
 					ImGui::Checkbox("Use event camera control setting", &timeUseEventCameraControl);
 
-					app::rfl::FxAtmosphereParameter atmosphereParam;
-					RESOLVE_STATIC_VARIABLE(app::rfl::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
-					atmosphereParam.enable = resource->reflectionData->items[itemId].atmosphere.enable;
-					atmosphereParam.sunParam = resource->reflectionData->items[itemId].atmosphere.sunParam;
-					atmosphereParam.moonParam = resource->reflectionData->items[itemId].atmosphere.moonParam;
-					atmosphereParam.commonSkyParam = resource->reflectionData->timeItems[timeItemId].atmosphere.commonSkyParam;
-					atmosphereParam.brunetonSkyParam = resource->reflectionData->timeItems[timeItemId].atmosphere.brunetonSkyParam;
-					atmosphereParam.sebastienSkyParam = resource->reflectionData->timeItems[timeItemId].atmosphere.sebastienSkyParam;
-					atmosphereParam.cloudParam = resource->reflectionData->timeItems[timeItemId].atmosphere.cloudParam;
-					atmosphereParam.crepuscularRayParam = resource->reflectionData->timeItems[timeItemId].atmosphere.crepuscularRayParam;
-					atmosphereParam.heightFogParam = resource->reflectionData->timeItems[timeItemId].atmosphere.heightFogParam;
+					hh::needle::FxAtmosphereParameter atmosphereParam;
+					RESOLVE_STATIC_VARIABLE(hh::needle::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
+					atmosphereParam.enable = resource->GetData()->items[itemId].atmosphere.enable;
+					atmosphereParam.sunParam = resource->GetData()->items[itemId].atmosphere.sunParam;
+					atmosphereParam.moonParam = resource->GetData()->items[itemId].atmosphere.moonParam;
+					atmosphereParam.commonSkyParam = resource->GetData()->timeItems[timeItemId].atmosphere.commonSkyParam;
+					atmosphereParam.brunetonSkyParam = resource->GetData()->timeItems[timeItemId].atmosphere.brunetonSkyParam;
+					atmosphereParam.sebastienSkyParam = resource->GetData()->timeItems[timeItemId].atmosphere.sebastienSkyParam;
+					atmosphereParam.cloudParam = resource->GetData()->timeItems[timeItemId].atmosphere.cloudParam;
+					atmosphereParam.crepuscularRayParam = resource->GetData()->timeItems[timeItemId].atmosphere.crepuscularRayParam;
+					atmosphereParam.heightFogParam = resource->GetData()->timeItems[timeItemId].atmosphere.heightFogParam;
 
 					fxParamManager->mutex.Lock();
-					fxParamManager->paramInterpolators.bloomInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].bloom);
-					fxParamManager->paramInterpolators.cameraControlInterpolator->UpdateJob(timeJobId, timeUseEventCameraControl ? &resource->reflectionData->timeItems[timeItemId].cameraControlEvent : &resource->reflectionData->timeItems[timeItemId].cameraControl);
-					fxParamManager->paramInterpolators.tonemapInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].tonemap);
-					fxParamManager->paramInterpolators.colorContrastInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].colorContrast);
-					fxParamManager->paramInterpolators.lightscatteringInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].lightscattering);
-					fxParamManager->paramInterpolators.effectInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].effect);
-					fxParamManager->paramInterpolators.ssGodrayInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].ssGodray);
-					fxParamManager->paramInterpolators.godrayInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].godray);
-					fxParamManager->paramInterpolators.heatHazeInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].heatHaze);
-					fxParamManager->paramInterpolators.weatherInterpolator->UpdateJob(timeJobId, &resource->reflectionData->timeItems[timeItemId].weather);
+					fxParamManager->paramInterpolators.bloomInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].bloom);
+					fxParamManager->paramInterpolators.cameraControlInterpolator->UpdateJob(timeJobId, timeUseEventCameraControl ? &resource->GetData()->timeItems[timeItemId].cameraControlEvent : &resource->GetData()->timeItems[timeItemId].cameraControl);
+					fxParamManager->paramInterpolators.tonemapInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].tonemap);
+					fxParamManager->paramInterpolators.colorContrastInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].colorContrast);
+					fxParamManager->paramInterpolators.lightscatteringInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].lightscattering);
+					fxParamManager->paramInterpolators.effectInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].effect);
+					fxParamManager->paramInterpolators.ssGodrayInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].ssGodray);
+					fxParamManager->paramInterpolators.godrayInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].godray);
+					fxParamManager->paramInterpolators.heatHazeInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].heatHaze);
+					fxParamManager->paramInterpolators.weatherInterpolator->UpdateJob(timeJobId, &resource->GetData()->timeItems[timeItemId].weather);
 					fxParamManager->paramInterpolators.atmosphereInterpolator->UpdateJob(timeJobId, &atmosphereParam);
 					fxParamManager->mutex.Unlock();
 
@@ -158,30 +158,30 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 
 				if (ImGui::Checkbox("Overlay weather parameters", &setWeatherParam)) {
 					if (setWeatherParam) {
-						app::rfl::FxAtmosphereParameter atmosphereParam;
-						RESOLVE_STATIC_VARIABLE(app::rfl::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
-						atmosphereParam.enable = resource->reflectionData->items[itemId].atmosphere.enable;
-						atmosphereParam.sunParam = resource->reflectionData->items[itemId].atmosphere.sunParam;
-						atmosphereParam.moonParam = resource->reflectionData->items[itemId].atmosphere.moonParam;
-						atmosphereParam.commonSkyParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.commonSkyParam;
-						atmosphereParam.brunetonSkyParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.brunetonSkyParam;
-						atmosphereParam.sebastienSkyParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.sebastienSkyParam;
-						atmosphereParam.cloudParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.cloudParam;
-						atmosphereParam.crepuscularRayParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.crepuscularRayParam;
-						atmosphereParam.heightFogParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.heightFogParam;
+						hh::needle::FxAtmosphereParameter atmosphereParam;
+						RESOLVE_STATIC_VARIABLE(hh::needle::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
+						atmosphereParam.enable = resource->GetData()->items[itemId].atmosphere.enable;
+						atmosphereParam.sunParam = resource->GetData()->items[itemId].atmosphere.sunParam;
+						atmosphereParam.moonParam = resource->GetData()->items[itemId].atmosphere.moonParam;
+						atmosphereParam.commonSkyParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.commonSkyParam;
+						atmosphereParam.brunetonSkyParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.brunetonSkyParam;
+						atmosphereParam.sebastienSkyParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.sebastienSkyParam;
+						atmosphereParam.cloudParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.cloudParam;
+						atmosphereParam.crepuscularRayParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.crepuscularRayParam;
+						atmosphereParam.heightFogParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.heightFogParam;
 
 						fxParamManager->mutex.Lock();
-						fxParamManager->paramInterpolators.bloomInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].bloom, 0xFFFFFFFE, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.cameraControlInterpolator->AddJob(weatherJobId, weatherUseEventCameraControl ? &resource->reflectionData->weatherItems[weatherItemId].cameraControlEvent : &resource->reflectionData->weatherItems[weatherItemId].cameraControl, 0x10, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.tonemapInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].tonemap, 0x3, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.colorContrastInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].colorContrast, 0xFFFFFFFF, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.lightscatteringInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].lightscattering, 0xFFFFFFFF, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.effectInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].effect, 0x4, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.ssGodrayInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].ssGodray, 0xFFFFFFFF, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.godrayInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].godray, 0xFFFFFFFC, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.heatHazeInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].heatHaze, 0xFFFFFFFF, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.weatherInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].weather, 0xE, 20002, 0.0f, -1);
-						fxParamManager->paramInterpolators.windInterpolator->AddJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].wind, 0xFFFFFFFF, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.bloomInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].bloom, 0xFFFFFFFE, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.cameraControlInterpolator->AddJob(weatherJobId, weatherUseEventCameraControl ? &resource->GetData()->weatherItems[weatherItemId].cameraControlEvent : &resource->GetData()->weatherItems[weatherItemId].cameraControl, 0x10, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.tonemapInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].tonemap, 0x3, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.colorContrastInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].colorContrast, 0xFFFFFFFF, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.lightscatteringInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].lightscattering, 0xFFFFFFFF, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.effectInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].effect, 0x4, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.ssGodrayInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].ssGodray, 0xFFFFFFFF, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.godrayInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].godray, 0xFFFFFFFC, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.heatHazeInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].heatHaze, 0xFFFFFFFF, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.weatherInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].weather, 0xE, 20002, 0.0f, -1);
+						fxParamManager->paramInterpolators.windInterpolator->AddJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].wind, 0xFFFFFFFF, 20002, 0.0f, -1);
 						fxParamManager->paramInterpolators.atmosphereInterpolator->AddJob(weatherJobId, &atmosphereParam, 0xFF28, 20002, 0.0f, -1);
 						fxParamManager->mutex.Unlock();
 					}
@@ -208,30 +208,30 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 					ImGui::SliderInt("Weather item ID", &weatherItemId, 0, 6);
 					ImGui::Checkbox("Use event camera control setting", &weatherUseEventCameraControl);
 
-					app::rfl::FxAtmosphereParameter atmosphereParam;
-					RESOLVE_STATIC_VARIABLE(app::rfl::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
-					atmosphereParam.enable = resource->reflectionData->items[itemId].atmosphere.enable;
-					atmosphereParam.sunParam = resource->reflectionData->items[itemId].atmosphere.sunParam;
-					atmosphereParam.moonParam = resource->reflectionData->items[itemId].atmosphere.moonParam;
-					atmosphereParam.commonSkyParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.commonSkyParam;
-					atmosphereParam.brunetonSkyParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.brunetonSkyParam;
-					atmosphereParam.sebastienSkyParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.sebastienSkyParam;
-					atmosphereParam.cloudParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.cloudParam;
-					atmosphereParam.crepuscularRayParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.crepuscularRayParam;
-					atmosphereParam.heightFogParam = resource->reflectionData->weatherItems[weatherItemId].atmosphere.heightFogParam;
+					hh::needle::FxAtmosphereParameter atmosphereParam;
+					RESOLVE_STATIC_VARIABLE(hh::needle::FxAtmosphereParameter::typeInfo).m_fpConstruct(&atmosphereParam, GetAllocator());
+					atmosphereParam.enable = resource->GetData()->items[itemId].atmosphere.enable;
+					atmosphereParam.sunParam = resource->GetData()->items[itemId].atmosphere.sunParam;
+					atmosphereParam.moonParam = resource->GetData()->items[itemId].atmosphere.moonParam;
+					atmosphereParam.commonSkyParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.commonSkyParam;
+					atmosphereParam.brunetonSkyParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.brunetonSkyParam;
+					atmosphereParam.sebastienSkyParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.sebastienSkyParam;
+					atmosphereParam.cloudParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.cloudParam;
+					atmosphereParam.crepuscularRayParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.crepuscularRayParam;
+					atmosphereParam.heightFogParam = resource->GetData()->weatherItems[weatherItemId].atmosphere.heightFogParam;
 
 					fxParamManager->mutex.Lock();
-					fxParamManager->paramInterpolators.bloomInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].bloom);
-					fxParamManager->paramInterpolators.cameraControlInterpolator->UpdateJob(weatherJobId, weatherUseEventCameraControl ? &resource->reflectionData->weatherItems[weatherItemId].cameraControlEvent : &resource->reflectionData->weatherItems[weatherItemId].cameraControl);
-					fxParamManager->paramInterpolators.tonemapInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].tonemap);
-					fxParamManager->paramInterpolators.colorContrastInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].colorContrast);
-					fxParamManager->paramInterpolators.lightscatteringInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].lightscattering);
-					fxParamManager->paramInterpolators.effectInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].effect);
-					fxParamManager->paramInterpolators.ssGodrayInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].ssGodray);
-					fxParamManager->paramInterpolators.godrayInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].godray);
-					fxParamManager->paramInterpolators.heatHazeInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].heatHaze);
-					fxParamManager->paramInterpolators.weatherInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].weather);
-					fxParamManager->paramInterpolators.windInterpolator->UpdateJob(weatherJobId, &resource->reflectionData->weatherItems[weatherItemId].wind);
+					fxParamManager->paramInterpolators.bloomInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].bloom);
+					fxParamManager->paramInterpolators.cameraControlInterpolator->UpdateJob(weatherJobId, weatherUseEventCameraControl ? &resource->GetData()->weatherItems[weatherItemId].cameraControlEvent : &resource->GetData()->weatherItems[weatherItemId].cameraControl);
+					fxParamManager->paramInterpolators.tonemapInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].tonemap);
+					fxParamManager->paramInterpolators.colorContrastInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].colorContrast);
+					fxParamManager->paramInterpolators.lightscatteringInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].lightscattering);
+					fxParamManager->paramInterpolators.effectInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].effect);
+					fxParamManager->paramInterpolators.ssGodrayInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].ssGodray);
+					fxParamManager->paramInterpolators.godrayInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].godray);
+					fxParamManager->paramInterpolators.heatHazeInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].heatHaze);
+					fxParamManager->paramInterpolators.weatherInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].weather);
+					fxParamManager->paramInterpolators.windInterpolator->UpdateJob(weatherJobId, &resource->GetData()->weatherItems[weatherItemId].wind);
 					fxParamManager->paramInterpolators.atmosphereInterpolator->UpdateJob(weatherJobId, &atmosphereParam);
 					fxParamManager->mutex.Unlock();
 
@@ -248,8 +248,8 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 			auto* res = *static_cast<ManagedResource**>(payload->Data);
 			const ResourceTypeInfo* typeInfo = &res->GetClass();
 
-			if (typeInfo == ResReflection<void>::GetTypeInfo())
-				resource = static_cast<ResReflection<app::rfl::NeedleFxSceneData>*>(res);
+			if (typeInfo == ResReflection::GetTypeInfo())
+				resource = static_cast<ResReflectionT<hh::needle::NeedleFxSceneData>*>(res);
 		}
 		ImGui::EndDragDropTarget();
 	}

@@ -14,31 +14,22 @@ target_sources(${DEVTOOLS_TARGET}
         reflection/serialization/ReflectionSerializer.cpp
         reflection/serialization/resource-rfls/ResObjectWorld.cpp
         ui/common/editors/Basic.cpp
-        # ui/common/editors/Camera.cpp
         ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
-        # ui/common/editors/Needle.cpp
-        # ui/common/editors/SurfRide.cpp
         ui/common/viewers/Basic.cpp
         ui/common/viewers/ObjectData.cpp
         ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
-        # ui/common/inputs/Needle.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/Textures.cpp
         ui/common/Theme.cpp
         ui/common/Translations.cpp
         ui/Context.cpp
-        ui/Input.cpp
-        # ui/core-services/GameUpdaterInspector.cpp
-        # ui/core-services/GraphicsContextInspector.cpp
-        # ui/core-services/RenderManagerInspector.cpp
-        # ui/core-services/RenderingEngineInspector.cpp
-        # ui/core-services/MemoryInspector.cpp
+        ui/input/Input.cpp
+        ui/input/${DEVTOOLS_TARGET_SDK}/Input.cpp
         ui/Desktop.cpp
-        # ui/game-modes/GameModeInspector.cpp
         ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
         ui/game-services/game-service-inspectors/ObjectWorld.cpp
         ui/game-services/game-service-inspectors/StageInfo.cpp
@@ -49,25 +40,17 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/LevelEditor/ObjectLibrary.cpp
         ui/operation-modes/LevelEditor/SetObjectList.cpp
         ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.cpp
+        ui/operation-modes/ObjectInspection/component-inspectors/GOCCollider.cpp
         ui/operation-modes/ObjectInspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.cpp
         ui/operation-modes/ObjectInspection/ObjectInspection.cpp
         ui/operation-modes/ObjectInspection/ObjectInspector.cpp
         ui/operation-modes/ObjectInspection/ObjectList.cpp
-        # ui/operation-modes/SurfRideEditor/Timeline.cpp
-        # ui/operation-modes/SurfRideEditor/ProjectTree.cpp
-        # ui/operation-modes/SurfRideEditor/ElementInspector.cpp
-        # ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
         ui/operation-modes/OperationMode.cpp
-        # ui/resources/editors/ResEffectEditor.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
-        # ui/resources/editors/ResMaterialEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
-        # ui/resources/editors/ResSurfRideProjectEditor.cpp
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
-        # ui/tools/NeedleFxSceneDataTester.cpp
-        # ui/tools/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
@@ -106,7 +89,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/Translations.h
         ui/common/TreeView.h
         ui/Context.h
-        ui/Input.h
+        ui/input/Input.h
         ui/core-services/GameUpdaterInspector.h
         ui/core-services/GraphicsContextInspector.h
         ui/core-services/RenderManagerInspector.h
@@ -157,3 +140,37 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/RflDiff.h
         utilities/CompatibleObject.h
 )
+
+if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/game-services/game-service-inspectors/LevelInfo.cpp
+            ui/game-services/game-service-inspectors/CameraService.cpp
+            ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
+            ui/game-services/game-service-inspectors/TerrainManager.cpp
+            ui/tools/NeedleFxSceneDataTester.cpp
+            ui/tools/NeedleFxSceneDataTesterV2.cpp
+            ui/common/editors/Camera.cpp
+            ui/common/editors/Needle.cpp
+            ui/common/editors/SurfRide.cpp
+            ui/common/inputs/Needle.cpp
+            ui/core-services/GameUpdaterInspector.cpp
+            ui/core-services/GraphicsContextInspector.cpp
+            ui/core-services/RenderManagerInspector.cpp
+            ui/core-services/RenderingEngineInspector.cpp
+            ui/core-services/MemoryInspector.cpp
+            ui/game-modes/GameModeInspector.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCEvent.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCCamera.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCAnimator.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCPlayerBlackboard.cpp
+            ui/operation-modes/ObjectInspection/component-inspectors/GOCPlayerKinematicParams.cpp
+            ui/operation-modes/SurfRideEditor/Timeline.cpp
+            ui/operation-modes/SurfRideEditor/ProjectTree.cpp
+            ui/operation-modes/SurfRideEditor/ElementInspector.cpp
+            ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
+            ui/resources/editors/ResEffectEditor.cpp
+            ui/resources/editors/ResMaterialEditor.cpp
+            ui/resources/editors/ResSurfRideProjectEditor.cpp
+        )
+endif()

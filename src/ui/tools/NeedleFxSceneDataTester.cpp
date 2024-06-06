@@ -58,9 +58,9 @@ void NeedleFxSceneDataTester::RenderContents()
 
 			auto* renderingEngine = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice();
 			if (setConfig)
-				renderingEngine->SetSceneConfig(&resource->reflectionData->config);
+				renderingEngine->SetSceneConfig(&resource->GetData()->config);
 			if (setParam)
-				renderingEngine->SetFXParameter(&resource->reflectionData->items[itemId], 0);
+				renderingEngine->SetFXParameter(&resource->GetData()->items[itemId], 0);
 		}
 	}
 	ImGui::EndChild();
@@ -70,8 +70,8 @@ void NeedleFxSceneDataTester::RenderContents()
 			auto* res = *static_cast<ManagedResource**>(payload->Data);
 			const ResourceTypeInfo* typeInfo = &res->GetClass();
 
-			if (typeInfo == ResReflection<void>::GetTypeInfo())
-				resource = static_cast<ResReflection<app::rfl::NeedleFxSceneData>*>(res);
+			if (typeInfo == ResReflection::GetTypeInfo())
+				resource = static_cast<ResReflectionT<hh::needle::NeedleFxSceneData>*>(res);
 		}
 		ImGui::EndDragDropTarget();
 	}

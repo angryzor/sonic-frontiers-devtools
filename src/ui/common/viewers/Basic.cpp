@@ -33,9 +33,13 @@ void Viewer(const char* label, const char* str)
 	ImGui::Text("%s: %s", label, str);
 }
 
-void Viewer(const char* label, const hh::game::ObjectId& obj)
+void Viewer(const char* label, const hh::game::ObjectId& id)
 {
-	ImGui::Text("%s: %x", label, obj.id);
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	ImGui::Text("%s: %08x", label, id.id);
+#else
+	ImGui::Text("%s: %016zx%016zx", label, id.groupId, id.objectId);
+#endif
 }
 
 void Viewer(const char* label, void* const& obj) {

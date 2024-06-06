@@ -4,7 +4,7 @@
 #include "ObjectList.h"
 #include "ObjectInspector.h"
 
-class ObjectInspection : public OperationMode {//, DebugRenderable{
+class ObjectInspection : public OperationMode, DebugRenderable {
     ObjectList objectList{ GetAllocator(), *this };
     ObjectInspector objectInspector{ GetAllocator(), *this };
     ImGuizmo::OPERATION gizmoOperation{ ImGuizmo::TRANSLATE };
@@ -18,7 +18,7 @@ public:
     csl::ut::MoveArray<hh::fnd::Reference<hh::game::GameObject>> focusedObjects{ GetAllocator() };
 
     virtual void Render() override;
-    //virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) override;
+    virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) override;
 
     void DeleteFocusedObject();
     void HandleObjectSelection();
