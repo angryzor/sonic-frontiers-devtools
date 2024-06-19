@@ -94,6 +94,7 @@ class SettingsManager
         bool debugRenderingRenderColliders{ true };
         bool debugRenderingRenderOcclusionCapsules{ true };
         uint8_t debugRenderingGOCVisualDebugDrawOpacity{ 80 };
+        float debugRenderingLevelEditorDebugBoxScale{ 0.3f };
 
         bool operator==(const Settings& other) const;
         bool operator!=(const Settings& other) const;

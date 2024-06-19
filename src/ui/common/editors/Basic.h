@@ -15,7 +15,7 @@ static bool Editor(const char* label, Eigen::Matrix<T, Rows, Cols>& mat) {
 
 	ImGui::PushID(label);
 	for (int i = 0; i < Cols; i++) {
-		ImGui::PushID(i++);
+		ImGui::PushID(i);
 		edited |= DragScalar(label, cols[i]);
 		ImGui::PopID();
 	}
@@ -50,11 +50,51 @@ static bool Editor(const char* label, T*& gameObject) {
 	return Editor(label, reinterpret_cast<hh::game::GameObject*&>(gameObject));
 }
 
+template<typename T, std::enable_if_t<std::is_base_of_v<hh::game::GameObject, T>, bool> = true>
+static bool Editor(const char* label, hh::fnd::Handle<T>& hGameObject) {
+	bool edited{};
+
+	auto* gameObject = hh::game::GameObjectSystem::GetGameObjectByHandle(hGameObject);
+
+	if (edited = Editor(label, gameObject))
+		hGameObject = gameObject;
+
+	return edited;
+}
+
+template<typename T, typename S>
+static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
+	bool edited{};
+
+	if (ImGui::TreeNode("MoveArray", "%s[0..]", label)) {
+		for (int i = 0; i < arr.size(); i++) {
+			ImGui::PushID(i);
+			if (ImGui::Button("x"))
+				arr.remove(i);
+			ImGui::SameLine();
+
+			char indexedName[200];
+			snprintf(indexedName, sizeof(indexedName), "%s[%d]", label, i);
+
+			edited |= Editor(indexedName, arr[i]);
+
+			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Add item"))
+			arr.emplace_back();
+
+		ImGui::TreePop();
+	}
+
+	return edited;
+}
+
 template<typename T, size_t Len>
 static bool Editor(const char* label, T(&arr)[Len]) {
 	bool edited{};
 	char name[200];
-	snprintf(name, sizeof(name), "%s[0..%zd]", label, Len);
+	snprintf(name, sizeof(name), "%s[0..%zd]", label, Len - 1);
 
 	if (ImGui::TreeNode(name)) {
 		for (size_t i = 0; i < Len; i++) {

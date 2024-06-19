@@ -48,7 +48,7 @@ const RflClass* handleSpawnerData(void* obj) {
 }
 
 RflClassMember componentDataMembers[]{
-    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_VOID, 0, 0, offsetof(ComponentData, unk1), nullptr },
+    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ComponentData, unk1), nullptr },
     { "type", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ComponentData, type), nullptr },
     { "size", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_VOID, 0, 0, offsetof(ComponentData, size), nullptr },
     { "data", reinterpret_cast<RflClass*> (handleComponentDataData), nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_VOID, 0, 0, offsetof(ComponentData, data), nullptr },
@@ -70,7 +70,7 @@ RflClassMember componentDataArrayEntryMembers[]{
 RflClass componentDataArrayEntry{ "ComponentDataArrayEntry", nullptr, 8, nullptr, 0, componentDataArrayEntryMembers, 1, nullptr };
 
 RflClassMember objectDataMembers[]{
-    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, flags), nullptr },
+    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectData, flags), nullptr },
     { "gameObjectClass", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, gameObjectClass), nullptr },
     { "name", nullptr, nullptr, RflClassMember::TYPE_STRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, name), nullptr },
     { "id", nullptr, nullptr, RflClassMember::TYPE_OBJECT_ID, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, id), nullptr },
@@ -90,9 +90,9 @@ RflClassMember objectDataArrayEntryMembers[]{
 RflClass objectDataArrayEntry{ "ObjectDataArrayEntry", nullptr, 8, nullptr, 0, objectDataArrayEntryMembers, 1, nullptr };
 
 RflClassMember resObjWorldMembers[]{
-    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, unk1), nullptr },
-    { "unk2", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, unk2), nullptr },
-    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT8, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectWorldData, flags), nullptr },
+    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectWorldData, unk1), nullptr },
+    { "unk2", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectWorldData, unk2), nullptr },
+    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT8, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectWorldData, flags), nullptr },
     { "objects", &objectDataArrayEntry, nullptr, RflClassMember::TYPE_ARRAY, RflClassMember::TYPE_STRUCT, 0, 0, offsetof(ObjectWorldData, objects), nullptr },
 };
 

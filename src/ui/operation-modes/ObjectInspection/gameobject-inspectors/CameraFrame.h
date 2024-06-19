@@ -1,3 +1,3 @@
 #pragma once
 
-void GameObjectInspector(app_cmn::camera::CameraFrame& cameraFrame);
+void RenderGameObjectInspector(app_cmn::camera::CameraFrame& cameraFrame);

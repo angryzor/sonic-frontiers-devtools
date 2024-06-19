@@ -64,5 +64,19 @@ static int VariableStringResizeCallback(ImGuiInputTextCallbackData* data)
 bool InputText(const char* label, csl::ut::VariableString& str, ImGuiInputTextFlags flags) {
 	auto& rstr = static_cast<ResizeableVariableString&>(str);
 
-	return ImGui::InputText(label, rstr.c_str(), rstr.size() + 1, flags | ImGuiInputTextFlags_CallbackResize, VariableStringResizeCallback, &rstr);
+	bool edited = ImGui::InputText(label, rstr.c_str(), rstr.size() + 1, flags | ImGuiInputTextFlags_CallbackResize, VariableStringResizeCallback, &rstr);
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("Resource")) {
+			auto* resource = *static_cast<hh::fnd::ManagedResource**>(payload->Data);
+
+			if (!str.GetAllocator())
+				str.Set(resource->GetName(), -1, hh::fnd::MemoryRouter::GetModuleAllocator());
+			else
+				str.Set(resource->GetName());
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	return edited;
 }

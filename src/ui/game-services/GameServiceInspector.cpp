@@ -25,6 +25,7 @@ typedef std::tuple<
 #include "game-service-inspectors/CameraService.h"
 #include "game-service-inspectors/GameModeResourceManager.h"
 #include "game-service-inspectors/TerrainManager.h"
+#include "game-service-inspectors/SoundDirector.h"
 
 typedef std::tuple<
 	app::gfx::FxParamManager,
@@ -34,7 +35,8 @@ typedef std::tuple<
 	hh::game::CameraManager,
 	app::camera::CameraService,
 	app::game::GameModeResourceManager,
-	app::trr::TerrainManager
+	app::trr::TerrainManager,
+	app::snd::SoundDirector
 > InspectableServices;
 
 #endif
@@ -45,7 +47,9 @@ bool RenderServiceInspector(hh::game::GameService& service) {
 	bool result{ service.pStaticClass == T::GetClass() };
 	
 	if (result) {
+		ImGui::PushID(&service);
 		RenderGameServiceInspector(static_cast<T&>(service));
+		ImGui::PopID();
 	}
 
 	return result;

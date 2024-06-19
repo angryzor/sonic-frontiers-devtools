@@ -1,6 +1,8 @@
 #include "ObjCameraVolume.h"
+#include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Basic.h>
 
-void GameObjectInspector(app_cmn::camera::ObjCameraVolume& cameraVolume) {
+void RenderGameObjectInspector(app::ObjCameraVolume& cameraVolume) {
     ImGui::SeparatorText("Players inside volume");
     for (size_t i = 0; i < std::min(8ull, cameraVolume.enterCountPerPlayer.size()); i++) {
         char txt[20];

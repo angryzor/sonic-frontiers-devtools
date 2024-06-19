@@ -5,14 +5,14 @@
 
 struct WorkQueueEntry {
 	size_t id;
-	void* ptr;
-	void* parentPtr;
+	const void* ptr;
+	const void* parentPtr;
 	const hh::fnd::RflClassMember* member;
 	size_t size;
 	size_t dbgUnalignedOffset;
 	size_t dbgExpectedOffset;
 
-	WorkQueueEntry(void* ptr, void* parentPtr, const hh::fnd::RflClassMember* member, size_t size) : ptr{ ptr }, parentPtr{ parentPtr }, member{ member }, size{ size }, dbgExpectedOffset{ 0 } {}
+	WorkQueueEntry(const void* ptr, const void* parentPtr, const hh::fnd::RflClassMember* member, size_t size) : ptr{ ptr }, parentPtr{ parentPtr }, member{ member }, size{ size }, dbgExpectedOffset{ 0 } {}
 };
 
 class ReflectionSerializer : public CompatibleObject {
@@ -23,21 +23,21 @@ class ReflectionSerializer : public CompatibleObject {
 
 	size_t curChunkId;
 	size_t nextFreeAddress;
-	csl::ut::PointerMap<void*, size_t> processedPointers{ GetAllocator() };
+	csl::ut::PointerMap<const void*, size_t> processedPointers{ GetAllocator() };
 	csl::ut::MoveArray<WorkQueueEntry> workQueue{ GetAllocator() };
 
 	size_t EnqueueChunk(WorkQueueEntry chunk);
 	template<typename T>
-	void WriteCast(void* obj) {
-		writer.write_obj<T>(*static_cast<T*>(obj), alignof(T));
+	void WriteCast(const void* obj) {
+		writer.write_obj<T>(*static_cast<const T*>(obj), alignof(T));
 	}
-	void WritePrimitive(void* address, hh::fnd::RflClassMember::Type type);
-	void WriteRflClassMember(void* obj, const hh::fnd::RflClassMember& member);
-	void WriteRflClass(void* obj, const hh::fnd::RflClass& rflClass);
-	void Write(void* obj, const hh::fnd::RflClass& rflClass);
+	void WritePrimitive(const void* address, hh::fnd::RflClassMember::Type type);
+	void WriteRflClassMember(const void* obj, const hh::fnd::RflClassMember& member);
+	void WriteRflClass(const void* obj, const hh::fnd::RflClass& rflClass);
+	void Write(const void* obj, const hh::fnd::RflClass& rflClass);
 	ReflectionSerializer(csl::fnd::IAllocator* allocator, hl::stream& stream);
 public:
-	static void SerializeToFile(const hl::nchar* filename, void* obj, const hh::fnd::RflClass& rflClass);
+	static void SerializeToFile(const hl::nchar* filename, const void* obj, const hh::fnd::RflClass& rflClass);
 	template<typename T>
 	static void SerializeToFile(const hl::nchar* filename, T* obj) {
 		SerializeToFile(filename, obj, RESOLVE_STATIC_VARIABLE(T::rflClass));

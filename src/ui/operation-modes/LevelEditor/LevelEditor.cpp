@@ -18,6 +18,7 @@ namespace app::gfx {
 	};
 }
 
+float LevelEditor::debugBoxScale{ 0.3f };
 LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator }, mt{ std::random_device()() }
 {
 	auto* gameManager = GameManager::GetInstance();
@@ -27,15 +28,15 @@ LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ alloc
 	if (auto* objWorld = gameManager->GetService<ObjectWorld>())
 		objWorld->AddWorldListener(this);
 
-	hh::fnd::Geometry box{ allocator };
-	box.CreateBox({ 0, 0, 0 }, { 0.3, 0.3, 0.3 }, csl::math::Quaternion::Identity);
 
 	targetBox = RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateGraphicsGeometry)(nullptr, allocator);
-	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
-	targetBox->SetColor({ 255, 0, 255, 255 });
+
+	UpdateDebugBoxGeometry();
 }
 
 LevelEditor::~LevelEditor() {
+	ClearClipboard();
+	SetFocusedChunk(nullptr);
 	auto* gameManager = GameManager::GetInstance();
 
 	gameManager->RemoveListener(this);
@@ -67,7 +68,7 @@ void LevelEditor::Render() {
 	objectDataInspector.Render();
 	objectLibrary.Render();
 
-	if (ImGui::Begin("Sonic Forces Devtools")) {
+	if (ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION)) {
 		ImGui::SameLine();
 		ImGui::Checkbox("Render debug comments", &renderDebugComments);
 	}
@@ -81,18 +82,14 @@ void LevelEditor::Render() {
 
 	// Object manipulation
 	if (focusedObjects.size() > 0) {
-		csl::ut::MoveArray<GameObject*> gameObjects{ hh::fnd::MemoryRouter::GetTempAllocator() };
-		for (auto* obj : focusedObjects)
-			if (auto* gameObject = focusedChunk->GetGameObjectByObjectId(obj->id))
-				gameObjects.push_back(gameObject);
-
-		haveSelectionAabb = CalcApproxAabb(gameObjects, selectionAabb);
+		haveSelectionAabb = CalcApproxAabb(focusedChunk, focusedObjects, selectionAabb);
 		HandleObjectManipulation();
 	}
 	else {
 		haveSelectionAabb = false;
 	}
 
+	HandleClipboard();
 	HandleObjectSelection();
 }
 
@@ -148,6 +145,64 @@ void LevelEditor::RenderDebugComments()
 	}
 }
 
+void LevelEditor::ClearClipboard()
+{
+	for (ObjectData* item : clipboard)
+		TerminateObjectData(GetAllocator(), item);
+	clipboard.clear();
+}
+
+void LevelEditor::HandleClipboard()
+{
+	if (focusedObjects.size() > 0 && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_C))
+		HandleCopy();
+	if (placeTargetLayer && ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && ImGui::IsKeyPressed(ImGuiKey_V))
+		HandlePaste();
+}
+
+void LevelEditor::HandleCopy()
+{
+	ClearClipboard();
+	for (ObjectData* item : focusedObjects) {
+		auto* clipboardItem = CopyObject(GetAllocator(), item);
+		clipboard.push_back(clipboardItem);
+	}
+}
+
+void LevelEditor::HandlePaste()
+{
+	csl::ut::MoveArray<ObjectData*> pastedObjs{ GetAllocator() };
+	for (ObjectData* item : clipboard) {
+		auto* pasted = CopyObject(placeTargetLayer->GetAllocator(), item);
+		SpawnObject(pasted);
+		pastedObjs.push_back(pasted);
+	}
+	Select(pastedObjs);
+}
+
+void LevelEditor::RecalculateDependentTransforms(hh::game::ObjectData* objectData)
+{
+	// Copy changes to the live object if any.
+	if (auto* obj = focusedChunk->GetGameObjectByObjectId(objectData->id))
+		if (auto* gocTransform = obj->GetComponent<GOCTransform>())
+			UpdateGOCTransform(*objectData, *gocTransform);
+
+	for (auto* layer : focusedChunk->GetLayers()) {
+		for (auto* child : layer->GetResource()->GetObjects()) {
+			if (child->parentID == objectData->id) {
+				RecalculateAbsoluteTransform(*objectData, *child);
+				RecalculateDependentTransforms(child);
+			}
+		}
+	}
+}
+
+void LevelEditor::RecalculateDependentTransforms()
+{
+	for (auto* obj : focusedObjects)
+		RecalculateDependentTransforms(obj);
+}
+
 void LevelEditor::HandleObjectSelection() {
 	if (Desktop::instance->IsPickerMouseReleased())
 		Select(Desktop::instance->GetPickedObjects());
@@ -156,6 +211,15 @@ void LevelEditor::HandleObjectSelection() {
 		SpawnObject();
 
 	CheckSelectionHotkeys();
+}
+
+void LevelEditor::SetDebugBoxScale(float scale)
+{
+	debugBoxScale = scale;
+	
+	if (Desktop::instance)
+		if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+			levelEditor->UpdateDebugBoxGeometry();
 }
 
 void LevelEditor::HandleObjectManipulation() {
@@ -210,13 +274,9 @@ void LevelEditor::HandleObjectManipulation() {
 				// Update both transforms based on this changed absolute transform.
 				UpdateAbsoluteTransform(pivotTransform * preTransforms[i], *object);
 				i++;
-
-				// Copy changes to the live object if any.
-				if (auto* obj = focusedChunk->GetGameObjectByObjectId(object->id))
-					if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-						UpdateGOCTransform(*object, *gocTransform);
 			}
 
+			RecalculateDependentTransforms();
 			NotifyUpdatedObject();
 		}
 
@@ -257,6 +317,14 @@ void LevelEditor::CheckGizmoHotkeys() {
 	}
 }
 
+void LevelEditor::UpdateDebugBoxGeometry()
+{
+	hh::fnd::Geometry box{ GetAllocator() };
+	box.CreateBox({ 0, 0, 0 }, { debugBoxScale, debugBoxScale, debugBoxScale }, csl::math::Quaternion::Identity);
+	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
+	targetBox->SetColor({ 255, 0, 255, 255 });
+}
+
 void LevelEditor::CheckSelectionHotkeys() {
 	if (ImGui::IsKeyPressed(ImGuiKey_Delete))
 		DeleteFocusedObject();
@@ -269,7 +337,7 @@ void LevelEditor::DeleteFocusedObject() {
 	// Send an early notification as we are going to delete it.
 	NotifyDeselectedObject();
 
-	for (auto& focusedObject : focusedObjects) {
+	for (auto* focusedObject : focusedObjects) {
 		focusedChunk->Despawn(focusedObject);
 		focusedChunk->ShutdownPendingObjects();
 
@@ -295,34 +363,19 @@ struct RangeSpawningData {
 };
 
 void LevelEditor::SpawnObject() {
+	SpawnObject(CreateObject(placeTargetLayer->GetAllocator(), objectClassToPlace, { csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0.0f, 0.0f, 0.0f } }, focusedObjects.size() == 1 ? focusedObjects[0] : nullptr));
+}
+
+void LevelEditor::SpawnObject(ObjectData* objData) {
 	auto* resource = placeTargetLayer->GetResource();
-	auto* alloc = resource->GetAllocator();
 
-	// FIXME: We're leaking memory here because the string does not get freed.
-	auto name = new char[100];
-	snprintf(name, sizeof(name), "%s_%zd", objectClassToPlace->name, resource->GetObjects().size());
-
-	auto* objData = new (alloc) ObjectData{
-		alloc,
-		objectClassToPlace,
-		{ mt() },
-		name,
-		focusedObjects.size() == 1 ? focusedObjects[0] : nullptr,
-		{ csl::math::Position{ *Desktop::instance->GetPickedLocation() }, csl::math::Position{ 0, 0, 0 } }
-	};
-
-	if (auto* objInfoName = static_cast<const char*>(objectClassToPlace->GetAttributeValue("objinfo"))) {
+	if (auto* objInfoName = static_cast<const char*>(hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(objData->gameObjectClass)->GetAttributeValue("objinfo"))) {
 		auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
 		auto* objInfoClass = RESOLVE_STATIC_VARIABLE(ObjInfoRegistry::instance)->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
 		auto* objInfo = objInfoClass->Create(GetAllocator());
 
 		objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
 	}
-
-	// FIXME: We're leaking memory here because the spawnerData does not get freed.
-	auto* rangeSpawningData = new (GetAllocator()) RangeSpawningData{ 500, 200 };
-	auto* rangeSpawning = new (GetAllocator()) ComponentData{ "RangeSpawning", rangeSpawningData };
-	objData->componentData.push_back(rangeSpawning);
 
 	resource->AddObject(objData);
 	focusedChunk->AddWorldObjectStatus(objData, true);
@@ -428,6 +481,7 @@ void LevelEditor::GameServiceRemovedCallback(GameService* service) {
 void LevelEditor::WorldChunkRemovedCallback(ObjectWorldChunk* chunk)
 {
 	if (focusedChunk == chunk) {
+		ClearClipboard();
 		focusedObjects.clear();
 		placeTargetLayer = nullptr;
 		objectClassToPlace = nullptr;
@@ -440,6 +494,7 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 	if (focusedChunk == chunk)
 		return;
 
+	ClearClipboard();
 	placeTargetLayer = nullptr;
 	objectClassToPlace = nullptr;
 	Deselect();
@@ -458,4 +513,59 @@ void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
 		focusedChunk->SpawnByAttribute(GetStatusEternal);
 	}
 	setObjectList.InvalidateTree();
+}
+
+ObjectData* LevelEditor::CreateObject(csl::fnd::IAllocator* allocator, const GameObjectClass* gameObjectClass, ObjectTransformData transform, ObjectData* parentObject)
+{
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	// FIXME: We're leaking memory here because the string does not get freed.
+	auto name = new char[100];
+#else
+	char name[100];
+#endif
+	snprintf(name, 100, "%s_%zd", gameObjectClass->name, mt() % 0x1000000);
+
+	auto* objData = new (allocator) ObjectData{
+		allocator,
+		gameObjectClass,
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		{ mt() },
+#else
+		{ mt(), mt() },
+#endif
+		name,
+		parentObject,
+		transform,
+	};
+
+	objData->componentData.push_back(ComponentData::Create(allocator, "RangeSpawning", RangeSpawningData{ 500, 200 }));
+
+	return objData;
+}
+
+ObjectData* LevelEditor::CopyObject(csl::fnd::IAllocator* allocator, ObjectData* otherObject)
+{
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	// FIXME: We're leaking memory here because the string does not get freed.
+	auto name = new char[100];
+#else
+	char name[100];
+#endif
+	snprintf(name, 100, "%s_%zd", otherObject->gameObjectClass, mt() % 0x1000000);
+
+	auto* objData = new (allocator) ObjectData{
+		allocator,
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		{ mt() },
+#else
+		{ mt(), mt() },
+#endif
+		name,
+		*otherObject,
+	};
+
+	auto* otherRangeSpawning = otherObject->GetComponentDataByType("RangeSpawning");
+	objData->componentData.push_back(ComponentData::Create(allocator, "RangeSpawning", otherRangeSpawning ? *otherRangeSpawning->GetData<RangeSpawningData>() : RangeSpawningData{ 500, 200 }));
+
+	return objData;
 }

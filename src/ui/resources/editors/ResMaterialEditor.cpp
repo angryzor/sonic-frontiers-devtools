@@ -52,7 +52,9 @@ void ResMaterialEditor::RenderContents()
 	}
 	ImGui::EndGroup();
 	if (ImGui::IsItemEdited()) {
-		resource->resource->RefreshInstanceParameter();
+		hh::game::GameManager::GetInstance()->PreResourceReloadCallback(resource);
+		hh::game::GameManager::GetInstance()->PostResourceReloadCallback(resource);
+		//resource->resource->RefreshInstanceParameter();
 		//MaterialChunkBuilder::RegisterUniqueMaterialResource(&resource->resource);
 	}
 }
@@ -66,10 +68,17 @@ void ResMaterialEditor::RenderFloatParameterEditor(size_t idx, ParameterFloatVal
 {
 	auto& info = reinterpret_cast<MaterialChunkBuilder::ParameterInfo*>(reinterpret_cast<size_t>(resource->resource->data) + 0x28)[idx];
 
-	for (size_t i = 0; i < (info.sizeInDwords - 2) / 4; i++) {
-		char buf[256];
-		snprintf(buf, sizeof(buf), "%s[%zd]", data->name->name, i);
-		ImGui::DragFloat4(buf, reinterpret_cast<float*>(&(&data->values)[i]), 0.01);
+	size_t itemCount = (info.sizeInDwords - 2) / 4;
+
+	if (itemCount > 1) {
+		for (size_t i = 0; i < itemCount; i++) {
+			char buf[256];
+			snprintf(buf, sizeof(buf), "%s[%zd]", data->name->name, i);
+			ImGui::DragFloat4(buf, reinterpret_cast<float*>(&(&data->values)[i]), 0.01);
+		}
+	}
+	else {
+		ImGui::DragFloat4(data->name->name, reinterpret_cast<float*>(&(&data->values)[0]), 0.01);
 	}
 }
 
@@ -94,12 +103,14 @@ static const char* wrapModes[] = { "WRAP", "MIRROR", "CLAMP", "MIRRORONCE", "BOR
 
 void ResMaterialEditor::RenderSamplerParameterEditor(size_t idx, hh::needle::ParameterSamplerValue* data)
 {
-	ImGui::Text("%s", data->name->name);
-	ComboEnum("Wrap mode U", data->wrapModeU, wrapModes);
-	ComboEnum("Wrap mode V", data->wrapModeV, wrapModes);
-	ImGui::DragScalar("TexCoord index", ImGuiDataType_U8, &data->texCoordIndex);
-	ImGui::Text("TexCoord index name %s", data->texCoordIndexName->name);
-	ImGui::Text("TexCoord mtx name %s", data->texCoordMtxName->name);
+	if (ImGui::TreeNode(data->name->name)) {
+		ComboEnum("Wrap mode U", data->wrapModeU, wrapModes);
+		ComboEnum("Wrap mode V", data->wrapModeV, wrapModes);
+		ImGui::DragScalar("TexCoord index", ImGuiDataType_U8, &data->texCoordIndex);
+		ImGui::Text("TexCoord index name %s", data->texCoordIndexName->name);
+		ImGui::Text("TexCoord mtx name %s", data->texCoordMtxName->name);
+		ImGui::TreePop();
+	}
 }
 
 void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)
@@ -114,9 +125,11 @@ void ResMaterialEditor::RenderShaderNameParameterEditor(size_t idx, hh::needle::
 
 void ResMaterialEditor::RenderTextureNameParameterEditor(size_t idx, hh::needle::ParameterTextureNameValue* data)
 {
-	ImGui::SeparatorText("Texture");
-	InputText("Type", data->type);
-	InputText("Name", data->name);
+	if (ImGui::TreeNode("Texture name")) {
+		InputText("Type", data->type);
+		InputText("Name", data->name);
+		ImGui::TreePop();
+	}
 }
 
 void ResMaterialEditor::RenderUnimplementedTypeParameterEditor(size_t idx)

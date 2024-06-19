@@ -26,6 +26,8 @@ typedef std::tuple<
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
 #include "component-inspectors/GOCAnimator.h"
+#include "component-inspectors/GOCActivator.h"
+#include "component-inspectors/GOCVisual.h"
 #include "component-inspectors/GOCEvent.h"
 #include "component-inspectors/GOCPlayerBlackboard.h"
 #include "component-inspectors/GOCPlayerKinematicParams.h"
@@ -34,10 +36,14 @@ typedef std::tuple<
 
 typedef std::tuple<
 	hh::game::GOCTransform,
+	hh::game::GOCActivator,
 	hh::physics::GOCSphereCollider,
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::gfx::GOCVisual,
+	hh::gfx::GOCVisualTransformed,
+	hh::gfx::GOCVisualModel,
 	hh::anim::GOCAnimator,
 	app_cmn::camera::GOCCamera,
 	app::game::GOCEventCollision,
@@ -47,16 +53,32 @@ typedef std::tuple<
 > InspectableComponents;
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
+typedef std::tuple<> InspectableGameObjects;
+#endif
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include "gameobject-inspectors/CameraFrame.h"
+#include "gameobject-inspectors/ObjCameraVolume.h"
+
+typedef std::tuple<
+	app_cmn::camera::CameraFrame,
+	app::ObjCameraVolume
+> InspectableGameObjects;
+#endif
+
 using namespace hh::fnd;
 using namespace hh::game;
 
 
 template<typename T>
-bool RenderComponentInspectorT(hh::game::GOComponent& service) {
-	bool result{ service.pStaticClass == T::GetClass() };
+bool RenderComponentInspectorT(hh::game::GOComponent& component) {
+	bool result{ component.pStaticClass == T::GetClass() };
 
 	if (result) {
-		RenderComponentInspector(static_cast<T&>(service));
+		ImGui::PushID(&component);
+		RenderComponentInspector(static_cast<T&>(component));
+		ImGui::PopID();
 	}
 
 	return result;
@@ -67,8 +89,32 @@ class ComponentIterator;
 template<typename... T>
 class ComponentIterator<std::tuple<T...>> {
 public:
-	static void Render(hh::game::GOComponent& service) {
-		(RenderComponentInspectorT<T>(service) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
+	static void Render(hh::game::GOComponent& component) {
+		(RenderComponentInspectorT<T>(component) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
+	}
+};
+
+
+template<typename T>
+bool RenderGameObjectInspectorT(hh::game::GameObject& gameObject) {
+	bool result{ gameObject.objectClass == T::GetClass() };
+
+	if (result) {
+		ImGui::PushID(&gameObject);
+		RenderGameObjectInspector(static_cast<T&>(gameObject));
+		ImGui::PopID();
+	}
+
+	return result;
+}
+
+template<typename = InspectableGameObjects>
+class GameObjectIterator;
+template<typename... T>
+class GameObjectIterator<std::tuple<T...>> {
+public:
+	static void Render(hh::game::GameObject& gameObject) {
+		(RenderGameObjectInspectorT<T>(gameObject) || ...);
 	}
 };
 
@@ -114,110 +160,107 @@ void ObjectInspector::Render() {
 					ImGui::EndTabItem();
 				}
 				if (ImGui::BeginTabItem("Details")) {
-					// if (focusedObject->objectClass == app_cmn::camera::CameraFrame::GetClass()) {
-					// 	auto* cameraFrame = static_cast<app_cmn::camera::CameraFrame*>(&*focusedObject);
-
-					// }
-					// if (focusedObject->objectClass == app::ObjCameraVolume::GetClass()) {
-					// 	auto* cameraVolume = static_cast<app::ObjCameraVolume*>(&*focusedObject);
-
-					// }
+					GameObjectIterator<>::Render(*focusedObject);
 					ImGui::EndTabItem();
 				}
-				//if (ImGui::BeginTabItem("Update configuration")) {
-				//	if (ImGui::BeginChild("Content")) {
-				//		ImGui::Text("GameObject requested update phases:");
-				//		ImGui::BeginGroup();
-				//		CheckboxFlags("PreAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);
-				//		if (ImGui::IsItemEdited())
-				//			focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("PostAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::POST_ANIM);
-				//		if (ImGui::IsItemEdited())
-				//			focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("Final", focusedObject->forcedUpdateFlags, UpdatingPhase::FINAL);
-				//		if (ImGui::IsItemEdited())
-				//			focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
-				//		ImGui::EndGroup();
-				//		ImGui::Text("Real update phases due to components:");
-				//		ImGui::BeginDisabled();
-				//		CheckboxFlags("PreAnim", focusedObject->updateFlags, UpdatingPhase::PRE_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("PostAnim", focusedObject->updateFlags, UpdatingPhase::POST_ANIM);
-				//		ImGui::SameLine();
-				//		CheckboxFlags("Final", focusedObject->updateFlags, UpdatingPhase::FINAL);
-				//		ImGui::EndDisabled();
-				//		ImGui::SeparatorText("Component update configuration");
-				//		for (auto* component : focusedObject->components) {
-				//			ImGui::PushID(component);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+				if (ImGui::BeginTabItem("Update configuration")) {
+					if (ImGui::BeginChild("Content")) {
+						CheckboxFlags("Asleep", focusedObject->statusFlags, GameObject::StatusFlags::ASLEEP);
+						ImGui::Text("GameObject requested update phases:");
+						ImGui::BeginGroup();
+						CheckboxFlags("PreAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::PRE_ANIM);
+						if (ImGui::IsItemEdited())
+							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("PostAnim", focusedObject->forcedUpdateFlags, UpdatingPhase::POST_ANIM);
+						if (ImGui::IsItemEdited())
+							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("Final", focusedObject->forcedUpdateFlags, UpdatingPhase::FINAL);
+						if (ImGui::IsItemEdited())
+							focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
+						ImGui::EndGroup();
+						ImGui::Text("Real update phases due to components:");
+						ImGui::BeginDisabled();
+						CheckboxFlags("PreAnim", focusedObject->updateFlags, UpdatingPhase::PRE_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("PostAnim", focusedObject->updateFlags, UpdatingPhase::POST_ANIM);
+						ImGui::SameLine();
+						CheckboxFlags("Final", focusedObject->updateFlags, UpdatingPhase::FINAL);
+						ImGui::EndDisabled();
+						ImGui::SeparatorText("Component update configuration");
+						for (auto* component : focusedObject->components) {
+							ImGui::PushID(component);
 
-				//			char title[200];
-				//			snprintf(title, 200, "%s (%s)", component->pStaticClass->pName, component->pStaticClass->category);
+							char title[200];
+							snprintf(title, 200, "%s (%s)", component->pStaticClass->pName, component->pStaticClass->category);
 
-				//			if (ImGui::CollapsingHeader(title)) {
-				//				ImGui::Text("Update phases");
-				//				//ImGui::BeginDisabled();
-				//				ImGui::BeginGroup();
-				//				CheckboxFlags("PreAnim", component->updateFlags, UpdatingPhase::PRE_ANIM);
-				//				if (ImGui::IsItemDeactivatedAfterEdit()) {
-				//					if (component->updateFlags.test(UpdatingPhase::PRE_ANIM)) {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
-				//						if (it == -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].push_back(component);
-				//					}
-				//					else {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
-				//						if (it != -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].remove(it);
-				//					}
-				//					focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::PRE_ANIM);
-				//					focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
-				//				}
-				//				ImGui::SameLine();
-				//				CheckboxFlags("PostAnim", component->updateFlags, UpdatingPhase::POST_ANIM);
-				//				if (ImGui::IsItemDeactivatedAfterEdit()) {
-				//					if (component->updateFlags.test(UpdatingPhase::POST_ANIM)) {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
-				//						if (it == -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].push_back(component);
-				//					}
-				//					else {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
-				//						if (it != -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].remove(it);
-				//					}
-				//					focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::POST_ANIM);
-				//					focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
-				//				}
-				//				ImGui::SameLine();
-				//				CheckboxFlags("Final", component->updateFlags, UpdatingPhase::FINAL);
-				//				if (ImGui::IsItemDeactivatedAfterEdit()) {
-				//					if (component->updateFlags.test(UpdatingPhase::FINAL)) {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
-				//						if (it == -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].push_back(component);
-				//					}
-				//					else {
-				//						auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
-				//						if (it != -1)
-				//							focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].remove(it);
-				//					}
-				//					focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::FINAL);
-				//					focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
-				//				}
-				//				ImGui::EndGroup();
-				//				//ImGui::EndDisabled();
-				//				ImGui::Text("Update priorities:");
-				//				ImGui::InputScalarN("PreAnim, PostAnim, Final", ImGuiDataType_U8, component->updatePriorityByPhase, 3);
-				//			}
+							if (ImGui::CollapsingHeader(title)) {
+								ImGui::Text("Update phases");
+								//ImGui::BeginDisabled();
+								ImGui::BeginGroup();
+								CheckboxFlags("PreAnim", component->updateFlags, UpdatingPhase::PRE_ANIM);
+								if (ImGui::IsItemDeactivatedAfterEdit()) {
+									if (component->updateFlags.test(UpdatingPhase::PRE_ANIM)) {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
+										if (it == -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].push_back(component);
+									}
+									else {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
+										if (it != -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].remove(it);
+									}
+									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::PRE_ANIM);
+									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
+								}
+								ImGui::SameLine();
+								CheckboxFlags("PostAnim", component->updateFlags, UpdatingPhase::POST_ANIM);
+								if (ImGui::IsItemDeactivatedAfterEdit()) {
+									if (component->updateFlags.test(UpdatingPhase::POST_ANIM)) {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
+										if (it == -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].push_back(component);
+									}
+									else {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
+										if (it != -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].remove(it);
+									}
+									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::POST_ANIM);
+									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
+								}
+								ImGui::SameLine();
+								CheckboxFlags("Final", component->updateFlags, UpdatingPhase::FINAL);
+								if (ImGui::IsItemDeactivatedAfterEdit()) {
+									if (component->updateFlags.test(UpdatingPhase::FINAL)) {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
+										if (it == -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].push_back(component);
+									}
+									else {
+										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
+										if (it != -1)
+											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].remove(it);
+									}
+									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::FINAL);
+									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
+								}
+								ImGui::EndGroup();
+								//ImGui::EndDisabled();
+								ImGui::Text("Update priorities:");
+								ImGui::InputScalarN("PreAnim, PostAnim, Final", ImGuiDataType_U8, component->updatePriorityByPhase, 3);
+							}
 
-				//			ImGui::PopID();
-				//		}
-				//	}
-				//	ImGui::EndChild();
-				//	ImGui::EndTabItem();
-				//}
+							ImGui::PopID();
+						}
+					}
+					ImGui::EndChild();
+					ImGui::EndTabItem();
+				}
+#endif
+
 				ImGui::EndTabBar();
 			}
 		}

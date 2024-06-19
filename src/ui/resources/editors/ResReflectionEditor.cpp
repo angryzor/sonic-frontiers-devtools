@@ -61,10 +61,33 @@ void ResReflectionEditor::RenderContents() {
 
 	if (!forcedRflClass) {
 		const char* previewValue = rflClass == nullptr ? "<none>" : rflClass->GetName();
+		csl::ut::MoveArray<const RflClass*> matchingRflClasses{ hh::fnd::MemoryRouter::GetTempAllocator() };
+
+		for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
+			auto resSize = resource->GetSize();
+			auto rflSize = rflc->GetSizeInBytes();
+
+			if (resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF))
+				matchingRflClasses.push_back(rflc);
+		}
 
 		if (ImGui::BeginCombo("RflClass", previewValue)) {
-			for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
-				if (resource->GetSize() == rflc->GetSizeInBytes()) {
+			if (matchingRflClasses.size() > 0) {
+				for (auto* rflc : matchingRflClasses) {
+					bool is_selected = rflClass == rflc;
+
+					if (ImGui::Selectable(rflc->GetName(), is_selected)) {
+						FreeOriginalCopy();
+						rflClass = rflc;
+						MakeOriginalCopy();
+					}
+
+					if (is_selected)
+						ImGui::SetItemDefaultFocus();
+				}
+			}
+			else {
+				for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
 					bool is_selected = rflClass == rflc;
 
 					if (ImGui::Selectable(rflc->GetName(), is_selected)) {

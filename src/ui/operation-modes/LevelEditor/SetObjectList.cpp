@@ -53,15 +53,13 @@ bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
 
 	if (type == SetObjectListTreeViewNode::Type::OBJECT) {
-		if (ImGui::IsItemClicked())
+		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
 			list.levelEditor.Select(object.object);
-
 		if (ImGui::BeginDragDropSource()) {
 			ObjectData* obj = object.object;
 			ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));
 			ImGui::EndDragDropSource();
 		}
-
 		if (ImGui::BeginDragDropTarget()) {
 			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
 				ObjectData* parent = object.object;

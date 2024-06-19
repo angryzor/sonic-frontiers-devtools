@@ -1,4 +1,5 @@
 #include "CameraFrame.h"
+#include <ui/common/editors/Basic.h>
 #include <ui/common/editors/Camera.h>
 
 void RenderCameraBlendTree(app_cmn::camera::CameraFrame::BlendNode* node) {
@@ -28,7 +29,7 @@ void RenderCameraBlendTree(app_cmn::camera::CameraFrame::BlendNode* node) {
 	}
 }
 
-void GameObjectInspector(app_cmn::camera::CameraFrame& cameraFrame) {
+void RenderGameObjectInspector(app_cmn::camera::CameraFrame& cameraFrame) {
     ImGui::Text("Id: %d", cameraFrame.id);
     ImGui::Text("Name: %s", cameraFrame.name.c_str());
     if (ImGui::TreeNode("Parameters 1")) {

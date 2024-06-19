@@ -11,12 +11,40 @@ hh::game::ObjectTransformData Affine3fToObjectTransformData(const Eigen::Affine3
 	return { { transform.translation() }, MatrixToEuler(absoluteRotation) };
 }
 
-Eigen::Affine3f ObjectTransformDataToAffine3f(hh::game::ObjectTransformData& transformData) {
+Eigen::Affine3f ObjectTransformDataToAffine3f(const hh::game::ObjectTransformData& transformData) {
 	Eigen::Affine3f transform;
 
 	transform.fromPositionOrientationScale(transformData.position, EulerToQuat(transformData.rotation), csl::math::Vector3{ 1.0f, 1.0f, 1.0f });
 
 	return transform;
+}
+
+void RecalculateLocalTransform(const Eigen::Affine3f& parentTransform, hh::game::ObjectData& objData) {
+	auto absoluteTransform = ObjectTransformDataToAffine3f(objData.transform);
+
+	objData.localTransform = Affine3fToObjectTransformData(parentTransform.inverse() * absoluteTransform);
+}
+
+void RecalculateAbsoluteTransform(const Eigen::Affine3f& parentTransform, hh::game::ObjectData& objData) {
+	auto localTransform = ObjectTransformDataToAffine3f(objData.localTransform);
+
+	objData.transform = Affine3fToObjectTransformData(parentTransform * localTransform);
+}
+
+void RecalculateLocalTransform(const hh::game::ObjectTransformData& parentTransform, hh::game::ObjectData& objData) {
+	RecalculateLocalTransform(ObjectTransformDataToAffine3f(parentTransform), objData);
+}
+
+void RecalculateAbsoluteTransform(const hh::game::ObjectTransformData& parentTransform, hh::game::ObjectData& objData) {
+	RecalculateAbsoluteTransform(ObjectTransformDataToAffine3f(parentTransform), objData);
+}
+
+void RecalculateLocalTransform(const hh::game::ObjectData& parent, hh::game::ObjectData& objData) {
+	RecalculateLocalTransform(parent.transform, objData);
+}
+
+void RecalculateAbsoluteTransform(const hh::game::ObjectData& parent, hh::game::ObjectData& objData) {
+	RecalculateAbsoluteTransform(parent.transform, objData);
 }
 
 void UpdateAbsoluteTransform(const Eigen::Affine3f& newAbsoluteTransform, hh::game::ObjectData& objData) {
@@ -31,8 +59,9 @@ void UpdateAbsoluteTransform(const Eigen::Affine3f& newAbsoluteTransform, hh::ga
 void UpdateLocalTransform(const Eigen::Affine3f& newLocalTransform, hh::game::ObjectData& objData) {
 	auto absoluteTransform = ObjectTransformDataToAffine3f(objData.transform);
 	auto localTransform = ObjectTransformDataToAffine3f(objData.localTransform);
+	auto parentTransform = absoluteTransform * localTransform.inverse();
 
-	objData.transform = Affine3fToObjectTransformData(absoluteTransform * localTransform.inverse() * newLocalTransform);
+	objData.transform = Affine3fToObjectTransformData(parentTransform * newLocalTransform);
 	objData.localTransform = Affine3fToObjectTransformData(newLocalTransform);
 }
 

@@ -18,7 +18,7 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 
 	auto* transform = obj->GetComponent<GOCTransform>();
 
-	if (transform && transform->GetChildren().size() != 0) {
+	if ((transform && transform->GetChildren().size() > 0) || obj->GetChildren().size() > 0) {
 		bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
 		if (ImGui::IsItemClicked()) {
@@ -38,7 +38,7 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 				GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
 				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
 
-				if (obj != child) {
+				if (objTransform && childTransform && obj != child) {
 					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
 					auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
 
@@ -76,7 +76,7 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 				GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
 				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
 
-				if (obj != child) {
+				if (objTransform && childTransform && obj != child) {
 					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
 					auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
 

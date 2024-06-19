@@ -108,7 +108,7 @@ void** RflMoveArrayAccessor::RflMoveArray::get(size_t i, const RflClassMember* m
     if (!m_pBuffer)
         return nullptr;
 
-    return reinterpret_cast<void**>(reinterpret_cast<size_t>(&m_pBuffer) + member->GetSubTypeSizeInBytes() * i);
+    return reinterpret_cast<void**>(reinterpret_cast<size_t>(m_pBuffer) + member->GetSubTypeSizeInBytes() * i);
 }
 
 RflMoveArrayAccessor::RflMoveArrayAccessor(csl::ut::MoveArray<void*>& underlying, const RflClassMember* member) : underlying{ static_cast<RflMoveArray&>(underlying) }, member{ member }

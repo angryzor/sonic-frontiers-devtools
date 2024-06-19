@@ -2,7 +2,7 @@
 #include "ResourceBrowser.h"
 #include "editors/ResReflectionEditor.h"
 //#include "editors/ResObjectWorldEditor.h"
-//#include "editors/ResMaterialEditor.h"
+#include "editors/ResMaterialEditor.h"
 #include <hot-reload/ReloadManager.h>
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
@@ -153,9 +153,9 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			else if (typeInfo == ResReflection::GetTypeInfo()) {
 				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection*>(resource));
 			}
-			//else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
-			//	ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
-			//}
+			else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
+				ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
+			}
 			//else if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo()) {
 			//	ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::game::ResObjectWorld*>(resource));
 			//}
@@ -264,9 +264,15 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 	
 	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
 		auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource);
-		ImGui::Image(GetTextureIDFromResTexture(texture), ImVec2(size, size));
-		ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
-		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
+		if (auto* textureId = GetTextureIDFromResTexture(texture)) {
+			ImGui::Image(textureId, ImVec2(size, size));
+			ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
+			RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
+		}
+		else {
+			ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
+			RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()));
+		}
 	}
 	else {
 		ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));

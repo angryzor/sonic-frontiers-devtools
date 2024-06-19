@@ -31,7 +31,7 @@ void ToolBar::Render() {
 	ImGui::SetNextWindowPos(viewport->WorkPos);
 	ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 0));
 
-	if (!ImGui::Begin("Sonic Forces Devtools", NULL, windowFlags)) {
+	if (!ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION, NULL, windowFlags)) {
 		ImGui::End();
 		return;
 	}

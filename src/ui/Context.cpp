@@ -5,7 +5,7 @@
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
-//#include <hot-reload/ReloadManager.h>
+#include <hot-reload/ReloadManager.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -107,16 +107,6 @@ HOOK(void*, __fastcall, SwapChainHook, displaySwapDeviceConstructorAddr, void* i
 	return originalSwapChainHook(in_pThis, in_pSwapChain);
 }
 
-//HOOK(float, __fastcall, MouseGetInputValue, 0x14076ED20, hh::hid::MouseWin32 * a1, unsigned int inputId)
-//{
-//	if (!Context::visible || Context::passThroughMouse || ImGui::IsMouseDragging(ImGuiMouseButton_Right)) {
-//		return originalMouseGetInputValue(a1, inputId);
-//	}
-//	else {
-//		return 0.0f;
-//	}
-//}
-
 //HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::RenderingDevice** renderingDevice, hh::needle::RenderingDeviceContext** renderingDeviceContext, void* deviceCreationSetting, void** displaySwapDevice, unsigned int creationFlags)
 //{
 //	return originalCreateRenderingDeviceDX11(renderingDevice, renderingDeviceContext, deviceCreationSetting, displaySwapDevice, D3D11_CREATE_DEVICE_DEBUG);
@@ -139,7 +129,6 @@ void Context::install_hooks()
 	INSTALL_HOOK(WndProcHook);
 	INSTALL_HOOK(SwapChainHook);
 	InstallInputHooks();
-	//INSTALL_HOOK(MouseGetInputValue);
 	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
 	//INSTALL_HOOK(GOCCamera_PushController);
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
@@ -177,13 +166,15 @@ void Context::init() {
 	io.Fonts->Build();
 
 	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-	auto* allocator = moduleAllocator;
-	//static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
-	//devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
-	//auto* allocator = &devtoolsAllocator;
+	//auto* allocator = moduleAllocator;
+	static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
+	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
+	auto* allocator = &devtoolsAllocator;
 
-	//ReloadManager::instance = new (allocator) ReloadManager(allocator);
+	ReloadManager::instance = new (allocator) ReloadManager(allocator);
+#ifdef DEVTOOLS_TARGET_SDK_wars
 	RESOLVE_STATIC_VARIABLE(hh::game::DebugCameraManager::instance) = hh::game::DebugCameraManager::Create();
+#endif
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
 

@@ -18,6 +18,7 @@ public:
 	constexpr static size_t arity = 1;
 	static inline const char* currentMemberName{};
 	static inline const hh::fnd::RflClassMember* currentMember{};
+	static inline bool defaultOpen{};
 	typedef bool result_type;
 	
 	template<typename T> class rfl_range_info {};
@@ -215,7 +216,7 @@ public:
 	static bool VisitArrayClassMember(void* obj, const hh::fnd::RflClassMember* member, size_t size, F f) {
 		return MemberScope(member, [&]() {
 			bool edited{};
-			if (ImGui::TreeNode("Array", "%s[0..%zd]", currentMemberName, size - 1)) {
+			if (ImGui::TreeNode(currentMemberName, "%s[0..%zd]", currentMemberName, size - 1)) {
 				edited = f(obj);
 				ImGui::TreePop();
 			}
@@ -240,7 +241,7 @@ public:
 	static bool VisitStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
 		ImGui::PushID(obj);
 		bool edited{};
-		bool isOpen{ ImGui::TreeNode(currentMemberName) };
+		bool isOpen{ ImGui::TreeNodeEx(currentMemberName, RenderStaticReflectionEditor::defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None) };
 
 		if (ImGui::BeginDragDropSource()) {
 			RflDragDropData dndData{ rflClass, obj };
@@ -257,6 +258,7 @@ public:
 					edited = true;
 				}
 			}
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::BeginPopupContextItem("RFL Operations")) {
@@ -338,7 +340,7 @@ public:
 	static bool VisitStruct(void* obj, void* orig, const hh::fnd::RflClass* rflClass, F f) {
 		ImGui::PushID(obj);
 		bool edited{};
-		bool isOpen{ ImGui::TreeNode(RenderStaticReflectionEditor::currentMemberName) };
+		bool isOpen{ ImGui::TreeNodeEx(RenderStaticReflectionEditor::currentMemberName, RenderStaticReflectionEditor::defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None) };
 
 		if (ImGui::BeginDragDropSource()) {
 			RflDragDropData dndData{ rflClass, obj };
@@ -355,6 +357,7 @@ public:
 					edited = true;
 				}
 			}
+			ImGui::EndDragDropTarget();
 		}
 
 		if (ImGui::BeginPopupContextItem("RFL Operations")) {
@@ -384,8 +387,9 @@ public:
 
 };
 
-bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::RflClass* rflClass) {
+bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::RflClass* rflClass, bool defaultOpen) {
 	ImGui::BeginGroup();
+	RenderStaticReflectionEditor::defaultOpen = defaultOpen;
 	bool edited = RenderStaticReflectionEditor::NameScope(label, [&]() { return rflops::traversals::rflop<RenderStaticReflectionEditor>::Apply(reflectionData, rflClass); });
 	ImGui::EndGroup();
 	return edited;
@@ -393,6 +397,7 @@ bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::Rf
 
 bool ResettableReflectionEditor(const char* label, void* reflectionData, void* originalReflectionData, const hh::fnd::RflClass* rflClass) {
 	ImGui::BeginGroup();
+	RenderStaticReflectionEditor::defaultOpen = false;
 	bool edited = RenderStaticReflectionEditor::NameScope(label, [&]() { return rflops::traversals::rflop<RenderResettableReflectionEditor>::Apply(reflectionData, originalReflectionData, rflClass); });
 	ImGui::EndGroup();
 	return edited;

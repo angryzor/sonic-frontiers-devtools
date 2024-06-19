@@ -1,3 +1,3 @@
 #pragma once
 
-void GameObjectInspector(app_cmn::camera::ObjCameraVolume& cameraVolume);
+void RenderGameObjectInspector(app::ObjCameraVolume& cameraVolume);

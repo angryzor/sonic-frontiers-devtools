@@ -20,7 +20,15 @@ class LevelEditor : public OperationMode, public hh::game::GameManagerListener, 
     ImGuizmo::MODE gizmoMode{ ImGuizmo::LOCAL };
     bool haveSelectionAabb{ false };
     csl::geom::Aabb selectionAabb{};
+    csl::ut::MoveArray<hh::game::ObjectData*> clipboard{ GetAllocator() };
+#ifdef DEVTOOLS_TARGET_SDK_wars
     std::mt19937 mt;
+#else
+    std::mt19937_64 mt;
+#endif
+    static float debugBoxScale;
+
+    void RecalculateDependentTransforms(hh::game::ObjectData* objectData);
 
 public:
     LevelEditor(csl::fnd::IAllocator* allocator);
@@ -39,7 +47,10 @@ public:
     virtual void WorldChunkRemovedCallback(hh::game::ObjectWorldChunk* chunk) override;
 
     void SetFocusedChunk(hh::game::ObjectWorldChunk* chunk);
+    hh::game::ObjectData* CreateObject(csl::fnd::IAllocator* allocator, const hh::game::GameObjectClass* objectClass, hh::game::ObjectTransformData transform, hh::game::ObjectData* parentObject = nullptr);
+    hh::game::ObjectData* CopyObject(csl::fnd::IAllocator* allocator, hh::game::ObjectData* otherObject);
     void SpawnObject();
+    void SpawnObject(hh::game::ObjectData* objectData);
     void Select(const csl::ut::MoveArray<hh::game::GameObject*>& objs);
     void Select(const csl::ut::MoveArray<hh::game::ObjectData*>& objectDatas);
     void Select(hh::game::GameObject* gameObject);
@@ -51,6 +62,8 @@ public:
     void NotifyActiveObject(hh::fnd::Message& msg);
     void DeleteFocusedObject();
     void ReloadObjectWorldData();
+    static void SetDebugBoxScale(float scale);
+    void UpdateDebugBoxGeometry();
 
     void HandleObjectSelection();
     void HandleObjectManipulation();
@@ -58,4 +71,11 @@ public:
     void CheckSelectionHotkeys();
 
     void RenderDebugComments();
+
+    void RecalculateDependentTransforms();
+
+    void ClearClipboard();
+    void HandleClipboard();
+    void HandleCopy();
+    void HandlePaste();
 };

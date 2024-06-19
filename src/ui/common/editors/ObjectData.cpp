@@ -35,12 +35,14 @@ hh::fnd::RflClassMember gocActivatorSpawnerMembers[]{
 
 hh::fnd::RflClass gocActivatorSpawnerClass{ "GOCActivatorSpawner", nullptr, sizeof(GOCActivatorSpawner), nullptr, 0, gocActivatorSpawnerMembers, 2, nullptr };
 
+#ifndef DEVTOOLS_TARGET_SDK_wars
 //ComponentData* CreateComponentData(const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
 //	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 //
+//	size_t spawnerDataSize = gocRegItem->rflClass->GetSizeInBytes();
 //	// We're placing both in 1 block here because TerminateObjectData only calls free on the ComponentData.
 //	// If we had 2 allocations the spawner data would not be freed.
-//	void* buf = new (std::align_val_t(16), allocator) char[sizeof(ComponentData) + gocRegItem->rflClass->GetSizeInBytes()];
+//	void* buf = new (std::align_val_t(16), allocator) char[sizeof(ComponentData) + spawnerDataSize];
 //	void* spawnerData = reinterpret_cast<void*>(reinterpret_cast<size_t>(buf) + sizeof(ComponentData));
 //
 //	if (!strcmp(gocRegItem->name, "Model"))
@@ -52,8 +54,9 @@ hh::fnd::RflClass gocActivatorSpawnerClass{ "GOCActivatorSpawner", nullptr, size
 //	else
 //		assert(false);
 //
-//	return new (buf) ComponentData{ allocator, gocRegItem, spawnerData };
+//	return new (buf) ComponentData{ gocRegItem->name, spawnerData, spawnerDataSize };
 //}
+#endif
 
 bool Editor(const char* label, hh::game::ObjectTransformData& obj)
 {
@@ -73,7 +76,11 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	auto* objSystem = GameObjectSystem::GetInstance();
 
 	Viewer("Id", obj.id);
+#ifdef DEVTOOLS_TARGET_SDK_wars
 	Viewer("Name", obj.name);
+#else
+	edited |= Editor("Name", obj.name);
+#endif
 	ImGui::Text("Class: %s", obj.gameObjectClass);
 	Viewer("Parent object id", obj.parentID);
 
@@ -89,6 +96,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	if (editedTransform)
 		UpdateLocalTransform(ObjectTransformDataToAffine3f(localTransformData), obj);
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
 	ImGui::SeparatorText("Component configuration");
 	for (auto* componentConfig : obj.componentData) {
 		if (ImGui::CollapsingHeader(componentConfig->type)) {
@@ -97,15 +105,15 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 				edited |= ReflectionEditor("Component properties", componentConfig->data, &gocActivatorSpawnerClass);
 		}
 	}
-
-	//for (auto* componentConfig : obj.componentData) {
-	//	auto* gocInfo = objSystem->goComponentRegistry->GetComponentInformationByName(componentConfig->type);
-	//	if (ImGui::CollapsingHeader(gocInfo->name)) {
-	//		ImGui::Text("Component type: %s", gocInfo->componentClass->category);
-	//		ImGui::Text("Configuration:");
-	//		edited |= ReflectionEditor("Component properties", componentConfig->data, gocInfo->rflClass);
-	//	}
-	//}
+#else
+	for (auto* componentConfig : obj.componentData) {
+		auto* gocInfo = objSystem->goComponentRegistry->GetComponentInformationByName(componentConfig->type);
+		if (ImGui::CollapsingHeader(gocInfo->name)) {
+			ImGui::Text("Component type: %s", gocInfo->componentClass->category);
+			ImGui::Text("Configuration:");
+			edited |= ReflectionEditor("Component properties", componentConfig->data, gocInfo->rflClass, true);
+		}
+	}
 
 	//if (ImGui::Button("Add component..."))
 	//	ImGui::OpenPopup("ComponentConfigSelection");
@@ -135,12 +143,13 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	//	}
 	//	ImGui::EndPopup();
 	//}
+#endif
 
 	if (obj.spawnerData) {
 		auto* objClass = objSystem->gameObjectRegistry->GetGameObjectClassByName(obj.gameObjectClass);
 
 		ImGui::SeparatorText("Object properties");
-		edited |= ReflectionEditor("Object properties", obj.spawnerData, objClass->spawnerDataRflClass);
+		edited |= ReflectionEditor("Object properties", obj.spawnerData, objClass->spawnerDataRflClass, true);
 	}
 
 	return edited;

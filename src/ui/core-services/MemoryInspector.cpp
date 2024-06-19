@@ -125,6 +125,88 @@ void HeapInspector::Render()
 	ImGui::PopID();
 }
 
+inline static size_t hashAvalanche(size_t key)
+{
+	size_t k = (size_t)key;
+
+	k ^= k >> 33;
+	k *= 0xff51afd7ed558ccd;
+	k ^= k >> 33;
+	k *= 0xc4ceb9fe1a85ec53;
+	k ^= k >> 33;
+
+	return k;
+}
+
+class RenderMapIterator : public MemoryBlockFunction {
+	ImDrawList* dl;
+	size_t startAddr;
+	size_t endAddr;
+	ImVec2 graphStart;
+	ImVec2 graphEnd;
+	float multiplier;
+public:
+	RenderMapIterator(ImDrawList* dl, size_t startAddr, size_t endAddr, ImVec2 graphStart, ImVec2 graphEnd)
+		: dl{ dl }
+		, startAddr{ startAddr }
+		, endAddr{ endAddr }
+		, graphStart{ graphStart }
+		, graphEnd{ graphEnd }
+		, multiplier{ static_cast<float>(graphEnd.x - graphStart.x) / static_cast<float>(endAddr - startAddr) }
+	{}
+
+	virtual void operator()(void* ptr, size_t size) {
+		size_t sPtr = reinterpret_cast<size_t>(ptr);
+
+		dl->AddRectFilled(
+			{ graphStart.x + multiplier * (sPtr - startAddr), graphStart.y },
+			{ graphStart.x + multiplier * (sPtr - startAddr + size), graphEnd.y },
+			ImGui::GetColorU32(ImPlot::GetColormapColor(static_cast<int>((hashAvalanche(sPtr) ^ hashAvalanche(size)) & 0x7FFFFFFF)))
+		);
+	}
+};
+
+void HeapInspector::RenderAllocationMaps() {
+	ImGui::PushID(target);
+
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+
+	auto isOpen = ImGui::TreeNodeEx("Node", ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen | (childHeapInspectors.empty() ? ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen : 0), "%s", target->GetName());
+
+	ImGui::TableNextColumn();
+
+	auto* dl = ImGui::GetWindowDrawList();
+
+	auto cpos = ImGui::GetCursorPos();
+
+	auto startAddr = target->GetBufferTop();
+	auto endAddr = target->GetBufferEnd();
+
+	auto graphStart = ImGui::GetCursorScreenPos();
+	auto graphEnd = ImVec2{ graphStart.x + ImGui::GetContentRegionAvail().x, graphStart.y + 50.0f };
+
+	RenderMapIterator renderMap{ dl, startAddr, endAddr, graphStart, graphEnd };
+
+	dl->AddRectFilled(graphStart, graphEnd, ImGui::GetColorU32(ImGuiCol_FrameBg));
+	target->ForEachAllocatedBlock(renderMap);
+
+	ImGui::SetCursorPos({ cpos.x, cpos.y + 50.0f });
+
+	if (!childHeapInspectors.empty() && isOpen) {
+		for (auto& inspector : childHeapInspectors)
+			inspector->RenderAllocationMaps();
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+}
+
+void HeapInspector::RenderDetails()
+{
+}
+
 MemoryInspector::MemoryInspector(IAllocator* allocator) : StandaloneWindow{ allocator }
 {
 	auto* lh = *rangerssdk::GetAddress(&hh::fw::heap::LocalHeap::instance);
@@ -156,30 +238,75 @@ void MemoryInspector::RenderContents()
 		ImGui::EndMenuBar();
 	}
 
-	char totalHeader[20]{};
-	char usedHeader[20]{};
-	char allocatedHeader[20]{};
-
-	snprintf(totalHeader, sizeof(totalHeader), "Total (%s)", unitNames[units]);
-	snprintf(usedHeader, sizeof(usedHeader), "Used (%s)", unitNames[units]);
-	snprintf(allocatedHeader, sizeof(allocatedHeader), "Allocated (%s)", unitNames[units]);
-
 	ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
-	if (ImGui::BeginTable("Heap inspectors", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
-		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
-		ImGui::TableSetupColumn(totalHeader);
-		ImGui::TableSetupColumn(usedHeader);
-		ImGui::TableSetupColumn(allocatedHeader);
-		ImGui::TableSetupColumn("Live allocations");
-		ImGui::TableSetupColumn("Total allocations");
-		ImGui::TableSetupColumn("Usage plot (teal = allocated unused memory, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
-		ImGui::TableSetupColumn("Activity plot (teal = live allocations, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
-		ImGui::TableHeadersRow();
 
-		for (auto& inspector : heapInspectors)
-			inspector->Render();
+	if (ImGui::BeginTabBar("Memory inspector type")) {
+		if (ImGui::BeginTabItem("Overview")) {
+			char totalHeader[20]{};
+			char usedHeader[20]{};
+			char allocatedHeader[20]{};
 
-		ImGui::EndTable();
+			snprintf(totalHeader, sizeof(totalHeader), "Total (%s)", unitNames[units]);
+			snprintf(usedHeader, sizeof(usedHeader), "Used (%s)", unitNames[units]);
+			snprintf(allocatedHeader, sizeof(allocatedHeader), "Allocated (%s)", unitNames[units]);
+
+			if (ImGui::BeginTable("Heap inspectors", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
+				ImGui::TableSetupColumn(totalHeader);
+				ImGui::TableSetupColumn(usedHeader);
+				ImGui::TableSetupColumn(allocatedHeader);
+				ImGui::TableSetupColumn("Live allocations");
+				ImGui::TableSetupColumn("Total allocations");
+				ImGui::TableSetupColumn("Usage plot (teal = allocated unused memory, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
+				ImGui::TableSetupColumn("Activity plot (teal = live allocations, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
+				ImGui::TableHeadersRow();
+
+				for (auto& inspector : heapInspectors)
+					inspector->Render();
+
+				ImGui::EndTable();
+			}
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Allocation maps")) {
+			if (ImGui::BeginTable("Heap inspectors", 2, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
+				ImGui::TableSetupColumn("Allocation map", ImGuiTableColumnFlags_WidthStretch);
+				ImGui::TableHeadersRow();
+
+				for (auto& inspector : heapInspectors)
+					inspector->RenderAllocationMaps();
+
+				ImGui::EndTable();
+			}
+			ImGui::EndTabItem();
+		}
+
+		if (ImGui::BeginTabItem("Details")) {
+			if (ImGui::BeginCombo("Heap", detailsInspector == nullptr ? "" : detailsInspector->target->GetName())) {
+				for (auto& inspector : heapInspectors)
+					RenderHeapSelectComboItem(inspector);
+
+				ImGui::EndCombo();
+			}
+
+			ImGui::EndTabItem();
+		}
+
+		ImGui::EndTabBar();
 	}
 	ImPlot::PopStyleVar();
+}
+
+void MemoryInspector::RenderHeapSelectComboItem(HeapInspector* inspector)
+{
+	if (ImGui::Selectable(inspector->target->GetName(), detailsInspector == inspector))
+		detailsInspector = inspector;
+
+	if (detailsInspector == inspector)
+		ImGui::SetItemDefaultFocus();
+
+	for (auto& child : inspector->childHeapInspectors)
+		RenderHeapSelectComboItem(child);
 }

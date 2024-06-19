@@ -2,6 +2,7 @@
 #include "Desktop.h"
 #include "ToolBar.h"
 #include "SettingsManager.h"
+#include "resources/ResourceBrowser.h"
 #include "operation-modes/ObjectInspection/ObjectInspection.h"
 #include "operation-modes/LevelEditor/LevelEditor.h"
 #ifdef DEVTOOLS_TARGET_SDK_rangers
@@ -11,6 +12,7 @@
 #include <utilities/math/MathUtils.h>
 #include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"
+#include "common/inputs/Basic.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -40,7 +42,7 @@ void Desktop::Render() {
 
 	ToolBar::Render();
 	operationMode->Render();
-	//ResourceBrowser::RenderDialogs();
+	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
@@ -77,6 +79,11 @@ void Desktop::Render() {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//	ImGui::Checkbox("grind", reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
 	//}
+	//static char packfileName[300];
+	//ImGui::InputText("Packfile", packfileName, sizeof(packfileName));
+	//if (ImGui::Button("Put packfile in objectworld lol"))
+	//	if (auto* objectWorld = GameManager::GetInstance()->GetService<hh::game::ObjectWorld>())
+	//		objectWorld->packFile = ResourceManager::GetInstance()->GetResource<hh::fnd::Packfile>(packfileName);
 
 	//if (ImGui::Button("Add island objinfo")) {
 
@@ -186,8 +193,9 @@ void Desktop::HandleMousePicking()
 				auto mouseEnd = ImGui::GetMousePos();
 				auto frustum = ScreenRectToFrustum(mouseStart, mouseEnd, (camera->viewportData.projMatrix * camera->viewportData.viewMatrix).inverse());
 
-				ImGui::Begin("Overlay");
-				ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
+				if (ImGui::Begin("Overlay")) {
+					ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
+				}
 				ImGui::End();
 
 				pickedObjects.clear();

@@ -3,11 +3,11 @@
 inline float rflMinFloatStep{ 0.01f };
 inline unsigned int rflSliderCutOff{ 3000 };
 
-bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::RflClass* rflClass);
+bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::RflClass* rflClass, bool defaultOpen = true);
 
 template<typename T, typename = decltype(T::rflClass)>
-static bool Editor(const char* label, T& reflectionData) {
-    return ReflectionEditor(label, &reflectionData, &RESOLVE_STATIC_VARIABLE(T::rflClass));
+static bool Editor(const char* label, T& reflectionData, bool defaultOpen = true) {
+    return ReflectionEditor(label, &reflectionData, &RESOLVE_STATIC_VARIABLE(T::rflClass), defaultOpen);
 }
 
 bool ResettableReflectionEditor(const char* label, void* reflectionData, void* originalReflectionData, const hh::fnd::RflClass* rflClass);

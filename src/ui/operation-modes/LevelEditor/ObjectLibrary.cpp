@@ -148,7 +148,11 @@ bool ObjectLibraryTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
 
 	if (type == Type::OBJECT_CLASS) {
-		if (ImGui::IsItemClicked()) {
+		if (ImGui::BeginDragDropSource()) {
+			ImGui::SetDragDropPayload("GameObjectClass", &objectClass, sizeof(objectClass));
+			ImGui::EndDragDropSource();
+		}
+		else if (ImGui::IsItemClicked()) {
 			library.selectedClass = objectClass;
 
 			if (library.levelEditor.objectClassToPlace)

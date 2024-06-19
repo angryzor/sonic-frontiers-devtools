@@ -4,7 +4,7 @@
 #include <utilities/CompatibleObject.h>
 
 class Desktop : public CompatibleObject {
-    hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture;
+    hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture{};
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
     csl::ut::MoveArray<hh::physics::PhysicsQueryResult> pickerResults{ GetAllocator() };
@@ -16,8 +16,8 @@ class Desktop : public CompatibleObject {
     void RemoveStandaloneWindow(StandaloneWindow* window);
 public:
     static bool selectionColliderFilters[32][32];
-    hh::fnd::Reference<OperationMode> operationMode;
-    hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader;
+    hh::fnd::Reference<OperationMode> operationMode{};
+    hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader{};
     static Desktop* instance;
 
     ID3D11ShaderResourceView* iconView;
