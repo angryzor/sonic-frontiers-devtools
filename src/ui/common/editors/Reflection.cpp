@@ -265,7 +265,7 @@ public:
 			if (ImGui::Selectable("Reset to default values")) {
 				const hh::fnd::RflTypeInfo* typeInfo = hh::fnd::RflTypeInfoRegistry::GetInstance()->GetByName(rflClass->GetName());
 				typeInfo->CleanupLoadedObject(obj);
-				typeInfo->ConstructObject(obj, hh::fnd::MemoryRouter::GetTempAllocator());
+				typeInfo->ConstructObject(obj, hh::fnd::MemoryRouter::GetModuleAllocator());
 				edited = true;
 			}
 			ImGui::EndPopup();
@@ -369,7 +369,7 @@ public:
 			if (ImGui::Selectable("Reset to default values")) {
 				const hh::fnd::RflTypeInfo* typeInfo = hh::fnd::RflTypeInfoRegistry::GetInstance()->GetByName(rflClass->GetName());
 				typeInfo->CleanupLoadedObject(obj);
-				typeInfo->ConstructObject(obj, hh::fnd::MemoryRouter::GetTempAllocator());
+				typeInfo->ConstructObject(obj, hh::fnd::MemoryRouter::GetModuleAllocator());
 				edited = true;
 			}
 

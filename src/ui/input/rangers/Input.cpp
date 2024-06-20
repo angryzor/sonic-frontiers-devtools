@@ -7,7 +7,7 @@ HOOK(void, __fastcall, KeyboardUpdate, 0x140F22430, hh::hid::Keyboard* self)
 	}
 }
 
-HOOK(void, __fastcall, MouseUpdate, 0x140F16F00, hh::hid::MouseWin32* self)
+HOOK(void, __fastcall, MouseUpdate, 0x140F16F00, hh::hid::MouseWin32* self, float unkParam)
 {
 	static bool capturing{};
 	if (ShouldCaptureMouseInputs()) {
@@ -20,7 +20,7 @@ HOOK(void, __fastcall, MouseUpdate, 0x140F16F00, hh::hid::MouseWin32* self)
 		capturing = true;
 	}
     else {
-		originalMouseUpdate(self);
+		originalMouseUpdate(self, unkParam);
 		if (capturing) {
 			self->state.deltaX = 0;
 			self->state.deltaY = 0;

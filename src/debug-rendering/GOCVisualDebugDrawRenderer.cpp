@@ -10,6 +10,13 @@ bool GOCVisualDebugDrawRenderer::renderColliders{ true };
 bool GOCVisualDebugDrawRenderer::renderOcclusionCapsules{ true };
 uint8_t GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity{ 80 };
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
+constexpr size_t gocVisualDebugDrawSetupAddr = 0x140682D50;
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+constexpr size_t gocVisualDebugDrawSetupAddr = 0x140D06320;
+#endif
+
 class GOCMyVisualDebugDraw : public GOCVisualDebugDraw {
 public:
 	//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> geometry;
@@ -53,7 +60,7 @@ void GOCMyVisualDebugDraw::InstallHooks() {
 	reinterpret_cast<hh::game::GOComponentClass*>(reinterpret_cast<size_t>(hh::gfx::GOCVisualDebugDraw::GetClass()))->instantiator = &GOCMyVisualDebugDraw::Create;
 }
 
-HOOK(bool, __fastcall, VisualDebugDrawSetup, 0x140682D50, GOCMyVisualDebugDraw* gocVisual, const GOCVisualDebugDraw::SetupInfo& setupInfo) {
+HOOK(bool, __fastcall, VisualDebugDrawSetup, gocVisualDebugDrawSetupAddr, GOCMyVisualDebugDraw* gocVisual, const GOCVisualDebugDraw::SetupInfo& setupInfo) {
 	bool ret = originalVisualDebugDrawSetup(gocVisual, setupInfo);
 
 	if (setupInfo.geometry != nullptr) {
