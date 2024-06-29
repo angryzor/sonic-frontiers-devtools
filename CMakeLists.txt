@@ -1,11 +1,12 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.24
+project(devtools VERSION 0.1.25
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
 set(PROJECT_AUTHOR "angryzor")
 set(PROJECT_COPYRIGHT "Copyright (c) 2024 angryzor - Licensed under GPL3")
+set(PROJECT_DOWNLOAD_SIZE "2.42 MB")
 string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
 
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
@@ -26,6 +27,10 @@ set(DEBUGGER_WORKING_DIRECTORY_rangers "")
 set(MOD_SUBFOLDER_rangers "Mods/devtools")
 set(UPDATE_SERVER_NAMESPACE_rangers "sonic-frontiers")
 set(FRIENDLY_GAME_NAME_rangers "Sonic Frontiers")
+
+if(DEFINED UPDATE_SERVER)
+    cmake_path(SET UPDATE_SERVER_NORMALIZED NORMALIZE ${UPDATE_SERVER})
+endif()
 
 # The main target
 foreach(DEVTOOLS_TARGET_SDK rangers wars)
@@ -50,7 +55,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
     target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_17)
-    target_compile_options(${DEVTOOLS_TARGET} PRIVATE /ZI /permissive-)
+    target_compile_options(${DEVTOOLS_TARGET} PRIVATE $<$<CONFIG:Debug>:/ZI> /permissive-)
     target_compile_definitions(${DEVTOOLS_TARGET}
         PRIVATE
             DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:${DEVTOOLS_TARGET}>
@@ -78,10 +83,30 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 
     add_subdirectory(src ${DEVTOOLS_TARGET}/src)
     add_subdirectory(natvis ${DEVTOOLS_TARGET}/natvis)
-    configure_file(Mod.ini.in ${DEVTOOLS_TARGET}/Mod.ini)
+    configure_file(mod.ini.in ${DEVTOOLS_TARGET}/mod.ini)
+    configure_file(mod_version.ini.in ${DEVTOOLS_TARGET}/mod_version.ini)
 
     install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${MOD_FOLDER}")
     install(DIRECTORY resources/common/ DESTINATION "${MOD_FOLDER}")
     install(DIRECTORY resources/${DEVTOOLS_TARGET_SDK}/ DESTINATION "${MOD_FOLDER}")
-    install(FILES LICENSE.txt "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/Mod.ini" DESTINATION "${MOD_FOLDER}")
+    install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${MOD_FOLDER}")
+
+    if(DEFINED UPDATE_SERVER_NORMALIZED)
+        cmake_path(APPEND UPDATE_SERVER_NORMALIZED "${UPDATE_SERVER_NAMESPACE}/devtools" OUTPUT_VARIABLE UPDATE_SERVER_MOD_FOLDER)
+
+        install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION ${UPDATE_SERVER_MOD_FOLDER})
+        install(DIRECTORY resources/common/ DESTINATION ${UPDATE_SERVER_MOD_FOLDER})
+        install(DIRECTORY resources/${DEVTOOLS_TARGET_SDK}/ DESTINATION ${UPDATE_SERVER_MOD_FOLDER})
+        install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod_version.ini" DESTINATION ${UPDATE_SERVER_MOD_FOLDER})
+
+        install(CODE "
+            file(GLOB_RECURSE UPDATE_SERVER_FILES LIST_DIRECTORIES false RELATIVE \"${UPDATE_SERVER_MOD_FOLDER}\" \"${UPDATE_SERVER_MOD_FOLDER}/*\")
+            list(REMOVE_ITEM UPDATE_SERVER_FILES \"mod_files.txt\" \"mod_version.ini\")
+            list(TRANSFORM UPDATE_SERVER_FILES PREPEND \"add \")
+            list(JOIN UPDATE_SERVER_FILES \"\\n\" UPDATE_SERVER_MOD_FILES_CONTENT)
+            file(WRITE \"${UPDATE_SERVER_MOD_FOLDER}/mod_files.txt\" \"\${UPDATE_SERVER_MOD_FILES_CONTENT}\\n\")
+        ")
+    endif()
+
+    install(CODE "file(ARCHIVE_CREATE OUTPUT \"${CMAKE_CURRENT_BINARY_DIR}/devtools-${DEVTOOLS_TARGET_SDK}-v${PROJECT_VERSION}.zip\" PATHS \"${MOD_FOLDER}\")")
 endforeach()

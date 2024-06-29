@@ -12,18 +12,29 @@ void DataSizeText(size_t value, size_t total, int unit) {
 		ImGui::Text("%.2f (%d%%)", static_cast<float>(value) / (1 << 10 * unit), value * 100 / total);
 }
 
-HeapInspector::HeapInspector(IAllocator* allocator, MemoryInspector* memoryInspector, HeapBase* target) : ReferencedObject{ allocator, true }, memoryInspector{ memoryInspector }, target { target }
+HeapInspector::HeapInspector(IAllocator* allocator, MemoryInspector* memoryInspector, HeapBase* target) : CompatibleObject{ allocator }, memoryInspector{ memoryInspector }, target { target }
 {
 }
 
 void HeapInspector::Tick() {
+	HeapInformation info{};
+	target->CollectHeapInformation(info);
+
+	heapInfoAllocationsHistory[nextFrame] = info.liveAllocations;
+	heapInfoTotalFreeSizeHistory[nextFrame] = info.freeSize.totalFreeSize;
+	heapInfoMaxFreeSizeHistory[nextFrame] = info.freeSize.maxFreeSize;
+
+
+#ifndef DEVTOOLS_TARGET_SDK_wars
 	HeapStatistics stats{};
 	target->GetStatistics(stats);
 
 	// We do this separately so that the frames on all inspectors line up even if they aren't being rendered.
-	allocationsHistory[nextFrame] = stats.liveAllocations;
-	allocatedHistory[nextFrame] = stats.allocated;
-	usedHistory[nextFrame] = stats.used;
+	statisticsAllocationsHistory[nextFrame] = stats.liveAllocations;
+	statisticsAllocatedHistory[nextFrame] = stats.allocated;
+	statisticsUsedHistory[nextFrame] = stats.used;
+#endif
+
 	nextFrame = (nextFrame + 1) % numSamples;
 
 	for (auto i = 0; i < childHeapInspectors.size(); i++) {
@@ -58,7 +69,73 @@ void HeapInspector::Tick() {
 		inspector->Tick();
 }
 
-void HeapInspector::Render()
+void HeapInspector::RenderHeapInformation()
+{
+	auto* name = target->GetName();
+
+	HeapInformation info{};
+	target->CollectHeapInformation(info);
+
+	ImGui::PushID(target);
+
+	ImGui::TableNextRow();
+	ImGui::TableNextColumn();
+
+	auto isOpen = ImGui::TreeNodeEx("Node", ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen | (childHeapInspectors.empty() ? ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen : 0), "%s", name);
+
+	ImGui::TableNextColumn();
+	DataSizeText(info.bufferSize, info.bufferSize, memoryInspector->units);
+	ImGui::TableNextColumn();
+	DataSizeText(info.freeSize.totalFreeSize, info.bufferSize, memoryInspector->units);
+	ImGui::TableNextColumn();
+	DataSizeText(info.freeSize.maxFreeSize, info.bufferSize, memoryInspector->units);
+	ImGui::TableNextColumn();
+	ImGui::Text("%d", info.liveAllocations);
+	ImGui::TableNextColumn();
+
+	if (ImPlot::BeginPlot("##Free memory", ImVec2(-1, 50), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
+		//ImPlot::SetupLegend(ImPlotLocation_SouthWest, ImPlotLegendFlags_Horizontal | ImPlotLegendFlags_Outside);
+		ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
+		ImPlot::SetupAxis(ImAxis_Y1, "Memory size", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
+		ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, static_cast<double>(info.bufferSize), ImPlotCond_Always);
+		ImPlot::SetNextLineStyle(ImVec4(0.471f, 0.349f, 0.392f, 1.0f));
+		ImPlot::SetNextFillStyle(ImVec4(0.471f, 0.349f, 0.392f, 1.0f));
+		ImPlot::PlotLine("Free", heapInfoTotalFreeSizeHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::SetNextLineStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
+		ImPlot::SetNextFillStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
+		ImPlot::PlotLine("Max free", heapInfoMaxFreeSizeHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::EndPlot();
+	}
+	ImGui::TableNextColumn();
+
+	if (ImPlot::BeginPlot("##Activity", ImVec2(-1, 50), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
+		//ImPlot::SetupLegend(ImPlotLocation_SouthWest, ImPlotLegendFlags_Horizontal | ImPlotLegendFlags_Outside);
+		ImPlot::SetupAxis(ImAxis_X1, nullptr, ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
+		ImPlot::SetupAxis(ImAxis_Y1, "Allocations", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
+		ImPlot::SetupAxis(ImAxis_Y2, "Used", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_Opposite);
+		ImPlot::SetNextLineStyle(ImVec4(0.31f, 0.69f, 0.776f, 1.0f));
+		ImPlot::SetNextFillStyle(ImVec4(0.31f, 0.69f, 0.776f, 1.0f), 0.3f);
+		ImPlot::SetAxes(ImAxis_X1, ImAxis_Y1);
+		ImPlot::PlotLine("Live allocations", heapInfoAllocationsHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::SetNextLineStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
+		ImPlot::SetNextFillStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f), 0.3f);
+		ImPlot::SetAxes(ImAxis_X1, ImAxis_Y2);
+		ImPlot::PlotLine("Free", heapInfoTotalFreeSizeHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::EndPlot();
+	}
+
+	if (!childHeapInspectors.empty() && isOpen) {
+		for (auto& inspector : childHeapInspectors)
+			inspector->RenderHeapInformation();
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+}
+
+#ifndef DEVTOOLS_TARGET_SDK_wars
+void HeapInspector::RenderStatistics()
 {
 	auto* name = target->GetName();
 
@@ -91,10 +168,10 @@ void HeapInspector::Render()
 		ImPlot::SetupAxisLimits(ImAxis_Y1, 0.0, static_cast<double>(stats.bufferSize), ImPlotCond_Always);
 		ImPlot::SetNextLineStyle(ImVec4(0.471f, 0.349f, 0.392f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.471f, 0.349f, 0.392f, 1.0f));
-		ImPlot::PlotLine("Allocated", allocatedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Allocated", statisticsAllocatedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::SetNextLineStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
-		ImPlot::PlotLine("Used", usedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Used", statisticsUsedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::EndPlot();
 	}
 	ImGui::TableNextColumn();
@@ -107,23 +184,24 @@ void HeapInspector::Render()
 		ImPlot::SetNextLineStyle(ImVec4(0.31f, 0.69f, 0.776f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.31f, 0.69f, 0.776f, 1.0f), 0.3f);
 		ImPlot::SetAxes(ImAxis_X1, ImAxis_Y1);
-		ImPlot::PlotLine("Live allocations", allocationsHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Live allocations", statisticsAllocationsHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::SetNextLineStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f));
 		ImPlot::SetNextFillStyle(ImVec4(0.8f, 0.643f, 0.231f, 1.0f), 0.3f);
 		ImPlot::SetAxes(ImAxis_X1, ImAxis_Y2);
-		ImPlot::PlotLine("Used", usedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
+		ImPlot::PlotLine("Used", statisticsUsedHistory, numSamples, 1.0, 0.0, ImPlotLineFlags_Shaded, nextFrame);
 		ImPlot::EndPlot();
 	}
 
 	if (!childHeapInspectors.empty() && isOpen) {
 		for (auto& inspector : childHeapInspectors)
-			inspector->Render();
+			inspector->RenderStatistics();
 
 		ImGui::TreePop();
 	}
 
 	ImGui::PopID();
 }
+#endif
 
 inline static size_t hashAvalanche(size_t key)
 {
@@ -209,12 +287,20 @@ void HeapInspector::RenderDetails()
 
 MemoryInspector::MemoryInspector(IAllocator* allocator) : StandaloneWindow{ allocator }
 {
-	auto* lh = *rangerssdk::GetAddress(&hh::fw::heap::LocalHeap::instance);
+	auto* lh = RESOLVE_STATIC_VARIABLE(hh::fw::heap::LocalHeap::instance);
 
 	heapInspectors.push_back(new (allocator) HeapInspector{ allocator, this, &lh->baseHeap });
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	for (auto& heap : lh->heaps1)
+		heapInspectors.push_back(new (allocator) HeapInspector{ allocator, this, heap.second });
+	for (auto& heap : lh->heaps2)
+		heapInspectors.push_back(new (allocator) HeapInspector{ allocator, this, heap.second });
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 	for (auto& heap : lh->heaps)
 		heapInspectors.push_back(new (allocator) HeapInspector{ allocator, this, heap.second });
+#endif
 
 	SetTitle("Memory Inspector");
 }
@@ -241,7 +327,8 @@ void MemoryInspector::RenderContents()
 	ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 
 	if (ImGui::BeginTabBar("Memory inspector type")) {
-		if (ImGui::BeginTabItem("Overview")) {
+#ifndef DEVTOOLS_TARGET_SDK_wars
+		if (ImGui::BeginTabItem("Used memory")) {
 			char totalHeader[20]{};
 			char usedHeader[20]{};
 			char allocatedHeader[20]{};
@@ -250,7 +337,7 @@ void MemoryInspector::RenderContents()
 			snprintf(usedHeader, sizeof(usedHeader), "Used (%s)", unitNames[units]);
 			snprintf(allocatedHeader, sizeof(allocatedHeader), "Allocated (%s)", unitNames[units]);
 
-			if (ImGui::BeginTable("Heap inspectors", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
+			if (ImGui::BeginTable("Allocated memory", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
 				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
 				ImGui::TableSetupColumn(totalHeader);
 				ImGui::TableSetupColumn(usedHeader);
@@ -262,7 +349,35 @@ void MemoryInspector::RenderContents()
 				ImGui::TableHeadersRow();
 
 				for (auto& inspector : heapInspectors)
-					inspector->Render();
+					inspector->RenderStatistics();
+
+				ImGui::EndTable();
+			}
+			ImGui::EndTabItem();
+		}
+#endif
+
+		if (ImGui::BeginTabItem("Free memory")) {
+			char totalHeader[20]{};
+			char freeHeader[20]{};
+			char maxFreeHeader[20]{};
+
+			snprintf(totalHeader, sizeof(totalHeader), "Total (%s)", unitNames[units]);
+			snprintf(freeHeader, sizeof(freeHeader), "Free (%s)", unitNames[units]);
+			snprintf(maxFreeHeader, sizeof(maxFreeHeader), "Max free (%s)", unitNames[units]);
+
+			if (ImGui::BeginTable("Free memory", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
+				ImGui::TableSetupColumn(totalHeader);
+				ImGui::TableSetupColumn(freeHeader);
+				ImGui::TableSetupColumn(maxFreeHeader);
+				ImGui::TableSetupColumn("Live allocations");
+				ImGui::TableSetupColumn("Usage plot (teal = allocated unused memory, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
+				ImGui::TableSetupColumn("Activity plot (teal = live allocations, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
+				ImGui::TableHeadersRow();
+
+				for (auto& inspector : heapInspectors)
+					inspector->RenderHeapInformation();
 
 				ImGui::EndTable();
 			}

@@ -10,7 +10,6 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/GOCVisualDebugDrawRenderer.cpp
         hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
-        reflection/RflMoveArrayAccessor.cpp
         reflection/serialization/ReflectionSerializer.cpp
         reflection/serialization/resource-rfls/ResObjectWorld.cpp
         ui/common/editors/Basic.cpp
@@ -29,6 +28,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Context.cpp
         ui/input/Input.cpp
         ui/input/${DEVTOOLS_TARGET_SDK}/Input.cpp
+        ui/core-services/MemoryInspector.cpp
         ui/Desktop.cpp
         ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
         ui/game-services/game-service-inspectors/ObjectWorld.cpp
@@ -51,6 +51,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/ToolBar.cpp
+        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
@@ -65,7 +66,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/GOCVisualDebugDrawRenderer.h
         hot-reload/ReloadManager.h
         reflection/ReflectiveOperations.h
-        reflection/RflMoveArrayAccessor.h
+        reflection/RflArrayAccessor.h
         reflection/serialization/EndianSwaps.h
         reflection/serialization/ReflectionSerializer.h
         reflection/serialization/resource-rfls/ResourceRfls.h
@@ -126,8 +127,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/resources/ResourceBrowser.h
         ui/SettingsManager.h
         ui/ToolBar.h
-        ui/tools/NeedleFxSceneDataTester.h
-        ui/tools/NeedleFxSceneDataTesterV2.h
+        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
         ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h
@@ -149,8 +149,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
             ui/game-services/game-service-inspectors/TerrainManager.cpp
             ui/game-services/game-service-inspectors/SoundDirector.cpp
-            ui/tools/NeedleFxSceneDataTester.cpp
-            ui/tools/NeedleFxSceneDataTesterV2.cpp
             ui/common/editors/Camera.cpp
             ui/common/editors/Needle.cpp
             ui/common/editors/SurfRide.cpp
@@ -159,7 +157,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/core-services/GraphicsContextInspector.cpp
             ui/core-services/RenderManagerInspector.cpp
             ui/core-services/RenderingEngineInspector.cpp
-            ui/core-services/MemoryInspector.cpp
             ui/game-modes/GameModeInspector.cpp
             ui/operation-modes/ObjectInspection/gameobject-inspectors/CameraFrame.cpp
             ui/operation-modes/ObjectInspection/gameobject-inspectors/ObjCameraVolume.cpp
@@ -177,11 +174,13 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/resources/editors/ResEffectEditor.cpp
             ui/resources/editors/ResMaterialEditor.cpp
             ui/resources/editors/ResSurfRideProjectEditor.cpp
+            ui/tools/rangers/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
             ui/game-services/game-service-inspectors/SoundDirector.h
             ui/operation-modes/ObjectInspection/gameobject-inspectors/CameraFrame.h
             ui/operation-modes/ObjectInspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.h
             ui/operation-modes/ObjectInspection/component-inspectors/GOCActivator.h
+            ui/tools/rangers/NeedleFxSceneDataTester.h
     )
 endif()

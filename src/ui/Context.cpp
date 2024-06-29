@@ -167,9 +167,19 @@ void Context::init() {
 
 	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 	//auto* allocator = moduleAllocator;
+
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	//static hh::fnd::ThreadSafePooledAllocator devtoolsAllocator{ "devtools" };
+	//devtoolsAllocator.Setup(moduleAllocator, 100 * 1024 * 1024, nullptr, 0, true);
+	//devtoolsAllocator.SetName("devtools");
+	//auto* allocator = &devtoolsAllocator;
+	auto* allocator = moduleAllocator;
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 	static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
 	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
 	auto* allocator = &devtoolsAllocator;
+#endif
 
 	ReloadManager::instance = new (allocator) ReloadManager(allocator);
 #ifdef DEVTOOLS_TARGET_SDK_wars

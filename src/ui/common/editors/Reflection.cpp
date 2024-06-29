@@ -131,8 +131,8 @@ public:
 	static bool VisitPrimitive(csl::math::Vector4* obj) { return InputRflScalar<csl::math::Vector4, csl::math::Vector4, false>(obj); }
 	static bool VisitPrimitive(const char** obj) { ImGui::Text("%s: %s", currentMemberName, *obj); return false; }
 
-	template<typename F, typename C, typename D>
-	static bool VisitArray(RflMoveArrayAccessor& arr, C c, D d, F f) {
+	template<typename F, template<typename> typename A, typename C, typename D>
+	static bool VisitArray(RflArrayAccessor<A>& arr, C c, D d, F f) {
 		bool edited{};
 		if (ImGui::TreeNode("MoveArray", "%s[0..]", currentMemberName)) {
 			for (int i = 0; i < arr.size(); i++) {
@@ -289,8 +289,8 @@ public:
 	template<typename T>
 	static bool VisitPrimitive(T* obj, T* orig) { return RenderStaticReflectionEditor::VisitPrimitive(obj); }
 
-	template<typename F, typename C, typename D>
-	static bool VisitArray(RflMoveArrayAccessor& arr, RflMoveArrayAccessor& orig, C c, D d, F f) {
+	template<typename F, template<typename> typename A, typename C, typename D>
+	static bool VisitArray(RflArrayAccessor<A>& arr, RflArrayAccessor<A>& orig, C c, D d, F f) {
 		size_t idx{};
 		void* emptyElement{};
 

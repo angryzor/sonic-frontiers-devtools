@@ -84,7 +84,12 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 	}
 	else {
 		char unkNameBuf[50];
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		sprintf_s(unkNameBuf, 50, "<%08x>", id.id);
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 		sprintf_s(unkNameBuf, 50, "<%016zx%016zx>", id.groupId, id.objectId);
+#endif
 
 		const char* name = unkNameBuf;
 

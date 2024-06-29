@@ -197,6 +197,41 @@ void LevelEditor::RecalculateDependentTransforms(hh::game::ObjectData* objectDat
 	}
 }
 
+ObjectId LevelEditor::GenerateRandomObjectId()
+{
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	return { mt() };
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	return { mt(), mt() };
+#endif
+}
+
+// This is extremely unlikely to happen with V3 object IDs and I would probably not even bother if we were only handling those,
+// but it is less unlikely to happen with V2 object IDs (though still unlikely). 
+ObjectId LevelEditor::GenerateUniqueRandomObjectId()
+{
+	ObjectId result{};
+	boolean isUnique{ true };
+	
+	// This has the potential to infinitely loop if the user has 2^32 objects in one chunk (V2).
+	// It also has the potential to take a long time in collisions if there are less but still an extreme amount of
+	// object IDs on the map.
+	// I'm currently ignoring this possibility, but the second one could be avoided by only rolling once and then simply incrementing until we find a gap.
+	// I just prefer a more random distribution, and we'll see if issues happen in practice. (Why have tests when you have end users :) )
+	do {
+		result = GenerateRandomObjectId();
+		
+		for (auto& status : focusedChunk->GetObjectStatuses()) {
+			if (status.objectData->id == result) {
+				isUnique = false;
+			}
+		}
+	} while (!result.IsNonNull() || !isUnique);
+
+	return result;
+}
+
 void LevelEditor::RecalculateDependentTransforms()
 {
 	for (auto* obj : focusedObjects)
@@ -520,19 +555,16 @@ ObjectData* LevelEditor::CreateObject(csl::fnd::IAllocator* allocator, const Gam
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	// FIXME: We're leaking memory here because the string does not get freed.
 	auto name = new char[100];
+	snprintf(name, 100, "%s_%d", gameObjectClass->name, mt() % 0x1000000);
 #else
 	char name[100];
-#endif
 	snprintf(name, 100, "%s_%zd", gameObjectClass->name, mt() % 0x1000000);
+#endif
 
 	auto* objData = new (allocator) ObjectData{
 		allocator,
 		gameObjectClass,
-#ifdef DEVTOOLS_TARGET_SDK_wars
-		{ mt() },
-#else
-		{ mt(), mt() },
-#endif
+		GenerateUniqueRandomObjectId(),
 		name,
 		parentObject,
 		transform,
@@ -548,18 +580,15 @@ ObjectData* LevelEditor::CopyObject(csl::fnd::IAllocator* allocator, ObjectData*
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	// FIXME: We're leaking memory here because the string does not get freed.
 	auto name = new char[100];
+	snprintf(name, 100, "%s_%d", otherObject->gameObjectClass, mt() % 0x1000000);
 #else
 	char name[100];
-#endif
 	snprintf(name, 100, "%s_%zd", otherObject->gameObjectClass, mt() % 0x1000000);
+#endif
 
 	auto* objData = new (allocator) ObjectData{
 		allocator,
-#ifdef DEVTOOLS_TARGET_SDK_wars
-		{ mt() },
-#else
-		{ mt(), mt() },
-#endif
+		GenerateUniqueRandomObjectId(),
 		name,
 		*otherObject,
 	};

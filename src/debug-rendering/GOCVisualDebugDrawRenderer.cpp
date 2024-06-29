@@ -84,8 +84,10 @@ HOOK(bool, __fastcall, VisualDebugDrawSetup, gocVisualDebugDrawSetupAddr, GOCMyV
 hh::fnd::Reference<GOCVisualDebugDrawRenderer> GOCVisualDebugDrawRenderer::instance = nullptr;
 
 void GOCVisualDebugDrawRenderer::InstallHooks() {
+#ifndef DEVTOOLS_TARGET_SDK_wars
 	INSTALL_HOOK(VisualDebugDrawSetup);
 	GOCMyVisualDebugDraw::InstallHooks();
+#endif
 }
 
 #ifdef DEVTOOLS_TARGET_SDK_wars

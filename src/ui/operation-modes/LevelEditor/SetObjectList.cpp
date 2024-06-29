@@ -50,7 +50,15 @@ bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	if (type == SetObjectListTreeViewNode::Type::OBJECT && list.levelEditor.focusedObjects.find(object.object) != -1)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
+	if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull())
+		ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
+
 	bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
+
+	if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull()) {
+		ImGui::PopStyleColor();
+		ImGui::SetItemTooltip("Invalid object ID: this object's ID is NULL, which is a reserved value!");
+	}
 
 	if (type == SetObjectListTreeViewNode::Type::OBJECT) {
 		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
@@ -178,15 +186,18 @@ TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildTreeNode(csl::ut::Po
 	auto objId = objData == nullptr ? ObjectId{} : objData->id;
 	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
 
-	for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
-		auto childLayerMapIt = childMaps.Find(layer);
-		auto childMapIt = childLayerMapIt->Find(objId);
+	// Some tools generate faulty objects with ID 0. Avoid crashing on those.
+	if (objData == nullptr || objId.IsNonNull()) {
+		for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
+			auto childLayerMapIt = childMaps.Find(layer);
+			auto childMapIt = childLayerMapIt->Find(objId);
 
-		if (childMapIt == childLayerMapIt->end())
-			continue;
+			if (childMapIt == childLayerMapIt->end())
+				continue;
 
-		for (auto* object : *childMapIt)
-			node.AddChild(BuildTreeNode(childMaps, object));
+			for (auto* object : *childMapIt)
+				node.AddChild(BuildTreeNode(childMaps, object));
+		}
 	}
 
 	return node;
@@ -195,13 +206,16 @@ TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildTreeNode(csl::ut::Po
 TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerTreeNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer, ObjectData* objData) {
 	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
 
-	auto childMapIt = childMap.Find(objData->id);
+	// Some tools generate faulty objects with ID 0. Avoid crashing on those.
+	if (objData->id.IsNonNull()) {
+		auto childMapIt = childMap.Find(objData->id);
 
-	if (childMapIt == childMap.end())
-		return node;
+		if (childMapIt == childMap.end())
+			return node;
 
-	for (auto* object : *childMapIt)
-		node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
+		for (auto* object : *childMapIt)
+			node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
+	}
 
 	return node;
 }

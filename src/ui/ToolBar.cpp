@@ -4,6 +4,10 @@
 #include "SettingsManager.h"
 #include "resources/ResourceBrowser.h"
 #include "game-services/GameServiceInspector.h"
+#include "core-services/MemoryInspector.h"
+#ifdef DEVTOOLS_TARGET_SDK_wars
+#include "tools/wars/NeedleFxSceneDataTesterV2.h"
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "game-modes/GameModeInspector.h"
 #include "core-services/GameUpdaterInspector.h"
@@ -11,9 +15,8 @@
 #include "core-services/RenderManagerInspector.h"
 #include "core-services/RenderingEngineInspector.h"
 #include "core-services/CameraManagerInspector.h"
-#include "core-services/MemoryInspector.h"
-#include "tools/NeedleFxSceneDataTester.h"
-#include "tools/NeedleFxSceneDataTesterV2.h"
+#include "tools/rangers/NeedleFxSceneDataTester.h"
+#include "tools/rangers/NeedleFxSceneDataTesterV2.h"
 #endif
 #include "tools/RflComparer.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
@@ -43,6 +46,8 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Inspectors")) {
 			if (ImGui::MenuItem("GameService"))
 				new (Desktop::instance->GetAllocator()) GameServiceInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("Memory"))
+				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("GameUpdater"))
 				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
@@ -52,25 +57,23 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) RenderManagerInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("RenderingEngine"))
 				new (Desktop::instance->GetAllocator()) RenderingEngineInspector(Desktop::instance->GetAllocator());
-			if (ImGui::MenuItem("Memory"))
-				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GameMode"))
 				new (Desktop::instance->GetAllocator()) GameModeInspector(Desktop::instance->GetAllocator());
 #endif
 			ImGui::EndMenu();
 		}
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if (ImGui::BeginMenu("Tools")) {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("NeedleFxSceneData Tester") && ImGui::FindWindowByName("NeedleFxSceneData testing tool") == nullptr)
 				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTester(Desktop::instance->GetAllocator());
+#endif
 			if (ImGui::MenuItem("NeedleFxSceneData Tester V2") && ImGui::FindWindowByName("NeedleFxSceneData testing tool V2") == nullptr)
 				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTesterV2(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("RFL Comparer"))
 				new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
 			ImGui::EndMenu();
 		}
-#endif
 
 		if (ImGui::BeginMenu("Mode")) {
 			if (ImGui::MenuItem("Object Inspection"))
@@ -90,7 +93,6 @@ void ToolBar::Render() {
 		ImGui::EndMenuBar();
 	}
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 	auto& gameUpdater = GameApplication::GetInstance()->GetGameUpdater();
 
 	unsigned int gameUpdaterFlags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
@@ -115,7 +117,6 @@ void ToolBar::Render() {
 		gameUpdater.flags.flip(GameUpdater::Flags::DEBUG_PAUSE);
 	if (ImGui::IsKeyPressed(ImGuiKey_F5))
 		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);
-#endif
 
 	auto* debugCameraMgr = DebugCameraManager::GetInstance();
 

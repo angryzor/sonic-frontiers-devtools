@@ -29,6 +29,8 @@ class LevelEditor : public OperationMode, public hh::game::GameManagerListener, 
     static float debugBoxScale;
 
     void RecalculateDependentTransforms(hh::game::ObjectData* objectData);
+    hh::game::ObjectId GenerateRandomObjectId();
+    hh::game::ObjectId GenerateUniqueRandomObjectId();
 
 public:
     LevelEditor(csl::fnd::IAllocator* allocator);

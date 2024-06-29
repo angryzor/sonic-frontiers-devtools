@@ -1,0 +1,4 @@
+[Main]
+VersionString="${PROJECT_VERSION}"
+DownloadSizeString="${PROJECT_DOWNLOAD_SIZE}"
+Markdown="CHANGELOG.md"

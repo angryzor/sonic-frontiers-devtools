@@ -1,5 +1,5 @@
 #pragma once
-#include "RflMoveArrayAccessor.h"
+#include "RflArrayAccessor.h"
 #include <tuple>
 
 namespace rflops {
@@ -57,7 +57,7 @@ namespace rflops {
 
 			static typename V::result_type ProcessArray(RflObj<S>... objs, const hh::fnd::RflClassMember* member)
 			{
-				std::tuple<RflObj<S, RflMoveArrayAccessor>...> arrs{ { *static_cast<csl::ut::MoveArray<void*>*>(objs), member }... };
+				std::tuple<RflObj<S, RflArrayAccessor<csl::ut::MoveArray>>...> arrs{ { *static_cast<csl::ut::MoveArray<void*>*>(objs), member }... };
 
 				return V::VisitArray(
 					std::get<S>(arrs)...,
@@ -67,6 +67,30 @@ namespace rflops {
 						if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
 							hh::fnd::RflTypeInfoRegistry::GetInstance()->ConstructObject(hh::fnd::MemoryRouter::GetModuleAllocator(), obj, member->GetStructClass()->GetName());
 						
+						return obj;
+					},
+					[member](void* obj) {
+						if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+							hh::fnd::RflTypeInfoRegistry::GetInstance()->CleanupLoadedObject(obj, member->GetStructClass()->GetName());
+
+						hh::fnd::MemoryRouter::GetModuleAllocator()->Free(obj);
+					},
+					[member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); }
+				);
+			}
+
+			static typename V::result_type ProcessOldArray(RflObj<S>... objs, const hh::fnd::RflClassMember* member)
+			{
+				std::tuple<RflObj<S, RflArrayAccessor<csl::ut::MoveArray32>>...> arrs{ { *static_cast<csl::ut::MoveArray32<void*>*>(objs), member }... };
+
+				return V::VisitArray(
+					std::get<S>(arrs)...,
+					[member]() {
+						void* obj = new (std::align_val_t(16), hh::fnd::MemoryRouter::GetModuleAllocator()) char[member->GetSubTypeSizeInBytes()];
+
+						if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+							hh::fnd::RflTypeInfoRegistry::GetInstance()->ConstructObject(hh::fnd::MemoryRouter::GetModuleAllocator(), obj, member->GetStructClass()->GetName());
+
 						return obj;
 					},
 					[member](void* obj) {
@@ -92,6 +116,9 @@ namespace rflops {
 			static typename V::result_type ProcessClassMember(RflObj<S>... objs, const hh::fnd::RflClassMember* member) {
 				switch (member->GetType()) {
 				case hh::fnd::RflClassMember::TYPE_ARRAY: return ProcessArray(objs..., member);
+#ifdef DEVTOOLS_TARGET_SDK_wars
+				case hh::fnd::RflClassMember::TYPE_OLD_ARRAY: return ProcessOldArray(objs..., member);
+#endif
 				case hh::fnd::RflClassMember::TYPE_POINTER: return ProcessSingle(*static_cast<void**>(objs)..., member, member->GetSubType());
 				case hh::fnd::RflClassMember::TYPE_ENUM: return ProcessEnum(objs..., member);
 				case hh::fnd::RflClassMember::TYPE_FLAGS: return ProcessFlags(objs..., member);
@@ -166,8 +193,8 @@ namespace rflops {
 				assert(false);
 				return 0;
 			}
-			template<typename F, typename C, typename D>
-			static int VisitArray(RflMoveArrayAccessor& arr1, RflMoveArrayAccessor& arr2, C c, D d, F f) {
+			template<typename F, template<typename> typename A, typename C, typename D>
+			static int VisitArray(RflArrayAccessor<A>& arr1, RflArrayAccessor<A>& arr2, C c, D d, F f) {
 				arr1.clear();
 
 				for (auto item : arr2) {

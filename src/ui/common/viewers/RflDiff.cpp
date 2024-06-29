@@ -21,8 +21,8 @@ public:
 		return false;
 	}
 
-	template<typename F, typename C, typename D>
-	static bool VisitArray(RflMoveArrayAccessor& arr, C c, D d, F f) {
+	template<typename F, template<typename> typename A, typename C, typename D>
+	static bool VisitArray(RflArrayAccessor<A>& arr, C c, D d, F f) {
 		void* obj = arr[change->path[pathIdx].arrayIdx];
 		pathIdx--;
 		f(obj);
