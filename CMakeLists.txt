@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.25
+project(devtools VERSION 0.1.26
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
@@ -16,7 +16,7 @@ set(SDK_VAR_wars "SONIC_FORCES_SDK")
 set(GAME_FOLDER_DEFAULT_wars "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicForces")
 set(GAME_EXECUTABLE_wars "build/main/projects/exec/Sonic Forces.exe")
 set(DEBUGGER_WORKING_DIRECTORY_wars "build/main/projects/exec")
-set(MOD_SUBFOLDER_wars "build/main/projects/exec/Mods/devtools")
+set(MODS_SUBFOLDER_wars "build/main/projects/exec/Mods")
 set(UPDATE_SERVER_NAMESPACE_wars "sonic-forces")
 set(FRIENDLY_GAME_NAME_wars "Sonic Forces")
 
@@ -24,9 +24,11 @@ set(SDK_VAR_rangers "SONIC_FRONTIERS_SDK")
 set(GAME_FOLDER_DEFAULT_rangers "C:\\Program Files (x86)\\Steam\\steamapps\\common\\SonicFrontiers")
 set(GAME_EXECUTABLE_rangers "SonicFrontiers.exe")
 set(DEBUGGER_WORKING_DIRECTORY_rangers "")
-set(MOD_SUBFOLDER_rangers "Mods/devtools")
+set(MODS_SUBFOLDER_rangers "Mods")
 set(UPDATE_SERVER_NAMESPACE_rangers "sonic-frontiers")
 set(FRIENDLY_GAME_NAME_rangers "Sonic Frontiers")
+
+file(MAKE_DIRECTORY "${CMAKE_CURRENT_BINARY_DIR}/archives")
 
 if(DEFINED UPDATE_SERVER)
     cmake_path(SET UPDATE_SERVER_NORMALIZED NORMALIZE ${UPDATE_SERVER})
@@ -42,7 +44,8 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
     cmake_path(SET GAME_FOLDER_NORMALIZED NORMALIZE ${GAME_FOLDER_${DEVTOOLS_TARGET_SDK}})
     cmake_path(APPEND GAME_FOLDER_NORMALIZED ${GAME_EXECUTABLE_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE GAME_EXECUTABLE)
     cmake_path(APPEND GAME_FOLDER_NORMALIZED ${DEBUGGER_WORKING_DIRECTORY_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE DEBUGGER_WORKING_DIRECTORY)
-    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${MOD_SUBFOLDER_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE MOD_FOLDER)
+    cmake_path(APPEND GAME_FOLDER_NORMALIZED ${MODS_SUBFOLDER_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE MODS_FOLDER)
+    cmake_path(APPEND MODS_FOLDER "devtools" OUTPUT_VARIABLE MOD_FOLDER)
 
     if(DEFINED ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
         message("${SDK_VAR_${DEVTOOLS_TARGET_SDK}} environment variable found. Using this version instead of the local submodule.")
@@ -91,6 +94,13 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
     install(DIRECTORY resources/${DEVTOOLS_TARGET_SDK}/ DESTINATION "${MOD_FOLDER}")
     install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${MOD_FOLDER}")
 
+    install(CODE "
+        execute_process(
+            COMMAND \$\{CMAKE_COMMAND} \"-E\" \"tar\" \"cvf\" \"${CMAKE_CURRENT_BINARY_DIR}/archives/devtools-${DEVTOOLS_TARGET_SDK}-v${PROJECT_VERSION}.zip\" \"--format=zip\" \"devtools\"
+            WORKING_DIRECTORY \"${MODS_FOLDER}\"
+        )
+    ")
+
     if(DEFINED UPDATE_SERVER_NORMALIZED)
         cmake_path(APPEND UPDATE_SERVER_NORMALIZED "${UPDATE_SERVER_NAMESPACE}/devtools" OUTPUT_VARIABLE UPDATE_SERVER_MOD_FOLDER)
 
@@ -107,6 +117,4 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
             file(WRITE \"${UPDATE_SERVER_MOD_FOLDER}/mod_files.txt\" \"\${UPDATE_SERVER_MOD_FILES_CONTENT}\\n\")
         ")
     endif()
-
-    install(CODE "file(ARCHIVE_CREATE OUTPUT \"${CMAKE_CURRENT_BINARY_DIR}/devtools-${DEVTOOLS_TARGET_SDK}-v${PROJECT_VERSION}.zip\" PATHS \"${MOD_FOLDER}\")")
 endforeach()

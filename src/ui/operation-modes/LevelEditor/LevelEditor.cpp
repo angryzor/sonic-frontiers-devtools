@@ -220,6 +220,7 @@ ObjectId LevelEditor::GenerateUniqueRandomObjectId()
 	// I'm currently ignoring this possibility, but the second one could be avoided by only rolling once and then simply incrementing until we find a gap.
 	// I just prefer a more random distribution, and we'll see if issues happen in practice. (Why have tests when you have end users :) )
 	do {
+		isUnique = true;
 		result = GenerateRandomObjectId();
 		
 		for (auto& status : focusedChunk->GetObjectStatuses()) {

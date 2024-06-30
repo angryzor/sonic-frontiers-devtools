@@ -1,3 +1,7 @@
+# v0.1.26
+* Fixed a previously masked problem in the selection tool which made it impossible to select or place objects in the previous version.
+* Fixed a problem in the build scripts.
+
 # v0.1.25
 * Removed "Sonic's Birthday" HEMS event easter egg.
 * Added workaround to not crash when objects have invalid NULL IDs.

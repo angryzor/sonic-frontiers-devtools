@@ -209,19 +209,14 @@ void Desktop::HandleMousePicking()
 			}
 		}
 		else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			ImVec2 ndcPos{ 2 * io.MousePos.x / io.DisplaySize.x - 1, 1 - 2 * io.MousePos.y / io.DisplaySize.y };
-
 			auto* gameManager = GameManager::GetInstance();
 
 			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
 				if (auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0)) {
-					auto inverseMat = camera->viewportData.GetInverseViewMatrix() * camera->viewportData.projMatrix.inverse();
-
-					Eigen::Vector4f worldSpaceOrigin = inverseMat * csl::math::Vector4{ ndcPos.x, ndcPos.y, 0, 1 };
-					Eigen::Vector4f worldSpaceTarget = inverseMat * csl::math::Vector4{ ndcPos.x, ndcPos.y, 1, 1 };
+					auto ray = ScreenPosToWorldRay(ImGui::GetMousePos(), camera->viewportData.GetInverseViewMatrix() * camera->viewportData.projMatrix.inverse());
 
 					csl::ut::MoveArray<PhysicsQueryResult> results{ hh::fnd::MemoryRouter::GetTempAllocator() };
-					if (physicsWorld->RayCastAllHits({ worldSpaceOrigin.hnormalized() }, { worldSpaceTarget.hnormalized() }, 0xFFFFFFFF, results)) {
+					if (physicsWorld->RayCastAllHits(ray.start, ray.end, 0xFFFFFFFF, results)) {
 						if (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) {
 							csl::ut::PointerMap<GameObject*, bool> unique{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
