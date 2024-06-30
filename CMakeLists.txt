@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.26
+project(devtools VERSION 0.1.27
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 

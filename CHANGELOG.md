@@ -1,3 +1,6 @@
+# v0.1.27
+* Fixed ObjectId and GameObject selection inputs always being set to the last item in the list.
+
 # v0.1.26
 * Fixed a previously masked problem in the selection tool which made it impossible to select or place objects in the previous version.
 * Fixed a problem in the build scripts.

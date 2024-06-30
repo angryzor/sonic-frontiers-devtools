@@ -125,8 +125,10 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 			for (auto* chunk : objWorld->GetWorldChunks()) {
 				for (auto* layers : chunk->GetLayers()) {
 					for (auto* obj : layers->GetResource()->GetObjects()) {
-						if (edited |= ImGui::Selectable(obj->name))
+						if (ImGui::Selectable(obj->name)) {
 							id = obj->id;
+							edited = true;
+						}
 
 						if (id == obj->id)
 							ImGui::SetItemDefaultFocus();
@@ -159,8 +161,10 @@ bool Editor(const char* label, hh::game::GameObject*& gameObject)
 
 	if (ImGui::BeginCombo(label, gameObject == nullptr ? "<none>" : gameObject->name)) {
 		for (auto* obj : hh::game::GameManager::GetInstance()->objects) {
-			if (edited |= ImGui::Selectable(obj->name))
+			if (ImGui::Selectable(obj->name)) {
 				gameObject = obj;
+				edited = true;
+			}
 
 			if (gameObject == obj)
 				ImGui::SetItemDefaultFocus();
