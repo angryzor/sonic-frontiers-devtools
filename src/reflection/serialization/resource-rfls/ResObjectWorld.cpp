@@ -1,5 +1,7 @@
 #include "ResourceRfls.h"
 
+#include <utilities/ObjectDataUtils.h>
+
 using namespace hh::fnd;
 using namespace hh::game;
 
@@ -35,13 +37,20 @@ using namespace hh::game;
 //    csl::ut::MoveArray<ObjectData*> objects;
 //};
 
-const RflClass* handleComponentDataData(void* obj) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
-    return nullptr;
-#else
-    return GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
-#endif
+const RflClass* handleComponentDataData(void* obj) {
+    const char* componentType = static_cast<ComponentData*>(obj)->type;
+
+    if (!strcmp(componentType, "RangeSpawning"))
+        return &GOCActivatorSpawner::rflClass;
+    else
+        return nullptr;
 }
+#else
+const RflClass* handleComponentDataData(void* obj) {
+    return GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(obj)->type)->rflClass;
+}
+#endif
 
 const RflClass* handleSpawnerData(void* obj) {
     return GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(static_cast<ObjectData*>(obj)->gameObjectClass)->spawnerDataRflClass;
@@ -72,7 +81,11 @@ RflClass componentDataArrayEntry{ "ComponentDataArrayEntry", nullptr, 8, nullptr
 RflClassMember objectDataMembers[]{
     { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectData, flags), nullptr },
     { "gameObjectClass", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, gameObjectClass), nullptr },
+#ifdef DEVTOOLS_TARGET_SDK_wars
+    { "name", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, name), nullptr },
+#else
     { "name", nullptr, nullptr, RflClassMember::TYPE_STRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, name), nullptr },
+#endif
     { "id", nullptr, nullptr, RflClassMember::TYPE_OBJECT_ID, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, id), nullptr },
     { "parentID", nullptr, nullptr, RflClassMember::TYPE_OBJECT_ID, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, parentID), nullptr },
     { "transform", &objectTransformData, nullptr, RflClassMember::TYPE_STRUCT, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, transform), nullptr },

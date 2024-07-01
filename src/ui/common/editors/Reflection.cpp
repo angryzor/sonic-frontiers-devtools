@@ -134,7 +134,7 @@ public:
 	template<typename F, template<typename> typename A, typename C, typename D>
 	static bool VisitArray(RflArrayAccessor<A>& arr, C c, D d, F f) {
 		bool edited{};
-		if (ImGui::TreeNode("MoveArray", "%s[0..]", currentMemberName)) {
+		if (ImGui::TreeNode(currentMemberName, "%s[0..]", currentMemberName)) {
 			for (int i = 0; i < arr.size(); i++) {
 				ImGui::PushID(i);
 				if (ImGui::Button("x"))

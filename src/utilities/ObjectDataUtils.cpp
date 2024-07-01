@@ -2,6 +2,13 @@
 #include "ObjectDataUtils.h"
 #include <utilities/math/MathUtils.h>
 
+const hh::fnd::RflClassMember GOCActivatorSpawner::rflClassMembers[2]{
+	{ "m_range", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_range), nullptr },
+	{ "m_distance", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_distance), nullptr },
+};
+
+const hh::fnd::RflClass GOCActivatorSpawner::rflClass{ "GOCActivatorSpawner", nullptr, sizeof(GOCActivatorSpawner), nullptr, 0, GOCActivatorSpawner::rflClassMembers, 2, nullptr };
+
 hh::game::ObjectTransformData Affine3fToObjectTransformData(const Eigen::Affine3f& transform) {
 	Eigen::Matrix3f absoluteRotation;
 	Eigen::Matrix3f absoluteScaling;

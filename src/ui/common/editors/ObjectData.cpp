@@ -10,31 +10,6 @@
 
 using namespace hh::game;
 
-struct GOCVisualModelSpawner {
-	csl::ut::VariableString resModel;
-
-	GOCVisualModelSpawner(csl::fnd::IAllocator* allocator) : resModel{ allocator } {}
-};
-
-struct GOCSimpleAnimationSpawner {
-	csl::ut::VariableString resSkeleton;
-	csl::ut::VariableString resAnimation;
-
-	GOCSimpleAnimationSpawner(csl::fnd::IAllocator* allocator) : resSkeleton{ allocator }, resAnimation{ allocator } {}
-};
-
-struct GOCActivatorSpawner {
-	float m_range{};
-	float m_distance{};
-};
-
-hh::fnd::RflClassMember gocActivatorSpawnerMembers[]{
-	{ "m_range", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_range), nullptr },
-	{ "m_distance", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_distance), nullptr },
-};
-
-hh::fnd::RflClass gocActivatorSpawnerClass{ "GOCActivatorSpawner", nullptr, sizeof(GOCActivatorSpawner), nullptr, 0, gocActivatorSpawnerMembers, 2, nullptr };
-
 #ifndef DEVTOOLS_TARGET_SDK_wars
 //ComponentData* CreateComponentData(const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
 //	auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
@@ -102,7 +77,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 		if (ImGui::CollapsingHeader(componentConfig->type)) {
 			ImGui::Text("Configuration:");
 			if (!strcmp(componentConfig->type, "RangeSpawning"))
-				edited |= ReflectionEditor("Component properties", componentConfig->data, &gocActivatorSpawnerClass);
+				edited |= ReflectionEditor("Component properties", componentConfig->data, &GOCActivatorSpawner::rflClass, true);
 		}
 	}
 #else

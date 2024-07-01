@@ -79,9 +79,10 @@ namespace rflops {
 				);
 			}
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
 			static typename V::result_type ProcessOldArray(RflObj<S>... objs, const hh::fnd::RflClassMember* member)
 			{
-				std::tuple<RflObj<S, RflArrayAccessor<csl::ut::MoveArray32>>...> arrs{ { *static_cast<csl::ut::MoveArray32<void*>*>(objs), member }... };
+				std::tuple<RflObj<S, RflArrayAccessor<hh::TArray>>...> arrs{ { *static_cast<hh::TArray<void*>*>(objs), member }... };
 
 				return V::VisitArray(
 					std::get<S>(arrs)...,
@@ -99,9 +100,10 @@ namespace rflops {
 
 						hh::fnd::MemoryRouter::GetModuleAllocator()->Free(obj);
 					},
-					[member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); }
+					[member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType() == hh::fnd::RflClassMember::TYPE_UINT32 ? hh::fnd::RflClassMember::TYPE_OBJECT_ID : member->GetSubType()); } // We're overriding this here because Forces seems to use TYPE_OLD_ARRAY,TYPE_UINT32 for object ID arrays...
 				);
 			}
+#endif
 
 			static typename V::result_type ProcessEnum(RflObj<S>... objs, const hh::fnd::RflClassMember* member) {
 				return V::VisitEnum(objs..., member->GetSubType(), member->GetEnumClass(), [member](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); });

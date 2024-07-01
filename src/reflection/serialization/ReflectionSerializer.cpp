@@ -15,6 +15,35 @@ struct OffsetVarStr {
 	}
 };
 
+namespace hl::hh {
+	template<typename T>
+	struct tarray
+	{
+		using value_type = T;
+		using size_type = size_t;
+		using pointer = T*;
+		using const_pointer = const T*;
+		using reference = typename off64<T>::reference;
+		using const_reference = typename off64<T>::const_reference;
+		using iterator = pointer;
+		using const_iterator = const_pointer;
+		using reverse_iterator = std::reverse_iterator<iterator>;
+		using const_reverse_iterator = std::reverse_iterator<const_iterator>;
+
+		off64<T> dataPtr;
+		size_t count;
+		int64_t capacity;
+
+		template<bool swapOffsets = true>
+		void endian_swap() noexcept
+		{
+			hl::endian_swap<swapOffsets>(dataPtr);
+			hl::endian_swap<swapOffsets>(count);
+			hl::endian_swap<swapOffsets>(capacity);
+		}
+	};
+}
+
 size_t ReflectionSerializer::EnqueueChunk(WorkQueueEntry chunk) {
 	auto processed = processedPointers.Find(chunk.ptr);
 	if (processed != processedPointers.end())
@@ -149,6 +178,21 @@ void ReflectionSerializer::WriteRflClass(const void* obj, const RflClass& rflCla
 				writer.write_obj(offsetarr);
 				break;
 			}
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			case RflClassMember::TYPE_OLD_ARRAY: {
+				auto arr = static_cast<hh::TArray<void*>*>(address);
+
+				writer.add_offset(writer.tell());
+				hl::hh::tarray<void*> offsetarr{
+					EnqueueChunk({ arr->begin(), obj, &member, arr->size() }),
+					arr->size(),
+					static_cast<int64_t>(arr->capacity()),
+				};
+
+				writer.write_obj(offsetarr);
+				break;
+			}
+#endif
 			case RflClassMember::TYPE_SIMPLE_ARRAY:
 				// Array that is 16 bytes large. I don't quite know what their layout would be (maybe 32b movearray?)
 				// and the binary contains none of these, so just assert for now.

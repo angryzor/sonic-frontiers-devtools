@@ -64,7 +64,7 @@ void RenderGameObjectInspector(app_cmn::camera::CameraFrame& cameraFrame) {
         ImGui::Text("Addr: %zx", controllerUnit.controller);
         ImGui::Text("Name: %s", controllerUnit.controller->name.c_str());
         Editor("Camera frame", controllerUnit.controller->cameraFrame);
-        ImGui::Text("Priority: %d", controllerUnit.priority);
+        Editor("Priority", controllerUnit.priority);
         if (ImGui::TreeNode("Parameters")) {
             Editor("Parameters", controllerUnit.controller->parameter);
             ImGui::TreePop();

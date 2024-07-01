@@ -1,9 +1,27 @@
+# v0.1.28
+* Fixed TYPE_ARRAY editors on the same level unfolding together.
+* Fixed a crash when clicking outside the UI very early in the game's boot sequence.
+* Fixed RFL editor default defaultOpen being true.
+
+## Sonic Frontiers
+* Added TimeService inspector.
+* Added RespawnTimeManager inspector.
+* Made controller priority in CameraFrame inspector editable.
+
+## Sonic Forces
+* Fixed crash when exporting gedit.
+* Added support for TYPE_OLD_ARRAY in the serializer.
+* Added workaround to show TYPE_OLD_ARRAY arrays of unsigned ints as object ids in RFL editor.
+
+
 # v0.1.27
 * Fixed ObjectId and GameObject selection inputs always being set to the last item in the list.
+
 
 # v0.1.26
 * Fixed a previously masked problem in the selection tool which made it impossible to select or place objects in the previous version.
 * Fixed a problem in the build scripts.
+
 
 # v0.1.25
 * Removed "Sonic's Birthday" HEMS event easter egg.

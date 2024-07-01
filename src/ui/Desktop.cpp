@@ -188,7 +188,8 @@ void Desktop::HandleMousePicking()
 	if (!io.WantCaptureMouse && !ImGui::IsAnyItemHovered()) {
 		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
 			auto* gameManager = GameManager::GetInstance();
-			if (auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0)) {
+			if (auto* cameraSrv = gameManager->GetService<hh::game::CameraManager>())
+			if (auto* camera = cameraSrv->GetTopComponent(0)) {
 				auto mouseStart = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
 				auto mouseEnd = ImGui::GetMousePos();
 				auto frustum = ScreenRectToFrustum(mouseStart, mouseEnd, (camera->viewportData.projMatrix * camera->viewportData.viewMatrix).inverse());
@@ -212,7 +213,8 @@ void Desktop::HandleMousePicking()
 			auto* gameManager = GameManager::GetInstance();
 
 			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
-				if (auto* camera = gameManager->GetService<hh::game::CameraManager>()->GetTopComponent(0)) {
+				if (auto* cameraSrv = gameManager->GetService<hh::game::CameraManager>())
+				if (auto* camera = cameraSrv->GetTopComponent(0)) {
 					auto ray = ScreenPosToWorldRay(ImGui::GetMousePos(), camera->viewportData.GetInverseViewMatrix() * camera->viewportData.projMatrix.inverse());
 
 					csl::ut::MoveArray<PhysicsQueryResult> results{ hh::fnd::MemoryRouter::GetTempAllocator() };

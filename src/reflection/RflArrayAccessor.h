@@ -3,6 +3,7 @@
 template<template<typename> typename A>
 class RflArrayAccessor {
 protected:
+	template<template<typename> typename A2>
 	class RflArray : public A<void*> {
 	public:
 		void change_allocator(csl::fnd::IAllocator* new_allocator, const hh::fnd::RflClassMember* member) {
@@ -42,7 +43,7 @@ protected:
 				return;
 
 			size_t subTypeSize = member->GetSubTypeSizeInBytes();
-			
+
 			if (!this->m_pAllocator && !this->isUninitialized())
 				change_allocator(hh::fnd::MemoryRouter::GetModuleAllocator(), member);
 
@@ -113,7 +114,85 @@ protected:
 		}
 	};
 
-	RflArray& underlying;
+#ifdef DEVTOOLS_TARGET_SDK_wars
+	template<>
+	class RflArray<hh::TArray> : public A<void*> {
+	public:
+		void reserve(size_t len, const hh::fnd::RflClassMember* member) {
+			if (len <= this->capacity())
+				return;
+
+			size_t subTypeSize = member->GetSubTypeSizeInBytes();
+
+			void* new_buffer = hh::fnd::MemoryRouter::GetDebugAllocator()->Alloc(subTypeSize * len, 16);
+
+			if (this->m_pBuffer)
+			{
+				memcpy(new_buffer, this->m_pBuffer, subTypeSize * this->m_length);
+			}
+
+			if (!this->isUninitialized())
+			{
+				hh::fnd::MemoryRouter::GetDebugAllocator()->Free(this->m_pBuffer);
+			}
+
+			this->m_capacity = len;
+			this->m_pBuffer = static_cast<void**>(new_buffer);
+		}
+
+		void emplace_back(const hh::fnd::RflClassMember* member) {
+			size_t subTypeSize = member->GetSubTypeSizeInBytes();
+
+			this->m_length++;
+
+			if (this->m_length > this->capacity())
+			{
+				reserve(this->m_length * 2, member);
+			}
+
+			void* placement = reinterpret_cast<void*>(reinterpret_cast<size_t>(this->m_pBuffer) + subTypeSize * (this->m_length - 1));
+
+			if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+				hh::fnd::RflTypeInfoRegistry::GetInstance()->ConstructObject(hh::fnd::MemoryRouter::GetModuleAllocator(), placement, member->GetStructClass()->GetName());
+			else
+				memset(placement, 0, subTypeSize);
+		}
+
+		void remove(size_t i, const hh::fnd::RflClassMember* member) {
+			size_t subTypeSize = member->GetSubTypeSizeInBytes();
+			if (i >= this->m_length)
+				return;
+
+			void* placement = reinterpret_cast<void*>(reinterpret_cast<size_t>(this->m_pBuffer) + subTypeSize * i);
+
+			if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+				hh::fnd::RflTypeInfoRegistry::GetInstance()->CleanupLoadedObject(placement, member->GetName());
+
+			memmove(placement, reinterpret_cast<void*>(reinterpret_cast<size_t>(this->m_pBuffer) + subTypeSize * (i + 1)), subTypeSize * (this->m_length - i - 1));
+
+			this->m_length--;
+		}
+
+		void clear(const hh::fnd::RflClassMember* member) {
+			if (!this->empty()) {
+				for (size_t i = 0; i < this->m_length; i++)
+					if (member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT)
+						hh::fnd::RflTypeInfoRegistry::GetInstance()->CleanupLoadedObject(get(i, member), member->GetName());
+
+				this->m_length = 0;
+			}
+		}
+
+		void** get(size_t i, const hh::fnd::RflClassMember* member) const {
+			if (!this->m_pBuffer)
+				return nullptr;
+
+			return reinterpret_cast<void**>(reinterpret_cast<size_t>(this->m_pBuffer) + member->GetSubTypeSizeInBytes() * i);
+		}
+	};
+#endif
+
+	RflArray<A>& underlying;
 public:
 	const hh::fnd::RflClassMember* member;
 
@@ -176,7 +255,7 @@ public:
 		}
 	};
 
-	RflArrayAccessor(A<void*>& underlying, const hh::fnd::RflClassMember* member) : underlying{ static_cast<RflArray&>(underlying) }, member{ member } {}
+	RflArrayAccessor(A<void*>& underlying, const hh::fnd::RflClassMember* member) : underlying{ static_cast<RflArray<A>&>(underlying) }, member{ member } {}
 
 	void change_allocator(csl::fnd::IAllocator* new_allocator) {
 		underlying.change_allocator(new_allocator, member);

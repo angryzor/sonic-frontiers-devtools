@@ -66,7 +66,7 @@ template<typename T, typename S>
 static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
 	bool edited{};
 
-	if (ImGui::TreeNode("MoveArray", "%s[0..]", label)) {
+	if (ImGui::TreeNode(label, "%s[0..]", label)) {
 		for (int i = 0; i < arr.size(); i++) {
 			ImGui::PushID(i);
 			if (ImGui::Button("x"))

@@ -149,9 +149,12 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
             ui/game-services/game-service-inspectors/TerrainManager.cpp
             ui/game-services/game-service-inspectors/SoundDirector.cpp
+            ui/game-services/game-service-inspectors/rangers/TimeService.cpp
+            ui/game-services/game-service-inspectors/rangers/RespawnTimeManager.cpp
             ui/common/editors/Camera.cpp
             ui/common/editors/Needle.cpp
             ui/common/editors/SurfRide.cpp
+            ui/common/editors/rangers/TimeService.cpp
             ui/common/inputs/Needle.cpp
             ui/core-services/GameUpdaterInspector.cpp
             ui/core-services/GraphicsContextInspector.cpp
@@ -176,7 +179,10 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/resources/editors/ResSurfRideProjectEditor.cpp
             ui/tools/rangers/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
+            ui/common/editors/rangers/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
+            ui/game-services/game-service-inspectors/rangers/TimeService.h
+            ui/game-services/game-service-inspectors/rangers/RespawnTimeManager.h
             ui/operation-modes/ObjectInspection/gameobject-inspectors/CameraFrame.h
             ui/operation-modes/ObjectInspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.h
