@@ -15,7 +15,7 @@ hh::game::ObjectTransformData Affine3fToObjectTransformData(const Eigen::Affine3
 
 	transform.computeRotationScaling(&absoluteRotation, &absoluteScaling);
 
-	return { { transform.translation() }, MatrixToEuler(absoluteRotation) };
+	return { transform.translation(), MatrixToEuler(absoluteRotation) };
 }
 
 Eigen::Affine3f ObjectTransformDataToAffine3f(const hh::game::ObjectTransformData& transformData) {

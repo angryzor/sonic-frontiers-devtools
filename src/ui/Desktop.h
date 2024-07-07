@@ -2,8 +2,15 @@
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/common/StandaloneWindow.h>
 #include <utilities/CompatibleObject.h>
+#include "Action.h"
+#include "Shortcuts.h"
 
 class Desktop : public CompatibleObject {
+    struct ShortcutBinding {
+        ShortcutId shortcutId;
+        ActionId actionId;
+    };
+
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture{};
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
@@ -11,6 +18,7 @@ class Desktop : public CompatibleObject {
     bool pickerClicked{ false };
     bool locationPicked{ false };
     csl::ut::MoveArray<hh::game::GameObject*> pickedObjects{ GetAllocator() };
+    csl::ut::MoveArray<ShortcutBinding> boundShortcuts{ GetAllocator() };
     csl::math::Vector3 pickedLocation;
     void AddStandaloneWindow(StandaloneWindow* window);
     void RemoveStandaloneWindow(StandaloneWindow* window);
@@ -33,4 +41,12 @@ public:
     void SwitchToObjectInspectionMode();
     void SwitchToLevelEditorMode();
     void SwitchToSurfRideEditorMode();
+    void Dispatch(const ActionBase& action);
+
+    template<typename T, typename = std::enable_if_t<std::is_same_v<typename T::PayloadType, EmptyActionPayload>>> void BindShortcut(ShortcutId shortcutId) {
+        boundShortcuts.push_back({ shortcutId, T::id });
+    }
+
+    void UnbindShortcut(ShortcutId shortcutId);
+    void HandleShortcuts();
 };

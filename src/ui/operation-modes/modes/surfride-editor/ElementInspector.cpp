@@ -18,26 +18,28 @@ void ElementInspector::Render()
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_FirstUseEver, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Element inspector", NULL, windowFlags)) {
-		if (editor.focusedElements.size() == 0) {
+		auto& selection = editor.GetBehavior<SelectionBehavior<SurfRideSelection>>()->GetSelection();
+
+		if (selection.size() == 0) {
 			ImGui::Text("Select an item in the left pane.");
 		}
-		else if (editor.focusedElements.size() > 1) {
+		else if (selection.size() > 1) {
 			ImGui::Text("Multiple items selected.");
 		}
 		else {
-			auto& focusedElement = editor.focusedElements[0];
+			auto& focusedElement = selection[0];
 
 			switch (focusedElement.type) {
-			case SurfRideEditor::Selection::Type::SCENE:
+			case SurfRideSelection::Type::SCENE:
 				RenderSceneInspector(*focusedElement.scene);
 				break;
-			case SurfRideEditor::Selection::Type::CAMERA_DATA:
+			case SurfRideSelection::Type::CAMERA_DATA:
 				RenderCameraDataInspector(*focusedElement.cameraData);
 				break;
-			case SurfRideEditor::Selection::Type::LAYER:
+			case SurfRideSelection::Type::LAYER:
 				RenderLayerInspector(*focusedElement.layer);
 				break;
-			case SurfRideEditor::Selection::Type::CAST:
+			case SurfRideSelection::Type::CAST:
 				RenderCastInspector(*focusedElement.cast);
 				break;
 			}

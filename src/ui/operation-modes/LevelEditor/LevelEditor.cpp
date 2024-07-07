@@ -48,8 +48,8 @@ LevelEditor::~LevelEditor() {
 void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 {
 	if (haveSelectionAabb) {
-		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
-		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 255, 255, 255, 140 });
+		csl::geom::Aabb aabb{ selectionAabb.min, selectionAabb.max };
+		ctx.DrawAABB(aabb.min, aabb.max, { 255, 255, 255, 140 });
 	}
 
 	if (focusedChunk) {
@@ -57,7 +57,7 @@ void LevelEditor::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 			auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
 
 			if (gameObject && ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>())) {
-				targetBox->Render(&ctx, { ObjectTransformDataToAffine3f(status.objectData->transform) });
+				targetBox->Render(&ctx, ObjectTransformDataToAffine3f(status.objectData->transform));
 			}
 		}
 	}
@@ -268,7 +268,7 @@ void LevelEditor::HandleObjectManipulation() {
 
 		Eigen::Affine3f pivotTransform{};
 		if (focusedObjects.size() > 1 && haveSelectionAabb)
-			pivotTransform.fromPositionOrientationScale((selectionAabb.m_Min + selectionAabb.m_Max) / 2.0f, Eigen::Quaternionf::Identity(), Eigen::Vector3f{ 1.0f, 1.0f, 1.0f });
+			pivotTransform.fromPositionOrientationScale((selectionAabb.min + selectionAabb.max) / 2.0f, Eigen::Quaternionf::Identity(), Eigen::Vector3f{ 1.0f, 1.0f, 1.0f });
 		else
 			pivotTransform = ObjectTransformDataToAffine3f(focusedObjects[0]->transform);
 
@@ -356,7 +356,7 @@ void LevelEditor::CheckGizmoHotkeys() {
 void LevelEditor::UpdateDebugBoxGeometry()
 {
 	hh::fnd::Geometry box{ GetAllocator() };
-	box.CreateBox({ 0, 0, 0 }, { debugBoxScale, debugBoxScale, debugBoxScale }, csl::math::Quaternion::Identity);
+	box.CreateBox({ 0, 0, 0 }, { debugBoxScale, debugBoxScale, debugBoxScale }, csl::math::Quaternion::Identity());
 	targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
 	targetBox->SetColor({ 255, 0, 255, 255 });
 }

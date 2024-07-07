@@ -8,6 +8,9 @@ target_sources(${DEVTOOLS_TARGET}
         DllMain.cpp
         Mod.cpp
         debug-rendering/GOCVisualDebugDrawRenderer.cpp
+        debug-rendering/visuals/AabbTree.cpp
+        debug-rendering/visuals/Geometry.cpp
+        debug-rendering/visuals/KdTree.cpp
         hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/serialization/ReflectionSerializer.cpp
@@ -35,21 +38,23 @@ target_sources(${DEVTOOLS_TARGET}
         ui/game-services/game-service-inspectors/StageInfo.cpp
         ui/game-services/game-service-inspectors/CameraManager.cpp
         ui/game-services/GameServiceInspector.cpp
-        ui/operation-modes/LevelEditor/LevelEditor.cpp
-        ui/operation-modes/LevelEditor/ObjectDataInspector.cpp
-        ui/operation-modes/LevelEditor/ObjectLibrary.cpp
-        ui/operation-modes/LevelEditor/SetObjectList.cpp
-        ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.cpp
-        ui/operation-modes/ObjectInspection/component-inspectors/GOCCollider.cpp
-        ui/operation-modes/ObjectInspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.cpp
-        ui/operation-modes/ObjectInspection/ObjectInspection.cpp
-        ui/operation-modes/ObjectInspection/ObjectInspector.cpp
-        ui/operation-modes/ObjectInspection/ObjectList.cpp
+        ui/operation-modes/modes/level-editor/LevelEditor.cpp
+        ui/operation-modes/modes/level-editor/ObjectDataInspector.cpp
+        ui/operation-modes/modes/level-editor/ObjectLibrary.cpp
+        ui/operation-modes/modes/level-editor/SetObjectList.cpp
+        ui/operation-modes/modes/object-inspection/component-inspectors/GOCTransform.cpp
+        ui/operation-modes/modes/object-inspection/component-inspectors/GOCCollider.cpp
+        ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.cpp
+        ui/operation-modes/modes/object-inspection/ObjectInspection.cpp
+        ui/operation-modes/modes/object-inspection/ObjectInspector.cpp
+        ui/operation-modes/modes/object-inspection/ObjectList.cpp
+        ui/operation-modes/OperationModeBehavior.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
+        ui/Shortcuts.cpp
         ui/ToolBar.cpp
         ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
@@ -64,6 +69,9 @@ target_sources(${DEVTOOLS_TARGET}
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/GOCVisualDebugDrawRenderer.h
+        debug-rendering/visuals/AabbTree.h
+        debug-rendering/visuals/Geometry.h
+        debug-rendering/visuals/KdTree.h
         hot-reload/ReloadManager.h
         reflection/ReflectiveOperations.h
         reflection/RflArrayAccessor.h
@@ -105,19 +113,25 @@ target_sources(${DEVTOOLS_TARGET}
         ui/game-services/game-service-inspectors/StageInfo.h
         ui/game-services/game-service-inspectors/CameraManager.h
         ui/game-services/GameServiceInspector.h
-        ui/operation-modes/LevelEditor/LevelEditor.h
-        ui/operation-modes/LevelEditor/ObjectDataInspector.h
-        ui/operation-modes/LevelEditor/ObjectLibrary.h
-        ui/operation-modes/LevelEditor/SetObjectList.h
-        ui/operation-modes/ObjectInspection/component-inspectors/GOCTransform.h
-        ui/operation-modes/ObjectInspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.h
-        ui/operation-modes/ObjectInspection/ObjectInspection.h
-        ui/operation-modes/ObjectInspection/ObjectInspector.h
-        ui/operation-modes/ObjectInspection/ObjectList.h
-        ui/operation-modes/SurfRideEditor/Timeline.h
-        ui/operation-modes/SurfRideEditor/ProjectTree.h
-        ui/operation-modes/SurfRideEditor/ElementInspector.h
-        ui/operation-modes/SurfRideEditor/SurfRideEditor.h
+        ui/operation-modes/behaviors/Clipboard.h
+        ui/operation-modes/behaviors/DebugCommentsVisual.h
+        ui/operation-modes/behaviors/Gizmo.h
+        ui/operation-modes/behaviors/MousePicking.h
+        ui/operation-modes/behaviors/ObjectLocationVisual3D.h
+        ui/operation-modes/behaviors/Selection.h
+        ui/operation-modes/behaviors/SelectionAabb.h
+        ui/operation-modes/behaviors/SelectionMousePicking.h
+        ui/operation-modes/behaviors/SelectionTransformation.h
+        ui/operation-modes/behaviors/SelectionVisual.h
+        ui/operation-modes/modes/level-editor/LevelEditor.h
+        ui/operation-modes/modes/level-editor/ObjectDataInspector.h
+        ui/operation-modes/modes/level-editor/ObjectLibrary.h
+        ui/operation-modes/modes/level-editor/SetObjectList.h
+        ui/operation-modes/modes/object-inspection/component-inspectors/GOCTransform.h
+        ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.h
+        ui/operation-modes/modes/object-inspection/ObjectInspection.h
+        ui/operation-modes/modes/object-inspection/ObjectInspector.h
+        ui/operation-modes/modes/object-inspection/ObjectList.h
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h
         ui/resources/editors/ResObjectWorldEditor.h
@@ -126,6 +140,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/resources/editors/ResSurfRideProjectEditor.h
         ui/resources/ResourceBrowser.h
         ui/SettingsManager.h
+        ui/Shortcuts.h
         ui/ToolBar.h
         ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
         ui/tools/RflComparer.h
@@ -144,6 +159,7 @@ target_sources(${DEVTOOLS_TARGET}
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
+            debug-rendering/visuals/FxColCollisionShape.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
@@ -161,32 +177,39 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/core-services/RenderManagerInspector.cpp
             ui/core-services/RenderingEngineInspector.cpp
             ui/game-modes/GameModeInspector.cpp
-            ui/operation-modes/ObjectInspection/gameobject-inspectors/CameraFrame.cpp
-            ui/operation-modes/ObjectInspection/gameobject-inspectors/ObjCameraVolume.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCEvent.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCCamera.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCAnimator.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCActivator.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCPlayerBlackboard.cpp
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCPlayerKinematicParams.cpp
-            ui/operation-modes/SurfRideEditor/Timeline.cpp
-            ui/operation-modes/SurfRideEditor/ProjectTree.cpp
-            ui/operation-modes/SurfRideEditor/ElementInspector.cpp
-            ui/operation-modes/SurfRideEditor/SurfRideEditor.cpp
+            ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.cpp
+            ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCEvent.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCCamera.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerBlackboard.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerKinematicParams.cpp
+            ui/operation-modes/modes/surfride-editor/Timeline.cpp
+            ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
+            ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
+            ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
+            ui/operation-modes/modes/surfride-editor/Selection.cpp
             ui/resources/editors/ResEffectEditor.cpp
             ui/resources/editors/ResMaterialEditor.cpp
             ui/resources/editors/ResSurfRideProjectEditor.cpp
             ui/tools/rangers/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
+            debug-rendering/visuals/FxColCollisionShape.h
             ui/common/editors/rangers/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
             ui/game-services/game-service-inspectors/rangers/TimeService.h
             ui/game-services/game-service-inspectors/rangers/RespawnTimeManager.h
-            ui/operation-modes/ObjectInspection/gameobject-inspectors/CameraFrame.h
-            ui/operation-modes/ObjectInspection/gameobject-inspectors/ObjCameraVolume.h
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCVisual.h
-            ui/operation-modes/ObjectInspection/component-inspectors/GOCActivator.h
+            ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h
+            ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.h
+            ui/operation-modes/modes/surfride-editor/Timeline.h
+            ui/operation-modes/modes/surfride-editor/ProjectTree.h
+            ui/operation-modes/modes/surfride-editor/ElementInspector.h
+            ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
+            ui/operation-modes/modes/surfride-editor/Selection.h
             ui/tools/rangers/NeedleFxSceneDataTester.h
     )
 endif()

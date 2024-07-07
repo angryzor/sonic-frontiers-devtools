@@ -27,5 +27,5 @@ Ray<T, AmbientDim> operator*(const Eigen::Matrix<T, AmbientDim + 1, AmbientDim +
 
 template<typename T, int AmbientDim, int Mode>
 Ray<T, AmbientDim> operator*(const Eigen::Transform<T, AmbientDim, Mode>& transform, const Ray<T, AmbientDim>& ray) {
-    return { transform * ray.start, transform * ray};
+    return { transform * ray.start, transform * ray.end };
 }

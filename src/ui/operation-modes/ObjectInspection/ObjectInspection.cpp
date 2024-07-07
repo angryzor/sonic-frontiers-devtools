@@ -29,8 +29,8 @@ void ObjectInspection::Render() {
 void ObjectInspection::RenderDebugVisuals(hh::gfnd::DrawContext& ctx)
 {
 	if (haveSelectionAabb) {
-		csl::geom::Aabb aabb{ selectionAabb.m_Min, selectionAabb.m_Max };
-		ctx.DrawAABB(aabb.m_Min, aabb.m_Max, { 255, 255, 255, 140 });
+		csl::geom::Aabb aabb{ selectionAabb.min, selectionAabb.max };
+		ctx.DrawAABB(aabb.min, aabb.max, { 255, 255, 255, 140 });
 	}
 }
 
@@ -58,7 +58,7 @@ void ObjectInspection::HandleObjectManipulation() {
 
 		Eigen::Affine3f pivotTransform{};
 		if (focusedObjects.size() > 1 && haveSelectionAabb)
-			pivotTransform.fromPositionOrientationScale((selectionAabb.m_Min + selectionAabb.m_Max) / 2.0f, Eigen::Quaternionf::Identity(), Eigen::Vector3f{ 1.0f, 1.0f, 1.0f });
+			pivotTransform.fromPositionOrientationScale((selectionAabb.min + selectionAabb.max) / 2.0f, Eigen::Quaternionf::Identity(), Eigen::Vector3f{ 1.0f, 1.0f, 1.0f });
 		else
 			pivotTransform = TransformToAffine3f(firstObjGocTransform->GetFrame().fullTransform);
 

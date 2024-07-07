@@ -4,12 +4,20 @@ project(HedgeLibWrapper)
 set(HEDGELIB_BUILD_HEDGERENDER OFF)
 set(HEDGELIB_BUILD_HEDGETOOLS OFF)
 
-if(NOT EXISTS ${PROJECT_SOURCE_DIR}/HedgeLib/Dependencies)
+if(CMAKE_GENERATOR_PLATFORM)
+    set(DEVTOOLS_HEDGELIB_TARGET_ARCHITECTURE "${CMAKE_GENERATOR_PLATFORM}")
+else()
+    set(DEVTOOLS_HEDGELIB_TARGET_ARCHITECTURE "x64")
+endif()
+
+if(NOT EXISTS ${PROJECT_SOURCE_DIR}/HedgeLib/Dependencies/${DEVTOOLS_HEDGELIB_TARGET_ARCHITECTURE})
     execute_process(
-        COMMAND powershell "-File" "${PROJECT_SOURCE_DIR}/HedgeLib/Get-Dependencies.ps1"
+        COMMAND powershell "-File" "${PROJECT_SOURCE_DIR}/HedgeLib/Get-Dependencies.ps1" "-Architecture" ${CMAKE_GENERATOR_PLATFORM}
         WORKING_DIRECTORY "${PROJECT_SOURCE_DIR}/HedgeLib"
         COMMAND_ERROR_IS_FATAL ANY
     )
 endif()
+
+set(HEDGELIB_LOCAL_DEPENDENCIES_DIR "${PROJECT_SOURCE_DIR}/HedgeLib/Dependencies/${DEVTOOLS_HEDGELIB_TARGET_ARCHITECTURE}")
 
 add_subdirectory(HedgeLib)

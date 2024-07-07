@@ -47,7 +47,9 @@ bool SetObjectListTreeViewNode::MatchesSearchString(const char* searchString) co
 
 bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 {
-	if (type == SetObjectListTreeViewNode::Type::OBJECT && list.levelEditor.focusedObjects.find(object.object) != -1)
+	auto* selection = list.levelEditor.GetBehavior<SelectionBehavior<ObjectData*>>();
+
+	if (type == SetObjectListTreeViewNode::Type::OBJECT && selection->GetSelection().find(object.object) != -1)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 	if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull())
@@ -62,7 +64,7 @@ bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 
 	if (type == SetObjectListTreeViewNode::Type::OBJECT) {
 		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
-			list.levelEditor.Select(object.object);
+			selection->Select(object.object);
 		if (ImGui::BeginDragDropSource()) {
 			ObjectData* obj = object.object;
 			ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));

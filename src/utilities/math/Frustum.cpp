@@ -66,7 +66,7 @@ Frustum& Frustum::operator=(const FrustumRays& rays)
 	};
 }
 
-bool Frustum::Test(const Eigen::Vector3f vec)
+bool Frustum::Test(const Eigen::Vector3f vec) const
 {
 	for (size_t i = 0; i < 6; i++)
 		if (planes[i].signedDistance(vec) < 0)

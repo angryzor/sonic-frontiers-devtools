@@ -187,6 +187,7 @@ void Context::init() {
 #endif
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
+	Desktop::instance->SwitchToObjectInspectionMode();
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);

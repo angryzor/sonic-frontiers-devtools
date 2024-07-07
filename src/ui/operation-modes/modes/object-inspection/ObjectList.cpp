@@ -1,6 +1,7 @@
 #include "ObjectList.h"
 #include "ObjectInspection.h"
 #include <ui/common/Icons.h>
+#include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/math/MathUtils.h>
 
 using namespace hh::fnd;
@@ -13,7 +14,9 @@ ObjectList::ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& object
 void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-	if (objectInspection.focusedObjects.find(obj) != -1)
+	auto* selection = objectInspection.GetBehavior<SelectionBehavior<GameObject*>>();
+
+	if (selection->GetSelection().find(obj) != -1)
 		nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 	auto* transform = obj->GetComponent<GOCTransform>();
@@ -21,10 +24,8 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	if ((transform && transform->GetChildren().size() > 0) || obj->GetChildren().size() > 0) {
 		bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
-		if (ImGui::IsItemClicked()) {
-			objectInspection.focusedObjects.clear();
-			objectInspection.focusedObjects.push_back(obj);
-		}
+		if (ImGui::IsItemClicked())
+			selection->Select(obj);
 
 		if (ImGui::BeginDragDropSource()) {
 			ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
@@ -59,10 +60,8 @@ void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 	else {
 		ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->name.c_str());
 
-		if (ImGui::IsItemClicked()) {
-			objectInspection.focusedObjects.clear();
-			objectInspection.focusedObjects.push_back(obj);
-		}
+		if (ImGui::IsItemClicked())
+			selection->Select(obj);
 
 		if (ImGui::BeginDragDropSource()) {
 			ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
@@ -112,20 +111,20 @@ void ObjectList::Render() {
 			}
 			if (ImGui::BeginTabItem("Layer view")) {
 				if (ImGui::BeginChild("Content")) {
+					auto* selection = objectInspection.GetBehavior<SelectionBehavior<GameObject*>>();
+
 					for (auto* layer : GameManager::GetInstance()->gameObjectLayers) {
 						if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
 							for (auto* obj : layer->objects) {
 								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-								if (objectInspection.focusedObjects.find(obj) != -1)
+								if (selection->GetSelection().find(obj) != -1)
 									nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
-								if (ImGui::IsItemClicked()) {
-									objectInspection.focusedObjects.clear();
-									objectInspection.focusedObjects.push_back(obj);
-								}
+								if (ImGui::IsItemClicked())
+									selection->Select(obj);
 
 								if (ImGui::BeginDragDropSource()) {
 									ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));

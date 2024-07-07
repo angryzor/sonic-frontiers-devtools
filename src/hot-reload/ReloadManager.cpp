@@ -1,6 +1,6 @@
 #include "ReloadManager.h"
 #include <ui/Desktop.h>
-#include <ui/operation-modes/LevelEditor/LevelEditor.h>
+//#include <ui/operation-modes/LevelEditor/LevelEditor.h>
 #include <utilities/ResourceTypes.h>
 #include <locale>
 #include <codecvt>
@@ -128,8 +128,8 @@ void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWor
 						auto* allocator = layer->GetAllocator();
 						bool wasEnabled = layer->IsEnable();
 
-						if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-							levelEditor->Deselect();
+						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+						//	levelEditor->Deselect();
 
 						{
 							Reference<hh::game::ObjectWorldChunkLayer> l{ layer };
@@ -146,8 +146,8 @@ void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWor
 						chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, resource));
 						chunk->SetLayerEnabled(resource->GetName(), wasEnabled);
 
-						if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-							levelEditor->ReloadObjectWorldData();
+						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+						//	levelEditor->ReloadObjectWorldData();
 
 						success = true;
 						break;

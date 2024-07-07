@@ -3,6 +3,7 @@
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/math/EulerTransform.h>
 #include <utilities/math/MathUtils.h>
 #include <imgui_internal.h>
@@ -129,14 +130,16 @@ void ObjectInspector::Render() {
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_FirstUseEver, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Object inspector", NULL, windowFlags)) {
-		if (objectInspection.focusedObjects.size() == 0) {
+		auto& selection = objectInspection.GetBehavior<SelectionBehavior<GameObject*>>()->GetSelection();
+
+		if (selection.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");
 		}
-		else if (objectInspection.focusedObjects.size() > 1) {
+		else if (selection.size() > 1) {
 			ImGui::Text("Multiple objects selected");
 		}
 		else {
-			auto focusedObject = objectInspection.focusedObjects[0];
+			auto focusedObject = selection[0];
 			ImGui::Text("Object name: %s", focusedObject->name.c_str());
 			ImGui::Text("Layer: %d", focusedObject->layer);
 			ImGui::Text("Class: %s", focusedObject->objectClass ? focusedObject->objectClass->name : "<none>");

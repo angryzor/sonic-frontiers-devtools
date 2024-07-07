@@ -3,8 +3,6 @@
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/Desktop.h>
-#include <ui/operation-modes/ObjectInspection/ObjectInspection.h>
-#include <ui/operation-modes/LevelEditor/LevelEditor.h>
 
 bool Editor(const char* label, Eigen::Quaternionf& quat) {
 	auto euler = MatrixToEuler(quat.toRotationMatrix());
@@ -96,14 +94,14 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 		for (auto* chunk : objWorld->GetWorldChunks()) {
 			int idx = chunk->GetObjectIndexById(id);
 
-			if (idx == -1) ImGui::BeginDisabled();
-			if (ImGui::Button("Select")) {
-				if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-					opMode->Select(chunk->GetWorldObjectStatusByIndex(idx).objectData);
-			}
-			if (idx == -1) ImGui::EndDisabled();
+			//if (idx == -1) ImGui::BeginDisabled();
+			//if (ImGui::Button("Select")) {
+			//	if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+			//		opMode->Select(chunk->GetWorldObjectStatusByIndex(idx).objectData);
+			//}
+			//if (idx == -1) ImGui::EndDisabled();
 
-			ImGui::SameLine();
+			//ImGui::SameLine();
 
 			if (idx != -1)
 				name = chunk->GetWorldObjectStatusByIndex(idx).objectData->name;
@@ -148,16 +146,16 @@ bool Editor(const char* label, hh::game::GameObject*& gameObject)
 	bool edited{};
 
 	ImGui::PushID(label);
-	if (gameObject == nullptr) ImGui::BeginDisabled();
-	if (ImGui::Button("Select")) {
-		if (auto* opMode = dynamic_cast<ObjectInspection*>(&*Desktop::instance->operationMode))
-			opMode->Select(gameObject);
-		else if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-		 	opMode->Select(gameObject);
-	}
-	if (gameObject == nullptr) ImGui::EndDisabled();
+	//if (gameObject == nullptr) ImGui::BeginDisabled();
+	//if (ImGui::Button("Select")) {
+	//	if (auto* opMode = dynamic_cast<ObjectInspection*>(&*Desktop::instance->operationMode))
+	//		opMode->Select(gameObject);
+	//	else if (auto* opMode = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+	//	 	opMode->Select(gameObject);
+	//}
+	//if (gameObject == nullptr) ImGui::EndDisabled();
 
-	ImGui::SameLine();
+	//ImGui::SameLine();
 
 	if (ImGui::BeginCombo(label, gameObject == nullptr ? "<none>" : gameObject->name)) {
 		for (auto* obj : hh::game::GameManager::GetInstance()->objects) {

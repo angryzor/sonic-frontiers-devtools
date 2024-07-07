@@ -1,6 +1,7 @@
 set(IMGUI_BUILD_BACKEND_WIN32 ON)
 set(IMGUI_BUILD_BACKEND_DX11 ON)
 
+add_subdirectory(eigen)
 add_subdirectory(detours)
 add_subdirectory(imgui)
 add_subdirectory(imguizmo)

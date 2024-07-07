@@ -19,11 +19,13 @@ void ObjectDataInspector::Render() {
 	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_FirstUseEver, ImVec2(1, 0));
 	ImGui::SetNextWindowSize(ImVec2(800, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_FirstUseEver);
 	if (ImGui::Begin("Object data inspector", NULL, windowFlags)) {
-		if (levelEditor.focusedObjects.size() == 0) {
+		auto& selection = levelEditor.GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
+
+		if (selection.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");
 		}
-		else if (levelEditor.focusedObjects.size() > 1) {
-			ImGui::Text("%zd objects selected", levelEditor.focusedObjects.size());
+		else if (selection.size() > 1) {
+			ImGui::Text("%zd objects selected", selection.size());
 			ImGui::SeparatorText("Align / Distribute");
 			ImGui::PushID("Align / Distribute");
 			Editor("##AlignX", alignX);
@@ -40,7 +42,7 @@ void ObjectDataInspector::Render() {
 			ImGui::PopID();
 		}
 		else {
-			auto focusedObject = levelEditor.focusedObjects[0];
+			auto focusedObject = selection[0];
 			bool edited = Editor("Focused object", *focusedObject);
 
 			if (edited || ImGui::IsItemDeactivatedAfterEdit()) {
@@ -90,18 +92,20 @@ void ObjectDataInspector::DistributeAlongBasis(const Eigen::Vector3f& basis, flo
 {
 	Eigen::Vector3f avg{ 0.0f, 0.0f, 0.0f };
 
-	if (levelEditor.focusedObjects.size() == 0)
+	auto& selection = levelEditor.GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
+
+	if (selection.size() == 0)
 		return;
 
-	for (auto* obj : levelEditor.focusedObjects)
+	for (auto* obj : selection)
 		avg += obj->transform.position.cwiseProduct(basis);
-	avg /= levelEditor.focusedObjects.size();
+	avg /= selection.size();
 
 	size_t idx{};
-	float startOffset{ -static_cast<float>(levelEditor.focusedObjects.size() - 1) / 2.0f };
-	for (auto* obj : levelEditor.focusedObjects) {
+	float startOffset{ -static_cast<float>(selection.size() - 1) / 2.0f };
+	for (auto* obj : selection) {
 		auto transform = obj->transform;
-		transform.position = { transform.position - transform.position.cwiseProduct(basis) + avg + basis * spacing * (startOffset + static_cast<float>(idx)) };
+		transform.position = transform.position - transform.position.cwiseProduct(basis) + avg + basis * spacing * (startOffset + static_cast<float>(idx));
 		UpdateAbsoluteTransform(ObjectTransformDataToAffine3f(transform), *obj);
 		idx++;
 	}

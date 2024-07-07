@@ -202,10 +202,10 @@ void SurfRideEditor::Deselect()
 
 void SurfRideEditor::UpdateSelectionAabb(const Eigen::Matrix4f& transform, const SurfRide::Vector2& size)
 {
-	selectionAabb.AddPoint({ (transform * Eigen::Vector4f{ -size.x() / 2.0f, size.y() / 2.0f, 0.0f, 1.0f }).hnormalized() });
-	selectionAabb.AddPoint({ (transform * Eigen::Vector4f{ size.x() / 2.0f, size.y() / 2.0f, 0.0f, 1.0f }).hnormalized() });
-	selectionAabb.AddPoint({ (transform * Eigen::Vector4f{ size.x() / 2.0f, -size.y() / 2.0f, 0.0f, 1.0f }).hnormalized() });
-	selectionAabb.AddPoint({ (transform * Eigen::Vector4f{ -size.x() / 2.0f, -size.y() / 2.0f, 0.0f, 1.0f }).hnormalized() });
+	selectionAabb.AddPoint((transform * Eigen::Vector4f{ -size.x() / 2.0f, size.y() / 2.0f, 0.0f, 1.0f }).hnormalized());
+	selectionAabb.AddPoint((transform * Eigen::Vector4f{ size.x() / 2.0f, size.y() / 2.0f, 0.0f, 1.0f }).hnormalized());
+	selectionAabb.AddPoint((transform * Eigen::Vector4f{ size.x() / 2.0f, -size.y() / 2.0f, 0.0f, 1.0f }).hnormalized());
+	selectionAabb.AddPoint((transform * Eigen::Vector4f{ -size.x() / 2.0f, -size.y() / 2.0f, 0.0f, 1.0f }).hnormalized());
 }
 
 void SurfRideEditor::DrawSelectionAabb()
@@ -213,8 +213,8 @@ void SurfRideEditor::DrawSelectionAabb()
 	if (haveSelectionAabb) {
 		if (ImGui::Begin("Overlay")) {
 			if (auto* dl = ImGui::GetCurrentWindow()->DrawList) {
-				auto min = NDCCoordsToImGui({ selectionAabb.m_Min.x(), selectionAabb.m_Max.y() });
-				auto max = NDCCoordsToImGui({ selectionAabb.m_Max.x(), selectionAabb.m_Min.y() });
+				auto min = NDCCoordsToImGui({ selectionAabb.min.x(), selectionAabb.max.y() });
+				auto max = NDCCoordsToImGui({ selectionAabb.max.x(), selectionAabb.min.y() });
 
 				dl->AddRect({ min.x, max.y }, { max.x, min.y }, 0xFFFFFFFF);
 			}
@@ -231,8 +231,8 @@ bool SurfRideEditor::IsMouseInSelectionAabb()
 	auto& io = ImGui::GetIO();
 	auto mousePos = ImGui::GetMousePos();
 
-	auto min = NDCCoordsToImGui({ selectionAabb.m_Min.x(), selectionAabb.m_Max.y() });
-	auto max = NDCCoordsToImGui({ selectionAabb.m_Max.x(), selectionAabb.m_Min.y() });
+	auto min = NDCCoordsToImGui({ selectionAabb.min.x(), selectionAabb.max.y() });
+	auto max = NDCCoordsToImGui({ selectionAabb.max.x(), selectionAabb.min.y() });
 
 	return min.x <= mousePos.x && min.y <= mousePos.y && max.x >= mousePos.x && max.y >= mousePos.y;
 }
@@ -240,8 +240,8 @@ bool SurfRideEditor::IsMouseInSelectionAabb()
 void SurfRideEditor::CalcSelectionAabb()
 {
 	haveSelectionAabb = false;
-	selectionAabb.m_Min = { INFINITY, INFINITY, INFINITY };
-	selectionAabb.m_Max = { -INFINITY, -INFINITY, -INFINITY };
+	selectionAabb.min = { INFINITY, INFINITY, INFINITY };
+	selectionAabb.max = { -INFINITY, -INFINITY, -INFINITY };
 	for (auto& el : focusedElements) {
 		if (el.type != Selection::Type::CAST)
 			continue;

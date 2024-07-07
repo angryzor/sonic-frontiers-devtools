@@ -8,10 +8,10 @@ static bool Editor(const char* label, T& obj) {
 	return DragScalar(label, obj);
 }
 
-template<typename T, int Rows, int Cols>
-static bool Editor(const char* label, Eigen::Matrix<T, Rows, Cols>& mat) {
+template<typename T, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+static bool Editor(const char* label, Eigen::Matrix<T, Rows, Cols, Options, MaxRows, MaxCols>& mat) {
 	bool edited{};
-	auto cols = reinterpret_cast<Eigen::Matrix<T, Rows, 1>(&)[4]>(mat);
+	auto cols = reinterpret_cast<Eigen::Matrix<T, Rows, 1, Options, MaxRows>(&)[Cols]>(mat);
 
 	ImGui::PushID(label);
 	for (int i = 0; i < Cols; i++) {

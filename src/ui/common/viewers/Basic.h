@@ -14,9 +14,9 @@ static void Viewer(const char* label, const T& obj) {
 		ImGui::Text("%s: %f", label, obj);
 }
 
-template<typename T, int Dim>
-static void Viewer(const char* label, const Eigen::Matrix<T, Dim, 1>& vec) {
-	if constexpr (Dim == 4)
+template<typename T, int Rows, int Options, int MaxRows>
+static void Viewer(const char* label, const Eigen::Matrix<T, Rows, 1, Options, MaxRows>& vec) {
+	if constexpr (Rows == 4)
 		IM_ASSERT(ImGui::GetStateStorage()->GetBool(ImGui::GetID("WithW")));
 
 	ImGui::TableNextRow();
@@ -25,9 +25,9 @@ static void Viewer(const char* label, const Eigen::Matrix<T, Dim, 1>& vec) {
 	ImGui::TableNextColumn();
 	ImGui::Text("%f", vec.y());
 	ImGui::TableNextColumn();
-	if constexpr (Dim >= 3)
+	if constexpr (Rows >= 3)
 		ImGui::Text("%f", vec.z());
-	if constexpr (Dim == 4) {
+	if constexpr (Rows == 4) {
 		ImGui::TableNextColumn();
 		ImGui::Text("%f", vec.w());
 	}
@@ -52,9 +52,9 @@ void Viewer(const char* label, const csl::ut::Color<float>& color);
 bool BeginVectorViewerTable(const char* id, bool withWAxis);
 void EndVectorViewerTable();
 
-template<typename T, int Rows, int Cols>
-static void Viewer(const char* label, const Eigen::Matrix<T, Rows, Cols>& mat) {
-	auto cols = reinterpret_cast<const Eigen::Matrix<T, Rows, 1>(&)[4]>(mat);
+template<typename T, int Rows, int Cols, int Options, int MaxRows, int MaxCols>
+static void Viewer(const char* label, const Eigen::Matrix<T, Rows, Cols, Options, MaxRows, MaxCols>& mat) {
+	auto cols = reinterpret_cast<const Eigen::Matrix<T, Rows, 1, Options, MaxRows>(&)[Cols]>(mat);
 
 	if (BeginVectorViewerTable(label, true)) {
 		for (int i = 0; i < Cols; i++) {

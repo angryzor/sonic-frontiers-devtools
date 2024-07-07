@@ -24,8 +24,10 @@ void ProjectTree::Render()
 				for (auto* goc : obj->components)
 					if (goc->pStaticClass == hh::ui::GOCSprite::GetClass()) {
 						snprintf(spriteName, sizeof(spriteName), "%s - %zx", goc->owner->name.c_str(), reinterpret_cast<size_t>(goc));
-						if (ImGui::Selectable(spriteName, goc == editor.gocSprite))
+						if (ImGui::Selectable(spriteName, goc == editor.gocSprite)) {
 							editor.gocSprite = static_cast<hh::ui::GOCSprite*>(goc);
+							editor.focusedScene = nullptr;
+						}
 						if (editor.gocSprite == goc)
 							ImGui::SetItemDefaultFocus();
 					}
@@ -37,38 +39,59 @@ void ProjectTree::Render()
 			return;
 		}
 
-		if (!editor.gocSprite->GetProject()) {
+		auto* project = editor.gocSprite->GetProject();
+		if (project == nullptr) {
+			ImGui::End();
+			return;
+		}
+
+		const char* sceneName = editor.focusedScene ? editor.focusedScene->sceneData->name : "<none>";
+
+		if (ImGui::BeginCombo("Scene", sceneName)) {
+			for (auto* scene : project->scenes) {
+				if (ImGui::Selectable(scene->sceneData->name, scene == editor.focusedScene))
+					editor.focusedScene = scene;
+				if (editor.focusedScene == scene)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		if (editor.focusedScene == nullptr) {
 			ImGui::End();
 			return;
 		}
 
 		const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-		for (auto* scene : editor.gocSprite->GetProject()->scenes) {
-			ImGuiTreeNodeFlags itemNodeFlags = nodeFlags;
-			SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::SCENE, scene };
+		auto* selectionBehavior = editor.GetBehavior<SelectionBehavior<SurfRideSelection>>();
+		auto& selected = selectionBehavior->GetSelection();
 
-			if (editor.focusedElements.find(selection) != -1)
+		for (auto* scene : project->scenes) {
+			ImGuiTreeNodeFlags itemNodeFlags = nodeFlags;
+			SurfRideSelection selection{ SurfRideSelection::Type::SCENE, scene };
+
+			if (selected.find(selection) != -1)
 				itemNodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 			bool isOpen = ImGui::TreeNode(scene, "%s", scene->sceneData->name);
 
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-				editor.Select(selection);
+				selectionBehavior->Select(selection);
 
 			if (isOpen) {
 				if (ImGui::TreeNodeEx("Cameras", nodeFlags)) {
 					for (size_t i = 0; i < scene->sceneData->cameraCount; i++) {
 						ImGuiTreeNodeFlags itemNodeFlags = nodeFlags;
-						SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::CAMERA_DATA, &scene->sceneData->cameras[i] };
+						SurfRideSelection selection{ SurfRideSelection::Type::CAMERA_DATA, &scene->sceneData->cameras[i] };
 
-						if (editor.focusedElements.find(selection) != -1)
+						if (selected.find(selection) != -1)
 							itemNodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 						ImGui::TreeNodeEx(&scene->sceneData->cameras[i], nodeFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", scene->sceneData->cameras[i].name);
 
 						if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-							editor.Select(selection);
+							selectionBehavior->Select(selection);
 					}
 					ImGui::TreePop();
 				}
@@ -87,15 +110,18 @@ void ProjectTree::Render()
 void ProjectTree::RenderLayer(SurfRide::Layer* layer)
 {
 	ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-	SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::LAYER, layer };
+	SurfRideSelection selection{ SurfRideSelection::Type::LAYER, layer };
 
-	if (editor.focusedElements.find(selection) != -1)
+	auto* selectionBehavior = editor.GetBehavior<SelectionBehavior<SurfRideSelection>>();
+	auto& selected = selectionBehavior->GetSelection();
+
+	if (selected.find(selection) != -1)
 		nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 	bool isOpen = ImGui::TreeNodeEx(layer, nodeFlags, "%s", layer->layerData->name);
 
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-		editor.Select(selection);
+		selectionBehavior->Select(selection);
 
 	if (isOpen) {
 		for (auto* cast : layer->topLevelCasts)
@@ -108,10 +134,13 @@ void ProjectTree::RenderCast(SurfRide::Cast* cast)
 {
 	bool isOpen{ false };
 	ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-	SurfRideEditor::Selection selection{ SurfRideEditor::Selection::Type::CAST, cast };
+	SurfRideSelection selection{ SurfRideSelection::Type::CAST, cast };
 	SurfRide::Layer* refLayer{ static_cast<SurfRide::SRS_CASTNODE::Type>(cast->flags & 0xF) == SurfRide::SRS_CASTNODE::Type::REFERENCE ? static_cast<SurfRide::ReferenceCast*>(cast)->layer : nullptr };
 
-	if (editor.focusedElements.find(selection) != -1)
+	auto* selectionBehavior = editor.GetBehavior<SelectionBehavior<SurfRideSelection>>();
+	auto& selected = selectionBehavior->GetSelection();
+
+	if (selected.find(selection) != -1)
 		nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 	if (cast->children.size() == 0 && !refLayer)
@@ -120,7 +149,7 @@ void ProjectTree::RenderCast(SurfRide::Cast* cast)
 		isOpen = ImGui::TreeNodeEx(cast, nodeFlags, "%s", cast->castData->name);
 
 	if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-		editor.Select(selection);
+		selectionBehavior->Select(selection);
 	
 	if (isOpen) {
 		if (refLayer)

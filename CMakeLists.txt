@@ -9,6 +9,8 @@ set(PROJECT_COPYRIGHT "Copyright (c) 2024 angryzor - Licensed under GPL3")
 set(PROJECT_DOWNLOAD_SIZE "2.42 MB")
 string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
 
+set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
+
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
 # Settings for target sdks
@@ -47,6 +49,9 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
     cmake_path(APPEND GAME_FOLDER_NORMALIZED ${MODS_SUBFOLDER_${DEVTOOLS_TARGET_SDK}} OUTPUT_VARIABLE MODS_FOLDER)
     cmake_path(APPEND MODS_FOLDER "devtools" OUTPUT_VARIABLE MOD_FOLDER)
 
+    string(TOUPPER ${DEVTOOLS_TARGET_SDK} DEVTOOLS_TARGET_SDK_UPPERCASE)
+    set(${DEVTOOLS_TARGET_SDK_UPPERCASE}_SDK_CUSTOM_EIGEN_TARGET eigen)
+
     if(DEFINED ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
         message("${SDK_VAR_${DEVTOOLS_TARGET_SDK}} environment variable found. Using this version instead of the local submodule.")
         cmake_path(SET SDK_PATH NORMALIZE $ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
@@ -58,7 +63,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
     target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_17)
-    target_compile_options(${DEVTOOLS_TARGET} PRIVATE $<$<CONFIG:Debug>:/ZI> /permissive-)
+    target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive-)
     target_compile_definitions(${DEVTOOLS_TARGET}
         PRIVATE
             DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:${DEVTOOLS_TARGET}>

@@ -2,12 +2,12 @@
 
 bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 	if (auto* visual = object->GetComponent<hh::gfx::GOCVisualTransformed>()) {
-		aabb.m_Min.x() = std::fminf(aabb.m_Min.x(), visual->transformedAabb.m_Min.x());
-		aabb.m_Min.y() = std::fminf(aabb.m_Min.y(), visual->transformedAabb.m_Min.y());
-		aabb.m_Min.z() = std::fminf(aabb.m_Min.z(), visual->transformedAabb.m_Min.z());
-		aabb.m_Max.x() = std::fmaxf(aabb.m_Max.x(), visual->transformedAabb.m_Max.x());
-		aabb.m_Max.y() = std::fmaxf(aabb.m_Max.y(), visual->transformedAabb.m_Max.y());
-		aabb.m_Max.z() = std::fmaxf(aabb.m_Max.z(), visual->transformedAabb.m_Max.z());
+		aabb.min.x() = std::fminf(aabb.min.x(), visual->transformedAabb.min.x());
+		aabb.min.y() = std::fminf(aabb.min.y(), visual->transformedAabb.min.y());
+		aabb.min.z() = std::fminf(aabb.min.z(), visual->transformedAabb.min.z());
+		aabb.max.x() = std::fmaxf(aabb.max.x(), visual->transformedAabb.max.x());
+		aabb.max.y() = std::fmaxf(aabb.max.y(), visual->transformedAabb.max.y());
+		aabb.max.z() = std::fmaxf(aabb.max.z(), visual->transformedAabb.max.z());
 		return true;
 	}
 
@@ -17,8 +17,8 @@ bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 	for (auto* component : object->components) {
 		if (component->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
 			auto* coll = static_cast<hh::physics::GOCSphereCollider*>(component);
-			tempAabb.m_Min = coll->GetWorldTransform() * Eigen::Vector3f{ -coll->radius, -coll->radius, -coll->radius };
-			tempAabb.m_Max = coll->GetWorldTransform() * Eigen::Vector3f{ coll->radius, coll->radius, coll->radius };
+			tempAabb.min = coll->GetWorldTransform() * Eigen::Vector3f{ -coll->radius, -coll->radius, -coll->radius };
+			tempAabb.max = coll->GetWorldTransform() * Eigen::Vector3f{ coll->radius, coll->radius, coll->radius };
 			colliderCount++;
 			if (colliderCount > 1)
 				break;
@@ -26,22 +26,22 @@ bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 	}
 
 	if (colliderCount == 1) {
-		aabb.m_Min.x() = std::fminf(aabb.m_Min.x(), tempAabb.m_Min.x());
-		aabb.m_Min.y() = std::fminf(aabb.m_Min.y(), tempAabb.m_Min.y());
-		aabb.m_Min.z() = std::fminf(aabb.m_Min.z(), tempAabb.m_Min.z());
-		aabb.m_Max.x() = std::fmaxf(aabb.m_Max.x(), tempAabb.m_Max.x());
-		aabb.m_Max.y() = std::fmaxf(aabb.m_Max.y(), tempAabb.m_Max.y());
-		aabb.m_Max.z() = std::fmaxf(aabb.m_Max.z(), tempAabb.m_Max.z());
+		aabb.min.x() = std::fminf(aabb.min.x(), tempAabb.min.x());
+		aabb.min.y() = std::fminf(aabb.min.y(), tempAabb.min.y());
+		aabb.min.z() = std::fminf(aabb.min.z(), tempAabb.min.z());
+		aabb.max.x() = std::fmaxf(aabb.max.x(), tempAabb.max.x());
+		aabb.max.y() = std::fmaxf(aabb.max.y(), tempAabb.max.y());
+		aabb.max.z() = std::fmaxf(aabb.max.z(), tempAabb.max.z());
 		return true;
 	}
 		
 	if (auto* gocTransform = object->GetComponent<hh::game::GOCTransform>()) {
-		aabb.m_Min.x() = std::fminf(aabb.m_Min.x(), gocTransform->GetFrame().fullTransform.position.x());
-		aabb.m_Min.y() = std::fminf(aabb.m_Min.y(), gocTransform->GetFrame().fullTransform.position.y());
-		aabb.m_Min.z() = std::fminf(aabb.m_Min.z(), gocTransform->GetFrame().fullTransform.position.z());
-		aabb.m_Max.x() = std::fmaxf(aabb.m_Max.x(), gocTransform->GetFrame().fullTransform.position.x());
-		aabb.m_Max.y() = std::fmaxf(aabb.m_Max.y(), gocTransform->GetFrame().fullTransform.position.y());
-		aabb.m_Max.z() = std::fmaxf(aabb.m_Max.z(), gocTransform->GetFrame().fullTransform.position.z());
+		aabb.min.x() = std::fminf(aabb.min.x(), gocTransform->GetFrame().fullTransform.position.x());
+		aabb.min.y() = std::fminf(aabb.min.y(), gocTransform->GetFrame().fullTransform.position.y());
+		aabb.min.z() = std::fminf(aabb.min.z(), gocTransform->GetFrame().fullTransform.position.z());
+		aabb.max.x() = std::fmaxf(aabb.max.x(), gocTransform->GetFrame().fullTransform.position.x());
+		aabb.max.y() = std::fmaxf(aabb.max.y(), gocTransform->GetFrame().fullTransform.position.y());
+		aabb.max.z() = std::fmaxf(aabb.max.z(), gocTransform->GetFrame().fullTransform.position.z());
 		return true;
 	}
 
@@ -49,12 +49,12 @@ bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 }
 
 bool AddToAabb(hh::game::ObjectData* objectData, csl::geom::Aabb& aabb) {
-	aabb.m_Min.x() = std::fminf(aabb.m_Min.x(), objectData->transform.position.x());
-	aabb.m_Min.y() = std::fminf(aabb.m_Min.y(), objectData->transform.position.y());
-	aabb.m_Min.z() = std::fminf(aabb.m_Min.z(), objectData->transform.position.z());
-	aabb.m_Max.x() = std::fmaxf(aabb.m_Max.x(), objectData->transform.position.x());
-	aabb.m_Max.y() = std::fmaxf(aabb.m_Max.y(), objectData->transform.position.y());
-	aabb.m_Max.z() = std::fmaxf(aabb.m_Max.z(), objectData->transform.position.z());
+	aabb.min.x() = std::fminf(aabb.min.x(), objectData->transform.position.x());
+	aabb.min.y() = std::fminf(aabb.min.y(), objectData->transform.position.y());
+	aabb.min.z() = std::fminf(aabb.min.z(), objectData->transform.position.z());
+	aabb.max.x() = std::fmaxf(aabb.max.x(), objectData->transform.position.x());
+	aabb.max.y() = std::fmaxf(aabb.max.y(), objectData->transform.position.y());
+	aabb.max.z() = std::fmaxf(aabb.max.z(), objectData->transform.position.z());
 	return true;
 }
 

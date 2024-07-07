@@ -25,3 +25,6 @@
 [submodule "sdks/wars-sdk"]
 	path = sdks/wars-sdk
 	url = https://github.com/angryzor/wars-sdk.git
+[submodule "vendor/eigen/eigen"]
+	path = vendor/eigen/eigen
+	url = https://gitlab.com/libeigen/eigen.git

@@ -22,7 +22,7 @@ csl::math::Transform Affine3fToTransform(const Eigen::Affine3f& affine) {
 
 	affine.computeRotationScaling(&rotation, &scaling);
 
-	return { { affine.translation() }, Eigen::Quaternionf{ rotation }, { scaling.diagonal() } };
+	return { affine.translation(), Eigen::Quaternionf{ rotation }, scaling.diagonal() };
 }
 
 Ray3f ScreenPosToWorldRay(const Eigen::Vector2f& screenPos, const Eigen::Matrix4f& inverseCameraMatrix)

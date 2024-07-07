@@ -18,12 +18,14 @@ void Timeline::Render()
 	if (ImGui::Begin("Timeline", NULL, windowFlags)) {
 		Layer* focusedLayer{};
 
-		for (auto& element : editor.focusedElements) {
+		auto& selected = editor.GetBehavior<SelectionBehavior<SurfRideSelection>>()->GetSelection();
+
+		for (auto& element : selected) {
 			Layer* newLayer{};
-			if (element.type == SurfRideEditor::Selection::Type::LAYER) {
+			if (element.type == SurfRideSelection::Type::LAYER) {
 				newLayer = element.layer;
 			}
-			else if (element.type == SurfRideEditor::Selection::Type::CAST) {
+			else if (element.type == SurfRideSelection::Type::CAST) {
 				newLayer = element.cast->layer;
 			}
 

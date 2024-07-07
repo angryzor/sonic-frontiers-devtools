@@ -3,10 +3,10 @@
 #include "ToolBar.h"
 #include "SettingsManager.h"
 #include "resources/ResourceBrowser.h"
-#include "operation-modes/ObjectInspection/ObjectInspection.h"
-#include "operation-modes/LevelEditor/LevelEditor.h"
+#include "operation-modes/modes/object-inspection/ObjectInspection.h"
+#include "operation-modes/modes/level-editor/LevelEditor.h"
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-#include "operation-modes/SurfRideEditor/SurfRideEditor.h"
+#include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
 #endif
 #include "reflection/serialization/ReflectionSerializer.h"
 #include <utilities/math/MathUtils.h>
@@ -27,8 +27,6 @@ Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator 
 	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac", 0);
 
 	Translations::Init(allocator);
-
-	SwitchToObjectInspectionMode();
 }
 
 namespace app::game {
@@ -38,10 +36,10 @@ namespace app::game {
 }
 void Desktop::Render() {
 	RenderOverlayWindow();
-	HandleMousePicking();
+	//HandleMousePicking();
 
 	ToolBar::Render();
-	operationMode->Render();
+	operationMode->RenderOperationMode();
 	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
@@ -59,6 +57,8 @@ void Desktop::Render() {
 		RemoveStandaloneWindow(window);
 
 	SettingsManager::Render();
+
+	HandleShortcuts();
 
 	//if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
 	//	ImGui::OpenPopup("WorldContext");
@@ -291,20 +291,10 @@ Desktop::~Desktop()
 	delete operationMode;
 }
 
-//bool Desktop::IsPickerMouseDown() const
-//{
-//	return physicsPicker->mouseDown;
-//}
-
 bool Desktop::IsPickerMouseReleased() const
 {
 	return pickerClicked;
 }
-
-//bool Desktop::IsPickerMouseClicked() const
-//{
-//	return !prevPhysicsPickerMouseDown && physicsPicker->mouseDown;
-//}
 
 const csl::ut::MoveArray<GameObject*>& Desktop::GetPickedObjects() const {
 	return pickedObjects;
@@ -314,19 +304,67 @@ const csl::math::Vector3* Desktop::GetPickedLocation() const {
 	return locationPicked ? &pickedLocation : nullptr;
 }
 
+void Desktop::Dispatch(const ActionBase& action)
+{
+	operationMode->ProcessAction(action);
+}
+
+void Desktop::UnbindShortcut(ShortcutId shortcutId)
+{
+	for (auto i = 0; i < boundShortcuts.size(); i++)
+		if (boundShortcuts[i].shortcutId == shortcutId) {
+			boundShortcuts.remove(i);
+			break;
+		}
+}
+
+void Desktop::HandleShortcuts()
+{
+	for (auto& boundShortcut : boundShortcuts) {
+		auto& keyCombo = GetShortcutKeyCombo(boundShortcut.shortcutId);
+
+		if ((keyCombo.modifiers & ShortcutModifier_Alt) && !ImGui::IsKeyDown(ImGuiKey_LeftAlt) && !ImGui::IsKeyDown(ImGuiKey_RightAlt))
+			continue;
+
+		if ((keyCombo.modifiers & ShortcutModifier_Ctrl) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && !ImGui::IsKeyDown(ImGuiKey_RightCtrl))
+			continue;
+
+		if ((keyCombo.modifiers & ShortcutModifier_Shift) && !ImGui::IsKeyDown(ImGuiKey_LeftShift) && !ImGui::IsKeyDown(ImGuiKey_RightShift))
+			continue;
+
+		if (ImGui::IsKeyPressed(keyCombo.key))
+			Dispatch(ActionBase{ boundShortcut.actionId });
+	}
+}
+
 void Desktop::SwitchToObjectInspectionMode()
 {
+	if (operationMode != nullptr)
+		operationMode->DeinitBehaviors();
+
 	operationMode = new (GetAllocator()) ObjectInspection(GetAllocator());
+
+	operationMode->InitBehaviors();
 }
 
 void Desktop::SwitchToLevelEditorMode()
 {
+	if (operationMode != nullptr)
+		operationMode->DeinitBehaviors();
+
 	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
+
+	operationMode->InitBehaviors();
 }
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 void Desktop::SwitchToSurfRideEditorMode()
 {
+	if (operationMode != nullptr)
+		operationMode->DeinitBehaviors();
+
 	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
+
+	operationMode->InitBehaviors();
 }
 #endif

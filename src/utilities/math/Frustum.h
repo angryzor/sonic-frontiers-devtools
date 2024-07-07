@@ -22,5 +22,5 @@ struct Frustum {
 	Frustum& operator=(const FrustumRays& rays);
 	Frustum& operator=(const Eigen::Hyperplane<float, 3> (&otherPlanes)[6]);
 	Frustum& operator=(Eigen::Hyperplane<float, 3> (&&otherPlanes)[6]) noexcept;
-	bool Test(const Eigen::Vector3f vec);
+	bool Test(const Eigen::Vector3f vec) const;
 };

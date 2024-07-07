@@ -67,7 +67,7 @@ bool Editor(const char* label, CameraPose& pose) {
     ImGui::PushID(label);
     
 	edited |= Editor("Unk1", pose.unk1);
-	edited |= Editor("Unk2", pose.unk2);
+	edited |= Editor("Position", pose.position);
 	edited |= Editor("Unk3", pose.unk3);
 
     ImGui::PopID();
