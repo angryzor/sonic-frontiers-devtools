@@ -10,7 +10,11 @@ enum class ActionId {
 	DESELECT,
 	SELECT_ALL,
 	DESELECT_ALL,
+	SELECTION_CHANGED,
 	SET_SELECTION_TRANSFORM,
+	SELECTION_TRANSFORM_CHANGED,
+	OBJECTS_PICKED,
+	LOCATION_PICKED,
 	COPY,
 	PASTE,
 	CHANGE_COORDINATE_SYSTEM,
@@ -24,6 +28,11 @@ enum class ActionId {
 	ONLY_Z_AXIS,
 	LOCK_Z_AXIS,
 	DELETE,
+	LEVEL_EDITOR_OBJECT_TRANSFORM_CHANGED,
+	LEVEL_EDITOR_CHANGING_PARAMETERS,
+	LEVEL_EDITOR_STOP_CHANGING_PARAMETERS,
+	LEVEL_EDITOR_SET_FOCUSED_CHUNK,
+	LEVEL_EDITOR_FOCUSED_CHUNK_CHANGED,
 };
 
 struct ActionBase {
@@ -43,4 +52,14 @@ struct Action : ActionBase {
 	explicit Action() : ActionBase{ actionId }, payload{} {}
 	explicit Action(const Payload& payload) : ActionBase{ actionId }, payload{ payload } {}
 	explicit Action(Payload&& payload) : ActionBase{ actionId }, payload{ std::move(payload) } {}
+};
+
+class ActionDispatcher {
+protected:
+	static void Dispatch(const ActionBase& action);
+};
+
+class ActionProcessor {
+public:
+	virtual void ProcessAction(const ActionBase& action);
 };

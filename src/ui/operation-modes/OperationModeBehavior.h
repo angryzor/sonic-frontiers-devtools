@@ -1,22 +1,18 @@
 #pragma once
 #include <ui/Action.h>
 #include <ui/Shortcuts.h>
-#include <utilities/CompatibleObject.h>
+#include <ui/Component.h>
 
-class OperationMode;
+class OperationModeBase;
 
-class OperationModeBehavior : public CompatibleObject {
+class OperationModeBehavior : public Component {
 protected:
-	OperationMode& operationMode;
+	OperationModeBase& operationMode;
 
 public:
-	OperationModeBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode);
-
-	OperationMode& GetOperationMode();
+	OperationModeBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode);
 
 	virtual unsigned int GetId() = 0;
-	virtual void Init() {}
-	virtual void Deinit() {}
-	virtual void ProcessAction(const ActionBase& action) {}
-	virtual void Render() {}
+	virtual void Init();
+	virtual void Deinit();
 };

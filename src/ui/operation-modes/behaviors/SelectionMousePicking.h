@@ -11,11 +11,11 @@ public:
 
 	using OperationModeBehavior::OperationModeBehavior;
 
-	void Render() {
-		auto* selection = operationMode.GetBehavior<SelectionBehavior<T>>();
+	virtual void Render() override {
+		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<T>>();
 		auto* mousePicking = operationMode.GetBehavior<MousePickingBehaviorBase<T>>();
 
-		if (mousePicking->picked)
-			selection->Select(mousePicking->pickedObjects);
+		if (mousePicking->picked && mousePicking->mouseButton == ImGuiMouseButton_Left)
+			selectionBehavior->Select(mousePicking->pickedObjects);
 	}
 };

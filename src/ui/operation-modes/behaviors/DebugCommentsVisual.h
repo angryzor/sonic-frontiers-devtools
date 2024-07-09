@@ -5,6 +5,8 @@
 using namespace hh::game;
 
 class DebugCommentsVisualBehavior : public OperationModeBehavior {
+	bool renderDebugComments{ false };
+
 public:
 	static constexpr unsigned int id = 1;
 	virtual unsigned int GetId() override { return id; }
@@ -12,6 +14,15 @@ public:
 	using OperationModeBehavior::OperationModeBehavior;
 
 	virtual void Render() override {
+		if (ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION)) {
+			ImGui::SameLine();
+			ImGui::Checkbox("Render debug comments", &renderDebugComments);
+		}
+		ImGui::End();
+
+		if (!renderDebugComments)
+			return;
+
 		auto* gameManager = GameManager::GetInstance();
 		auto* camera = gameManager->GetService<CameraManager>()->GetTopComponent(0);
 
@@ -23,6 +34,8 @@ public:
 		auto* ivp = ImGui::GetMainViewport();
 
 		if (ImGui::Begin("Overlay")) {
+			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+
 			for (auto* obj : gameManager->objects) {
 				if (auto* gocTransform = obj->GetComponent<GOCTransform>()) {
 					hh::dbg::MsgGetDebugCommentInEditor msgGetDbgCmt{};
@@ -50,6 +63,9 @@ public:
 					ImGui::Text(msgGetDbgCmt.comment);
 				}
 			}
+
+			ImGui::PopStyleColor();
 		}
+		ImGui::End();
 	}
 };

@@ -1,134 +1,138 @@
 #include "SetObjectList.h"
-#include "LevelEditor.h"
+#include "Context.h"
+#include "Actions.h"
 #include <ui/common/Icons.h>
 #include <ui/resources/ResourceBrowser.h>
+#include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/ObjectDataUtils.h>
 
-using namespace hh::fnd;
-using namespace hh::game;
+namespace ui::operation_modes::modes::level_editor {
+	using namespace hh::fnd;
+	using namespace hh::game;
 
-SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, ObjectData* objData) : list{ list }, type { SetObjectListTreeViewNode::Type::OBJECT }, object{ objData } {}
-SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, ObjectWorldChunkLayer* layer) : list{ list }, type{ SetObjectListTreeViewNode::Type::LAYER }, layer{ layer } {}
-SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, const char* label) : list{ list }, type{ SetObjectListTreeViewNode::Type::GROUP }, group{ label } {}
-SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectListTreeViewNode&& other) : list{ other.list }, type { other.type } {
-	switch (type) {
-	case SetObjectListTreeViewNode::Type::OBJECT: object = other.object;
-	case SetObjectListTreeViewNode::Type::LAYER: layer = other.layer;
-	case SetObjectListTreeViewNode::Type::GROUP: group = other.group;
-	}
-}
-
-const void* SetObjectListTreeViewNode::GetID() const {
-	switch (type) {
-	case SetObjectListTreeViewNode::Type::OBJECT:
-		return object.object;
-	case SetObjectListTreeViewNode::Type::LAYER:
-		return layer.layer;
-	case SetObjectListTreeViewNode::Type::GROUP:
-		return group.label;
-	}
-}
-
-const char* SetObjectListTreeViewNode::GetLabel() const {
-	switch (type) {
-	case SetObjectListTreeViewNode::Type::OBJECT:
-		return object.object->GetName();
-	case SetObjectListTreeViewNode::Type::LAYER:
-		return layer.layer->GetName();
-	case SetObjectListTreeViewNode::Type::GROUP:
-		return group.label;
-	}
-}
-
-bool SetObjectListTreeViewNode::MatchesSearchString(const char* searchString) const
-{
-	return strstr(GetLabel(), searchString);
-}
-
-bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
-{
-	auto* selection = list.levelEditor.GetBehavior<SelectionBehavior<ObjectData*>>();
-
-	if (type == SetObjectListTreeViewNode::Type::OBJECT && selection->GetSelection().find(object.object) != -1)
-		nodeflags |= ImGuiTreeNodeFlags_Selected;
-
-	if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull())
-		ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
-
-	bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
-
-	if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull()) {
-		ImGui::PopStyleColor();
-		ImGui::SetItemTooltip("Invalid object ID: this object's ID is NULL, which is a reserved value!");
-	}
-
-	if (type == SetObjectListTreeViewNode::Type::OBJECT) {
-		if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
-			selection->Select(object.object);
-		if (ImGui::BeginDragDropSource()) {
-			ObjectData* obj = object.object;
-			ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));
-			ImGui::EndDragDropSource();
+	SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, ObjectData* objData) : list{ list }, type{ SetObjectListTreeViewNode::Type::OBJECT }, object{ objData } {}
+	SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, ObjectWorldChunkLayer* layer) : list{ list }, type{ SetObjectListTreeViewNode::Type::LAYER }, layer{ layer } {}
+	SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectList& list, const char* label) : list{ list }, type{ SetObjectListTreeViewNode::Type::GROUP }, group{ label } {}
+	SetObjectListTreeViewNode::SetObjectListTreeViewNode(SetObjectListTreeViewNode&& other) : list{ other.list }, type{ other.type } {
+		switch (type) {
+		case SetObjectListTreeViewNode::Type::OBJECT: object = other.object;
+		case SetObjectListTreeViewNode::Type::LAYER: layer = other.layer;
+		case SetObjectListTreeViewNode::Type::GROUP: group = other.group;
 		}
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
-				ObjectData* parent = object.object;
-				ObjectData* child = *static_cast<ObjectData**>(payload->Data);
+	}
 
-				if (parent != child) {
-					auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
-					auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
+	const void* SetObjectListTreeViewNode::GetID() const {
+		switch (type) {
+		case SetObjectListTreeViewNode::Type::OBJECT:
+			return object.object;
+		case SetObjectListTreeViewNode::Type::LAYER:
+			return layer.layer;
+		case SetObjectListTreeViewNode::Type::GROUP:
+			return group.label;
+		}
+	}
 
-					child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
-					child->parentID = parent->id;
+	const char* SetObjectListTreeViewNode::GetLabel() const {
+		switch (type) {
+		case SetObjectListTreeViewNode::Type::OBJECT:
+			return object.object->GetName();
+		case SetObjectListTreeViewNode::Type::LAYER:
+			return layer.layer->GetName();
+		case SetObjectListTreeViewNode::Type::GROUP:
+			return group.label;
+		}
+	}
 
-					auto childStatus = list.levelEditor.focusedChunk->GetWorldObjectStatusByObjectId(child->id);
-					auto childIdx = list.levelEditor.focusedChunk->GetObjectIndexById(child->id);
+	bool SetObjectListTreeViewNode::MatchesSearchString(const char* searchString) const
+	{
+		return strstr(GetLabel(), searchString);
+	}
 
-					if (childStatus.objectData && childIdx != -1) {
-						list.levelEditor.focusedChunk->DespawnByIndex(childIdx);
-						childStatus.Restart();
-					}
+	bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
+	{
+		auto* selectionBehavior = list.GetBehavior<SelectionBehavior<ObjectData*>>();
+		auto* focusedChunk = list.GetContext().GetFocusedChunk();
 
-					list.InvalidateTree();
-				}
+		if (type == SetObjectListTreeViewNode::Type::OBJECT && selectionBehavior->IsSelected(object.object))
+			nodeflags |= ImGuiTreeNodeFlags_Selected;
+
+		if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull())
+			ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
+
+		bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
+
+		if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull()) {
+			ImGui::PopStyleColor();
+			ImGui::SetItemTooltip("Invalid object ID: this object's ID is NULL, which is a reserved value!");
+		}
+
+		if (type == SetObjectListTreeViewNode::Type::OBJECT) {
+			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
+				selectionBehavior->Select(object.object);
+			if (ImGui::BeginDragDropSource()) {
+				ObjectData* obj = object.object;
+				ImGui::SetDragDropPayload("ObjectData", &obj, sizeof(obj));
+				ImGui::EndDragDropSource();
 			}
-			ImGui::EndDragDropTarget();
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("ObjectData")) {
+					ObjectData* parent = object.object;
+					ObjectData* child = *static_cast<ObjectData**>(payload->Data);
+
+					if (parent != child) {
+						auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
+						auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
+
+						child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+						child->parentID = parent->id;
+
+						auto childStatus = focusedChunk->GetWorldObjectStatusByObjectId(child->id);
+						auto childIdx = focusedChunk->GetObjectIndexById(child->id);
+
+						if (childStatus.objectData && childIdx != -1) {
+							focusedChunk->DespawnByIndex(childIdx);
+							childStatus.Restart();
+						}
+
+						list.InvalidateTree();
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
+		}
+
+		if (type == SetObjectListTreeViewNode::Type::LAYER) {
+			ImGui::PushID(GetID());
+			if (ImGui::BeginPopupContextItem("Layer context menu")) {
+				if (ImGui::MenuItem("Load from file..."))
+					ResourceBrowser::ShowLoadResourceDialog(layer.layer->GetResource());
+
+				if (ImGui::MenuItem("Export..."))
+					ResourceBrowser::ShowExportResourceDialog(layer.layer->GetResource());
+
+				ImGui::EndPopup();
+			}
+			ImGui::PopID();
+		}
+
+		return isOpen;
+	}
+
+	void SetObjectList::ProcessAction(const ActionBase& action)
+	{
+		switch (action.id) {
+		case FocusedChunkChangedAction::id:
+			InvalidateTree();
+			break;
 		}
 	}
 
-	if (type == SetObjectListTreeViewNode::Type::LAYER) {
-		ImGui::PushID(GetID());
-		if (ImGui::BeginPopupContextItem("Layer context menu")) {
-			if (ImGui::MenuItem("Load from file..."))
-				ResourceBrowser::ShowLoadResourceDialog(layer.layer->GetResource());
+	void SetObjectList::RenderPanel() {
+		auto focusedChunk = GetContext().GetFocusedChunk();
+		auto* objWorld = GameManager::GetInstance()->GetService<ObjectWorld>();
 
-			if (ImGui::MenuItem("Export..."))
-				ResourceBrowser::ShowExportResourceDialog(layer.layer->GetResource());
-
-			ImGui::EndPopup();
-		}
-		ImGui::PopID();
-	}
-
-	return isOpen;
-}
-
-SetObjectList::SetObjectList(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor) : CompatibleObject{ allocator }, levelEditor{ levelEditor }
-{
-}
-
-void SetObjectList::Render() {
-	auto* objWorld = GameManager::GetInstance()->GetService<ObjectWorld>();
-
-	const ImGuiWindowFlags windowFlags
-		= 0;
-
-	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("World objects", NULL, windowFlags)) {
 		if (objWorld == nullptr) {
 			ImGui::Text("ObjectWorld service not active. Load a level first.");
-			ImGui::End();
 			return;
 		}
 
@@ -136,27 +140,26 @@ void SetObjectList::Render() {
 		strcpy_s(chunkid, "<none>");
 
 		int i = 0;
-		for (auto* chunk : objWorld->GetWorldChunks()) {
-			if (chunk == levelEditor.focusedChunk)
+		for (auto* chunk : objWorld->GetWorldChunks())
+			if (chunk == focusedChunk)
 				snprintf(chunkid, sizeof(chunkid), "Chunk %d", i++);
-		}
 
 		if (ImGui::BeginCombo("Chunk to be edited", chunkid)) {
-			bool none_selected = levelEditor.focusedChunk == nullptr;
+			bool none_selected = focusedChunk == nullptr;
 			strcpy_s(chunkid, "<none>");
 
 			if (ImGui::Selectable(chunkid, none_selected))
-				levelEditor.SetFocusedChunk(nullptr);
+				Dispatch(SetFocusedChunkAction{ nullptr });
 			if (none_selected)
 				ImGui::SetItemDefaultFocus();
 
 			i = 0;
 			for (auto* chunk : objWorld->GetWorldChunks()) {
-				bool is_selected = levelEditor.focusedChunk == chunk;
+				bool is_selected = focusedChunk == chunk;
 				snprintf(chunkid, sizeof(chunkid), "Chunk %d", i++);
 
 				if (ImGui::Selectable(chunkid, is_selected))
-					levelEditor.SetFocusedChunk(chunk);
+					Dispatch(SetFocusedChunkAction{ chunk });
 
 				if (is_selected)
 					ImGui::SetItemDefaultFocus();
@@ -167,7 +170,7 @@ void SetObjectList::Render() {
 		if (dirty)
 			RebuildTree();
 
-		if (levelEditor.focusedChunk && &*tree && ImGui::BeginTabBar("Object list views")) {
+		if (focusedChunk && &*tree && ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
 				tree->Render("Content");
 				ImGui::EndTabItem();
@@ -179,92 +182,98 @@ void SetObjectList::Render() {
 			ImGui::EndTabBar();
 		}
 	}
-	ImGui::End();
-}
 
-size_t count = 0;
-
-TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildTreeNode(csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>>& childMaps, ObjectData* objData) {
-	auto objId = objData == nullptr ? ObjectId{} : objData->id;
-	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
-
-	// Some tools generate faulty objects with ID 0. Avoid crashing on those.
-	if (objData == nullptr || objId.IsNonNull()) {
-		for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
-			auto childLayerMapIt = childMaps.Find(layer);
-			auto childMapIt = childLayerMapIt->Find(objId);
-
-			if (childMapIt == childLayerMapIt->end())
-				continue;
-
-			for (auto* object : *childMapIt)
-				node.AddChild(BuildTreeNode(childMaps, object));
-		}
+	PanelTraits ui::operation_modes::modes::level_editor::SetObjectList::GetPanelTraits() const
+	{
+		return { "World objects", ImVec2(0, 0), ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100) };
 	}
 
-	return node;
-}
+	size_t count = 0;
 
-TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerTreeNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer, ObjectData* objData) {
-	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
+	TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildTreeNode(csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>>& childMaps, ObjectData* objData) {
+		auto objId = objData == nullptr ? ObjectId{} : objData->id;
+		TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
 
-	// Some tools generate faulty objects with ID 0. Avoid crashing on those.
-	if (objData->id.IsNonNull()) {
-		auto childMapIt = childMap.Find(objData->id);
+		// Some tools generate faulty objects with ID 0. Avoid crashing on those.
+		if (objData == nullptr || objId.IsNonNull()) {
+			for (auto* layer : GetContext().GetFocusedChunk()->GetLayers()) {
+				auto childLayerMapIt = childMaps.Find(layer);
+				auto childMapIt = childLayerMapIt->Find(objId);
+
+				if (childMapIt == childLayerMapIt->end())
+					continue;
+
+				for (auto* object : *childMapIt)
+					node.AddChild(BuildTreeNode(childMaps, object));
+			}
+		}
+
+		return node;
+	}
+
+	TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerTreeNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer, ObjectData* objData) {
+		TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, objData } };
+
+		// Some tools generate faulty objects with ID 0. Avoid crashing on those.
+		if (objData->id.IsNonNull()) {
+			auto childMapIt = childMap.Find(objData->id);
+
+			if (childMapIt == childMap.end())
+				return node;
+
+			for (auto* object : *childMapIt)
+				node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
+		}
+
+		return node;
+	}
+
+	TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerRootNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer) {
+		TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, layer } };
+
+		auto childMapIt = childMap.Find({});
 
 		if (childMapIt == childMap.end())
 			return node;
 
 		for (auto* object : *childMapIt)
 			node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
-	}
 
-	return node;
-}
-
-TreeViewNode<SetObjectListTreeViewNode> SetObjectList::BuildSingleLayerRootNode(ObjectMap<csl::ut::MoveArray<ObjectData*>>& childMap, ObjectWorldChunkLayer* layer) {
-	TreeViewNode<SetObjectListTreeViewNode> node{ GetAllocator(), { *this, layer } };
-
-	auto childMapIt = childMap.Find({});
-
-	if (childMapIt == childMap.end())
 		return node;
-
-	for (auto* object : *childMapIt)
-		node.AddChild(BuildSingleLayerTreeNode(childMap, layer, object));
-
-	return node;
-}
-
-void SetObjectList::RebuildTree() {
-	dirty = false;
-	tree = nullptr;
-	layerTree = nullptr;
-
-	if (levelEditor.focusedChunk != nullptr) {
-		csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>> childMaps{ GetAllocator() };
-
-		for (auto* layer : levelEditor.focusedChunk->GetLayers()) {
-			auto& childMap = *childMaps.InsertAndGet(layer, { GetAllocator() });
-
-			for (auto* object : layer->GetResource()->GetObjects()) {
-				auto parentIt = childMap.Find(object->parentID);
-
-				if (parentIt == childMap.end())
-					parentIt = childMap.InsertAndGet(object->parentID, { GetAllocator() });
-
-				parentIt->push_back(object);
-			}
-		}
-
-		tree = new (GetAllocator()) TreeView<SetObjectListTreeViewNode>(GetAllocator(), BuildTreeNode(childMaps, nullptr));
-		layerTree = new (GetAllocator()) TreeView<SetObjectListTreeViewNode>(GetAllocator(), { GetAllocator(), { *this, "ROOT" } });
-
-		for (auto* layer : levelEditor.focusedChunk->GetLayers())
-			layerTree->rootNode.AddChild(BuildSingleLayerRootNode(*childMaps.Find(layer), layer));
 	}
-}
 
-void SetObjectList::InvalidateTree() {
-	dirty = true;
+	void SetObjectList::RebuildTree() {
+		dirty = false;
+		tree = nullptr;
+		layerTree = nullptr;
+
+		auto* focusedChunk = GetContext().GetFocusedChunk();
+
+		if (focusedChunk != nullptr) {
+			csl::ut::PointerMap<ObjectWorldChunkLayer*, ObjectMap<csl::ut::MoveArray<ObjectData*>>> childMaps{ GetAllocator() };
+
+			for (auto* layer : focusedChunk->GetLayers()) {
+				auto& childMap = *childMaps.InsertAndGet(layer, { GetAllocator() });
+
+				for (auto* object : layer->GetResource()->GetObjects()) {
+					auto parentIt = childMap.Find(object->parentID);
+
+					if (parentIt == childMap.end())
+						parentIt = childMap.InsertAndGet(object->parentID, { GetAllocator() });
+
+					parentIt->push_back(object);
+				}
+			}
+
+			tree = new (GetAllocator()) TreeView<SetObjectListTreeViewNode>(GetAllocator(), BuildTreeNode(childMaps, nullptr));
+			layerTree = new (GetAllocator()) TreeView<SetObjectListTreeViewNode>(GetAllocator(), { GetAllocator(), { *this, "ROOT" } });
+
+			for (auto* layer : focusedChunk->GetLayers())
+				layerTree->rootNode.AddChild(BuildSingleLayerRootNode(*childMaps.Find(layer), layer));
+		}
+	}
+
+	void SetObjectList::InvalidateTree() {
+		dirty = true;
+	}
 }

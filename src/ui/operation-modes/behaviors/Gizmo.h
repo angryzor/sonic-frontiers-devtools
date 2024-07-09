@@ -24,7 +24,7 @@ public:
 	using OnlyZAxisAction = Action<ActionId::ONLY_Z_AXIS>;
 	using LockZAxisAction = Action<ActionId::LOCK_Z_AXIS>;
 
-	GizmoBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, bool allowTranslate = true, bool allowRotate = true, bool allowScale = true) : OperationModeBehavior{ allocator, operationMode }, allowTranslate{ allowTranslate }, allowRotate{ allowRotate }, allowScale{ allowScale } {}
+	GizmoBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, bool allowTranslate = true, bool allowRotate = true, bool allowScale = true) : OperationModeBehavior{ allocator, operationMode }, allowTranslate{ allowTranslate }, allowRotate{ allowRotate }, allowScale{ allowScale } {}
 
 	static constexpr unsigned int id = 2;
 	virtual unsigned int GetId() override { return id; }

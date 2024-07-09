@@ -1,8 +1,11 @@
 #include "OperationModeBehavior.h"
 
-OperationModeBehavior::OperationModeBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode) : CompatibleObject{ allocator }, operationMode{ operationMode } {}
+OperationModeBehavior::OperationModeBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode) : Component{ allocator }, operationMode{ operationMode } {}
 
-OperationMode& OperationModeBehavior::GetOperationMode()
+void OperationModeBehavior::Init()
 {
-	return operationMode;
+}
+
+void OperationModeBehavior::Deinit()
+{
 }

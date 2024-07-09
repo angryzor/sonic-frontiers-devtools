@@ -13,7 +13,7 @@ private:
 	Operations& operations;
 
 public:
-	DeleteBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations) : OperationModeBehavior{ allocator, operationMode }, operations{ operations } {}
+	DeleteBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : OperationModeBehavior{ allocator, operationMode }, operations{ operations } {}
 
 	using DeleteAction = Action<ActionId::DELETE>;
 
@@ -31,14 +31,14 @@ public:
 	virtual void ProcessAction(const ActionBase& action) override {
 		switch (action.id) {
 		case DeleteAction::id: {
-			auto* selection = operationMode.GetBehavior<SelectionBehavior<T>>();
+			auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<T>>();
 
 			csl::ut::MoveArray<T> tmpArr{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
-			for (auto obj : selection->GetSelection())
+			for (auto obj : selectionBehavior->GetSelection())
 				tmpArr.push_back(obj);
 
-			selection->DeselectAll();
+			selectionBehavior->DeselectAll();
 			operations.DeleteObjects(tmpArr);
 		}
 		}

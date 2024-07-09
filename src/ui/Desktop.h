@@ -24,7 +24,7 @@ class Desktop : public CompatibleObject {
     void RemoveStandaloneWindow(StandaloneWindow* window);
 public:
     static bool selectionColliderFilters[32][32];
-    hh::fnd::Reference<OperationMode> operationMode{};
+    hh::fnd::Reference<OperationModeBase> operationMode{};
     hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader{};
     static Desktop* instance;
 

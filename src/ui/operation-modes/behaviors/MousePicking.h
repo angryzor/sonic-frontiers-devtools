@@ -9,6 +9,7 @@ template<typename T>
 class MousePickingBehaviorBase : public OperationModeBehavior {
 public:
 	csl::ut::MoveArray<T> pickedObjects{ GetAllocator() };
+	ImGuiMouseButton mouseButton{};
 	bool picked{};
 
 	static constexpr unsigned int id = 3;
@@ -28,14 +29,24 @@ public:
 	};
 
 protected:
-	csl::ut::MoveArray<T> intermediateResults{ this->GetAllocator() };
 	Operations& operations;
-	V pickedLocation{};
-	bool locationPicked{};
-	bool dragging{};
+	csl::ut::MoveArray<T> intermediateResults{ this->GetAllocator() };
+	ImGuiMouseButton intermediateMouseButton{};
+	bool draggingRightPrevFrame{};
 
 public:
-	MousePickingBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations)
+	V pickedLocation{};
+	bool locationPicked{};
+
+	struct LocationPickInfo {
+		V location;
+		ImGuiMouseButton button;
+	};
+
+	using ObjectsPickedAction = Action<ActionId::OBJECTS_PICKED, ImGuiMouseButton>;
+	using LocationPickedAction = Action<ActionId::LOCATION_PICKED, LocationPickInfo>;
+
+	MousePickingBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations)
 		: MousePickingBehaviorBase<T>{ allocator, operationMode }, operations{ operations } {}
 
 	virtual void Render() override {
@@ -48,13 +59,21 @@ public:
 		if (this->operationMode.CanTakeMouseControl(this)) {
 			if (this->operationMode.IsDragging(this))
 				HandleDragSelect();
-			else if (!ImGui::GetIO().WantCaptureMouse && !ImGui::IsAnyItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
-				this->operationMode.BeginSingleFrameExclusiveMouseControl(this);
-				HandleClickSelect();
+			else if (!ImGui::GetIO().WantCaptureMouse && !ImGui::IsAnyItemHovered()) {
+				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
+					this->operationMode.BeginSingleFrameExclusiveMouseControl(this);
+					HandleClickSelect(ImGuiMouseButton_Left);
+				}
+				else if (!draggingRightPrevFrame && ImGui::IsMouseReleased(ImGuiMouseButton_Right)) {
+					this->operationMode.BeginSingleFrameExclusiveMouseControl(this);
+					HandleClickSelect(ImGuiMouseButton_Right);
+				}
 			}
 
 			this->operationMode.ToggleDragging(this);
 		}
+
+		draggingRightPrevFrame = ImGui::IsMouseDragging(ImGuiMouseButton_Right);
 
 		HandlePopupSelect();
 	}
@@ -70,10 +89,13 @@ public:
 
 		operations.GetDragResults(mouseStart, mouseEnd, this->pickedObjects);
 
+		this->mouseButton = ImGuiMouseButton_Left;
 		this->picked = true;
+
+		this->Dispatch(ObjectsPickedAction{ ImGuiMouseButton_Left });
 	}
 
-	void HandleClickSelect() {
+	void HandleClickSelect(ImGuiMouseButton button) {
 		auto mousePos = ImGui::GetMousePos();
 
 		if (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) {
@@ -82,6 +104,7 @@ public:
 			operations.GetAllClickResults(mousePos, this->intermediateResults);
 
 			if (intermediateResults.size() > 0) {
+				intermediateMouseButton = button;
 				ImGui::OpenPopup("Picker results");
 				return;
 			}
@@ -90,7 +113,13 @@ public:
 			operations.GetBestClickResult(mousePos, this->pickedObjects, this->pickedLocation, this->locationPicked);
 		}
 		
+		this->mouseButton = button;
 		this->picked = true;
+
+		this->Dispatch(ObjectsPickedAction{ button });
+
+		if (this->locationPicked && this->pickedObjects.size() == 0)
+			this->Dispatch(LocationPickedAction{ { this->pickedLocation, button } });
 	}
 
 	void HandlePopupSelect() {
@@ -98,7 +127,10 @@ public:
 			for (auto& object : intermediateResults) {
 				if (ImGui::Selectable(operations.GetObjectName(object))) {
 					this->pickedObjects.push_back(object);
+					this->mouseButton = intermediateMouseButton;
 					this->picked = true;
+
+					this->Dispatch(ObjectsPickedAction{ intermediateMouseButton });
 				}
 			}
 			ImGui::EndPopup();
@@ -178,7 +210,7 @@ private:
 	OperationsAdapter operationsAdapter;
 
 public:
-	MousePicking3DBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations, MousePicking3DCameraProvider& cameraProvider)
+	MousePicking3DBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations, MousePicking3DCameraProvider& cameraProvider)
 		: operationsAdapter{ operations, cameraProvider }, MousePickingBehavior<T, V>{ allocator, operationMode, operationsAdapter } {}
 };
 
@@ -263,7 +295,7 @@ private:
 	MousePicking3DCameraManagerCameraProvider cameraProvider;
 
 public:
-	MousePickingPhysicsBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations)
+	MousePickingPhysicsBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations)
 		: operationsAdapter{ operations }, cameraProvider{}, MousePicking3DBehavior<T, csl::math::Vector3>{ allocator, operationMode, operationsAdapter, cameraProvider } {}
 };
 
@@ -336,7 +368,7 @@ private:
 
 
 public:
-	MousePicking3DRecursiveRaycastBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations, MousePicking3DCameraProvider& cameraProvider)
+	MousePicking3DRecursiveRaycastBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations, MousePicking3DCameraProvider& cameraProvider)
 		: operationsAdapter{ operations }, MousePicking3DBehavior<T, V>{ allocator, operationMode, operationsAdapter, cameraProvider } {}
 };
 

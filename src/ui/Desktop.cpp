@@ -39,7 +39,7 @@ void Desktop::Render() {
 	//HandleMousePicking();
 
 	ToolBar::Render();
-	operationMode->RenderOperationMode();
+	operationMode->Render();
 	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
@@ -342,7 +342,7 @@ void Desktop::SwitchToObjectInspectionMode()
 	if (operationMode != nullptr)
 		operationMode->DeinitBehaviors();
 
-	operationMode = new (GetAllocator()) ObjectInspection(GetAllocator());
+	operationMode = new (GetAllocator()) ui::operation_modes::modes::object_inspection::ObjectInspection(GetAllocator());
 
 	operationMode->InitBehaviors();
 }
@@ -352,7 +352,7 @@ void Desktop::SwitchToLevelEditorMode()
 	if (operationMode != nullptr)
 		operationMode->DeinitBehaviors();
 
-	operationMode = new (GetAllocator()) LevelEditor(GetAllocator());
+	operationMode = new (GetAllocator()) ui::operation_modes::modes::level_editor::LevelEditor(GetAllocator());
 
 	operationMode->InitBehaviors();
 }
@@ -363,7 +363,7 @@ void Desktop::SwitchToSurfRideEditorMode()
 	if (operationMode != nullptr)
 		operationMode->DeinitBehaviors();
 
-	operationMode = new (GetAllocator()) SurfRideEditor(GetAllocator());
+	operationMode = new (GetAllocator()) ui::operation_modes::modes::surfride_editor::SurfRideEditor(GetAllocator());
 
 	operationMode->InitBehaviors();
 }

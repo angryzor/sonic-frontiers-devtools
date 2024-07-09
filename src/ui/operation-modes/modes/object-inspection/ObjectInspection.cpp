@@ -8,75 +8,86 @@
 #include <ui/operation-modes/behaviors/Gizmo.h>
 #include <ui/operation-modes/behaviors/MousePicking.h>
 #include <ui/operation-modes/behaviors/Delete.h>
+#include <ui/operation-modes/behaviors/GroundContextMenu.h>
+#include <ui/operation-modes/behaviors/DebugCommentsVisual.h>
+#include <ui/operation-modes/BehaviorContext.h>
+#include "ObjectList.h"
+#include "ObjectInspector.h"
 
-using namespace hh::fnd;
-using namespace hh::game;
+namespace ui::operation_modes::modes::object_inspection {
 
-ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator) : OperationMode{ allocator } {
-	AddBehavior<SelectionBehavior<GameObject*>>();
-	AddBehavior<SelectionAabbBehavior<GameObject*>>(*this);
-	AddBehavior<SelectionTransformationBehavior<GameObject*>>(*this);
-	AddBehavior<SelectionVisual3DBehavior>();
-	AddBehavior<GizmoBehavior>();
-	AddBehavior<MousePickingPhysicsBehavior<GameObject*>>(*this);
-	AddBehavior<SelectionMousePickingBehavior<GameObject*>>();
-	AddBehavior<DeleteBehavior<GameObject*>>(*this);
-}
+	using namespace hh::fnd;
+	using namespace hh::game;
 
-void ObjectInspection::Render() {
-	objectList.Render();
-	objectInspector.Render();
-}
+	class SelectionTransformationBehaviorContext : public BehaviorContext<Context, SelectionTransformationBehavior<hh::game::GameObject*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual bool HasTransform(GameObject* obj) override { return obj->GetComponent<GOCTransform>() != nullptr; }
+		virtual bool IsRoot(GameObject* obj) override { return obj->GetComponent<GOCTransform>()->GetParent() == nullptr; }
+		virtual GameObject* GetParent(GameObject* obj) override { return obj->GetComponent<GOCTransform>()->GetParent()->GetOwnerGameObject(); }
+		virtual Eigen::Affine3f GetSelectionSpaceTransform(GameObject* obj) override { return TransformToAffine3f(obj->GetComponent<GOCTransform>()->GetFrame().fullTransform); }
+		virtual void SetSelectionSpaceTransform(GameObject* obj, const Eigen::Affine3f& transform) override {
+			auto* gocTransform = obj->GetComponent<GOCTransform>();
+			auto absoluteTransform = TransformToAffine3f(gocTransform->GetFrame().fullTransform);
+			auto localTransform = TransformToAffine3f(gocTransform->GetTransform());
 
-bool ObjectInspection::HasTransform(GameObject* obj) {
-	return obj->GetComponent<GOCTransform>() != nullptr;
-}
+			gocTransform->SetLocalTransform(Affine3fToTransform(localTransform * absoluteTransform.inverse() * transform));
+		}
+	};
 
-bool ObjectInspection::IsRoot(GameObject* obj) {
-	return obj->GetComponent<GOCTransform>()->GetParent() == nullptr;
-}
+	class DeleteBehaviorContext : public BehaviorContext<Context, DeleteBehavior<GameObject*>> {
+		using BehaviorContext::BehaviorContext;
+		void DeleteObjects(const csl::ut::MoveArray<GameObject*>& objects) {
+			for (auto* obj : objects)
+				obj->Kill();
+		}
+	};
 
-GameObject* ObjectInspection::GetParent(GameObject* obj) {
-	return obj->GetComponent<GOCTransform>()->GetParent()->GetOwnerGameObject();
-}
+	class MousePickingPhysicsBehaviorContext : public BehaviorContext<Context, MousePickingPhysicsBehavior<GameObject*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual const char* GetObjectName(GameObject* obj) override { return obj->name; }
+		virtual GameObject* GetObjectForGameObject(GameObject* obj) override { return obj; }
+		virtual bool IsSelectable(hh::game::GameObject* obj) override { return true; }
+		virtual void GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<GameObject*>& results) override {
+			if (auto* gameManager = hh::game::GameManager::GetInstance())
+				for (auto* object : gameManager->objects)
+					if (auto* gocTransform = object->GetComponent<GOCTransform>())
+						if (frustum.Test(gocTransform->GetFrame().fullTransform.position))
+							results.push_back(object);
+		}
+	};
 
-Eigen::Affine3f ObjectInspection::GetSelectionSpaceTransform(GameObject* obj) {
-	return TransformToAffine3f(obj->GetComponent<GOCTransform>()->GetFrame().fullTransform);
-}
+	class SelectionAabbBehaviorContext : public BehaviorContext<Context, SelectionAabbBehavior<hh::game::GameObject*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual bool CalculateAabb(const csl::ut::MoveArray<hh::game::GameObject*>& objects, csl::geom::Aabb& aabb) override { return CalcApproxAabb(objects, aabb); }
+	};
 
-void ObjectInspection::SetSelectionSpaceTransform(GameObject* obj, const Eigen::Affine3f& transform) {
-	auto* gocTransform = obj->GetComponent<GOCTransform>();
-	auto absoluteTransform = TransformToAffine3f(gocTransform->GetFrame().fullTransform);
-	auto localTransform = TransformToAffine3f(gocTransform->GetTransform());
+	ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator) : OperationMode{ allocator } {
+		AddPanel<ObjectList>();
+		AddPanel<ObjectInspector>();
+		AddBehavior<SelectionBehavior<GameObject*>>();
+		AddBehavior<SelectionAabbBehavior<GameObject*>, SelectionAabbBehaviorContext>();
+		AddBehavior<SelectionTransformationBehavior<GameObject*>, SelectionTransformationBehaviorContext>();
+		AddBehavior<SelectionVisual3DBehavior>();
+		AddBehavior<GizmoBehavior>();
+		AddBehavior<MousePickingPhysicsBehavior<GameObject*>, MousePickingPhysicsBehaviorContext>();
+		AddBehavior<SelectionMousePickingBehavior<GameObject*>>();
+		AddBehavior<DeleteBehavior<GameObject*>, DeleteBehaviorContext>();
+		AddBehavior<GroundContextMenuBehavior<ObjectData*>>();
+		AddBehavior<DebugCommentsVisualBehavior>();
 
-	gocTransform->SetLocalTransform(Affine3fToTransform(localTransform * absoluteTransform.inverse() * transform));
-}
+		hh::game::GameManager::GetInstance()->AddListener(this);
+	}
 
-void ObjectInspection::DeleteObjects(const csl::ut::MoveArray<GameObject*>& objects) {
-	for (auto* obj : objects)
-		obj->Kill();
-}
+	ObjectInspection::~ObjectInspection()
+	{
+		hh::game::GameManager::GetInstance()->RemoveListener(this);
+	}
 
-GameObject* ObjectInspection::GetObjectForGameObject(GameObject* obj) {
-	return obj;
-}
+	void ObjectInspection::GameObjectRemovedCallback(hh::game::GameManager* gameManager, hh::game::GameObject* gameObject)
+	{
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<GameObject*>>();
 
-bool ObjectInspection::IsSelectable(hh::game::GameObject* obj) {
-	return true;
-}
-
-const char* ObjectInspection::GetObjectName(GameObject* obj) {
-	return obj->name;
-}
-
-void ObjectInspection::GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<GameObject*>& results) {
-	if (auto* gameManager = hh::game::GameManager::GetInstance())
-		for (auto* object : gameManager->objects)
-			if (auto* gocTransform = object->GetComponent<GOCTransform>())
-				if (frustum.Test(gocTransform->GetFrame().fullTransform.position))
-					results.push_back(object);
-}
-
-bool ObjectInspection::CalculateAabb(const csl::ut::MoveArray<hh::game::GameObject*>& objects, csl::geom::Aabb& aabb) {
-	return CalcApproxAabb(objects, aabb);
+		if (selectionBehavior->IsSelected(gameObject))
+			selectionBehavior->Deselect(gameObject);
+	}
 }

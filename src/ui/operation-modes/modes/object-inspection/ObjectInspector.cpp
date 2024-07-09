@@ -68,69 +68,61 @@ typedef std::tuple<
 > InspectableGameObjects;
 #endif
 
-using namespace hh::fnd;
-using namespace hh::game;
+namespace ui::operation_modes::modes::object_inspection {
+
+	using namespace hh::fnd;
+	using namespace hh::game;
 
 
-template<typename T>
-bool RenderComponentInspectorT(hh::game::GOComponent& component) {
-	bool result{ component.pStaticClass == T::GetClass() };
+	template<typename T>
+	bool RenderComponentInspectorT(hh::game::GOComponent& component) {
+		bool result{ component.pStaticClass == T::GetClass() };
 
-	if (result) {
-		ImGui::PushID(&component);
-		RenderComponentInspector(static_cast<T&>(component));
-		ImGui::PopID();
+		if (result) {
+			ImGui::PushID(&component);
+			RenderComponentInspector(static_cast<T&>(component));
+			ImGui::PopID();
+		}
+
+		return result;
 	}
 
-	return result;
-}
+	template<typename = InspectableComponents>
+	class ComponentIterator;
+	template<typename... T>
+	class ComponentIterator<std::tuple<T...>> {
+	public:
+		static void Render(hh::game::GOComponent& component) {
+			(RenderComponentInspectorT<T>(component) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
+		}
+	};
 
-template<typename = InspectableComponents>
-class ComponentIterator;
-template<typename... T>
-class ComponentIterator<std::tuple<T...>> {
-public:
-	static void Render(hh::game::GOComponent& component) {
-		(RenderComponentInspectorT<T>(component) || ...) || (ImGui::Text("Inspector for this component not yet implemented"), true);
+
+	template<typename T>
+	bool RenderGameObjectInspectorT(hh::game::GameObject& gameObject) {
+		bool result{ gameObject.objectClass == T::GetClass() };
+
+		if (result) {
+			ImGui::PushID(&gameObject);
+			RenderGameObjectInspector(static_cast<T&>(gameObject));
+			ImGui::PopID();
+		}
+
+		return result;
 	}
-};
 
+	template<typename = InspectableGameObjects>
+	class GameObjectIterator;
+	template<typename... T>
+	class GameObjectIterator<std::tuple<T...>> {
+	public:
+		static void Render(hh::game::GameObject& gameObject) {
+			(RenderGameObjectInspectorT<T>(gameObject) || ...);
+		}
+	};
 
-template<typename T>
-bool RenderGameObjectInspectorT(hh::game::GameObject& gameObject) {
-	bool result{ gameObject.objectClass == T::GetClass() };
-
-	if (result) {
-		ImGui::PushID(&gameObject);
-		RenderGameObjectInspector(static_cast<T&>(gameObject));
-		ImGui::PopID();
-	}
-
-	return result;
-}
-
-template<typename = InspectableGameObjects>
-class GameObjectIterator;
-template<typename... T>
-class GameObjectIterator<std::tuple<T...>> {
-public:
-	static void Render(hh::game::GameObject& gameObject) {
-		(RenderGameObjectInspectorT<T>(gameObject) || ...);
-	}
-};
-
-ObjectInspector::ObjectInspector(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : CompatibleObject{ allocator }, objectInspection{ objectInspection }
-{
-}
-
-void ObjectInspector::Render() {
-	const ImGuiWindowFlags windowFlags
-		= 0;
-
-	ImGui::SetNextWindowPos(ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImGuiCond_FirstUseEver, ImVec2(1, 0));
-	ImGui::SetNextWindowSize(ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Object inspector", NULL, windowFlags)) {
-		auto& selection = objectInspection.GetBehavior<SelectionBehavior<GameObject*>>()->GetSelection();
+	void ObjectInspector::RenderPanel() {
+		auto& selection = GetBehavior<SelectionBehavior<GameObject*>>()->GetSelection();
 
 		if (selection.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");
@@ -268,5 +260,9 @@ void ObjectInspector::Render() {
 			}
 		}
 	}
-	ImGui::End();
+
+	PanelTraits ObjectInspector::GetPanelTraits() const
+	{
+		return { "Object inspector", ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImVec2(1, 0) };
+	}
 }

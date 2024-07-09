@@ -18,6 +18,14 @@ public:
 	using SelectAllAction = Action<ActionId::SELECT_ALL>;
 	using DeselectAllAction = Action<ActionId::DESELECT_ALL>;
 
+	struct SelectionChangedPayload {
+		csl::ut::MoveArray<T> previousSelection;
+		csl::ut::MoveArray<T> currentSelection;
+		csl::ut::MoveArray<T> selected;
+		csl::ut::MoveArray<T> deselected;
+	};
+	using SelectionChangedAction = Action<ActionId::SELECTION_CHANGED, SelectionChangedPayload>;
+
 	using OperationModeBehavior::OperationModeBehavior;
 
 	void Init() {
@@ -30,22 +38,47 @@ public:
 
 	virtual void ProcessAction(const ActionBase& action) override {
 		switch (action.id) {
-		case SelectAction::id:
+		case SelectAction::id: {
+			auto& selected = static_cast<const SelectAction&>(action).payload;
+
+			csl::ut::MoveArray<T> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			for (auto& object : selection)
+				previousSelection.push_back(object);
+
 			for (auto& object : static_cast<const SelectAction&>(action).payload)
 				selection.push_back(object);
+
+			Dispatch(SelectionChangedAction{ { previousSelection, selection, selected, {} } });
 			break;
-		case DeselectAction::id:
-			for (auto& object : static_cast<const DeselectAction&>(action).payload) {
+		}
+		case DeselectAction::id: {
+			auto& deselected = static_cast<const DeselectAction&>(action).payload;
+
+			csl::ut::MoveArray<T> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			for (auto& object : selection)
+				previousSelection.push_back(object);
+
+			for (auto& object : deselected) {
 				auto it = selection.find(object);
 				selection.remove(it);
 			}
+
+			Dispatch(SelectionChangedAction{ { previousSelection, selection, {}, deselected } });
 			break;
+		}
 		case SelectAllAction::id:
-			selection.clear();
+			assert(false);
 			break;
-		case DeselectAllAction::id:
+		case DeselectAllAction::id: {
+			csl::ut::MoveArray<T> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			for (auto& object : selection)
+				previousSelection.push_back(object);
+
 			selection.clear();
+
+			Dispatch(SelectionChangedAction{ { previousSelection, selection, {}, previousSelection } });
 			break;
+		}
 		}
 	}
 
@@ -66,7 +99,7 @@ public:
 	}
 
 	void AddToSelection(const csl::ut::MoveArray<T>& objects) {
-		Desktop::instance->Dispatch(SelectAction{ objects });
+		Dispatch(SelectAction{ objects });
 	}
 
 	void Deselect(const T& object) {
@@ -76,18 +109,22 @@ public:
 	}
 
 	void Deselect(const csl::ut::MoveArray<T>& objects) {
-		Desktop::instance->Dispatch(DeselectAction{ objects });
+		Dispatch(DeselectAction{ objects });
 	}
 
 	void SelectAll() {
-		//Desktop::instance->Dispatch(SelectAllAction{});
+		//Dispatch(SelectAllAction{});
 	}
 
 	void DeselectAll() {
-		Desktop::instance->Dispatch(DeselectAllAction{});
+		Dispatch(DeselectAllAction{});
 	}
 
 	const csl::ut::MoveArray<T>& GetSelection() const {
 		return selection;
+	}
+	
+	bool IsSelected(T object) const {
+		return selection.find(object) != -1;
 	}
 };

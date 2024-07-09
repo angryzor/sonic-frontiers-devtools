@@ -1,12 +1,14 @@
 #pragma once
 #include <ui/common/editors/Reflection.h>
-#include <utilities/CompatibleObject.h>
+#include <ui/operation-modes/Panel.h>
+#include "Context.h"
 
-class ObjectInspection;
-class ObjectInspector : public CompatibleObject {
-    ObjectInspection& objectInspection;
+namespace ui::operation_modes::modes::object_inspection {
+    class ObjectInspector : public Panel<Context> {
+    public:
+        using Panel::Panel;
 
-public:
-    ObjectInspector(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection);
-    void Render();
-};
+        virtual void RenderPanel() override;
+        virtual PanelTraits GetPanelTraits() const override;
+    };
+}

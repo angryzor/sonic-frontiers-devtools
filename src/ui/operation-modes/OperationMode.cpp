@@ -1,48 +1,38 @@
 #include "OperationMode.h"
 
-OperationMode::OperationMode(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }
+void OperationModeBase::Render()
 {
-}
-
-void OperationMode::RenderOperationMode()
-{
-	for (auto& behavior : behaviors)
-		behavior->Render();
-
-	Render();
-
 	singleFrameExclusiveMouseControlBehavior = nullptr;
+
+	for (auto& behavior : behaviors)
+		behavior->behavior->Render();
 }
 
-void OperationMode::Render()
-{
-}
-
-void OperationMode::InitBehaviors()
+void OperationModeBase::ProcessAction(const ActionBase& action)
 {
 	for (auto& behavior : behaviors)
-		behavior->Init();
+		behavior->behavior->ProcessAction(action);
 }
 
-void OperationMode::DeinitBehaviors()
+void OperationModeBase::InitBehaviors()
+{
+	for (auto& behavior : behaviors)
+		behavior->behavior->Init();
+}
+
+void OperationModeBase::DeinitBehaviors()
 {
 	for (auto i = behaviors.end(); i != behaviors.begin();)
-		(*(--i))->Deinit();
+		(*(--i))->behavior->Deinit();
 }
 
-void OperationMode::ProcessAction(const ActionBase& action)
-{
-	for (auto& behavior : behaviors)
-		behavior->ProcessAction(action);
-}
-
-bool OperationMode::CanTakeMouseControl(OperationModeBehavior* behavior)
+bool OperationModeBase::CanTakeMouseControl(OperationModeBehavior* behavior)
 {
 	return (draggingBehavior == nullptr || draggingBehavior == behavior)
 		&& (singleFrameExclusiveMouseControlBehavior == nullptr || singleFrameExclusiveMouseControlBehavior == behavior);
 }
 
-void OperationMode::ToggleDragging(OperationModeBehavior* behavior, bool canStart)
+void OperationModeBase::ToggleDragging(OperationModeBehavior* behavior, bool canStart)
 {
 	if (!CanTakeMouseControl(behavior))
 		return;
@@ -55,12 +45,12 @@ void OperationMode::ToggleDragging(OperationModeBehavior* behavior, bool canStar
 		draggingBehavior = nullptr;
 }
 
-bool OperationMode::IsDragging(OperationModeBehavior* behavior)
+bool OperationModeBase::IsDragging(OperationModeBehavior* behavior)
 {
 	return draggingBehavior == behavior;
 }
 
-void OperationMode::BeginSingleFrameExclusiveMouseControl(OperationModeBehavior* behavior)
+void OperationModeBase::BeginSingleFrameExclusiveMouseControl(OperationModeBehavior* behavior)
 {
 	singleFrameExclusiveMouseControlBehavior = behavior;
 }

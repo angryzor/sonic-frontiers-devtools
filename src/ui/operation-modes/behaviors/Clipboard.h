@@ -22,7 +22,7 @@ public:
 	using CopyAction = Action<ActionId::COPY>;
 	using PasteAction = Action<ActionId::PASTE>;
 
-	ClipboardBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations) : OperationModeBehavior{ allocator, operationMode }, operations{ operations } {}
+	ClipboardBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : OperationModeBehavior{ allocator, operationMode }, operations{ operations } {}
 
 	~ClipboardBehavior() {
 		Clear();

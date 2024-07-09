@@ -13,6 +13,7 @@ public:
 	virtual unsigned int GetId() override { return id; }
 
 	using SetSelectionTransformAction = Action<ActionId::SET_SELECTION_TRANSFORM, TransformType>;
+	using SelectionTransformChangedAction = Action<ActionId::SELECTION_TRANSFORM_CHANGED, TransformType>;
 
 	using OperationModeBehavior::OperationModeBehavior;
 
@@ -53,12 +54,12 @@ protected:
 	 * in the selection and would otherwise be transformed multiple times.
 	 */
 	void CalculateTransformableSelection() {
-		auto& focusedObjects = this->operationMode.GetBehavior<SelectionBehavior<T>>()->GetSelection();
+		auto& selection = this->operationMode.GetBehavior<SelectionBehavior<T>>()->GetSelection();
 
 		transformableSelection.clear();
 
-		for (auto& object : focusedObjects)
-			if (operations.HasTransform(object) && !HasParentInSelection(object, focusedObjects))
+		for (auto& object : selection)
+			if (operations.HasTransform(object) && !HasParentInSelection(object, selection))
 				transformableSelection.push_back(object);
 	}
 
@@ -76,7 +77,7 @@ protected:
 	}
 
 public:
-	SelectionTransformationBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations) : SelectionTransformationBehaviorBase<Projective>{ allocator, operationMode }, operations{ operations } {}
+	SelectionTransformationBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : SelectionTransformationBehaviorBase<Projective>{ allocator, operationMode }, operations{ operations } {}
 
 	virtual void ProcessAction(const ActionBase& action) override {
 		switch (action.id) {
@@ -92,6 +93,7 @@ public:
 			for (auto& object : transformableSelection)
 				operations.SetSelectionSpaceTransform(object, deltaTransform * operations.GetSelectionSpaceTransform(object));
 
+			this->Dispatch(typename SelectionTransformationBehavior::SelectionTransformChangedAction{});
 			break;
 		}
 	}

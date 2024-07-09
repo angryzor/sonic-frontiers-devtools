@@ -10,9 +10,13 @@
 #include <ui/operation-modes/behaviors/Gizmo.h>
 #include <ui/operation-modes/behaviors/MousePicking.h>
 #include <ui/operation-modes/behaviors/Delete.h>
-
-using namespace hh::fnd;
-using namespace hh::game;
+#include <ui/operation-modes/behaviors/GroundContextMenu.h>
+#include <ui/operation-modes/behaviors/DebugCommentsVisual.h>
+#include <ui/operation-modes/BehaviorContext.h>
+#include "SetObjectList.h"
+#include "ObjectDataInspector.h"
+#include "ObjectLibrary.h"
+#include "Actions.h"
 
 namespace app::gfx {
 	class GOCVisualGeometryInstance : public GOComponent {
@@ -24,325 +28,210 @@ namespace app::gfx {
 	};
 }
 
-LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator } {
-	AddBehavior<SelectionBehavior<ObjectData*>>();
-	AddBehavior<SelectionAabbBehavior<ObjectData*>>(*this);
-	AddBehavior<SelectionTransformationBehavior<ObjectData*>>(*this);
-	AddBehavior<SelectionVisual3DBehavior>();
-	AddBehavior<GizmoBehavior>();
-	AddBehavior<MousePickingPhysicsBehavior<ObjectData*>>(*this);
-	AddBehavior<SelectionMousePickingBehavior<ObjectData*>>();
-	AddBehavior<DeleteBehavior<ObjectData*>>(*this);
-	AddBehavior<ClipboardBehavior<ObjectData*>>(*this);
-	AddBehavior<ObjectLocationVisual3DBehavior<ObjectData*>>(*this);
+namespace ui::operation_modes::modes::level_editor {
+	using namespace hh::fnd;
+	using namespace hh::game;
 
-	auto* gameManager = GameManager::GetInstance();
+	template<> struct ClipboardEntry<hh::game::ObjectData*> {
+		Context& context;
+		hh::game::ObjectData* proto;
 
-	gameManager->AddListener(this);
-
-	if (auto* objWorld = gameManager->GetService<ObjectWorld>())
-		objWorld->AddWorldListener(this);
-}
-
-LevelEditor::~LevelEditor() {
-	SetFocusedChunk(nullptr);
-
-	auto* gameManager = GameManager::GetInstance();
-
-	gameManager->RemoveListener(this);
-
-	if (auto* objWorld = gameManager->GetService<ObjectWorld>())
-		objWorld->RemoveWorldListener(this);
-}
-
-void LevelEditor::Render() {
-	setObjectList.Render();
-	objectDataInspector.Render();
-	objectLibrary.Render();
-}
-
-ObjectId LevelEditor::GenerateRandomObjectId() {
-#ifdef DEVTOOLS_TARGET_SDK_wars
-	return { mt() };
-#endif
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-	return { mt(), mt() };
-#endif
-}
-
-// This is extremely unlikely to happen with V3 object IDs and I would probably not even bother if we were only handling those,
-// but it is less unlikely to happen with V2 object IDs (though still unlikely). 
-ObjectId LevelEditor::GenerateUniqueRandomObjectId() {
-	ObjectId result{};
-	boolean isUnique{ true };
-
-	// This has the potential to infinitely loop if the user has 2^32 objects in one chunk (V2).
-	// It also has the potential to take a long time in collisions if there are less but still an extreme amount of
-	// object IDs on the map.
-	// I'm currently ignoring this possibility, but the second one could be avoided by only rolling once and then simply incrementing until we find a gap.
-	// I just prefer a more random distribution, and we'll see if issues happen in practice. (Why have tests when you have end users :) )
-	do {
-		isUnique = true;
-		result = GenerateRandomObjectId();
-
-		for (auto& status : focusedChunk->GetObjectStatuses()) {
-			if (status.objectData->id == result) {
-				isUnique = false;
-			}
-		}
-	} while (!result.IsNonNull() || !isUnique);
-
-	return result;
-}
-
-void LevelEditor::RecalculateDependentTransforms()
-{
-	for (auto* obj : GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection())
-		RecalculateDependentTransforms(obj);
-}
-
-void LevelEditor::RecalculateDependentTransforms(hh::game::ObjectData* objectData)
-{
-	// Copy changes to the live object if any.
-	if (auto* obj = focusedChunk->GetGameObjectByObjectId(objectData->id))
-		if (auto* gocTransform = obj->GetComponent<GOCTransform>())
-			UpdateGOCTransform(*objectData, *gocTransform);
-
-	for (auto* layer : focusedChunk->GetLayers()) {
-		for (auto* child : layer->GetResource()->GetObjects()) {
-			if (child->parentID == objectData->id) {
-				RecalculateAbsoluteTransform(*objectData, *child);
-				RecalculateDependentTransforms(child);
-			}
-		}
-	}
-}
-
-ObjectData* LevelEditor::CreateObject(csl::fnd::IAllocator* allocator, const GameObjectClass* gameObjectClass, ObjectTransformData transform, ObjectData* parentObject) {
-#ifdef DEVTOOLS_TARGET_SDK_wars
-	// FIXME: We're leaking memory here because the string does not get freed.
-	auto name = new char[100];
-	snprintf(name, 100, "%s_%d", gameObjectClass->name, mt() % 0x1000000);
-#else
-	char name[100];
-	snprintf(name, 100, "%s_%zd", gameObjectClass->name, mt() % 0x1000000);
-#endif
-
-	auto* objData = new (allocator) ObjectData{
-		allocator,
-		gameObjectClass,
-		GenerateUniqueRandomObjectId(),
-		name,
-		parentObject,
-		transform,
+		ClipboardEntry(Context& context, hh::game::ObjectData* proto) : context{ context }, proto{ context.CopyObjectForClipboard(proto) } {}
+		ClipboardEntry(const ClipboardEntry& other) : context{ other.context }, proto{ context.CopyObjectForClipboard(other.proto) } {}
+		ClipboardEntry(ClipboardEntry&& other) noexcept : context{ other.context }, proto{ other.proto } { other.proto = nullptr; }
+		~ClipboardEntry() { context.TerminateClipboardObject(proto); }
 	};
 
-	objData->componentData.push_back(ComponentData::Create(allocator, "RangeSpawning", GOCActivatorSpawner{ 500, 200 }));
-
-	return objData;
-}
-
-ObjectData* LevelEditor::CopyObject(csl::fnd::IAllocator* allocator, ObjectData* otherObject) {
-#ifdef DEVTOOLS_TARGET_SDK_wars
-	// FIXME: We're leaking memory here because the string does not get freed.
-	auto name = new char[100];
-	snprintf(name, 100, "%s_%d", otherObject->gameObjectClass, mt() % 0x1000000);
-#else
-	char name[100];
-	snprintf(name, 100, "%s_%zd", otherObject->gameObjectClass, mt() % 0x1000000);
-#endif
-
-	auto* objData = new (allocator) ObjectData{
-		allocator,
-		GenerateUniqueRandomObjectId(),
-		name,
-		*otherObject,
+	class SelectionAabbBehaviorContext : public BehaviorContext<Context, SelectionAabbBehavior<ObjectData*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual bool CalculateAabb(const csl::ut::MoveArray<hh::game::ObjectData*>& objects, csl::geom::Aabb& aabb) override {
+			return CalcApproxAabb(context.GetFocusedChunk(), objects, aabb);
+		}
 	};
 
-	auto* otherRangeSpawning = otherObject->GetComponentDataByType("RangeSpawning");
-	objData->componentData.push_back(ComponentData::Create(allocator, "RangeSpawning", otherRangeSpawning ? *otherRangeSpawning->GetData<GOCActivatorSpawner>() : GOCActivatorSpawner{ 500, 200 }));
+	class SelectionTransformationBehaviorContext : public BehaviorContext<Context, SelectionTransformationBehavior<ObjectData*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual bool HasTransform(ObjectData* obj) override { return true; }
+		virtual bool IsRoot(ObjectData* obj) override { return !obj->parentID.IsNonNull(); }
+		virtual ObjectData* GetParent(ObjectData* obj) override { return context.GetFocusedChunk()->GetWorldObjectStatusByObjectId(obj->parentID).objectData; }
+		virtual Eigen::Affine3f GetSelectionSpaceTransform(ObjectData* obj) override { return ObjectTransformDataToAffine3f(obj->transform); }
+		virtual void SetSelectionSpaceTransform(ObjectData* obj, const Eigen::Affine3f& transform) override {
+			UpdateAbsoluteTransform(transform, *obj);
+			context.RecalculateDependentTransforms(obj);
+		}
+	};
 
-	return objData;
-}
+	class MousePickingPhysicsBehaviorContext : public BehaviorContext<Context, MousePickingPhysicsBehavior<ObjectData*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual const char* GetObjectName(ObjectData* obj) override { return obj->name; }
+		virtual ObjectData* GetObjectForGameObject(GameObject* obj) override { return obj->GetWorldObjectStatus()->objectData; }
+		virtual bool IsSelectable(hh::game::GameObject* obj) override {
+			auto* focusedChunk = context.GetFocusedChunk();
 
-ClipboardEntry<ObjectData*> LevelEditor::CreateClipboardEntry(ObjectData* objData) {
-	return { *this, objData };
-}
+			if (!focusedChunk)
+				return false;
 
-ObjectData* LevelEditor::CreateObject(const ClipboardEntry<ObjectData*>& entry) {
-	return { CopyObject(placeTargetLayer->GetAllocator(), entry.proto) };
-}
+			auto* status = obj->GetWorldObjectStatus();
 
-bool LevelEditor::HasTransform(ObjectData* obj) {
-	return true;
-}
+			return status != nullptr && focusedChunk->GetObjectIndexByObjectData(status->objectData) != -1;
+		}
+		virtual void GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<ObjectData*>& results) override {
+			auto* focusedChunk = context.GetFocusedChunk();
 
-bool LevelEditor::IsRoot(ObjectData* obj) {
-	return !obj->parentID.IsNonNull();
-}
+			if (!focusedChunk)
+				return;
 
-ObjectData* LevelEditor::GetParent(ObjectData* obj) {
-	return focusedChunk->GetWorldObjectStatusByObjectId(obj->parentID).objectData;
-}
+			for (auto* layer : focusedChunk->GetLayers())
+				for (auto* object : layer->GetResource()->GetObjects())
+					if (frustum.Test(object->transform.position))
+						results.push_back(object);
+		}
+	};
+	
+	class DeleteBehaviorContext : public BehaviorContext<Context, DeleteBehavior<ObjectData*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) override {
+			auto* focusedChunk = context.GetFocusedChunk();
 
-Eigen::Affine3f LevelEditor::GetSelectionSpaceTransform(ObjectData* obj) {
-	return ObjectTransformDataToAffine3f(obj->transform);
-}
+			for (auto* obj : objects)
+				focusedChunk->Despawn(obj);
 
-void LevelEditor::SetSelectionSpaceTransform(ObjectData* obj, const Eigen::Affine3f& transform) {
-	UpdateAbsoluteTransform(transform, *obj);
-	RecalculateDependentTransforms(obj);
-}
+			focusedChunk->ShutdownPendingObjects();
 
-ObjectData* LevelEditor::GetObjectForGameObject(GameObject* obj) {
-	return obj->GetWorldObjectStatus()->objectData;
-}
+			for (auto* obj : objects)
+				for (auto* layer : focusedChunk->GetLayers())
+					for (auto* object : layer->GetResource()->GetObjects())
+						if (object == obj)
+							layer->RemoveObjectData(obj);
+		}
+	};
 
-bool LevelEditor::IsSelectable(hh::game::GameObject* obj)
-{
-	if (!focusedChunk)
-		return false;
+	class ClipboardBehaviorContext : public BehaviorContext<Context, ClipboardBehavior<ObjectData*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual ClipboardEntry<ObjectData*> CreateClipboardEntry(ObjectData* objData) override { return { context, objData }; }
+		virtual ObjectData* CreateObject(const ClipboardEntry<ObjectData*>& entry) override { return context.CopyObjectForPlacement(entry.proto); }
+	};
 
-	auto* status = obj->GetWorldObjectStatus();
+	class ObjectLocationVisual3DBehaviorContext : public BehaviorContext<Context, ObjectLocationVisual3DBehavior<ObjectData*>> {
+		using BehaviorContext::BehaviorContext;
+		virtual Eigen::Affine3f GetWorldTransform(ObjectData* object) const override { return ObjectTransformDataToAffine3f(object->transform); }
+		virtual void GetInvisibleObjects(csl::ut::MoveArray<ObjectData*>& objects) const override {
+			auto* focusedChunk = context.GetFocusedChunk();
 
-	return status != nullptr && focusedChunk->GetObjectIndexByObjectData(status->objectData) != -1;
-}
+			if (!focusedChunk)
+				return;
 
-const char* LevelEditor::GetObjectName(ObjectData* obj) {
-	return obj->name;
-}
+			for (auto& status : focusedChunk->GetObjectStatuses()) {
+				auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
 
-void LevelEditor::GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<ObjectData*>& results) {
-	if (!focusedChunk)
-		return;
+				if (!gameObject || ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>()))
+					objects.push_back(status.objectData);
+			}
+		}
+	};
 
-	for (auto* layer : focusedChunk->GetLayers())
-		for (auto* object : layer->GetResource()->GetObjects())
-			if (frustum.Test(object->transform.position))
-				results.push_back(object);
-}
+	LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator } {
+		AddPanel<SetObjectList>();
+		AddPanel<ObjectDataInspector>();
+		AddPanel<ObjectLibrary>();
+		AddBehavior<SelectionBehavior<ObjectData*>>();
+		AddBehavior<SelectionAabbBehavior<ObjectData*>, SelectionAabbBehaviorContext>();
+		AddBehavior<SelectionTransformationBehavior<ObjectData*>, SelectionTransformationBehaviorContext>();
+		AddBehavior<SelectionVisual3DBehavior>();
+		AddBehavior<GizmoBehavior>();
+		AddBehavior<MousePickingPhysicsBehavior<ObjectData*>, MousePickingPhysicsBehaviorContext>();
+		AddBehavior<SelectionMousePickingBehavior<ObjectData*>>();
+		AddBehavior<DeleteBehavior<ObjectData*>, DeleteBehaviorContext>();
+		AddBehavior<ClipboardBehavior<ObjectData*>, ClipboardBehaviorContext>();
+		AddBehavior<ObjectLocationVisual3DBehavior<ObjectData*>, ObjectLocationVisual3DBehaviorContext>();
+		AddBehavior<GroundContextMenuBehavior<ObjectData*>>();
+		AddBehavior<DebugCommentsVisualBehavior>();
 
-bool LevelEditor::CalculateAabb(const csl::ut::MoveArray<hh::game::ObjectData*>& objects, csl::geom::Aabb& aabb)
-{
-	return CalcApproxAabb(focusedChunk, objects, aabb);
-}
+		auto* gameManager = GameManager::GetInstance();
 
-void LevelEditor::GetInvisibleObjects(csl::ut::MoveArray<ObjectData*>& objects) const
-{
-	if (!focusedChunk)
-		return;
+		gameManager->AddListener(this);
 
-	for (auto& status : focusedChunk->GetObjectStatuses()) {
-		auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
-
-		if (!gameObject || ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>()))
-			objects.push_back(status.objectData);
+		if (auto* objWorld = gameManager->GetService<ObjectWorld>())
+			objWorld->AddWorldListener(this);
 	}
-}
 
-Eigen::Affine3f LevelEditor::GetWorldTransform(ObjectData* object) const
-{
-	return ObjectTransformDataToAffine3f(object->transform);
-}
+	LevelEditor::~LevelEditor() {
 
-void LevelEditor::DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) {
-	for (auto* obj : objects)
-		focusedChunk->Despawn(obj);
+		auto* gameManager = GameManager::GetInstance();
 
-	focusedChunk->ShutdownPendingObjects();
+		gameManager->RemoveListener(this);
 
-	for (auto* obj : objects)
-		for (auto* layer : focusedChunk->GetLayers())
-			for (auto* object : layer->GetResource()->GetObjects())
-				if (object == obj)
-					layer->RemoveObjectData(obj);
-}
+		if (auto* objWorld = gameManager->GetService<ObjectWorld>())
+			objWorld->RemoveWorldListener(this);
+	} 
 
-void LevelEditor::NotifySelectedObject()
-{
-	hh::dbg::MsgStartActiveObjectInEditor msg{};
-	NotifyActiveObject(msg);
-}
+	void LevelEditor::ProcessAction(const ActionBase& action) {
+		OperationMode::ProcessAction(action);
 
-void LevelEditor::NotifyUpdatedObject()
-{
-	hh::dbg::MsgUpdateActiveObjectInEditor msg{};
-	NotifyActiveObject(msg);
+		switch (action.id) {
+		case SelectionTransformationBehavior<ObjectData*>::SelectionTransformChangedAction::id: {
+			auto& selection = GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
 
-	//for (auto* obj : GameManager::GetInstance()->objects) {
-	//	if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
-	//		hh::dbg::MsgUpdateActiveObjectInEditor msg;
-	//		obj->SendMessageImm(msg);
-	//		void* updater = *reinterpret_cast<void**>(reinterpret_cast<size_t>(grind) + 168);
-	//		uint8_t* flag = reinterpret_cast<uint8_t*>(reinterpret_cast<size_t>(updater) + 172);
-	//		*flag |= 2;
-	//	}
-	//}
-}
+			GetContext().RecalculateDependentTransforms(selection);
 
-void LevelEditor::NotifyDeselectedObject()
-{
-	hh::dbg::MsgFinishActiveObjectInEditor msg{};
-	NotifyActiveObject(msg);
-}
+			if (selection.size() == 1)
+				GetContext().NotifyUpdatedObject(selection[0]);
 
-void LevelEditor::NotifyActiveObject(Message& msg)
-{
-	auto selection = GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
-	if (selection.size() == 1) {
-		if (auto* obj = focusedChunk->GetGameObjectByObjectId(selection[0]->id)) {
-			obj->SendMessageImm(msg);
+			break;
+		}
+		case SelectionBehavior<ObjectData*>::SelectionChangedAction::id: {
+			auto& changes = static_cast<const SelectionBehavior<ObjectData*>::SelectionChangedAction&>(action).payload;
+
+			if (changes.previousSelection.size() == 1 && (changes.currentSelection.size() != 1 || changes.previousSelection[0] != changes.currentSelection[0]))
+				GetContext().NotifyDeselectedObject(changes.previousSelection[0]);
+			if (changes.currentSelection.size() == 1 && (changes.previousSelection.size() != 1 || changes.previousSelection[0] != changes.currentSelection[0]))
+				GetContext().NotifySelectedObject(changes.currentSelection[0]);
+
+			break;
+		}
+		case SetFocusedChunkAction::id: {
+			auto* chunk = static_cast<const SetFocusedChunkAction&>(action).payload;
+
+			if (GetContext().GetFocusedChunk() == chunk)
+				return;
+
+			GetContext().SetFocusedChunk(chunk);
+			Dispatch(FocusedChunkChangedAction{});
+			break;
+		}
+		case FocusedChunkChangedAction::id:
+			GetBehavior<ClipboardBehavior<ObjectData*>>()->Clear();
+			GetBehavior<SelectionBehavior<ObjectData*>>()->DeselectAll();
+			break;
+		case ChangingParametersAction::id:
+			GetContext().ReloadActiveObjectParameters(GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection()[0]);
+			break;
+		case StopChangingParametersAction::id:
+			GetContext().RespawnActiveObject(GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection()[0]);
+			break;
 		}
 	}
-}
 
-void LevelEditor::GameServiceAddedCallback(GameService* service) {
-	if (service->pStaticClass == ObjectWorld::GetClass()) {
-		auto* objWorld = static_cast<ObjectWorld*>(service);
-		objWorld->AddWorldListener(this);
+	void LevelEditor::GameServiceAddedCallback(GameService* service) {
+		if (service->pStaticClass == ObjectWorld::GetClass()) {
+			auto* objWorld = static_cast<ObjectWorld*>(service);
+			objWorld->AddWorldListener(this);
+		}
 	}
-}
 
-void LevelEditor::GameServiceRemovedCallback(GameService* service) {
-	if (service->pStaticClass == ObjectWorld::GetClass()) {
-		auto* objWorld = static_cast<ObjectWorld*>(service);
-		objWorld->RemoveWorldListener(this);
+	void LevelEditor::GameServiceRemovedCallback(GameService* service) {
+		if (service->pStaticClass == ObjectWorld::GetClass()) {
+			auto* objWorld = static_cast<ObjectWorld*>(service);
+			objWorld->RemoveWorldListener(this);
+		}
 	}
-}
 
-void LevelEditor::WorldChunkRemovedCallback(ObjectWorldChunk* chunk)
-{
-	if (focusedChunk == chunk) {
-		GetBehavior<ClipboardBehavior<ObjectData*>>()->Clear();
-		GetBehavior<SelectionBehavior<ObjectData*>>()->DeselectAll();
-		placeTargetLayer = nullptr;
-		objectClassToPlace = nullptr;
-		focusedChunk = nullptr;
-	}
-}
+	void LevelEditor::WorldChunkRemovedCallback(ObjectWorldChunk* chunk)
+	{
+		if (GetContext().GetFocusedChunk() != chunk)
+			return;
 
-void LevelEditor::SetFocusedChunk(ObjectWorldChunk* chunk)
-{
-	if (focusedChunk == chunk)
-		return;
-
-	GetBehavior<ClipboardBehavior<ObjectData*>>()->Clear();
-	placeTargetLayer = nullptr;
-	objectClassToPlace = nullptr;
-	GetBehavior<SelectionBehavior<ObjectData*>>()->DeselectAll();
-	if (focusedChunk) {
-		focusedChunk->DespawnAll();
-		focusedChunk->ShutdownPendingObjects();
-		focusedChunk->SetEditorStatus(false);
-		focusedChunk->SpawnByAttribute(GetStatusEternal);
+		GetContext().ReleaseChunk();
+		Dispatch(FocusedChunkChangedAction{});
 	}
-	focusedChunk = chunk;
-	if (focusedChunk) {
-		focusedChunk->SetEditorStatus(true);
-		focusedChunk->DespawnAll();
-		focusedChunk->ShutdownPendingObjects();
-		focusedChunk->Restart(true);
-		focusedChunk->SpawnByAttribute(GetStatusEternal);
-	}
-	setObjectList.InvalidateTree();
 }

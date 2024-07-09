@@ -33,7 +33,7 @@ private:
 	Operations& operations;
 
 public:
-	SelectionAabbBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations)
+	SelectionAabbBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations)
 		: SelectionAabbBehaviorBase{ allocator, operationMode }, operations{ operations } {}
 
 	virtual void Render() override {

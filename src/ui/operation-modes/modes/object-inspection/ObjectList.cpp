@@ -1,99 +1,90 @@
 #include "ObjectList.h"
-#include "ObjectInspection.h"
 #include <ui/common/Icons.h>
 #include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/math/MathUtils.h>
 
-using namespace hh::fnd;
-using namespace hh::game;
+namespace ui::operation_modes::modes::object_inspection {
+	using namespace hh::fnd;
+	using namespace hh::game;
 
-ObjectList::ObjectList(csl::fnd::IAllocator* allocator, ObjectInspection& objectInspection) : CompatibleObject{ allocator }, objectInspection{ objectInspection }
-{
-}
+	void ObjectList::RenderObjectTreeNode(GameObject* obj) {
+		ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-void ObjectList::RenderObjectTreeNode(GameObject* obj) {
-	ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<GameObject*>>();
 
-	auto* selection = objectInspection.GetBehavior<SelectionBehavior<GameObject*>>();
+		if (selectionBehavior->GetSelection().find(obj) != -1)
+			nodeflags |= ImGuiTreeNodeFlags_Selected;
 
-	if (selection->GetSelection().find(obj) != -1)
-		nodeflags |= ImGuiTreeNodeFlags_Selected;
+		auto* transform = obj->GetComponent<GOCTransform>();
 
-	auto* transform = obj->GetComponent<GOCTransform>();
+		if ((transform && transform->GetChildren().size() > 0) || obj->GetChildren().size() > 0) {
+			bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
-	if ((transform && transform->GetChildren().size() > 0) || obj->GetChildren().size() > 0) {
-		bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
+			if (ImGui::IsItemClicked())
+				selectionBehavior->Select(obj);
 
-		if (ImGui::IsItemClicked())
-			selection->Select(obj);
+			if (ImGui::BeginDragDropSource()) {
+				ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
+				ImGui::EndDragDropSource();
+			}
 
-		if (ImGui::BeginDragDropSource()) {
-			ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
-			ImGui::EndDragDropSource();
-		}
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
+					GameObject* child = *static_cast<GameObject**>(payload->Data);
 
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
-				GameObject* child = *static_cast<GameObject**>(payload->Data);
+					GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
+					GOCTransform* childTransform = child->GetComponent<GOCTransform>();
 
-				GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
-				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
+					if (objTransform && childTransform && obj != child) {
+						auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
+						auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
 
-				if (objTransform && childTransform && obj != child) {
-					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
-					auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
-
-					childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
-					childTransform->SetParent(objTransform);
+						childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
+						childTransform->SetParent(objTransform);
+					}
 				}
+				ImGui::EndDragDropTarget();
 			}
-			ImGui::EndDragDropTarget();
+
+			if (isOpen) {
+				for (auto& child : transform->GetChildren()) {
+					RenderObjectTreeNode(child.GetOwnerGameObject());
+				}
+				ImGui::TreePop();
+			}
 		}
-		
-		if (isOpen) {
-			for (auto& child : transform->GetChildren()) {
-				RenderObjectTreeNode(child.GetOwnerGameObject());
+		else {
+			ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->name.c_str());
+
+			if (ImGui::IsItemClicked())
+				selectionBehavior->Select(obj);
+
+			if (ImGui::BeginDragDropSource()) {
+				ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
+				ImGui::EndDragDropSource();
 			}
-			ImGui::TreePop();
+
+			if (ImGui::BeginDragDropTarget()) {
+				if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
+					GameObject* child = *static_cast<GameObject**>(payload->Data);
+
+					GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
+					GOCTransform* childTransform = child->GetComponent<GOCTransform>();
+
+					if (objTransform && childTransform && obj != child) {
+						auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
+						auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
+
+						childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
+						childTransform->SetParent(objTransform);
+					}
+				}
+				ImGui::EndDragDropTarget();
+			}
 		}
 	}
-	else {
-		ImGui::TreeNodeEx(obj, nodeflags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", obj->name.c_str());
 
-		if (ImGui::IsItemClicked())
-			selection->Select(obj);
-
-		if (ImGui::BeginDragDropSource()) {
-			ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
-			ImGui::EndDragDropSource();
-		}
-
-		if (ImGui::BeginDragDropTarget()) {
-			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("GameObject")) {
-				GameObject* child = *static_cast<GameObject**>(payload->Data);
-
-				GOCTransform* objTransform = obj->GetComponent<GOCTransform>();
-				GOCTransform* childTransform = child->GetComponent<GOCTransform>();
-
-				if (objTransform && childTransform && obj != child) {
-					auto parentAbsoluteTransform = TransformToAffine3f(objTransform->GetFrame().fullTransform);
-					auto childAbsoluteTransform = TransformToAffine3f(childTransform->GetFrame().fullTransform);
-
-					childTransform->SetLocalTransform(Affine3fToTransform(parentAbsoluteTransform.inverse() * childAbsoluteTransform));
-					childTransform->SetParent(objTransform);
-				}
-			}
-			ImGui::EndDragDropTarget();
-		}
-	}
-}
-
-void ObjectList::Render() {
-	const ImGuiWindowFlags windowFlags
-		= 0;
-
-	ImGui::SetNextWindowSize(ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100), ImGuiCond_FirstUseEver);
-	if (ImGui::Begin("Objects", NULL, windowFlags)) {
+	void ObjectList::RenderPanel() {
 		if (ImGui::BeginTabBar("Object list views")) {
 			if (ImGui::BeginTabItem("Tree view")) {
 				if (ImGui::BeginChild("Content")) {
@@ -111,20 +102,20 @@ void ObjectList::Render() {
 			}
 			if (ImGui::BeginTabItem("Layer view")) {
 				if (ImGui::BeginChild("Content")) {
-					auto* selection = objectInspection.GetBehavior<SelectionBehavior<GameObject*>>();
+					auto* selectionBehavior = GetBehavior<SelectionBehavior<GameObject*>>();
 
 					for (auto* layer : GameManager::GetInstance()->gameObjectLayers) {
 						if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
 							for (auto* obj : layer->objects) {
 								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
-								if (selection->GetSelection().find(obj) != -1)
+								if (selectionBehavior->IsSelected(obj))
 									nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 								ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
 								if (ImGui::IsItemClicked())
-									selection->Select(obj);
+									selectionBehavior->Select(obj);
 
 								if (ImGui::BeginDragDropSource()) {
 									ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
@@ -159,5 +150,9 @@ void ObjectList::Render() {
 			ImGui::EndTabBar();
 		}
 	}
-	ImGui::End();
+
+	PanelTraits ObjectList::GetPanelTraits() const
+	{
+		return { "Objects", ImVec2(0, 0), ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100) };
+	}
 }

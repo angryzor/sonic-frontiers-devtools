@@ -1,38 +1,42 @@
 #pragma once
 #include <ui/common/TreeView.h>
-#include <utilities/CompatibleObject.h>
+#include <ui/operation-modes/Panel.h>
+#include "Context.h"
 
-class ObjectLibrary;
-struct ObjectLibraryTreeViewNode {
-	enum class Type {
-		OBJECT_CLASS,
-		GROUP,
+namespace ui::operation_modes::modes::level_editor {
+	class ObjectLibrary;
+	struct ObjectLibraryTreeViewNode {
+		enum class Type {
+			OBJECT_CLASS,
+			GROUP,
+		};
+
+		Type type;
+		csl::ut::VariableString groupLabel;
+		const hh::game::GameObjectClass* objectClass;
+		ObjectLibrary& library;
+
+		const void* GetID() const;
+		const char* GetLabel() const;
+		bool MatchesSearchString(const char* searchString) const;
+		bool Render(ImGuiTreeNodeFlags nodeflags) const;
+
+		ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator, const hh::game::GameObjectClass* objectClass);
+		ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator, csl::ut::VariableString&& groupLabel);
+		ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator);
+		ObjectLibraryTreeViewNode(ObjectLibraryTreeViewNode&& other);
 	};
 
-	Type type;
-	csl::ut::VariableString groupLabel;
-	const hh::game::GameObjectClass* objectClass;
-	ObjectLibrary& library;
+	class LevelEditor;
+	class ObjectLibrary : public Panel<Context> {
+		friend class ObjectLibraryTreeViewNode;
+		TreeView<ObjectLibraryTreeViewNode> tree{ BuildTree() };
+		const hh::game::GameObjectClass* selectedClass{};
+	public:
+		using Panel::Panel;
 
-	const void* GetID() const;
-	const char* GetLabel() const;
-	bool MatchesSearchString(const char* searchString) const;
-	bool Render(ImGuiTreeNodeFlags nodeflags) const;
-
-	ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator, const hh::game::GameObjectClass* objectClass);
-	ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator, csl::ut::VariableString&& groupLabel);
-	ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator);
-	ObjectLibraryTreeViewNode(ObjectLibraryTreeViewNode&& other);
-};
-
-class LevelEditor;
-class ObjectLibrary : public CompatibleObject {
-	friend class ObjectLibraryTreeViewNode;
-    LevelEditor& levelEditor;
-	TreeView<ObjectLibraryTreeViewNode> tree;
-    const hh::game::GameObjectClass* selectedClass{};
-public:
-    ObjectLibrary(csl::fnd::IAllocator* allocator, LevelEditor& levelEditor);
-    void Render();
-	TreeView<ObjectLibraryTreeViewNode> BuildTree();
-};
+		virtual void RenderPanel() override;
+		virtual PanelTraits GetPanelTraits() const override;
+		TreeView<ObjectLibraryTreeViewNode> BuildTree();
+	};
+}

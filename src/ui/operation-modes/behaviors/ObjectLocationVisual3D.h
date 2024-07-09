@@ -11,7 +11,7 @@ protected:
 	inline static float debugBoxScale{ 0.03f };
 	inline static bool scaleChanged{ false };
 public:
-	ObjectLocationVisual3DBehaviorBase(csl::fnd::IAllocator* allocator, OperationMode& operationMode) : OperationModeBehavior{ allocator, operationMode }, DebugRenderable{} {
+	ObjectLocationVisual3DBehaviorBase(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode) : OperationModeBehavior{ allocator, operationMode }, DebugRenderable{} {
 		UpdateDebugBoxGeometry();
 	}
 
@@ -52,15 +52,15 @@ private:
 	Operations& operations;
 
 public:
-	ObjectLocationVisual3DBehavior(csl::fnd::IAllocator* allocator, OperationMode& operationMode, Operations& operations) : ObjectLocationVisual3DBehaviorBase{ allocator, operationMode }, operations{ operations } {}
+	ObjectLocationVisual3DBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : ObjectLocationVisual3DBehaviorBase{ allocator, operationMode }, operations{ operations } {}
 
 	virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) override {
-		auto* selection = operationMode.GetBehavior<SelectionBehavior<T>>();
+		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<T>>();
 
 		csl::ut::MoveArray<T> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
 		operations.GetInvisibleObjects(objects);
 
 		for (auto& object : objects)
-			(selection->GetSelection().find(object) != -1 ? selectedTargetBox : targetBox)->Render(&ctx, operations.GetWorldTransform(object));
+			(selectionBehavior->GetSelection().find(object) != -1 ? selectedTargetBox : targetBox)->Render(&ctx, operations.GetWorldTransform(object));
 	}
 };
