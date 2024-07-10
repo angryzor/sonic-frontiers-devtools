@@ -1,18 +1,7 @@
 #include "Basic.h"
-#include <utilities/math/MathUtils.h>
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/Desktop.h>
-
-bool Editor(const char* label, Eigen::Quaternionf& quat) {
-	auto euler = MatrixToEuler(quat.toRotationMatrix());
-	bool edited = DragScalar(label, euler, 0.005f);
-
-	if (edited)
-		quat = EulerToQuat(euler);
-
-	return edited;
-}
 
 bool Editor(const char* label, hh::fnd::WorldPosition& worldPos) {
     bool edited{};

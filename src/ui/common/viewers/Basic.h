@@ -41,6 +41,7 @@ static void Viewer(const char* label, const Eigen::Matrix<T, Rows, 1, Options, M
 
 void Viewer(const char* label, bool obj);
 void Viewer(const char* label, const char* str);
+void Viewer(const char* label, const csl::ut::String& str);
 void Viewer(const char* label, const hh::game::ObjectId& obj);
 void Viewer(const char* label, void* const& obj);
 void Viewer(const char* label, const Eigen::Quaternionf& quat);

@@ -44,21 +44,21 @@ protected:
 
 			size_t subTypeSize = member->GetSubTypeSizeInBytes();
 
-			if (!this->m_pAllocator && !this->isUninitialized())
-				change_allocator(hh::fnd::MemoryRouter::GetModuleAllocator(), member);
+			auto* allocator = !this->m_pAllocator ? hh::fnd::MemoryRouter::GetModuleAllocator() : this->m_pAllocator;
 
-			void* new_buffer = this->m_pAllocator->Alloc(subTypeSize * len, 16);
+			void* new_buffer = allocator->Alloc(subTypeSize * len, 16);
 
 			if (this->m_pBuffer)
 			{
 				memcpy(new_buffer, this->m_pBuffer, subTypeSize * this->m_length);
 			}
 
-			if (!this->isUninitialized())
+			if (this->m_pAllocator && !this->isUninitialized())
 			{
 				this->m_pAllocator->Free(this->m_pBuffer);
 			}
 
+			this->m_pAllocator = allocator;
 			this->m_capacity = len;
 			this->m_pBuffer = static_cast<void**>(new_buffer);
 		}

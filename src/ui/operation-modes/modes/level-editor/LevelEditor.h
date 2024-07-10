@@ -22,5 +22,7 @@ namespace ui::operation_modes::modes::level_editor {
         virtual void GameServiceAddedCallback(hh::game::GameService* gameService) override;
         virtual void GameServiceRemovedCallback(hh::game::GameService* gameService) override;
         virtual void WorldChunkRemovedCallback(hh::game::ObjectWorldChunk* chunk) override;
+
+        void ClearChunkReferences();
     };
 }

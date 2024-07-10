@@ -46,5 +46,5 @@ void RenderDebugVisual(hh::gfnd::DrawContext& ctx, const csl::geom::Sphere& sphe
 void RenderDebugVisual(hh::gfnd::DrawContext& ctx, const csl::geom::Cylinder& cylinder, csl::ut::Color8 color) {
 	csl::math::Matrix34 transform{};
 	transform.translate(cylinder.segment.start);
-	ctx.DrawCylinder(transform, (cylinder.segment.end - cylinder.segment.start).norm(), cylinder.radius, color);
+	ctx.DrawCylinder(transform, cylinder.radius, (cylinder.segment.end - cylinder.segment.start).norm() / 2, color);
 }

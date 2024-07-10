@@ -11,6 +11,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/AabbTree.cpp
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
+        debug-rendering/visuals/FxColCollisionShape.cpp
         hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/serialization/ReflectionSerializer.cpp
@@ -20,6 +21,8 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/Reflection.cpp
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
+        ui/common/editors/Resources.cpp
+        ui/common/editors/FxCol.cpp
         ui/common/viewers/Basic.cpp
         ui/common/viewers/ObjectData.cpp
         ui/common/viewers/RflDiff.cpp
@@ -36,6 +39,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Component.cpp
         ui/Desktop.cpp
         ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
+        ui/game-services/game-service-inspectors/FxColManager.cpp
         ui/game-services/game-service-inspectors/ObjectWorld.cpp
         ui/game-services/game-service-inspectors/StageInfo.cpp
         ui/game-services/game-service-inspectors/CameraManager.cpp
@@ -52,10 +56,15 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/object-inspection/ObjectInspection.cpp
         ui/operation-modes/modes/object-inspection/ObjectInspector.cpp
         ui/operation-modes/modes/object-inspection/ObjectList.cpp
+        ui/operation-modes/modes/fxcol-editor/Context.cpp
+        ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
+        ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
+        ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
         ui/operation-modes/OperationModeBehavior.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
+        ui/resources/editors/ResFxColFile2Editor.cpp
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
@@ -76,6 +85,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/AabbTree.h
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
+        debug-rendering/visuals/FxColCollisionShape.h
         hot-reload/ReloadManager.h
         reflection/ReflectiveOperations.h
         reflection/RflArrayAccessor.h
@@ -90,6 +100,8 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/LevelInfo.h
         ui/common/editors/Needle.h
         ui/common/editors/SurfRide.h
+        ui/common/editors/Resources.h
+        ui/common/editors/FxCol.h
         ui/common/viewers/Basic.h
         ui/common/viewers/ObjectData.h
         ui/common/viewers/RflDiff.h
@@ -115,6 +127,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/fonts/Inter.h
         ui/game-modes/GameModeInspector.h
         ui/game-services/game-service-inspectors/FxParamManager.h
+        ui/game-services/game-service-inspectors/FxColManager.h
         ui/game-services/game-service-inspectors/ObjectWorld.h
         ui/game-services/game-service-inspectors/StageInfo.h
         ui/game-services/game-service-inspectors/CameraManager.h
@@ -140,12 +153,17 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/object-inspection/ObjectInspection.h
         ui/operation-modes/modes/object-inspection/ObjectInspector.h
         ui/operation-modes/modes/object-inspection/ObjectList.h
+        ui/operation-modes/modes/fxcol-editor/Context.h
+        ui/operation-modes/modes/fxcol-editor/FxColEditor.h
+        ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
+        ui/operation-modes/modes/fxcol-editor/ShapeList.h
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h
         ui/resources/editors/ResObjectWorldEditor.h
         ui/resources/editors/ResMaterialEditor.h
         ui/resources/editors/ResReflectionEditor.h
         ui/resources/editors/ResSurfRideProjectEditor.h
+        ui/resources/editors/ResFxColFile2Editor.h
         ui/resources/ResourceBrowser.h
         ui/SettingsManager.h
         ui/Shortcuts.h
@@ -167,18 +185,17 @@ target_sources(${DEVTOOLS_TARGET}
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            debug-rendering/visuals/FxColCollisionShape.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
             ui/game-services/game-service-inspectors/TerrainManager.cpp
             ui/game-services/game-service-inspectors/SoundDirector.cpp
-            ui/game-services/game-service-inspectors/rangers/TimeService.cpp
-            ui/game-services/game-service-inspectors/rangers/RespawnTimeManager.cpp
+            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
+            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.cpp
             ui/common/editors/Camera.cpp
             ui/common/editors/Needle.cpp
             ui/common/editors/SurfRide.cpp
-            ui/common/editors/rangers/TimeService.cpp
+            ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
             ui/common/inputs/Needle.cpp
             ui/core-services/GameUpdaterInspector.cpp
             ui/core-services/GraphicsContextInspector.cpp
@@ -203,13 +220,12 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/resources/editors/ResEffectEditor.cpp
             ui/resources/editors/ResMaterialEditor.cpp
             ui/resources/editors/ResSurfRideProjectEditor.cpp
-            ui/tools/rangers/NeedleFxSceneDataTester.cpp
+            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
-            debug-rendering/visuals/FxColCollisionShape.h
-            ui/common/editors/rangers/TimeService.h
+            ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
-            ui/game-services/game-service-inspectors/rangers/TimeService.h
-            ui/game-services/game-service-inspectors/rangers/RespawnTimeManager.h
+            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h
+            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h
@@ -220,6 +236,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/surfride-editor/ElementInspector.h
             ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
             ui/operation-modes/modes/surfride-editor/SurfRideElement.h
-            ui/tools/rangers/NeedleFxSceneDataTester.h
+            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.h
     )
 endif()

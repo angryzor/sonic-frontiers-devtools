@@ -4,6 +4,7 @@
 #include "input/Input.h"
 #include "Desktop.h"
 #include "SettingsManager.h"
+#include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <hot-reload/ReloadManager.h>
 
@@ -187,7 +188,7 @@ void Context::init() {
 #endif
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
-	Desktop::instance->SwitchToObjectInspectionMode();
+	Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::object_inspection::ObjectInspection>();
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);

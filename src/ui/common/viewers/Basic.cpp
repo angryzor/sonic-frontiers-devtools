@@ -33,6 +33,12 @@ void Viewer(const char* label, const char* str)
 	ImGui::Text("%s: %s", label, str);
 }
 
+void Viewer(const char* label, const csl::ut::String& str)
+{
+	// FIXME: Make c_str() const
+	ImGui::Text("%s: %s", label, const_cast<csl::ut::String&>(str).c_str());
+}
+
 void Viewer(const char* label, const hh::game::ObjectId& id)
 {
 #ifdef DEVTOOLS_TARGET_SDK_wars

@@ -336,35 +336,3 @@ void Desktop::HandleShortcuts()
 			Dispatch(ActionBase{ boundShortcut.actionId });
 	}
 }
-
-void Desktop::SwitchToObjectInspectionMode()
-{
-	if (operationMode != nullptr)
-		operationMode->DeinitBehaviors();
-
-	operationMode = new (GetAllocator()) ui::operation_modes::modes::object_inspection::ObjectInspection(GetAllocator());
-
-	operationMode->InitBehaviors();
-}
-
-void Desktop::SwitchToLevelEditorMode()
-{
-	if (operationMode != nullptr)
-		operationMode->DeinitBehaviors();
-
-	operationMode = new (GetAllocator()) ui::operation_modes::modes::level_editor::LevelEditor(GetAllocator());
-
-	operationMode->InitBehaviors();
-}
-
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-void Desktop::SwitchToSurfRideEditorMode()
-{
-	if (operationMode != nullptr)
-		operationMode->DeinitBehaviors();
-
-	operationMode = new (GetAllocator()) ui::operation_modes::modes::surfride_editor::SurfRideEditor(GetAllocator());
-
-	operationMode->InitBehaviors();
-}
-#endif

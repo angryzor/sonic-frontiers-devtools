@@ -1,3 +1,3 @@
 #pragma
 
-void RenderDebugVisual(const app::gfx::FxColCollisionShape& shape);
+void RenderDebugVisual(hh::gfnd::DrawContext& ctx, const app::gfx::FxColCollisionShape& shape);

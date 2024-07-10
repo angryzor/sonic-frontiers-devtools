@@ -143,7 +143,7 @@ namespace ui::operation_modes::modes::object_inspection {
 							ImGui::PushID(component);
 
 							char title[200];
-							snprintf(title, 200, "%s (%s)", component->pStaticClass->pName, component->pStaticClass->category);
+							snprintf(title, 200, "%s (%s) - %x", component->pStaticClass->pName, component->pStaticClass->category, component->nameHash);
 
 							if (ImGui::CollapsingHeader(title))
 								ComponentIterator<>::Render(*component);

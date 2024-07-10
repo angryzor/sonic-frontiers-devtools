@@ -170,13 +170,15 @@ namespace ui::operation_modes::modes::level_editor {
 
 		switch (action.id) {
 		case SelectionTransformationBehavior<ObjectData*>::SelectionTransformChangedAction::id: {
+			auto& context = GetContext();
 			auto& selection = GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
 
-			GetContext().RecalculateDependentTransforms(selection);
+			context.RecalculateDependentTransforms(selection);
 
 			if (selection.size() == 1)
-				GetContext().NotifyUpdatedObject(selection[0]);
+				context.NotifyUpdatedObject(selection[0]);
 
+			context.UpdateGrindRails();
 			break;
 		}
 		case SelectionBehavior<ObjectData*>::SelectionChangedAction::id: {
@@ -195,14 +197,11 @@ namespace ui::operation_modes::modes::level_editor {
 			if (GetContext().GetFocusedChunk() == chunk)
 				return;
 
+			ClearChunkReferences();
 			GetContext().SetFocusedChunk(chunk);
 			Dispatch(FocusedChunkChangedAction{});
 			break;
-		}
-		case FocusedChunkChangedAction::id:
-			GetBehavior<ClipboardBehavior<ObjectData*>>()->Clear();
-			GetBehavior<SelectionBehavior<ObjectData*>>()->DeselectAll();
-			break;
+		};
 		case ChangingParametersAction::id:
 			GetContext().ReloadActiveObjectParameters(GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection()[0]);
 			break;
@@ -231,7 +230,14 @@ namespace ui::operation_modes::modes::level_editor {
 		if (GetContext().GetFocusedChunk() != chunk)
 			return;
 
+		ClearChunkReferences();
 		GetContext().ReleaseChunk();
 		Dispatch(FocusedChunkChangedAction{});
+	}
+
+	void LevelEditor::ClearChunkReferences()
+	{
+		GetBehavior<ClipboardBehavior<ObjectData*>>()->Clear();
+		GetBehavior<SelectionBehavior<ObjectData*>>()->DeselectAll();
 	}
 }

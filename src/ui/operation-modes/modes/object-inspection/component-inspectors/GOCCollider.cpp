@@ -68,7 +68,7 @@ void RenderComponentInspector(hh::physics::GOCCapsuleCollider& component)
 {
 	ImGui::SeparatorText("Parameters");
 	ImGui::Text("Radius: %f", component.radius);
-	ImGui::Text("Height: %f", component.height);
+	ImGui::Text("Height: %f", component.halfHeight);
 	RenderComponentInspector(static_cast<hh::physics::GOCCollider&>(component));
 }
 
@@ -76,6 +76,6 @@ void RenderComponentInspector(hh::physics::GOCCylinderCollider& component)
 {
 	ImGui::SeparatorText("Parameters");
 	ImGui::Text("Radius: %f", component.radius);
-	ImGui::Text("Height: %f", component.height);
+	ImGui::Text("Height: %f", component.halfHeight);
 	RenderComponentInspector(static_cast<hh::physics::GOCCollider&>(component));
 }

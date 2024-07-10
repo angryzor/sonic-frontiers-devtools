@@ -21,6 +21,13 @@
 #include "tools/RflComparer.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
+#include "operation-modes/modes/object-inspection/ObjectInspection.h"
+#include "operation-modes/modes/level-editor/LevelEditor.h"
+#include "operation-modes/modes/fxcol-editor/FxColEditor.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
+#endif
+
 using namespace hh::game;
 
 void ToolBar::Render() {
@@ -77,12 +84,14 @@ void ToolBar::Render() {
 
 		if (ImGui::BeginMenu("Mode")) {
 			if (ImGui::MenuItem("Object Inspection"))
-				Desktop::instance->SwitchToObjectInspectionMode();
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::object_inspection::ObjectInspection>();
 			if (ImGui::MenuItem("Level Editor"))
-				Desktop::instance->SwitchToLevelEditorMode();
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::level_editor::LevelEditor>();
+			if (ImGui::MenuItem("FxCol Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::fxcol_editor::FxColEditor>();
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("SurfRide Editor"))
-				Desktop::instance->SwitchToSurfRideEditorMode();
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
 #endif
 			ImGui::EndMenu();
 		}

@@ -2,6 +2,14 @@
 #include <utilities/ObjectDataUtils.h>
 #include <utilities/BoundingBoxes.h>
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+namespace app::game {
+	class GOCGrind : public hh::game::GOComponent {
+		GOCOMPONENT_CLASS_DECLARATION(GOCGrind)
+	};
+}
+#endif
+
 namespace ui::operation_modes::modes::level_editor {
 	using namespace hh::fnd;
 	using namespace hh::game;
@@ -59,6 +67,7 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		hh::dbg::MsgUpdateActiveObjectInEditor msg{};
 		NotifyObject(objectData, msg);
+
 	}
 
 	void Context::NotifyDeselectedObject(hh::game::ObjectData* objectData)
@@ -77,6 +86,22 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		if (auto* obj = focusedChunk->GetGameObjectByObjectId(objectData->id))
 			obj->SendMessageImm(msg);
+	}
+
+	void Context::UpdateGrindRails()
+	{
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		// Live update grind rails
+		for (auto* obj : GameManager::GetInstance()->objects) {
+			if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
+				hh::dbg::MsgUpdateActiveObjectInEditor msg;
+				obj->SendMessageImm(msg);
+				void* updater = *reinterpret_cast<void**>(reinterpret_cast<size_t>(grind) + 168);
+				uint8_t* flag = reinterpret_cast<uint8_t*>(reinterpret_cast<size_t>(updater) + 172);
+				*flag |= 2;
+			}
+		}
+#endif
 	}
 
 	void Context::ReloadActiveObjectParameters(hh::game::ObjectData* objectData)
@@ -100,11 +125,6 @@ namespace ui::operation_modes::modes::level_editor {
 			focusedChunk->ShutdownPendingObjects();
 			focusedChunk->SpawnByIndex(idx, nullptr);
 			NotifySelectedObject(objectData);
-
-			//for (auto* obj : GameManager::GetInstance()->objects) {
-			//	hh::dbg::MsgUpdateActiveObjectInEditor msg{};
-			//	obj->SendMessageImm(msg);
-			//}
 		}
 	}
 

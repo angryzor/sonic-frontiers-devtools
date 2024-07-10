@@ -38,9 +38,16 @@ public:
     bool IsPickerMouseReleased() const;
     const csl::ut::MoveArray<hh::game::GameObject*>& GetPickedObjects() const;
     const csl::math::Vector3* GetPickedLocation() const;
-    void SwitchToObjectInspectionMode();
-    void SwitchToLevelEditorMode();
-    void SwitchToSurfRideEditorMode();
+    
+    template<typename T>
+    void SwitchToOperationMode() {
+        if (operationMode != nullptr)
+            operationMode->DeinitBehaviors();
+
+        operationMode = new (GetAllocator()) T{ GetAllocator() };
+
+        operationMode->InitBehaviors();
+    }
     void Dispatch(const ActionBase& action);
 
     template<typename T, typename = std::enable_if_t<std::is_same_v<typename T::PayloadType, EmptyActionPayload>>> void BindShortcut(ShortcutId shortcutId) {

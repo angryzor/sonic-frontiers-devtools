@@ -43,5 +43,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 		void ReloadActiveObjectParameters(hh::game::ObjectData* objectData);
 		void RespawnActiveObject(hh::game::ObjectData* objectData);
+
+		void UpdateGrindRails();
 	};
 }

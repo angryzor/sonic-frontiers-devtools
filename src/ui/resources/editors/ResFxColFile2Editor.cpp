@@ -1,0 +1,26 @@
+#include "ResFxColFile2Editor.h"
+#include <ui/common/editors/FxCol.h>
+
+using namespace app::gfx;
+
+ResFxColFile2Editor::ResFxColFile2Editor(csl::fnd::IAllocator* allocator, app::gfx::ResFxColFile2* resource) : StandaloneWindow{ allocator }, resource{ resource }
+{
+	char namebuf[500];
+	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx)", resource->GetName(), resource->GetClass().pName, (size_t)&resource, (size_t)resource->fxColData);
+	SetTitle(namebuf);
+}
+
+ResFxColFile2Editor* ResFxColFile2Editor::Create(csl::fnd::IAllocator* allocator, app::gfx::ResFxColFile2* resource) {
+	return new (allocator) ResFxColFile2Editor(allocator, resource);
+}
+
+void ResFxColFile2Editor::RenderContents()
+{
+	auto* fxColData = resource->fxColData;
+
+	for (size_t i = 0; i < fxColData->collisionShapeCount; i++) {
+		ImGui::PushID(i);
+		Editor("Collision Shape", fxColData->collisionShapes[i]);
+		ImGui::PopID();
+	}
+}

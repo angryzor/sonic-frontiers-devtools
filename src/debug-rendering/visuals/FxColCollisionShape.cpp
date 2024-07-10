@@ -1,41 +1,41 @@
 #include "FxColCollisionShape.h"
 
 void RenderDebugVisual(hh::gfnd::DrawContext& ctx, const app::gfx::FxColCollisionShape& shape) {
-	csl::math::Matrix34 transform{};
+	csl::ut::Color8 color{ 255, 255, 0, 255 };
+	csl::ut::Color8 innerColor{ 255, 128, 0, 255 };
 
 	switch (shape.shape) {
-	case app::gfx::FxColCollisionShape::Shape::SPHERE:
-		transform.translate(shape.position);
-		ctx.DrawSphere(transform, shape.extents.sphere.radius, { 255, 255, 0, 255 });
-		ctx.DrawSphere(transform, shape.extents.sphere.innerRadius, { 255, 128, 0, 255 });
+	case app::gfx::FxColCollisionShape::Shape::SPHERE: {
+		auto& extents = shape.extents.sphere;
+		Eigen::Affine3f transform{ Eigen::Translation3f{ shape.position } };
+
+		ctx.DrawSphere(transform, extents.radius, color);
+		ctx.DrawSphere(transform, extents.radius - extents.borderThickness, innerColor);
 		break;
-	case app::gfx::FxColCollisionShape::Shape::CYLINDER:
-		transform.translate(shape.position);
-		transform.rotate(shape.rotation);
-		ctx.DrawCylinder(transform, shape.extents.cylinder.halfHeight * 2, shape.extents.cylinder.radius, { 255, 255, 0, 255 });
-		ctx.DrawCylinder(transform, shape.extents.cylinder.halfHeight * 2, shape.extents.cylinder.innerRadius, { 255, 128, 0, 255 });
+	}
+	case app::gfx::FxColCollisionShape::Shape::CYLINDER: {
+		auto& extents = shape.extents.cylinder;
+		Eigen::Affine3f transform{ Eigen::Translation3f{ shape.position } * shape.rotation };
+
+		ctx.DrawCylinder(transform, extents.radius, extents.halfHeight * 2, color);
+		ctx.DrawCylinder(transform, extents.radius - extents.borderThickness, extents.halfHeight * 2, innerColor);
 		break;
-	case app::gfx::FxColCollisionShape::Shape::ANISOTROPIC_OBB:
-		transform.translate(shape.position);
-		transform.rotate(shape.rotation);
-		ctx.DrawOBB(transform, { shape.extents.anisotropicObb.width, shape.extents.anisotropicObb.height, shape.extents.anisotropicObb.depth }, { 255, 255, 0, 255 });
-		transform.translate(csl::math::Vector3{ 0.0f, 0.0f, shape.extents.anisotropicObb.depth * shape.extents.anisotropicObb.innerDepthStart });
-		ctx.DrawOBB(transform, { shape.extents.anisotropicObb.width, shape.extents.anisotropicObb.height, shape.extents.anisotropicObb.depth - shape.extents.anisotropicObb.innerDepthStart - shape.extents.anisotropicObb.innerDepthEnd }, { 255, 128, 0, 255 });
+	}
+	case app::gfx::FxColCollisionShape::Shape::ANISOTROPIC_OBB: {
+		auto& extents = shape.extents.anisotropicObb;
+		Eigen::Affine3f transform{ Eigen::Translation3f{ shape.position } * shape.rotation };
+
+		ctx.DrawOBB(transform, { extents.width / 2, extents.height / 2, extents.depth / 2 }, color);
+		ctx.DrawOBB(transform * Eigen::Translation3f{ 0.0f, 0.0f, (extents.negativeDepthBorderThickness - extents.positiveDepthBorderThickness) / 2 }, { extents.width / 2, extents.height / 2, (extents.depth - extents.positiveDepthBorderThickness - extents.negativeDepthBorderThickness) / 2 }, innerColor);
 		break;
-	case app::gfx::FxColCollisionShape::Shape::ISOTROPIC_OBB:
-		transform.translate(shape.position);
-		transform.rotate(shape.rotation);
-		ctx.DrawOBB(transform, { shape.extents.anisotropicObb.width, shape.extents.anisotropicObb.height, shape.extents.anisotropicObb.depth }, { 255, 255, 0, 255 });
-		transform.translate(csl::math::Vector3{
-			shape.extents.isotropicObb.width * (1.0f - shape.extents.isotropicObb.innerSize / 2),
-			shape.extents.isotropicObb.height * (1.0f - shape.extents.isotropicObb.innerSize / 2),
-			shape.extents.isotropicObb.depth * (1.0f - shape.extents.isotropicObb.innerSize / 2),
-		});
-		ctx.DrawOBB(transform, {
-			shape.extents.anisotropicObb.width * shape.extents.isotropicObb.innerSize,
-			shape.extents.anisotropicObb.height * shape.extents.isotropicObb.innerSize,
-			shape.extents.anisotropicObb.depth * shape.extents.isotropicObb.innerSize,
-		}, {255, 128, 0, 255});
+	}
+	case app::gfx::FxColCollisionShape::Shape::ISOTROPIC_OBB: {
+		auto& extents = shape.extents.isotropicObb;
+		Eigen::Affine3f transform{ Eigen::Translation3f{ shape.position } * shape.rotation };
+
+		ctx.DrawOBB(transform, { extents.width / 2, extents.height / 2, extents.depth / 2 }, color);
+		ctx.DrawOBB(transform, { extents.width / 2 - extents.borderThickness, extents.height / 2 - extents.borderThickness, extents.depth / 2 - extents.borderThickness }, innerColor);
 		break;
+	}
 	}
 }

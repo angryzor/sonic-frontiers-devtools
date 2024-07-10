@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ui/common/inputs/Basic.h>
+#include <utilities/math/MathUtils.h>
 
 // Editors
 template<typename T, ImGuiDataType = imgui_datatype<T>::dtype>
@@ -37,13 +38,23 @@ static bool Editor(const char* label, char (&str)[Len]) {
 bool Editor(const char* label, bool& obj);
 bool Editor(const char* label, csl::ut::VariableString& str);
 bool Editor(const char* label, csl::ut::String& str);
-bool Editor(const char* label, Eigen::Quaternionf& quat);
 bool Editor(const char* label, csl::ut::Color<float>& color);
 bool Editor(const char* label, csl::ut::Color8& color);
 bool Editor(const char* label, hh::game::ObjectId& id);
 bool Editor(const char* label, hh::game::GameObject*& gameObject);
 bool Editor(const char* label, hh::fnd::WorldPosition& worldPos);
 bool Editor(const char* label, csl::math::Transform& transform);
+
+template<int Options>
+bool Editor(const char* label, Eigen::Quaternion<float, Options>& quat) {
+	auto euler = MatrixToEuler(quat.toRotationMatrix());
+	bool edited = DragScalar(label, euler, 0.005f);
+
+	if (edited)
+		quat = EulerToQuat(euler);
+
+	return edited;
+}
 
 template<typename T, std::enable_if_t<std::is_base_of_v<hh::game::GameObject, T>, bool> = true>
 static bool Editor(const char* label, T*& gameObject) {
