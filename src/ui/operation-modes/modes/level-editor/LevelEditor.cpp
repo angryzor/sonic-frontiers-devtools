@@ -91,6 +91,9 @@ namespace ui::operation_modes::modes::level_editor {
 		case PlacementBehavior<Context>::ObjectPlacedAction::id:
 			GetBehavior<SelectionBehavior<Context>>()->Select(static_cast<const PlacementBehavior<Context>::ObjectPlacedAction&>(action).payload);
 			break;
+		case FocusObjectDataAction::id:
+			GetBehavior<SelectionBehavior<Context>>()->Select(static_cast<const FocusObjectDataAction&>(action).payload);
+			break;
 		}
 	}
 

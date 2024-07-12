@@ -4,6 +4,6 @@ struct Theme {
 	const char* name;
 	void (*Load)();
 
-	static constexpr size_t themeCount{ 4 };
+	static constexpr size_t themeCount{ 5 };
 	static Theme themes[themeCount];
 };

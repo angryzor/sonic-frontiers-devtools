@@ -20,20 +20,25 @@ enum class ShortcutId {
 	LOCK_Y_AXIS,
 	ONLY_Z_AXIS,
 	LOCK_Z_AXIS,
+	TOGGLE_PLACE_MODE,
 };
 
-enum ShortcutModifier {
-	ShortcutModifier_None = 0,
-	ShortcutModifier_Ctrl = 1,
-	ShortcutModifier_Alt = 2,
-	ShortcutModifier_Shift = 4,
+constexpr size_t shortcutCount = 16;
+
+struct ShortcutDescription {
+	const char* name;
+	const char* description;
 };
 
-struct ShortcutKeyCombo {
-	ShortcutId shortcutId;
-	ShortcutModifier modifiers;
-	ImGuiKey key;
-};
+extern ShortcutDescription shortcutDescriptions[shortcutCount];
+extern ImGuiKeyChord shortcutBindings[shortcutCount];
 
-extern ShortcutKeyCombo shortcutKeys[15];
-ShortcutKeyCombo& GetShortcutKeyCombo(ShortcutId shortcutId);
+ShortcutDescription& GetShortcutDescription(ShortcutId shortcutId);
+ImGuiKeyChord GetShortcutBinding(ShortcutId shortcutId);
+void SetShortcutBinding(ShortcutId shortcutId, ImGuiKeyChord keyChord);
+
+template<typename F>
+void ForEachShortcut(F f) {
+	for (auto i = 0; i < shortcutCount; i++)
+		f(static_cast<ShortcutId>(i));
+}

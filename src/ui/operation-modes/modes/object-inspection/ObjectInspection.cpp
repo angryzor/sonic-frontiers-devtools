@@ -29,6 +29,17 @@ namespace ui::operation_modes::modes::object_inspection {
 		hh::game::GameManager::GetInstance()->RemoveListener(this);
 	}
 
+	void ObjectInspection::ProcessAction(const ActionBase& action)
+	{
+		OperationMode::ProcessAction(action);
+
+		switch (action.id)
+		{
+		case FocusGameObjectAction::id:
+			GetBehavior<SelectionBehavior<Context>>()->Select(static_cast<const FocusGameObjectAction&>(action).payload);
+		}
+	}
+
 	void ObjectInspection::GameObjectRemovedCallback(hh::game::GameManager* gameManager, hh::game::GameObject* gameObject)
 	{
 		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();

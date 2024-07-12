@@ -16,6 +16,13 @@ target_sources(imgui
         imgui/imgui_internal.h
 )
 
+if(${DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW})
+	target_sources(imgui
+		PRIVATE
+			imgui/imgui_demo.cpp
+	)
+endif()
+
 foreach(BACKEND allegro5 android dx9 dx10 dx11 dx12 glfw glut opengl2 opengl3 sdl2 sdl3 sdlrenderer2 sdlrenderer3 vulkan wgpu win32)
     string(TOUPPER ${BACKEND} BACKEND_UPPER)
     string(CONCAT IS_BACKEND_ENABLED IMGUI_BUILD_BACKEND_ ${BACKEND_UPPER})

@@ -169,18 +169,9 @@ void Desktop::UnbindShortcut(ShortcutId shortcutId)
 void Desktop::HandleShortcuts()
 {
 	for (auto& boundShortcut : boundShortcuts) {
-		auto& keyCombo = GetShortcutKeyCombo(boundShortcut.shortcutId);
+		auto binding = GetShortcutBinding(boundShortcut.shortcutId);
 
-		if ((keyCombo.modifiers & ShortcutModifier_Alt) && !ImGui::IsKeyDown(ImGuiKey_LeftAlt) && !ImGui::IsKeyDown(ImGuiKey_RightAlt))
-			continue;
-
-		if ((keyCombo.modifiers & ShortcutModifier_Ctrl) && !ImGui::IsKeyDown(ImGuiKey_LeftCtrl) && !ImGui::IsKeyDown(ImGuiKey_RightCtrl))
-			continue;
-
-		if ((keyCombo.modifiers & ShortcutModifier_Shift) && !ImGui::IsKeyDown(ImGuiKey_LeftShift) && !ImGui::IsKeyDown(ImGuiKey_RightShift))
-			continue;
-
-		if (ImGui::IsKeyPressed(keyCombo.key))
+		if (ImGui::IsKeyChordPressed(binding))
 			Dispatch(ActionBase{ boundShortcut.actionId });
 	}
 }

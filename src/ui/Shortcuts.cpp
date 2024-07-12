@@ -1,29 +1,51 @@
 #include "Shortcuts.h"
 
-ShortcutKeyCombo shortcutKeys[15]{
-	{ ShortcutId::ESCAPE, ShortcutModifier_None, ImGuiKey_Escape },
-	{ ShortcutId::CUT, ShortcutModifier_Ctrl, ImGuiKey_X },
-	{ ShortcutId::COPY, ShortcutModifier_Ctrl, ImGuiKey_C },
-	{ ShortcutId::CUT, ShortcutModifier_Ctrl, ImGuiKey_V },
-	{ ShortcutId::DELETE, ShortcutModifier_None, ImGuiKey_Delete },
-	{ ShortcutId::CHANGE_COORDINATE_SYSTEM, ShortcutModifier_Alt, ImGuiKey_Space },
-	{ ShortcutId::TRANSLATE_MODE, ShortcutModifier_None, ImGuiKey_G },
-	{ ShortcutId::ROTATE_MODE, ShortcutModifier_None, ImGuiKey_R },
-	{ ShortcutId::SCALE_MODE, ShortcutModifier_None, ImGuiKey_S },
-	{ ShortcutId::ONLY_X_AXIS, ShortcutModifier_None, ImGuiKey_X },
-	{ ShortcutId::LOCK_X_AXIS, ShortcutModifier_Shift, ImGuiKey_X },
-	{ ShortcutId::ONLY_Y_AXIS, ShortcutModifier_None, ImGuiKey_Y },
-	{ ShortcutId::LOCK_Y_AXIS, ShortcutModifier_Shift, ImGuiKey_Y },
-	{ ShortcutId::ONLY_Z_AXIS, ShortcutModifier_None, ImGuiKey_Z },
-	{ ShortcutId::LOCK_Z_AXIS, ShortcutModifier_Shift, ImGuiKey_Z },
+ShortcutDescription shortcutDescriptions[16]{
+	{ "Go back", "Go back to the previous state in various situations, e.g. deselect an object." },
+	{ "Cut", "Clipboard cut" },
+	{ "Copy", "Clipboard copy" },
+	{ "Paste", "Clipboard paste" },
+	{ "Delete", "Delete selected object" },
+	{ "Change Coordinate System", "Change the coordinate system" },
+	{ "Translate Mode", "Switch to translate mode" },
+	{ "Rotate Mode", "Switch to rotate mode" },
+	{ "Scale Mode", "Switch to scale mode" },
+	{ "Only X Axis", "Lock movement to the X axis" },
+	{ "Lock X Axis", "Lock movement along the X axis" },
+	{ "Only Y Axis", "Lock movement to the Y axis" },
+	{ "Lock Y Axis", "Lock movement along the Y axis" },
+	{ "Only Z Axis", "Lock movement to the Z axis" },
+	{ "Lock Z Axis", "Lock movement along the Z axis" },
+	{ "Toggle Place Mode", "Toggle place mode" },
 };
 
-ShortcutKeyCombo& GetShortcutKeyCombo(ShortcutId shortcutId) {
-	for (auto i = 0; i < sizeof(shortcutKeys) / sizeof(ShortcutKeyCombo); i++)
-		if (shortcutKeys[i].shortcutId == shortcutId)
-			return shortcutKeys[i];
+ImGuiKeyChord shortcutBindings[16]{
+	ImGuiKey_Escape,
+	ImGuiMod_Ctrl | ImGuiKey_X,
+	ImGuiMod_Ctrl | ImGuiKey_C,
+	ImGuiMod_Ctrl | ImGuiKey_V,
+	ImGuiKey_Delete,
+	ImGuiMod_Alt | ImGuiKey_Space,
+	ImGuiKey_G,
+	ImGuiKey_R,
+	ImGuiKey_S,
+	ImGuiKey_X,
+	ImGuiMod_Shift | ImGuiKey_X,
+	ImGuiKey_Y,
+	ImGuiMod_Shift | ImGuiKey_Y,
+	ImGuiKey_Z,
+	ImGuiMod_Shift | ImGuiKey_Z,
+	ImGuiKey_CapsLock,
+};
 
-	assert(false);
+ShortcutDescription& GetShortcutDescription(ShortcutId shortcutId) {
+	return shortcutDescriptions[static_cast<size_t>(shortcutId)];
+}
 
-	return shortcutKeys[0];
+ImGuiKeyChord GetShortcutBinding(ShortcutId shortcutId) {
+	return shortcutBindings[static_cast<size_t>(shortcutId)];
+}
+
+void SetShortcutBinding(ShortcutId shortcutId, ImGuiKeyChord keyChord) {
+	shortcutBindings[static_cast<size_t>(shortcutId)] = keyChord;
 }

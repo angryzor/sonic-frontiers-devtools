@@ -12,6 +12,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/FxColCollisionShape.cpp
+        debug-rendering/visuals/Math.cpp
         hot-reload/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/serialization/ReflectionSerializer.cpp
@@ -86,6 +87,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/FxColCollisionShape.h
+        debug-rendering/visuals/Math.h
         hot-reload/ReloadManager.h
         reflection/ReflectiveOperations.h
         reflection/RflArrayAccessor.h

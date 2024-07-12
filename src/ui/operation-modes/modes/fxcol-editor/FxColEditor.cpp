@@ -1,4 +1,6 @@
 #include "FxColEditor.h"
+#include "ShapeList.h"
+#include "ShapeInspector.h"
 #include "Behaviors.h"
 
 namespace ui::operation_modes::modes::fxcol_editor {

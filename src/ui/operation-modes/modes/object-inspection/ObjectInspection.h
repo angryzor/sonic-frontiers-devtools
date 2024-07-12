@@ -11,6 +11,7 @@ namespace ui::operation_modes::modes::object_inspection {
         ObjectInspection(csl::fnd::IAllocator* allocator);
         ~ObjectInspection();
 
+        virtual void ProcessAction(const ActionBase& action) override;
         virtual void GameObjectRemovedCallback(hh::game::GameManager* gameManager, hh::game::GameObject* gameObject) override;
     };
 }

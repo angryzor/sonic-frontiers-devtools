@@ -12,3 +12,10 @@ target_sources(implot
     PUBLIC FILE_SET HEADERS BASE_DIRS implot FILES
         implot/implot.h
 )
+
+if(${DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW})
+	target_sources(imgui
+		PRIVATE
+			implot/implot_demo.cpp
+	)
+endif()

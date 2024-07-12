@@ -133,24 +133,28 @@ namespace ui::operation_modes::modes::level_editor {
 		ClipboardEntry<Context> CreateClipboardEntry(ObjectData* objData) { return { context, objData }; }
 		ObjectData* CreateObject(const ClipboardEntry<Context>& entry) { return context.CopyObjectForPlacement(entry.proto); }
 	};
+}
 
-	template<> struct ObjectLocationVisual3DBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
-		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		Eigen::Affine3f GetWorldTransform(ObjectData* object) const { return ObjectTransformDataToAffine3f(object->transform); }
-		void GetInvisibleObjects(csl::ut::MoveArray<ObjectData*>& objects) const {
-			auto* focusedChunk = context.GetFocusedChunk();
+template<> struct ObjectLocationVisual3DBehaviorTraits<ui::operation_modes::modes::level_editor::Context> : BehaviorTraitsImpl<ui::operation_modes::modes::level_editor::Context> {
+	using BehaviorTraitsImpl::BehaviorTraitsImpl;
+	Eigen::Affine3f GetWorldTransform(hh::game::ObjectData* object) const { return ObjectTransformDataToAffine3f(object->transform); }
+	template<typename F> void ForInvisibleObjects(F f) const {
+		auto* focusedChunk = context.GetFocusedChunk();
 
-			if (!focusedChunk)
-				return;
+		if (!focusedChunk)
+			return;
 
-			for (auto& status : focusedChunk->GetObjectStatuses()) {
-				auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
+		for (auto& status : focusedChunk->GetObjectStatuses()) {
+			auto* gameObject = focusedChunk->GetGameObjectByObjectId(status.objectData->id);
 
-				if (!gameObject || ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>()))
-					objects.push_back(status.objectData);
-			}
+			if (gameObject && ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>()))
+				f(status.objectData);
 		}
-	};
+	}
+};
+
+namespace ui::operation_modes::modes::level_editor {
+	using namespace hh::game;
 
 	template<> struct PlacementBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;

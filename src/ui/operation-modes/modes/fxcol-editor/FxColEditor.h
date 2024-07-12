@@ -1,7 +1,5 @@
 #pragma once
 #include <ui/operation-modes/OperationMode.h>
-#include "ShapeList.h"
-#include "ShapeInspector.h"
 #include "Context.h"
 
 namespace ui::operation_modes::modes::fxcol_editor {

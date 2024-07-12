@@ -24,7 +24,10 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingRenderColliders == other.debugRenderingRenderColliders
 		&& debugRenderingRenderOcclusionCapsules == other.debugRenderingRenderOcclusionCapsules
 		&& debugRenderingGOCVisualDebugDrawOpacity == other.debugRenderingGOCVisualDebugDrawOpacity
-		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale;
+		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
+		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
+		&& debugRenderingLevelEditorDebugBoxRenderDistance == other.debugRenderingLevelEditorDebugBoxRenderDistance
+		;
 
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
@@ -33,6 +36,9 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
 			equal = equal && selectionColliderFilters[i][j] == other.selectionColliderFilters[i][j];
+
+	for (size_t i = 0; i < shortcutCount; i++)
+		equal = equal && shortcutBindings[i] == other.shortcutBindings[i];
 
 	return equal;
 }
@@ -167,6 +173,8 @@ void SettingsManager::Render() {
 							ImGui::Checkbox("Render occlusion capsules", &tempSettings.debugRenderingRenderOcclusionCapsules);
 							ImGui::SliderScalar("GOCVisualDebugDraw opacity (requires stage restart)", ImGuiDataType_U8, &tempSettings.debugRenderingGOCVisualDebugDrawOpacity, &minAlpha, &maxAlpha);
 							ImGui::DragFloat("Level editor debug box scale", &tempSettings.debugRenderingLevelEditorDebugBoxScale, 0.05f);
+							ImGui::DragScalar("Level editor debug box render limit", ImGuiDataType_U32, &tempSettings.debugRenderingLevelEditorDebugBoxRenderLimit);
+							ImGui::DragFloat("Level editor debug box render distance", &tempSettings.debugRenderingLevelEditorDebugBoxRenderDistance, 0.05f);
 							ImGui::EndTabItem();
 						}
 						if (ImGui::BeginTabItem("Collider rendering filters")) {
@@ -205,6 +213,55 @@ void SettingsManager::Render() {
 					}
 					ImGui::EndTabItem();
 				}
+
+				if (ImGui::BeginTabItem("Shortcuts")) {
+					if (ImGui::BeginTable("Filters", 2))
+					{
+						ImGui::TableSetupColumn("Shortcut", ImGuiTableColumnFlags_WidthStretch);
+						ImGui::TableSetupColumn("Key", ImGuiTableColumnFlags_WidthFixed, 250.0f);
+						ImGui::TableHeadersRow();
+
+						ForEachShortcut([&](ShortcutId shortcutId) {
+							auto description = GetShortcutDescription(shortcutId);
+
+							ImGui::PushID(static_cast<int>(shortcutId));
+							ImGui::TableNextRow();
+							ImGui::TableNextColumn();
+							ImGui::Text(description.name);
+							ImGui::SetItemTooltip(description.description);
+							ImGui::TableNextColumn();
+
+							const char* chordName = ImGui::GetKeyChordName(tempSettings.shortcutBindings[static_cast<size_t>(shortcutId)]);
+
+							ImGui::InputText("##Key", const_cast<char*>(chordName), 100, ImGuiInputTextFlags_ReadOnly);
+							if (ImGui::IsItemActive() && !ImGui::IsItemActivated()) {
+								ImGuiKeyChord mods{};
+
+								if (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt))
+									mods |= ImGuiMod_Alt;
+
+								if (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl))
+									mods |= ImGuiMod_Ctrl;
+
+								if (ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift))
+									mods |= ImGuiMod_Shift;
+
+								for (int i = 0; i < ImGuiKey_COUNT; i++) {
+									auto key = static_cast<ImGuiKey>(i);
+
+									if ((ImGui::IsKeyboardKey(key) || ImGui::IsMouseKey(key) || ImGui::IsGamepadKey(key)) && !ImGui::IsModKey(key) && ImGui::IsKeyPressed(key)) {
+										tempSettings.shortcutBindings[static_cast<size_t>(shortcutId)] = key | mods;
+										ImGui::ClearActiveID();
+									}
+								}
+							}
+							ImGui::PopID();
+						});
+
+						ImGui::EndTable();
+					}
+					ImGui::EndTabItem();
+				}
 				ImGui::EndTabBar();
 			}
 			if (tempSettings != settings) {
@@ -232,7 +289,7 @@ void SettingsManager::ApplySettings() {
 	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
 	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;
 	GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
-	ObjectLocationVisual3DBehaviorBase::SetDebugBoxScale(settings.debugRenderingLevelEditorDebugBoxScale);
+	ObjectLocationVisual3DBehaviorBase::ApplySettings(settings.debugRenderingLevelEditorDebugBoxScale, settings.debugRenderingLevelEditorDebugBoxRenderLimit, settings.debugRenderingLevelEditorDebugBoxRenderDistance);
 
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
@@ -241,6 +298,9 @@ void SettingsManager::ApplySettings() {
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
 			GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
+
+	for (size_t i = 0; i < shortcutCount; i++)
+		SetShortcutBinding(static_cast<ShortcutId>(i), settings.shortcutBindings[i]);
 
 	//ReloadInputSettings();
 }
@@ -279,6 +339,8 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingRenderOcclusionCapsules=%u", &u) == 1) { settings.debugRenderingRenderOcclusionCapsules = u; return; }
 	if (sscanf_s(line, "DebugRenderingGOCVisualDebugDrawOpacity=%u", &u) == 1) { settings.debugRenderingGOCVisualDebugDrawOpacity = u; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
+	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
+	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderDistance=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderDistance = f; return; }
 	if (sscanf_s(line, "SelectionColliderFilters=%256s", s, 300) == 1 && strlen(s) == 256) {
 		for (size_t i = 0; i < 32; i++) {
 			sscanf_s(s + i * 8, "%8x", &u);
@@ -296,6 +358,14 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 			}
 		}
 		return;
+	}
+	if (sscanf_s(line, "Shortcut[%128[^]]]=%u", &s, 300, &u) == 2) {
+		for (size_t i = 0; i < shortcutCount; i++) {
+			if (strcmp(s, GetShortcutDescription(static_cast<ShortcutId>(i)).name) == 0) {
+				settings.shortcutBindings[i] = u;
+				return;
+			}
+		}
 	}
 }
 
@@ -322,6 +392,8 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingRenderOcclusionCapsules=%u\n", settings.debugRenderingRenderOcclusionCapsules);
 	out_buf->appendf("DebugRenderingGOCVisualDebugDrawOpacity=%u\n", settings.debugRenderingGOCVisualDebugDrawOpacity);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
+	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);
+	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderDistance=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderDistance);
 
 	out_buf->appendf("SelectionColliderFilters=");
 	for (size_t i = 0; i < 32; i++) {
@@ -346,4 +418,7 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 		out_buf->appendf("%08x", u);
 	}
 	out_buf->appendf("\n");
+
+	for(size_t i = 0; i < shortcutCount; i++)
+		out_buf->appendf("Shortcut[%s]=%u\n", GetShortcutDescription(static_cast<ShortcutId>(i)), settings.shortcutBindings[i]);
 }

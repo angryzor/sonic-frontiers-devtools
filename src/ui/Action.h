@@ -29,11 +29,14 @@ enum class ActionId {
 	LOCK_Z_AXIS,
 	DELETE,
 	OBJECT_PLACED,
+	TOGGLE_PLACE_MODE,
 	LEVEL_EDITOR_OBJECT_TRANSFORM_CHANGED,
 	LEVEL_EDITOR_CHANGING_PARAMETERS,
 	LEVEL_EDITOR_STOP_CHANGING_PARAMETERS,
 	LEVEL_EDITOR_SET_FOCUSED_CHUNK,
 	LEVEL_EDITOR_FOCUSED_CHUNK_CHANGED,
+	FOCUS_GAME_OBJECT,
+	FOCUS_OBJECT_DATA,
 };
 
 struct ActionBase {
@@ -64,3 +67,6 @@ class ActionProcessor {
 public:
 	virtual void ProcessAction(const ActionBase& action);
 };
+
+using FocusGameObjectAction = Action<ActionId::FOCUS_GAME_OBJECT, hh::game::GameObject*>;
+using FocusObjectDataAction = Action<ActionId::FOCUS_OBJECT_DATA, hh::game::ObjectData*>;

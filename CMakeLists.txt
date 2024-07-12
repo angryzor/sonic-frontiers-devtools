@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.28
+project(devtools VERSION 0.1.29
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
@@ -8,6 +8,8 @@ set(PROJECT_AUTHOR "angryzor")
 set(PROJECT_COPYRIGHT "Copyright (c) 2024 angryzor - Licensed under GPL3")
 set(PROJECT_DOWNLOAD_SIZE "2.42 MB")
 string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
+option(DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW "Enable ImGui demo window" ON)
+option(DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW "Enable ImPlot demo window" OFF)
 
 set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
 
@@ -84,6 +86,13 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
             VS_DEBUGGER_COMMAND ${GAME_EXECUTABLE}
             VS_DEBUGGER_WORKING_DIRECTORY ${DEBUGGER_WORKING_DIRECTORY}
     )
+
+    if(DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW)
+		target_compile_definitions(${DEVTOOLS_TARGET} PRIVATE DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW=1)
+    endif()
+    if(DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW)
+		target_compile_definitions(${DEVTOOLS_TARGET} PRIVATE DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW=1)
+    endif()
 
     foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
         target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})

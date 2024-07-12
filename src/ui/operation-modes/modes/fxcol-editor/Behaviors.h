@@ -6,6 +6,7 @@
 #include <ui/operation-modes/behaviors/ForwardDeclarations.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <debug-rendering/visuals/FxColCollisionShape.h>
+#include <debug-rendering/visuals/KdTree.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
@@ -15,7 +16,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		using LocationType = csl::math::Vector3;
 
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		const char* GetObjectName(FxColCollisionShape* object) { return object->ownerName; }
+		const char* GetObjectName(FxColCollisionShape* object) { return object->name; }
 		bool IsSelectable(FxColCollisionShape* object) { return true; }
 		bool Intersects(FxColCollisionShape* object, const Ray3f& ray) { return false; }
 		void GetRootObjects(csl::ut::MoveArray<FxColCollisionShape*>& rootObjects) {}
@@ -144,6 +145,9 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	class RenderFxColBehavior : public OperationModeBehavior, public DebugRenderable {
+		bool renderBoundingVolumes{ true };
+		bool renderCollisionShapes{ true };
+		bool renderKdTree{ false };
 	public:
 		using OperationModeBehavior::OperationModeBehavior;
 
@@ -156,10 +160,30 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			if (fxColMgr == nullptr || fxColMgr->resource == nullptr)
 				return;
 
+			if (renderKdTree)
+				RenderDebugVisual(ctx, fxColMgr->collisionTree);
+
 			auto& selection = operationMode.GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
-			for (size_t i = 0; i < fxColMgr->resource->fxColData->collisionShapeCount; i++)
-				RenderDebugVisual(ctx, fxColMgr->resource->fxColData->collisionShapes[i]);
+			if (renderBoundingVolumes)
+				for (size_t i = 0; i < fxColMgr->resource->fxColData->boundingVolumeCount; i++)
+					ctx.DrawAABB(fxColMgr->resource->fxColData->boundingVolumes[i].aabbMin, fxColMgr->resource->fxColData->boundingVolumes[i].aabbMax, { 0, 0, 255, 255 });
+
+			if (renderCollisionShapes)
+				for (size_t i = 0; i < fxColMgr->resource->fxColData->collisionShapeCount; i++)
+					RenderDebugVisual(ctx, fxColMgr->resource->fxColData->collisionShapes[i]);
+		}
+
+		void Render() {
+			if (ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION)) {
+				ImGui::SameLine();
+				ImGui::Checkbox("Render bounding volumes", &renderBoundingVolumes);
+				ImGui::SameLine();
+				ImGui::Checkbox("Render collision shapes", &renderCollisionShapes);
+				ImGui::SameLine();
+				ImGui::Checkbox("Render bounding volumes K/D tree", &renderKdTree);
+			}
+			ImGui::End();
 		}
 	};
 }

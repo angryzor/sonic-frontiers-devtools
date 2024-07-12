@@ -1,3 +1,22 @@
+# v0.1.29
+* Added beginnings of a ResFxColFile2 editor.
+* Added rebindable shortcuts.
+* Added right click context menu which currently contains the "Teleport Sonic" option.
+* Added render limit and draw distance settings for the debug boxes.
+* Added debug comment rendering to the object inspection mode.
+* Added ability to place objects by holding Shift while clicking in the level editor.
+* Added ability to toggle place mode using Caps Lock in the level editor.
+* Added ability to select dead objects using drag select in the level editor.
+* Changed SurfRide editor so you now have to select a scene to edit first.
+* Further improved communication between the level editor and the game.
+* Improved mouse handling so that windows don't capture the mouse input when moving over them while dragging.
+* Improved build script so it is no longer necessary to supply `-A x64` when building.
+* Reinstated live grinding rail editing.
+* Fixed a crash when adding items to an array loaded from disk in the level editor.
+* Fixed a bug where capsules and cylinders were rendered with their radii and heights swapped.
+* Refactored operation modes so that editors can be added more easily.
+
+
 # v0.1.28
 * Fixed TYPE_ARRAY editors on the same level unfolding together.
 * Fixed a crash when clicking outside the UI very early in the game's boot sequence.

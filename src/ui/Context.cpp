@@ -214,8 +214,12 @@ void Context::update()
 	ImGuizmo::BeginFrame();
 
 	//ImGui::PushFont(firaCode);
-	//ImGui::ShowDemoWindow();
-	//ImPlot::ShowDemoWindow();
+#ifdef DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW
+	ImGui::ShowDemoWindow();
+#endif
+#ifdef DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW
+	ImPlot::ShowDemoWindow();
+#endif
 	Desktop::instance->Render();
 
 	ImGui::Render();

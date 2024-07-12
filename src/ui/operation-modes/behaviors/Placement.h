@@ -1,5 +1,6 @@
 #pragma once
 #include <optional>
+#include <ui/Desktop.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include "ForwardDeclarations.h"
 #include "MousePicking.h"
@@ -18,8 +19,17 @@ public:
 	virtual unsigned int GetId() override { return id; }
 
 	using ObjectPlacedAction = Action<ActionId::OBJECT_PLACED, typename MousePickingBehavior<OpModeContext>::ObjectType>;
+	using TogglePlaceModeAction = Action<ActionId::TOGGLE_PLACE_MODE>;
 
 	PlacementBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : OperationModeBehavior{ allocator, operationMode }, traits { operationMode.GetContext() } {}
+
+	void Init() {
+		Desktop::instance->BindShortcut<TogglePlaceModeAction>(ShortcutId::TOGGLE_PLACE_MODE);
+	}
+
+	void Deinit() {
+		Desktop::instance->UnbindShortcut(ShortcutId::TOGGLE_PLACE_MODE);
+	}
 		
 	void SetPlaceMode(bool placing) {
 		this->placing = placing;

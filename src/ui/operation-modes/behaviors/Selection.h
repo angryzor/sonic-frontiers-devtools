@@ -23,10 +23,10 @@ public:
 	using DeselectAllAction = Action<ActionId::DESELECT_ALL>;
 
 	struct SelectionChangedPayload {
-		csl::ut::MoveArray<ObjectType> previousSelection;
-		csl::ut::MoveArray<ObjectType> currentSelection;
-		csl::ut::MoveArray<ObjectType> selected;
-		csl::ut::MoveArray<ObjectType> deselected;
+		const csl::ut::MoveArray<ObjectType>& previousSelection;
+		const csl::ut::MoveArray<ObjectType>& currentSelection;
+		const csl::ut::MoveArray<ObjectType>& selected;
+		const csl::ut::MoveArray<ObjectType>& deselected;
 	};
 	using SelectionChangedAction = Action<ActionId::SELECTION_CHANGED, SelectionChangedPayload>;
 
@@ -45,7 +45,7 @@ public:
 		case SelectAction::id: {
 			auto& selected = static_cast<const SelectAction&>(action).payload;
 
-			csl::ut::MoveArray<ObjectType> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<ObjectType> previousSelection{ GetAllocator() };
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 
@@ -58,7 +58,7 @@ public:
 		case DeselectAction::id: {
 			auto& deselected = static_cast<const DeselectAction&>(action).payload;
 
-			csl::ut::MoveArray<ObjectType> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<ObjectType> previousSelection{ GetAllocator() };
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 
@@ -74,7 +74,7 @@ public:
 			assert(false);
 			break;
 		case DeselectAllAction::id: {
-			csl::ut::MoveArray<ObjectType> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<ObjectType> previousSelection{ GetAllocator() };
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 

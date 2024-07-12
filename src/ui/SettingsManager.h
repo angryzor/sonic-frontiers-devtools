@@ -95,6 +95,26 @@ class SettingsManager
         bool debugRenderingRenderOcclusionCapsules{ true };
         uint8_t debugRenderingGOCVisualDebugDrawOpacity{ 80 };
         float debugRenderingLevelEditorDebugBoxScale{ 0.3f };
+        unsigned int debugRenderingLevelEditorDebugBoxRenderLimit{ 500 };
+        float debugRenderingLevelEditorDebugBoxRenderDistance{ 500.0f };
+        ImGuiKeyChord shortcutBindings[16]{
+            ImGuiKey_Escape,
+            ImGuiMod_Ctrl | ImGuiKey_X,
+            ImGuiMod_Ctrl | ImGuiKey_C,
+            ImGuiMod_Ctrl | ImGuiKey_V,
+            ImGuiKey_Delete,
+            ImGuiMod_Alt | ImGuiKey_Space,
+            ImGuiKey_G,
+            ImGuiKey_R,
+            ImGuiKey_S,
+            ImGuiKey_X,
+            ImGuiMod_Shift | ImGuiKey_X,
+            ImGuiKey_Y,
+            ImGuiMod_Shift | ImGuiKey_Y,
+            ImGuiKey_Z,
+            ImGuiMod_Shift | ImGuiKey_Z,
+            ImGuiKey_CapsLock,
+        };
 
         bool operator==(const Settings& other) const;
         bool operator!=(const Settings& other) const;
