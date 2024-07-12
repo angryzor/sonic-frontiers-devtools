@@ -58,7 +58,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
         message("${SDK_VAR_${DEVTOOLS_TARGET_SDK}} environment variable found. Using this version instead of the local submodule.")
         cmake_path(SET SDK_PATH NORMALIZE $ENV{${SDK_VAR_${DEVTOOLS_TARGET_SDK}}})
     else()
-        set(SDK_PATH ${DEVTOOLS_TARGET_SDK}-sdk)
+        set(SDK_PATH sdks/${DEVTOOLS_TARGET_SDK}-sdk)
     endif()
 
     add_subdirectory(${SDK_PATH} ${DEVTOOLS_TARGET_SDK}-sdk EXCLUDE_FROM_ALL)
