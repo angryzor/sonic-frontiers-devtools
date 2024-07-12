@@ -15,6 +15,7 @@
 * Fixed a crash when adding items to an array loaded from disk in the level editor.
 * Fixed a bug where capsules and cylinders were rendered with their radii and heights swapped.
 * Refactored operation modes so that editors can be added more easily.
+* Made project buildable using Visual Studio 2022's CMake integration.
 
 
 # v0.1.28
