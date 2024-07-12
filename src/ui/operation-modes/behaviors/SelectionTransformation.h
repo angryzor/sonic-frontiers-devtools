@@ -1,6 +1,7 @@
 #pragma once
 #include <ui/Desktop.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
+#include "ForwardDeclarations.h"
 #include "Selection.h"
 #include "SelectionAabb.h"
 
@@ -29,23 +30,17 @@ public:
 	}
 };
 
-template<typename T, bool Projective = false>
-class SelectionTransformationBehavior : public SelectionTransformationBehaviorBase<Projective> {
+template<typename OpModeContext>
+class SelectionTransformationBehavior : public SelectionTransformationBehaviorBase<SelectionTransformationBehaviorTraits<OpModeContext>::Projective> {
 public:
-	class Operations {
-	public:
-		virtual bool HasTransform(const T object) = 0;
-		virtual bool IsRoot(const T object) = 0;
-		virtual T GetParent(const T object) = 0;
-		virtual typename SelectionTransformationBehavior::TransformType GetSelectionSpaceTransform(const T object) = 0;
-		virtual void SetSelectionSpaceTransform(T object, const typename SelectionTransformationBehavior::TransformType& transform) = 0;
-	};
+	using Traits = SelectionTransformationBehaviorTraits<OpModeContext>;
+	using ObjectType = typename SelectionBehaviorTraits<OpModeContext>::ObjectType;
 
 private:
-	Operations& operations;
+	Traits traits;
 
 protected:
-	csl::ut::MoveArray<T> transformableSelection{ SelectionTransformationBehavior::GetAllocator() };
+	csl::ut::MoveArray<ObjectType> transformableSelection{ SelectionTransformationBehavior::GetAllocator() };
 
 	/*
 	 * Takes the original selection and returns a subset of objects that should be affected by a transform operation.
@@ -54,20 +49,20 @@ protected:
 	 * in the selection and would otherwise be transformed multiple times.
 	 */
 	void CalculateTransformableSelection() {
-		auto& selection = this->operationMode.GetBehavior<SelectionBehavior<T>>()->GetSelection();
+		auto& selection = this->operationMode.GetBehavior<SelectionBehavior<OpModeContext>>()->GetSelection();
 
 		transformableSelection.clear();
 
 		for (auto& object : selection)
-			if (operations.HasTransform(object) && !HasParentInSelection(object, selection))
+			if (traits.HasTransform(object) && !HasParentInSelection(object, selection))
 				transformableSelection.push_back(object);
 	}
 
-	bool HasParentInSelection(T object, const csl::ut::MoveArray<T>& selection) {
-		if (operations.IsRoot(object))
+	bool HasParentInSelection(ObjectType object, const csl::ut::MoveArray<ObjectType>& selection) {
+		if (traits.IsRoot(object))
 			return false;
 
-		T parent = operations.GetParent(object);
+		ObjectType parent = traits.GetParent(object);
 
 		for (auto& obj2 : selection)
 			if (obj2 == parent)
@@ -77,28 +72,28 @@ protected:
 	}
 
 public:
-	SelectionTransformationBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : SelectionTransformationBehaviorBase<Projective>{ allocator, operationMode }, operations{ operations } {}
+	SelectionTransformationBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : SelectionTransformationBehaviorBase<Traits::Projective>{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
 	virtual void ProcessAction(const ActionBase& action) override {
 		switch (action.id) {
-		case SelectionBehavior<T>::SelectAction::id:
-		case SelectionBehavior<T>::DeselectAction::id:
-		case SelectionBehavior<T>::SelectAllAction::id:
-		case SelectionBehavior<T>::DeselectAllAction::id:
+		case SelectionBehavior<OpModeContext>::SelectAction::id:
+		case SelectionBehavior<OpModeContext>::DeselectAction::id:
+		case SelectionBehavior<OpModeContext>::SelectAllAction::id:
+		case SelectionBehavior<OpModeContext>::DeselectAllAction::id:
 			CalculateTransformableSelection();
 			break;
 		case SelectionTransformationBehavior::SetSelectionTransformAction::id:
 			typename SelectionTransformationBehavior::TransformType deltaTransform{ static_cast<const SelectionTransformationBehavior::SetSelectionTransformAction&>(action).payload * GetSelectionTransform().inverse() };
 
 			for (auto& object : transformableSelection)
-				operations.SetSelectionSpaceTransform(object, deltaTransform * operations.GetSelectionSpaceTransform(object));
+				traits.SetSelectionSpaceTransform(object, deltaTransform * traits.GetSelectionSpaceTransform(object));
 
 			this->Dispatch(typename SelectionTransformationBehavior::SelectionTransformChangedAction{});
 			break;
 		}
 	}
 
-	csl::ut::MoveArray<T>& GetTransformableSelection() const {
+	csl::ut::MoveArray<ObjectType>& GetTransformableSelection() const {
 		return transformableSelection;
 	}
 
@@ -112,11 +107,11 @@ public:
 	virtual typename SelectionTransformationBehavior::TransformType GetSelectionTransform() const override {
 		assert(transformableSelection.size() > 0);
 
-		auto* selAabb = this->operationMode.GetBehavior<SelectionAabbBehavior<T>>();
+		auto* selAabb = this->operationMode.GetBehavior<SelectionAabbBehavior<OpModeContext>>();
 
 		if (selAabb && transformableSelection.size() > 1 && selAabb->HaveAabb())
 			return Eigen::Affine3f{ Eigen::Translation3f{ selAabb->GetAabb().Center() } };
 		else
-			return operations.GetSelectionSpaceTransform(transformableSelection[0]);
+			return traits.GetSelectionSpaceTransform(transformableSelection[0]);
 	}
 };

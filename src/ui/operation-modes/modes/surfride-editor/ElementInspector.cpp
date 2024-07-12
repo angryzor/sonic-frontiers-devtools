@@ -1,6 +1,6 @@
 #include "ElementInspector.h"
 #include "SurfRideElement.h"
-#include <ui/operation-modes/behaviors/Selection.h>
+#include "Behaviors.h"
 #include <ui/common/editors/Basic.h>
 #include <ui/common/editors/SurfRide.h>
 #include <ui/common/viewers/Basic.h>
@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void ElementInspector::RenderPanel()
 	{
-		auto& selection = GetBehavior<SelectionBehavior<SurfRideElement>>()->GetSelection();
+		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		if (selection.size() == 0) {
 			ImGui::Text("Select an item in the left pane.");

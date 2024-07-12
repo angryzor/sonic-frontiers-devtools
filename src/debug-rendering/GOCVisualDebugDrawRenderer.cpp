@@ -168,7 +168,7 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 					else if (goc->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCCapsuleCollider*>(goc);
 						if (colliderFilters[gameObject->layer][cGoc->filterCategory])
-							renderer->drawContext->DrawCapsule(cGoc->GetWorldTransform(), cGoc->radius, cGoc->halfHeight, { 0, 255, 255, 255 });
+							renderer->drawContext->DrawCapsule(cGoc->GetWorldTransform(), cGoc->radius, cGoc->halfHeight / 2, { 0, 255, 255, 255 });
 					}
 					else if (goc->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
 						auto* cGoc = static_cast<hh::physics::GOCCylinderCollider*>(goc);

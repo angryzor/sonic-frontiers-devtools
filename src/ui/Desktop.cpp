@@ -36,7 +36,6 @@ namespace app::game {
 }
 void Desktop::Render() {
 	RenderOverlayWindow();
-	//HandleMousePicking();
 
 	ToolBar::Render();
 	operationMode->Render();
@@ -59,21 +58,6 @@ void Desktop::Render() {
 	SettingsManager::Render();
 
 	HandleShortcuts();
-
-	//if (ImGui::IsMouseClicked(ImGuiMouseButton_Right) && locationPicked) {
-	//	ImGui::OpenPopup("WorldContext");
-	//}
-
-	//if (ImGui::BeginPopup("WorldContext")) {
-	//	if (ImGui::Selectable("Teleport player")) {
-	//		if (auto* levelInfo = hh::game::GameManager::GetInstance()->GetService<app::level::LevelInfo>())
-	//		if (auto* player = static_cast<app::player::Player*>(hh::fnd::MessageManager::GetInstance()->GetMessengerByHandle(levelInfo->GetPlayerObject(0))))
-	//		if (auto* playerKine = player->GetComponent<app::player::GOCPlayerKinematicParams>()) {
-	//			playerKine->SetPosition({ pickedLocation.x(), pickedLocation.y(), pickedLocation.z(), 0.0f });
-	//		}
-	//	}
-	//	ImGui::EndPopup();
-	//};
 
 	//if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));
@@ -131,22 +115,6 @@ void Desktop::Render() {
 	//	}
 	//	ImGui::EndPopup();
 	//}
-
-	//if (ImGui::Button("Export")) {
-	//	auto* sonicRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::SonicParameters>>("player_common");
-	//	auto* amyRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::AmyParameters>>("amy_common");
-	//	auto* tailsRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::TailsParameters>>("tails_common");
-	//	auto* knucklesRfl = hh::fnd::ResourceManager::GetInstance()->GetResource<hh::fnd::ResReflection<app::rfl::KnucklesParameters>>("knuckles_common");
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_sonic_cyberspace\\player_common_extra_cyber\\amy_modepackage_cyber.rfl", &sonicRfl->reflectionData->cyberspace);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_sonic_cyberspace\\player_common_extra_cyber\\tails_modepackage_cyber.rfl", &sonicRfl->reflectionData->cyberspace);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_sonic_cyberspace\\player_common_extra_cyber\\knuckles_modepackage_cyber.rfl", &sonicRfl->reflectionData->cyberspace);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_cyberspace_sv\\player_common_extra_cyber\\amy_modepackage_cyber.rfl", &amyRfl->reflectionData->cyberspaceSV);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_cyberspace_sv\\player_common_extra_cyber\\tails_modepackage_cyber.rfl", &tailsRfl->reflectionData->cyberspaceSV);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_cyberspace_sv\\player_common_extra_cyber\\knuckles_modepackage_cyber.rfl", &knucklesRfl->reflectionData->cyberspaceSV);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_forward_view\\player_common_extra_cyber\\amy_modepackage_cyber.rfl", &amyRfl->reflectionData->forwardView);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_forward_view\\player_common_extra_cyber\\tails_modepackage_cyber.rfl", &tailsRfl->reflectionData->forwardView);
-	//	ReflectionSerializer::SerializeToFile(L"C:\\Users\\Ruben Tytgat\\source\\playercommon_extra_cyber\\base_forward_view\\player_common_extra_cyber\\knuckles_modepackage_cyber.rfl", &knucklesRfl->reflectionData->forwardView);
-	//}
 }
 
 void Desktop::RenderOverlayWindow()
@@ -179,129 +147,9 @@ void Desktop::OpenStandaloneWindow(StandaloneWindow* window) {
 	this->windowsThatOpened.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
 }
 
-void Desktop::HandleMousePicking()
-{
-	auto& io = ImGui::GetIO();
-
-	pickerClicked = false;
-
-	if (!io.WantCaptureMouse && !ImGui::IsAnyItemHovered()) {
-		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
-			auto* gameManager = GameManager::GetInstance();
-			if (auto* cameraSrv = gameManager->GetService<hh::game::CameraManager>())
-			if (auto* camera = cameraSrv->GetTopComponent(0)) {
-				auto mouseStart = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
-				auto mouseEnd = ImGui::GetMousePos();
-				auto frustum = ScreenRectToFrustum(mouseStart, mouseEnd, (camera->viewportData.projMatrix * camera->viewportData.viewMatrix).inverse());
-
-				if (ImGui::Begin("Overlay")) {
-					ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
-				}
-				ImGui::End();
-
-				pickedObjects.clear();
-				for (auto* object : gameManager->objects)
-					if (auto* gocTransform = object->GetComponent<GOCTransform>())
-						if (frustum.Test(gocTransform->GetFrame().fullTransform.position))
-							pickedObjects.push_back(object);
-
-				locationPicked = false;
-				pickerClicked = true;
-			}
-		}
-		else if (ImGui::IsMouseClicked(ImGuiMouseButton_Left)) {
-			auto* gameManager = GameManager::GetInstance();
-
-			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
-				if (auto* cameraSrv = gameManager->GetService<hh::game::CameraManager>())
-				if (auto* camera = cameraSrv->GetTopComponent(0)) {
-					auto ray = ScreenPosToWorldRay(ImGui::GetMousePos(), camera->viewportData.GetInverseViewMatrix() * camera->viewportData.projMatrix.inverse());
-
-					csl::ut::MoveArray<PhysicsQueryResult> results{ hh::fnd::MemoryRouter::GetTempAllocator() };
-					if (physicsWorld->RayCastAllHits(ray.start, ray.end, 0xFFFFFFFF, results)) {
-						if (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) {
-							csl::ut::PointerMap<GameObject*, bool> unique{ hh::fnd::MemoryRouter::GetTempAllocator() };
-
-							pickerResults.clear();
-
-							for (auto& result : results) {
-								if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
-									auto* gameObject = collider->GetOwnerGameObject();
-
-									if (unique.Find(gameObject) == unique.end())
-										pickerResults.push_back(result);
-
-									unique.Insert(gameObject, true);
-								}
-							}
-
-							ImGui::OpenPopup("Picker results");
-							return;
-						}
-						else {
-							for (auto& result : results) {
-								if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
-									auto* gameObject = collider->GetOwnerGameObject();
-
-									if (selectionColliderFilters[gameObject->layer][collider->filterCategory]) {
-										pickedObjects.clear();
-										pickedObjects.push_back(gameObject);
-										pickedLocation = result.hitLocation;
-										locationPicked = true;
-										pickerClicked = true;
-										return;
-									}
-								}
-							}
-							pickedObjects.clear();
-							pickedLocation = results[0].hitLocation;
-							locationPicked = true;
-							pickerClicked = true;
-						}
-					}
-					else {
-						pickedObjects.clear();
-						locationPicked = false;
-						pickerClicked = true;
-					}
-				}
-			}
-		}
-	}
-
-	if (ImGui::BeginPopup("Picker results")) {
-		for (auto& result : pickerResults) {
-			if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
-				auto* gameObject = collider->GetOwnerGameObject();
-
-				if (ImGui::Selectable(gameObject->name)) {
-					pickedObjects.clear();
-					pickedObjects.push_back(collider->GetOwnerGameObject());
-					locationPicked = false;
-					pickerClicked = true;
-				}
-			}
-		}
-		ImGui::EndPopup();
-	}
-}
-
 Desktop::~Desktop()
 {
 	delete operationMode;
-}
-
-bool Desktop::IsPickerMouseReleased() const
-{
-	return pickerClicked;
-}
-
-const csl::ut::MoveArray<GameObject*>& Desktop::GetPickedObjects() const {
-	return pickedObjects;
-}
-
-const csl::math::Vector3* Desktop::GetPickedLocation() const {
-	return locationPicked ? &pickedLocation : nullptr;
 }
 
 void Desktop::Dispatch(const ActionBase& action)

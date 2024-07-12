@@ -1,9 +1,9 @@
 #include "SetObjectList.h"
 #include "Context.h"
+#include "Behaviors.h"
 #include "Actions.h"
 #include <ui/common/Icons.h>
 #include <ui/resources/ResourceBrowser.h>
-#include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/ObjectDataUtils.h>
 
 namespace ui::operation_modes::modes::level_editor {
@@ -29,6 +29,8 @@ namespace ui::operation_modes::modes::level_editor {
 			return layer.layer;
 		case SetObjectListTreeViewNode::Type::GROUP:
 			return group.label;
+		default:
+			return nullptr;
 		}
 	}
 
@@ -40,6 +42,8 @@ namespace ui::operation_modes::modes::level_editor {
 			return layer.layer->GetName();
 		case SetObjectListTreeViewNode::Type::GROUP:
 			return group.label;
+		default:
+			return nullptr;
 		}
 	}
 
@@ -50,7 +54,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 	bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	{
-		auto* selectionBehavior = list.GetBehavior<SelectionBehavior<ObjectData*>>();
+		auto* selectionBehavior = list.GetBehavior<SelectionBehavior<Context>>();
 		auto* focusedChunk = list.GetContext().GetFocusedChunk();
 
 		if (type == SetObjectListTreeViewNode::Type::OBJECT && selectionBehavior->IsSelected(object.object))
@@ -122,6 +126,7 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		switch (action.id) {
 		case FocusedChunkChangedAction::id:
+		case PlacementBehavior<Context>::ObjectPlacedAction::id:
 			InvalidateTree();
 			break;
 		}

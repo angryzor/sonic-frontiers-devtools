@@ -3,17 +3,35 @@
 #include "OperationModeBehavior.h"
 #include "Panel.h"
 
+//template<typename Context, typename T>
+//class WithContext : public T {
+//protected:
+//	Context& context;
+//
+//public:
+//	WithContext(Context& context) : context(context), T{} {}
+//};
+//
+//template<typename Context, typename Behavior>
+//class BehaviorContext : public WithContext<Context, Behavior::Operations> {
+//	using WithContext::WithContext;
+//};
+
+template<typename Context>
+class BehaviorTraitsImpl {
+protected:
+	typename Context& context;
+
+public:
+	BehaviorTraitsImpl(typename Context& context) : context{ context } {}
+};
+
 class OperationModeBase : public Component {
 	OperationModeBehavior* draggingBehavior{ nullptr };
 	OperationModeBehavior* singleFrameExclusiveMouseControlBehavior{ nullptr };
 
 protected:
-	struct BehaviorWithContextBase : public CompatibleObject {
-		OperationModeBehavior* behavior;
-
-		BehaviorWithContextBase(csl::fnd::IAllocator* allocator, OperationModeBehavior* behavior) : CompatibleObject{ allocator }, behavior { behavior } {}
-	};
-	csl::ut::MoveArray<hh::fnd::Reference<BehaviorWithContextBase>> behaviors{ GetAllocator() };
+	csl::ut::MoveArray<hh::fnd::Reference<OperationModeBehavior>> behaviors{ GetAllocator() };
 
 public:
 	using Component::Component;
@@ -31,35 +49,38 @@ public:
 	template<typename T>
 	T* GetBehavior() {
 		for (auto& behavior : behaviors)
-			if (behavior->behavior->GetId() == T::id)
-				return static_cast<T*>(&*behavior->behavior);
+			if (behavior->GetId() == T::id)
+				return static_cast<T*>(&*behavior);
 
 		return nullptr;
 	}
 };
 
-template<typename Context>
+template<typename _Context>
 class OperationMode : public OperationModeBase {
-	template<typename Behavior, typename Contexts, typename I = std::make_index_sequence<std::tuple_size<Contexts>::value>>
-	struct BehaviorWithContext;
+public:
+	using Context = _Context;
 
-	template<typename Behavior, typename Contexts, size_t... Is>
-	struct BehaviorWithContext<Behavior, Contexts, std::index_sequence<Is...>> : public BehaviorWithContextBase {
-		Contexts contexts;
-		Behavior inlineBehavior;
+private:
+	//template<typename Behavior, typename TraitImpls, typename I = std::make_index_sequence<std::tuple_size<TraitImpls>::value>>
+	//struct BehaviorWithTraitsImpls;
 
-		BehaviorWithContext(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Context& context)
-			: contexts{ std::make_tuple(std::tuple_element_t<Is, Contexts>{ context }...) }
-			, inlineBehavior{ allocator, operationMode, std::get<Is>(contexts)... }
-			, BehaviorWithContextBase{allocator, &inlineBehavior} {}
-	};
+	//template<typename Behavior, typename TraitImpls, size_t... Is>
+	//struct BehaviorWithTraitsImpls<Behavior, TraitImpls, std::index_sequence<Is...>> : public BehaviorWithTraitsImplsBase {
+	//	Behavior inlineBehavior;
+	//	TraitImpls traitImpls;
+
+	//	BehaviorWithTraitsImpls(csl::fnd::IAllocator* allocator, OperationMode& operationMode)
+	//		: traitImpls{ std::make_tuple(std::tuple_element_t<Is, TraitImpls>{ operationMode.context }...) }
+	//		, inlineBehavior{ allocator, operationMode, std::get<Is>(traitImpls)... }
+	//		, BehaviorWithTraitsImplsBase{ allocator, &inlineBehavior } {}
+	//};
 
 	friend class Panel<Context>;
 	csl::ut::MoveArray<hh::fnd::Reference<Panel<Context>>> panels{ GetAllocator() };
 	Context context{ GetAllocator() };
-protected:
-	Context& GetContext() { return context; }
 public:
+	Context& GetContext() { return context; }
 	using OperationModeBase::OperationModeBase;
 
 	virtual void ProcessAction(const ActionBase& action) override {
@@ -67,7 +88,7 @@ public:
 
 		for (auto& panel : panels)
 			panel->ProcessAction(action);
-	
+
 	}
 
 	virtual void Render() override {
@@ -77,9 +98,24 @@ public:
 			panel->Render();
 	}
 
-	template<typename T, typename ...Args>
+	//template<typename Behavior>
+	//void AddBehavior() {
+	//	behaviors.push_back(new (std::align_val_t(Behavior), GetAllocator()) BehaviorWithTraitsImpls<Behavior, std::tuple<>>{ GetAllocator(), * this });
+	//}
+
+	//template<template<typename> typename Behavior, typename ...Args>
+	//void AddBehavior() {
+	//	behaviors.push_back(new (std::align_val_t(alignof(BehaviorWithTraitsImpls<Behavior<Context>, std::tuple<Args...>>)), GetAllocator()) BehaviorWithTraitsImpls<Behavior<Context>, std::tuple<Args...>>{ GetAllocator(), * this });
+	//}
+
+	template<typename Behavior>
 	void AddBehavior() {
-		behaviors.push_back(new (std::align_val_t(alignof(BehaviorWithContext<T, std::tuple<Args...>>)), GetAllocator()) BehaviorWithContext<T, std::tuple<Args...>>{ GetAllocator(), *this, context });
+		behaviors.push_back(new (std::align_val_t(alignof(Behavior)), GetAllocator()) Behavior{ GetAllocator(), *this });
+	}
+
+	template<template<typename> typename Behavior>
+	void AddBehavior() {
+		behaviors.push_back(new (std::align_val_t(alignof(Behavior<Context>)), GetAllocator()) Behavior<Context>{ GetAllocator(), *this });
 	}
 
 	template<typename T>

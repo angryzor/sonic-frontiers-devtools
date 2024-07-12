@@ -5,25 +5,25 @@ void OperationModeBase::Render()
 	singleFrameExclusiveMouseControlBehavior = nullptr;
 
 	for (auto& behavior : behaviors)
-		behavior->behavior->Render();
+		behavior->Render();
 }
 
 void OperationModeBase::ProcessAction(const ActionBase& action)
 {
 	for (auto& behavior : behaviors)
-		behavior->behavior->ProcessAction(action);
+		behavior->ProcessAction(action);
 }
 
 void OperationModeBase::InitBehaviors()
 {
 	for (auto& behavior : behaviors)
-		behavior->behavior->Init();
+		behavior->Init();
 }
 
 void OperationModeBase::DeinitBehaviors()
 {
 	for (auto i = behaviors.end(); i != behaviors.begin();)
-		(*(--i))->behavior->Deinit();
+		(*(--i))->Deinit();
 }
 
 bool OperationModeBase::CanTakeMouseControl(OperationModeBehavior* behavior)

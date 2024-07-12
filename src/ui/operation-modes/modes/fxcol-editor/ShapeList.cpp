@@ -1,5 +1,5 @@
 #include "ShapeList.h"
-#include <ui/operation-modes/behaviors/Selection.h>
+#include "Behaviors.h"
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
@@ -18,13 +18,13 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		}
 
 		auto* fxColData = fxColManager->resource->fxColData;
-		auto* selectionBehavior = GetBehavior<SelectionBehavior<FxColCollisionShape*>>();
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 
 		for (size_t i = 0; i < fxColData->collisionShapeCount; i++) {
 			auto* shape = &fxColData->collisionShapes[i];
 
 			if (ImGui::Selectable(shape->ownerName, selectionBehavior->GetSelection().find(shape) != -1))
-				GetBehavior<SelectionBehavior<FxColCollisionShape*>>()->Select(shape);
+				GetBehavior<SelectionBehavior<Context>>()->Select(shape);
 		}
 	}
 

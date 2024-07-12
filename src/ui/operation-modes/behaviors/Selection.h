@@ -3,26 +3,30 @@
 #include <utilities/math/Frustum.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include <ui/Desktop.h>
+#include "ForwardDeclarations.h"
 
-template<typename T>
+template<typename OpModeContext>
 class SelectionBehavior : public OperationModeBehavior {
+public:
+	using ObjectType = typename SelectionBehaviorTraits<OpModeContext>::ObjectType;
+
 protected:
-	csl::ut::MoveArray<T> selection{ GetAllocator() };
+	csl::ut::MoveArray<ObjectType> selection{ GetAllocator() };
 
 public:
 	static constexpr unsigned int id = 5;
 	virtual unsigned int GetId() override { return id; }
 
-	using SelectAction = Action<ActionId::SELECT, csl::ut::MoveArray<T>>;
-	using DeselectAction = Action<ActionId::DESELECT, csl::ut::MoveArray<T>>;
+	using SelectAction = Action<ActionId::SELECT, csl::ut::MoveArray<ObjectType>>;
+	using DeselectAction = Action<ActionId::DESELECT, csl::ut::MoveArray<ObjectType>>;
 	using SelectAllAction = Action<ActionId::SELECT_ALL>;
 	using DeselectAllAction = Action<ActionId::DESELECT_ALL>;
 
 	struct SelectionChangedPayload {
-		csl::ut::MoveArray<T> previousSelection;
-		csl::ut::MoveArray<T> currentSelection;
-		csl::ut::MoveArray<T> selected;
-		csl::ut::MoveArray<T> deselected;
+		csl::ut::MoveArray<ObjectType> previousSelection;
+		csl::ut::MoveArray<ObjectType> currentSelection;
+		csl::ut::MoveArray<ObjectType> selected;
+		csl::ut::MoveArray<ObjectType> deselected;
 	};
 	using SelectionChangedAction = Action<ActionId::SELECTION_CHANGED, SelectionChangedPayload>;
 
@@ -41,7 +45,7 @@ public:
 		case SelectAction::id: {
 			auto& selected = static_cast<const SelectAction&>(action).payload;
 
-			csl::ut::MoveArray<T> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<ObjectType> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 
@@ -54,7 +58,7 @@ public:
 		case DeselectAction::id: {
 			auto& deselected = static_cast<const DeselectAction&>(action).payload;
 
-			csl::ut::MoveArray<T> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<ObjectType> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 
@@ -70,7 +74,7 @@ public:
 			assert(false);
 			break;
 		case DeselectAllAction::id: {
-			csl::ut::MoveArray<T> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<ObjectType> previousSelection{ hh::fnd::MemoryRouter::GetTempAllocator() };
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 
@@ -82,33 +86,33 @@ public:
 		}
 	}
 
-	void Select(const T& object) {
+	void Select(ObjectType object) {
 		DeselectAll();
 		AddToSelection(object);
 	}
 
-	void Select(const csl::ut::MoveArray<T>& objects) {
+	void Select(const csl::ut::MoveArray<ObjectType>& objects) {
 		DeselectAll();
 		AddToSelection(objects);
 	}
 
-	void AddToSelection(const T& object) {
-		csl::ut::MoveArray<T> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+	void AddToSelection(ObjectType object) {
+		csl::ut::MoveArray<ObjectType> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
 		objects.push_back(object);
 		AddToSelection(objects);
 	}
 
-	void AddToSelection(const csl::ut::MoveArray<T>& objects) {
+	void AddToSelection(const csl::ut::MoveArray<ObjectType>& objects) {
 		Dispatch(SelectAction{ objects });
 	}
 
-	void Deselect(const T& object) {
-		csl::ut::MoveArray<T> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+	void Deselect(ObjectType object) {
+		csl::ut::MoveArray<ObjectType> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
 		objects.push_back(object);
 		Deselect(objects);
 	}
 
-	void Deselect(const csl::ut::MoveArray<T>& objects) {
+	void Deselect(const csl::ut::MoveArray<ObjectType>& objects) {
 		Dispatch(DeselectAction{ objects });
 	}
 
@@ -120,11 +124,11 @@ public:
 		Dispatch(DeselectAllAction{});
 	}
 
-	const csl::ut::MoveArray<T>& GetSelection() const {
+	const csl::ut::MoveArray<ObjectType>& GetSelection() const {
 		return selection;
 	}
 	
-	bool IsSelected(T object) const {
+	bool IsSelected(ObjectType object) const {
 		return selection.find(object) != -1;
 	}
 };

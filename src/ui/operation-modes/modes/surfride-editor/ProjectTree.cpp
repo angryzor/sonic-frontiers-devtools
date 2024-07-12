@@ -1,6 +1,6 @@
 #include "ProjectTree.h"
 #include "SurfRideElement.h"
-#include <ui/operation-modes/behaviors/Selection.h>
+#include "Behaviors.h"
 
 namespace ui::operation_modes::modes::surfride_editor {
 	void ProjectTree::RenderPanel()
@@ -19,7 +19,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 					if (goc->pStaticClass == hh::ui::GOCSprite::GetClass()) {
 						snprintf(spriteName, sizeof(spriteName), "%s - %zx", goc->owner->name.c_str(), reinterpret_cast<size_t>(goc));
 						if (ImGui::Selectable(spriteName, goc == context.gocSprite)) {
-							GetBehavior<SelectionBehavior<SurfRideElement>>()->DeselectAll();
+							GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
 							context.gocSprite = static_cast<hh::ui::GOCSprite*>(goc);
 							context.focusedScene = nullptr;
 						}
@@ -43,7 +43,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (ImGui::BeginCombo("Scene", sceneName)) {
 			for (auto* scene : project->scenes) {
 				if (ImGui::Selectable(scene->sceneData->name, scene == context.focusedScene)) {
-					GetBehavior<SelectionBehavior<SurfRideElement>>()->DeselectAll();
+					GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
 					context.focusedScene = scene;
 				}
 				if (context.focusedScene == scene)
@@ -59,7 +59,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-		auto* selectionBehavior = GetBehavior<SelectionBehavior<SurfRideElement>>();
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 		auto& selected = selectionBehavior->GetSelection();
 
 		if (ImGui::TreeNodeEx("Cameras", nodeFlags)) {
@@ -94,7 +94,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		SurfRideElement selection{ SurfRideElement::Type::LAYER, layer };
 
-		auto* selectionBehavior = GetBehavior<SelectionBehavior<SurfRideElement>>();
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 		auto& selected = selectionBehavior->GetSelection();
 
 		if (selected.find(selection) != -1)
@@ -119,7 +119,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		SurfRideElement selection{ SurfRideElement::Type::CAST, cast };
 		SurfRide::Layer* refLayer{ static_cast<SurfRide::SRS_CASTNODE::Type>(cast->flags & 0xF) == SurfRide::SRS_CASTNODE::Type::REFERENCE ? static_cast<SurfRide::ReferenceCast*>(cast)->layer : nullptr };
 
-		auto* selectionBehavior = GetBehavior<SelectionBehavior<SurfRideElement>>();
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 		auto& selected = selectionBehavior->GetSelection();
 
 		if (selected.find(selection) != -1)

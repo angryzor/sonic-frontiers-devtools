@@ -1,9 +1,8 @@
 #include "ObjectInspector.h"
-#include "ObjectInspection.h"
+#include "Behaviors.h"
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/inputs/Basic.h>
-#include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/math/EulerTransform.h>
 #include <utilities/math/MathUtils.h>
 #include <imgui_internal.h>
@@ -122,7 +121,7 @@ namespace ui::operation_modes::modes::object_inspection {
 	};
 
 	void ObjectInspector::RenderPanel() {
-		auto& selection = GetBehavior<SelectionBehavior<GameObject*>>()->GetSelection();
+		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		if (selection.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");

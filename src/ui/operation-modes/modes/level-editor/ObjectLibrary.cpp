@@ -1,6 +1,8 @@
 #include "ObjectLibrary.h"
+#include "Behaviors.h"
 #include "Context.h"
 #include <ui/common/Icons.h>
+#include <ui/operation-modes/behaviors/Placement.h>
 
 namespace ui::operation_modes::modes::level_editor {
 	using namespace hh::fnd;
@@ -28,23 +30,23 @@ namespace ui::operation_modes::modes::level_editor {
 				ImGui::EndCombo();
 			}
 
-			if (context.placementTargetLayer) {
-				if (context.objectClassToPlace) {
-					bool clickedStop = ImGui::Button("Stop placing");
-					ImGui::SameLine();
-					ImGui::Text("Placing %s", context.objectClassToPlace->name);
-					if (clickedStop)
-						context.objectClassToPlace = nullptr;
-				}
-				else {
-					if (!selectedClass)
-						ImGui::BeginDisabled();
-					if (ImGui::Button("Place"))
-						context.objectClassToPlace = selectedClass;
-					if (!selectedClass)
-						ImGui::EndDisabled();
-				}
+			auto* placement = GetBehavior<PlacementBehavior<Context>>();
+
+			if (!placement->CanPlace())
+				ImGui::BeginDisabled();
+
+			if (placement->IsInPlaceMode()) {
+				bool clickedStop = ImGui::Button("Stop placing");
+				ImGui::SameLine();
+				ImGui::Text("Placing %s", context.objectClassToPlace->name);
+				if (clickedStop)
+					placement->SetPlaceMode(false);
 			}
+			else if (ImGui::Button("Place"))
+				placement->SetPlaceMode(true);
+
+			if (!placement->CanPlace())
+				ImGui::EndDisabled();
 		}
 
 		if (ImGui::BeginChild("List of objects"))
@@ -110,6 +112,8 @@ namespace ui::operation_modes::modes::level_editor {
 			return objectClass;
 		case Type::GROUP:
 			return groupLabel;
+		default:
+			return nullptr;
 		}
 	}
 
@@ -120,6 +124,8 @@ namespace ui::operation_modes::modes::level_editor {
 			return objectClass->name;
 		case Type::GROUP:
 			return groupLabel.c_str();
+		default:
+			return nullptr;
 		}
 	}
 
@@ -130,7 +136,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 	bool ObjectLibraryTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
 	{
-		if (type == Type::OBJECT_CLASS && library.selectedClass == objectClass)
+		if (type == Type::OBJECT_CLASS && library.GetContext().objectClassToPlace == objectClass)
 			nodeflags |= ImGuiTreeNodeFlags_Selected;
 
 		bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
@@ -140,12 +146,8 @@ namespace ui::operation_modes::modes::level_editor {
 				ImGui::SetDragDropPayload("GameObjectClass", &objectClass, sizeof(objectClass));
 				ImGui::EndDragDropSource();
 			}
-			else if (ImGui::IsItemClicked()) {
-				library.selectedClass = objectClass;
-
-				if (library.GetContext().objectClassToPlace)
-					library.GetContext().objectClassToPlace = library.selectedClass;
-			}
+			else if (ImGui::IsItemClicked())
+				library.GetContext().objectClassToPlace = objectClass;
 		}
 
 		return isOpen;

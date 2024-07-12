@@ -1,7 +1,6 @@
 #include "ObjectDataInspector.h"
+#include "Behaviors.h"
 #include "Context.h"
-#include <ui/operation-modes/behaviors/Selection.h>
-#include <ui/operation-modes/behaviors/SelectionTransformation.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/editors/ObjectData.h>
 #include <utilities/ObjectDataUtils.h>
@@ -13,7 +12,7 @@ namespace ui::operation_modes::modes::level_editor {
 	using namespace hh::game;
 
 	void ObjectDataInspector::RenderPanel() {
-		auto& selection = GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
+		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		if (selection.size() == 0) {
 			ImGui::Text("Select an object in the left pane.");
@@ -40,7 +39,7 @@ namespace ui::operation_modes::modes::level_editor {
 			bool edited = Editor("Focused object", *focusedObject);
 
 			if (edited || ImGui::IsItemDeactivatedAfterEdit()) {
-				Dispatch(SelectionTransformationBehavior<ObjectData*>::SelectionTransformChangedAction{});
+				Dispatch(SelectionTransformationBehavior<Context>::SelectionTransformChangedAction{});
 				Dispatch(ChangingParametersAction{});
 			}
 
@@ -60,14 +59,14 @@ namespace ui::operation_modes::modes::level_editor {
 		if (alignY) DistributeAlongBasis(Eigen::Vector3f::UnitY(), distributeSpacing.y());
 		if (alignZ) DistributeAlongBasis(Eigen::Vector3f::UnitZ(), distributeSpacing.z());
 
-		Dispatch(SelectionTransformationBehavior<ObjectData*>::SelectionTransformChangedAction{});
+		Dispatch(SelectionTransformationBehavior<Context>::SelectionTransformChangedAction{});
 	}
 
 	void ObjectDataInspector::DistributeAlongBasis(const Eigen::Vector3f& basis, float spacing)
 	{
 		Eigen::Vector3f avg{ 0.0f, 0.0f, 0.0f };
 
-		auto& selection = GetBehavior<SelectionBehavior<ObjectData*>>()->GetSelection();
+		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		if (selection.size() == 0)
 			return;

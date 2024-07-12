@@ -2,6 +2,7 @@
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include <utilities/math/MathUtils.h>
 #include "SelectionTransformation.h"
+#include "ForwardDeclarations.h"
 
 class ScreenSpaceManipulationBehavior : public OperationModeBehavior {
 	bool dragging{ false };

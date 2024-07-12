@@ -206,6 +206,27 @@ namespace ui::operation_modes::modes::level_editor {
 		TerminateObjectData(GetAllocator(), objectData);
 	}
 
+	hh::game::ObjectData* Context::SpawnObject(const csl::math::Vector3& position) {
+		auto* result = CreateObject(placementTargetLayer->GetAllocator(), objectClassToPlace, { position, { 0.0f, 0.0f, 0.0f } }, nullptr);
+		SpawnObject(result);
+		return result;
+	}
+
+	void Context::SpawnObject(ObjectData* objData) {
+		auto* resource = placementTargetLayer->GetResource();
+
+		if (auto* objInfoName = static_cast<const char*>(hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(objData->gameObjectClass)->GetAttributeValue("objinfo"))) {
+			auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
+			auto* objInfoClass = RESOLVE_STATIC_VARIABLE(ObjInfoRegistry::instance)->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
+			auto* objInfo = objInfoClass->Create(GetAllocator());
+
+			objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
+		}
+
+		resource->AddObject(objData);
+		focusedChunk->AddWorldObjectStatus(objData, true);
+	}
+
 	hh::game::ObjectWorldChunk* Context::GetFocusedChunk() const
 	{
 		return focusedChunk;

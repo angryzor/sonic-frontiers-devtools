@@ -1,19 +1,18 @@
 #pragma once
 #include <ui/Desktop.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
+#include "ForwardDeclarations.h"
 
-template<typename T>
+template<typename OpModeContext>
 class DeleteBehavior : public OperationModeBehavior {
 public:
-	struct Operations {
-		virtual void DeleteObjects(const csl::ut::MoveArray<T>& objects) = 0;
-	};
+	using Traits = DeleteBehaviorTraits<OpModeContext>;
 
 private:
-	Operations& operations;
+	Traits traits;
 
 public:
-	DeleteBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : OperationModeBehavior{ allocator, operationMode }, operations{ operations } {}
+	DeleteBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : OperationModeBehavior{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
 	using DeleteAction = Action<ActionId::DELETE>;
 
@@ -31,15 +30,15 @@ public:
 	virtual void ProcessAction(const ActionBase& action) override {
 		switch (action.id) {
 		case DeleteAction::id: {
-			auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<T>>();
+			auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<OpModeContext>>();
 
-			csl::ut::MoveArray<T> tmpArr{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<typename SelectionBehavior<OpModeContext>::ObjectType> tmpArr{hh::fnd::MemoryRouter::GetTempAllocator()};
 
 			for (auto obj : selectionBehavior->GetSelection())
 				tmpArr.push_back(obj);
 
 			selectionBehavior->DeselectAll();
-			operations.DeleteObjects(tmpArr);
+			traits.DeleteObjects(tmpArr);
 		}
 		}
 	}

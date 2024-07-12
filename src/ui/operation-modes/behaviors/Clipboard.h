@@ -1,28 +1,22 @@
 #pragma once
 #include <ui/operation-modes/OperationModeBehavior.h>
+#include "ForwardDeclarations.h"
 #include "Selection.h"
 
-template<typename T>
-struct ClipboardEntry;
-
-template<typename T>
+template<typename OpModeContext>
 class ClipboardBehavior : public OperationModeBehavior {
 public:
-	class Operations {
-	public:
-		virtual ClipboardEntry<T> CreateClipboardEntry(const T object) = 0;
-		virtual T CreateObject(const ClipboardEntry<T>& entry) = 0;
-	};
+	using Traits = ClipboardBehaviorTraits<OpModeContext>;
 
 private:
-	csl::ut::MoveArray<ClipboardEntry<T>> clipboard{ GetAllocator() };
-	Operations& operations;
+	csl::ut::MoveArray<ClipboardEntry<OpModeContext>> clipboard{ GetAllocator() };
+	Traits traits;
 
 public:
 	using CopyAction = Action<ActionId::COPY>;
 	using PasteAction = Action<ActionId::PASTE>;
 
-	ClipboardBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : OperationModeBehavior{ allocator, operationMode }, operations{ operations } {}
+	ClipboardBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : OperationModeBehavior{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
 	~ClipboardBehavior() {
 		Clear();
@@ -36,17 +30,17 @@ public:
 		case CopyAction::id:
 			Clear();
 
-			for (auto object : operationMode.GetBehavior<SelectionBehavior<T>>()->GetSelection())
-				clipboard.push_back(operations.CreateClipboardEntry(object));
+			for (auto object : operationMode.GetBehavior<SelectionBehavior<OpModeContext>>()->GetSelection())
+				clipboard.push_back(traits.CreateClipboardEntry(object));
 
 			break;
 		case PasteAction::id: {
-			csl::ut::MoveArray<T> newObjects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			csl::ut::MoveArray<typename SelectionBehaviorTraits<OpModeContext>::ObjectType> newObjects{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
 			for (auto& entry : clipboard)
-				newObjects.push_back(operations.CreateObject(entry));
+				newObjects.push_back(traits.CreateObject(entry));
 
-			operationMode.GetBehavior<SelectionBehavior<T>>()->Select(newObjects);
+			operationMode.GetBehavior<SelectionBehavior<OpModeContext>>()->Select(newObjects);
 			break;
 		}
 		}

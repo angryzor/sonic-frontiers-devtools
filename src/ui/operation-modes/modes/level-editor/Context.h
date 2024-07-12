@@ -30,6 +30,8 @@ namespace ui::operation_modes::modes::level_editor {
 		void SetFocusedChunk(hh::game::ObjectWorldChunk* chunk);
 		void ReleaseChunk();
 
+		hh::game::ObjectData* SpawnObject(const csl::math::Vector3& position);
+		void SpawnObject(hh::game::ObjectData* objData);
 		void ResetPlacementState();
 
 		void RecalculateDependentTransforms(hh::game::ObjectData* objectData);

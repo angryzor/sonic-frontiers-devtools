@@ -5,12 +5,10 @@
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include "SelectionTransformation.h"
 
+template<typename OpModeContext>
 class GizmoBehavior : public OperationModeBehavior {
     ImGuizmo::OPERATION gizmoOperation{ ImGuizmo::TRANSLATE };
     ImGuizmo::MODE gizmoMode{ ImGuizmo::LOCAL };
-    bool allowTranslate;
-    bool allowRotate;
-    bool allowScale;
 
 public:
 	using ChangeCoordinateSystemAction = Action<ActionId::CHANGE_COORDINATE_SYSTEM>;
@@ -24,7 +22,7 @@ public:
 	using OnlyZAxisAction = Action<ActionId::ONLY_Z_AXIS>;
 	using LockZAxisAction = Action<ActionId::LOCK_Z_AXIS>;
 
-	GizmoBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, bool allowTranslate = true, bool allowRotate = true, bool allowScale = true) : OperationModeBehavior{ allocator, operationMode }, allowTranslate{ allowTranslate }, allowRotate{ allowRotate }, allowScale{ allowScale } {}
+	GizmoBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : OperationModeBehavior{ allocator, operationMode } {}
 
 	static constexpr unsigned int id = 2;
 	virtual unsigned int GetId() override { return id; }
@@ -61,15 +59,15 @@ public:
 			gizmoMode = gizmoMode == ImGuizmo::LOCAL ? ImGuizmo::WORLD : ImGuizmo::LOCAL;
 			break;
 		case TranslateModeAction::id:
-			if (allowTranslate)
+			if (GizmoBehaviorTraits<OpModeContext>::allowTranslate)
 				gizmoOperation = ImGuizmo::TRANSLATE;
 			break;
 		case RotateModeAction::id:
-			if (allowRotate)
+			if (GizmoBehaviorTraits<OpModeContext>::allowRotate)
 				gizmoOperation = ImGuizmo::ROTATE;
 			break;
 		case ScaleModeAction::id:
-			if (allowScale)
+			if (GizmoBehaviorTraits<OpModeContext>::allowScale)
 				gizmoOperation = ImGuizmo::SCALE;
 			break;
 		case OnlyXAxisAction::id:

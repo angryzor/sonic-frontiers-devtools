@@ -1,5 +1,6 @@
 #pragma once
 #include <ui/operation-modes/OperationModeBehavior.h>
+#include "ForwardDeclarations.h"
 #include "Selection.h"
 
 class SelectionAabbBehaviorBase : public OperationModeBehavior {
@@ -22,21 +23,19 @@ public:
 	}
 };
 
-template<typename T>
+template<typename OpModeContext>
 class SelectionAabbBehavior : public SelectionAabbBehaviorBase {
 public:
-	struct Operations {
-		virtual bool CalculateAabb(const csl::ut::MoveArray<T>& objects, csl::geom::Aabb& aabb) = 0;
-	};
+	using Traits = SelectionAabbBehaviorTraits<OpModeContext>;
 
 private:
-	Operations& operations;
+	Traits traits;
 
 public:
-	SelectionAabbBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations)
-		: SelectionAabbBehaviorBase{ allocator, operationMode }, operations{ operations } {}
+	SelectionAabbBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode)
+		: SelectionAabbBehaviorBase{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
 	virtual void Render() override {
-		haveAabb = operations.CalculateAabb(operationMode.GetBehavior<SelectionBehavior<T>>()->GetSelection(), aabb);
+		haveAabb = traits.CalculateAabb(operationMode.GetBehavior<SelectionBehavior<OpModeContext>>()->GetSelection(), aabb);
 	}
 };

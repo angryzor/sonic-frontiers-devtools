@@ -2,6 +2,7 @@
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include <ui/operation-modes/behaviors/Selection.h>
+#include "ForwardDeclarations.h"
 
 class ObjectLocationVisual3DBehaviorBase : public OperationModeBehavior, public DebugRenderable {
 protected:
@@ -40,27 +41,25 @@ public:
 	}
 };
 
-template<typename T>
+template<typename OpModeContext>
 class ObjectLocationVisual3DBehavior : public ObjectLocationVisual3DBehaviorBase {
 public:
-	struct Operations {
-		virtual void GetInvisibleObjects(csl::ut::MoveArray<T>& objects) const = 0;
-		virtual Eigen::Affine3f GetWorldTransform(T object) const = 0;
-	};
+	using Traits = ObjectLocationVisual3DBehaviorTraits<OpModeContext>;
+	using ObjectType = typename SelectionBehaviorTraits<OpModeContext>::ObjectType;
 
 private:
-	Operations& operations;
+	Traits traits;
 
 public:
-	ObjectLocationVisual3DBehavior(csl::fnd::IAllocator* allocator, OperationModeBase& operationMode, Operations& operations) : ObjectLocationVisual3DBehaviorBase{ allocator, operationMode }, operations{ operations } {}
+	ObjectLocationVisual3DBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : ObjectLocationVisual3DBehaviorBase{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
 	virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) override {
-		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<T>>();
+		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<OpModeContext>>();
 
-		csl::ut::MoveArray<T> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
-		operations.GetInvisibleObjects(objects);
+		csl::ut::MoveArray<ObjectType> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		traits.GetInvisibleObjects(objects);
 
 		for (auto& object : objects)
-			(selectionBehavior->GetSelection().find(object) != -1 ? selectedTargetBox : targetBox)->Render(&ctx, operations.GetWorldTransform(object));
+			(selectionBehavior->GetSelection().find(object) != -1 ? selectedTargetBox : targetBox)->Render(&ctx, traits.GetWorldTransform(object));
 	}
 };

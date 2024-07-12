@@ -1,9 +1,10 @@
 #pragma once
 #include <ui/operation-modes/OperationModeBehavior.h>
+#include "ForwardDeclarations.h"
 #include "Selection.h"
 #include "MousePicking.h"
 
-template<typename T>
+template<typename OpModeContext>
 class SelectionMousePickingBehavior : public OperationModeBehavior {
 public:
 	static constexpr unsigned int id = 9;
@@ -12,8 +13,8 @@ public:
 	using OperationModeBehavior::OperationModeBehavior;
 
 	virtual void Render() override {
-		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<T>>();
-		auto* mousePicking = operationMode.GetBehavior<MousePickingBehaviorBase<T>>();
+		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<OpModeContext>>();
+		auto* mousePicking = operationMode.GetBehavior<MousePickingBehavior<OpModeContext>>();
 
 		if (mousePicking->picked && mousePicking->mouseButton == ImGuiMouseButton_Left)
 			selectionBehavior->Select(mousePicking->pickedObjects);

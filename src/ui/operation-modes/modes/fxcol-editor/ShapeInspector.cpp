@@ -1,5 +1,5 @@
 #include "ShapeInspector.h"
-#include <ui/operation-modes/behaviors/Selection.h>
+#include "Behaviors.h"
 #include <ui/common/editors/FxCol.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
@@ -12,7 +12,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		if (!fxColManager)
 			return;
 
-		auto& selection = GetBehavior<SelectionBehavior<FxColCollisionShape*>>()->GetSelection();
+		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 		if (selection.size() == 0) {
 			ImGui::Text("Select a shape in the left pane.");
 		}

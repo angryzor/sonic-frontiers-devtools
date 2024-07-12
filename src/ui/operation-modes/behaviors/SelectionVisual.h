@@ -2,6 +2,7 @@
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include <utilities/math/MathUtils.h>
+#include "ForwardDeclarations.h"
 
 class SelectionVisualBehavior : public OperationModeBehavior {
 public:

@@ -1,6 +1,6 @@
-#include <ui/operation-modes/behaviors/Selection.h>
 #include "Timeline.h"
 #include "Context.h"
+#include "Behaviors.h"
 #include "SurfRideElement.h"
 #include "implot_internal.h"
 
@@ -11,7 +11,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	{
 		Layer* focusedLayer{};
 
-		auto& selection = GetBehavior<SelectionBehavior<SurfRideElement>>()->GetSelection();
+		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		for (auto& element : selection) {
 			Layer* newLayer{};

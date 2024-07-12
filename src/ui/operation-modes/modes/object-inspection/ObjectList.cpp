@@ -1,6 +1,6 @@
 #include "ObjectList.h"
+#include "Behaviors.h"
 #include <ui/common/Icons.h>
-#include <ui/operation-modes/behaviors/Selection.h>
 #include <utilities/math/MathUtils.h>
 
 namespace ui::operation_modes::modes::object_inspection {
@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::object_inspection {
 	void ObjectList::RenderObjectTreeNode(GameObject* obj) {
 		ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-		auto* selectionBehavior = GetBehavior<SelectionBehavior<GameObject*>>();
+		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 
 		if (selectionBehavior->GetSelection().find(obj) != -1)
 			nodeflags |= ImGuiTreeNodeFlags_Selected;
@@ -102,7 +102,7 @@ namespace ui::operation_modes::modes::object_inspection {
 			}
 			if (ImGui::BeginTabItem("Layer view")) {
 				if (ImGui::BeginChild("Content")) {
-					auto* selectionBehavior = GetBehavior<SelectionBehavior<GameObject*>>();
+					auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 
 					for (auto* layer : GameManager::GetInstance()->gameObjectLayers) {
 						if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
