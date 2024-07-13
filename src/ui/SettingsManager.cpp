@@ -222,7 +222,7 @@ void SettingsManager::Render() {
 						ImGui::TableHeadersRow();
 
 						ForEachShortcut([&](ShortcutId shortcutId) {
-							auto description = GetShortcutDescription(shortcutId);
+							auto& description = GetShortcutDescription(shortcutId);
 
 							ImGui::PushID(static_cast<int>(shortcutId));
 							ImGui::TableNextRow();
