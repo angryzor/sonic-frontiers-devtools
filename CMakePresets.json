@@ -1,0 +1,70 @@
+﻿{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "windows-base",
+      "description": "Target Windows with the Visual Studio development environment.",
+      "hidden": true,
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/out/build/${presetName}",
+      "installDir": "${sourceDir}/out/install/${presetName}",
+      "cacheVariables": {
+        "CMAKE_C_COMPILER": "cl.exe",
+        "CMAKE_CXX_COMPILER": "cl.exe"
+      },
+      "condition": {
+        "type": "equals",
+        "lhs": "${hostSystemName}",
+        "rhs": "Windows"
+      }
+    },
+    {
+      "name": "x64-debug",
+      "displayName": "x64 Debug",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment. (Debug)",
+      "inherits": "windows-base",
+      "architecture": {
+        "value": "x64",
+        "strategy": "external"
+      },
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW": false,
+        "DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW": false
+      }
+    },
+    {
+      "name": "x64-debug-with-demo",
+      "displayName": "x64 Debug ImGui Demo",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment and enable the ImGui demo window. (Debug)",
+      "inherits": "x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Debug",
+        "DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW": true,
+        "DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW": true
+      }
+    },
+    {
+      "name": "x64-release",
+      "displayName": "x64 Release",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment. (Release)",
+      "inherits": "x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "Release",
+        "DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW": false,
+        "DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW": false
+      }
+    },
+    {
+      "name": "x64-relwithdebinfo",
+      "displayName": "x64 RelWithDebInfo",
+      "description": "Target Windows (64-bit) with the Visual Studio development environment. (RelWithDebInfo)",
+      "inherits": "x64-debug",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": "RelWithDebInfo",
+        "DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW": false,
+        "DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW": false
+      }
+    }
+  ]
+}
