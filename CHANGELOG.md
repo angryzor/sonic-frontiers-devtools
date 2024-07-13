@@ -11,11 +11,13 @@
 * Further improved communication between the level editor and the game.
 * Improved mouse handling so that windows don't capture the mouse input when moving over them while dragging.
 * Improved build script so it is no longer necessary to supply `-A x64` when building.
-* Reinstated live grinding rail editing.
-* Fixed a crash when adding items to an array loaded from disk in the level editor.
-* Fixed a bug where capsules and cylinders were rendered with their radii and heights swapped.
-* Refactored operation modes so that editors can be added more easily.
 * Made project buildable using Visual Studio 2022's CMake integration.
+* Fixed a crash when adding items to an array loaded from disk in the level editor.
+* Fixed crash when Sonic is selected while changing maps.
+* Fixed loading screen hanging when an object is selected.
+* Fixed a bug where capsules and cylinders were rendered with their radii and heights swapped.
+* Reinstated live grind rail editing.
+* Refactored operation modes so that editors can be added more easily.
 
 
 # v0.1.28

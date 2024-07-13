@@ -9,6 +9,26 @@ A HMM update server is also available.
 
 ## Setting up the development environment
 
+### Using Visual Studio 2022's CMake integration
+You will need to have the following prerequisites installed:
+
+* Visual Studio 2022
+
+Check out the project and make sure to also check out its submodules:
+
+```sh
+git clone --recurse-submodules https://github.com/angryzor/sonic-frontiers-devtools.git
+```
+
+Simply open the project folder in Visual Studio 2022 (File > Open > CMake...) and it should automatically detect the CMakeLists.txt file.
+
+The following presets are available:
+* x64 Debug: Debug build.
+* x64 Debug ImGui Demo: Debug build with ImGui demo window enabled (for editing themes etc.).
+* x64 Release: Release build.
+* x64 RelWithDebInfo: Release build with debug information.
+
+### Using CMake with the Visual Studio 2022 generator
 You will need to have the following prerequisites installed:
 
 * Visual Studio 2022
@@ -23,14 +43,14 @@ git clone --recurse-submodules https://github.com/angryzor/sonic-frontiers-devto
 Now let CMake do its thing:
 
 ```sh
-cmake -A x64 -B build
+cmake -B build
 ```
 
 If you have Sonic Frontiers installed in a non-standard location, you can specify that location
 with the `DEVTOOLS_GAME_FOLDER` variable:
 
 ```sh
-cmake -A x64 -B build -DDEVTOOLS_GAME_FOLDER="C:\ShadowFrontiers"
+cmake -B build -DDEVTOOLS_GAME_FOLDER="C:\ShadowFrontiers"
 ```
 
 Once CMake is finished, navigate to the build directory and open `devtools.sln` with VS2022.
