@@ -1,3 +1,7 @@
+# v0.1.31
+* Fixed a bug where the level editor did not check if a placement layer is selected when using Shift+Click to place objects.
+
+
 # v0.1.30
 * Added support for ImGui DockSpaces, making it possible to dock windows to the sides of the screen.
 * Added support for ImGui Multi-Viewport mode, allowing you to move windows outside of the main viewport and/or to other monitors.

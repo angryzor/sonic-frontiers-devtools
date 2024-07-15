@@ -46,7 +46,7 @@ public:
 	void Render() override {
 		auto* mousePicking = operationMode.GetBehavior<MousePickingBehavior<OpModeContext>>();
 
-		if ((IsInPlaceMode() || ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) && mousePicking->locationPicked)
+		if (CanPlace() && (placing || ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) && mousePicking->locationPicked)
 			Dispatch(ObjectPlacedAction{ traits.PlaceObject(mousePicking->pickedLocation) });
 	}
 };
