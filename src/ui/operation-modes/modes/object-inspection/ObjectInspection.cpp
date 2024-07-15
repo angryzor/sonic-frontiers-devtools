@@ -7,7 +7,7 @@ namespace ui::operation_modes::modes::object_inspection {
 	using namespace hh::fnd;
 	using namespace hh::game;
 
-	ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator) : OperationMode{ allocator } {
+	ObjectInspection::ObjectInspection(csl::fnd::IAllocator* allocator, OperationModeHost& host) : OperationMode{ allocator, host } {
 		AddPanel<ObjectList>();
 		AddPanel<ObjectInspector>();
 		AddBehavior<SelectionBehavior>();

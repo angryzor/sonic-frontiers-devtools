@@ -6,7 +6,8 @@
 #include "SettingsManager.h"
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
-#include <hot-reload/ReloadManager.h>
+#include <resources/ReloadManager.h>
+#include <resources/ManagedMemoryRegistry.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -17,26 +18,34 @@ static ImFont* font;
 bool Context::visible = false;
 bool Context::passThroughMouse = false;
 bool Context::inited = false;
-bool Context::alreadyRendering = false;
 
 using namespace hh::game;
 using namespace hh::needle;
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 constexpr size_t appResetAddr = 0x145400300;
+constexpr size_t appShutdownAddr = 0x145401AE0;
 constexpr size_t wndProcAddr = 0x1406EC680;
-constexpr size_t displaySwapDeviceConstructorAddr = 0x14082EE90;
+constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x14082FD50;
+constexpr size_t displaySwapDevicePresentAddr = 0x1463FA880;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 constexpr size_t appResetAddr = 0x1501A41F0;
+constexpr size_t appShutdownAddr = 0x150192E80;
 constexpr size_t wndProcAddr = 0x140D68F80;
-constexpr size_t displaySwapDeviceConstructorAddr = 0x155D23F80;
+constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x1410FB090;
+constexpr size_t displaySwapDevicePresentAddr = 0x1410FAEE0;
 #endif
 
 HOOK(uint64_t, __fastcall, GameApplication_Reset, appResetAddr, hh::game::GameApplication* self) {
 	auto res = originalGameApplication_Reset(self);
 	Context::init();
 	return res;
+}
+
+HOOK(uint64_t, __fastcall, GameApplication_Shutdown, appShutdownAddr, hh::game::GameApplication* self) {
+	Context::deinit();
+	return originalGameApplication_Shutdown(self);
 }
 
 extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam);
@@ -78,34 +87,26 @@ static void createBackBuffer(IDXGISwapChain* This)
 	}
 }
 
-VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, Present, UINT SyncInterval, UINT Flags)
+HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeBuffersAddr, hh::needle::ImplDX11::DisplaySwapDeviceDX11* self, unsigned int* width, unsigned int* height)
 {
-	if (Context::visible && !Context::alreadyRendering) {
-		Context::alreadyRendering = true;
+	auto result = originalDisplaySwapDevice_ResizeBuffers(self, width, height);
+
+	createBackBuffer(self->swapChain);
+
+	return result;
+}
+
+HOOK(bool, __fastcall, DisplaySwapDevice_Present, displaySwapDevicePresentAddr, hh::needle::ImplDX11::DisplaySwapDeviceDX11* self, unsigned int flags)
+{
+	if (Context::inited && Context::visible) {
 		ShowCursor(true);
 		if (!renderTargetView) {
-			createBackBuffer(This);
+			createBackBuffer(self->swapChain);
 		}
 		Context::update();
-		Context::alreadyRendering = false;
 	}
 
-	return originalIDXGISwapChainPresent(This, SyncInterval, Flags);
-}
-
-VTABLE_HOOK(HRESULT, WINAPI, IDXGISwapChain, ResizeBuffers, UINT BufferCount, UINT Width, UINT Height, DXGI_FORMAT NewFormat, UINT SwapChainFlags)
-{
-	createBackBuffer(This);
-
-	return originalIDXGISwapChainResizeBuffers(This, BufferCount, Width, Height, NewFormat, SwapChainFlags);
-}
-
-HOOK(void*, __fastcall, SwapChainHook, displaySwapDeviceConstructorAddr, void* in_pThis, IDXGISwapChain* in_pSwapChain)
-{
-	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, Present, 8);
-	INSTALL_VTABLE_HOOK(IDXGISwapChain, in_pSwapChain, ResizeBuffers, 13);
-
-	return originalSwapChainHook(in_pThis, in_pSwapChain);
+	return originalDisplaySwapDevice_Present(self, flags);
 }
 
 //HOOK(bool, __fastcall, CreateRenderingDeviceDX11, 0x1410EC330, hh::needle::RenderingDevice** renderingDevice, hh::needle::RenderingDeviceContext** renderingDeviceContext, void* deviceCreationSetting, void** displaySwapDevice, unsigned int creationFlags)
@@ -127,8 +128,10 @@ HOOK(void*, __fastcall, SwapChainHook, displaySwapDeviceConstructorAddr, void* i
 void Context::install_hooks()
 {
 	INSTALL_HOOK(GameApplication_Reset);
+	INSTALL_HOOK(GameApplication_Shutdown);
 	INSTALL_HOOK(WndProcHook);
-	INSTALL_HOOK(SwapChainHook);
+	INSTALL_HOOK(DisplaySwapDevice_ResizeBuffers);
+	INSTALL_HOOK(DisplaySwapDevice_Present);
 	InstallInputHooks();
 	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
 	//INSTALL_HOOK(GOCCamera_PushController);
@@ -153,7 +156,7 @@ void Context::init() {
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
 	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-	//io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
 	SettingsManager::Init();
 
@@ -189,12 +192,28 @@ void Context::init() {
 	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
 	Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::object_inspection::ObjectInspection>();
+	resources::ManagedMemoryRegistry::Init(allocator);
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(device, deviceContext);
 
 	inited = true;
+}
+
+void Context::deinit()
+{
+	inited = false;
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
+
+	resources::ManagedMemoryRegistry::Deinit();
+	Desktop::instance->GetAllocator()->Free(Desktop::instance);
+	GOCVisualDebugDrawRenderer::instance = nullptr;
+	ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
+
+	ImPlot::DestroyContext();
+	ImGui::DestroyContext();
 }
 
 void Context::update()
@@ -211,7 +230,6 @@ void Context::update()
 	ImGui_ImplWin32_NewFrame();
 
 	ImGui::NewFrame();
-	ImGuizmo::BeginFrame();
 
 	//ImGui::PushFont(firaCode);
 #ifdef DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW
@@ -228,10 +246,10 @@ void Context::update()
 	deviceContext->OMSetRenderTargets(1, &renderTargetView, nullptr);
 	ImGui_ImplDX11_RenderDrawData(ImGui::GetDrawData());
 
-	//if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
-	//{
-	//	ImGui::UpdatePlatformWindows();
-	//	ImGui::RenderPlatformWindowsDefault();
-	//}
+	if (ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+	{
+		ImGui::UpdatePlatformWindows();
+		ImGui::RenderPlatformWindowsDefault();
+	}
 }
 

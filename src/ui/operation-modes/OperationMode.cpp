@@ -26,6 +26,11 @@ void OperationModeBase::DeinitBehaviors()
 		(*(--i))->Deinit();
 }
 
+bool OperationModeBase::IsMouseOverSceneWindow()
+{
+	return host.IsMouseOverSceneWindow();
+}
+
 bool OperationModeBase::CanTakeMouseControl(OperationModeBehavior* behavior)
 {
 	return (draggingBehavior == nullptr || draggingBehavior == behavior)
@@ -37,7 +42,7 @@ void OperationModeBase::ToggleDragging(OperationModeBehavior* behavior, bool can
 	if (!CanTakeMouseControl(behavior))
 		return;
 
-	if (!ImGui::GetIO().WantCaptureMouse && !ImGui::IsAnyItemHovered())
+	if (IsMouseOverSceneWindow())
 		if (ImGui::IsMouseDragging(ImGuiMouseButton_Left) && canStart)
 			draggingBehavior = behavior;
 

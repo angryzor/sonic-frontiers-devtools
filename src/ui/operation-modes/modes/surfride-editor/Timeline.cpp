@@ -175,8 +175,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (track.keyCount == 0)
 			return;
 
-		switch (static_cast<SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SRE_TRACK_FLAG>>(track.flags) & 0xF0)) {
-		case SRE_TRACK_FLAG::FLOAT:
+		switch (track.GetDataType()) {
+		case SRE_TRACK_DATA_TYPE::FLOAT:
 			switch (track.trackType) {
 			case SRE_CURVE_TYPE::MaterialColorR:
 			case SRE_CURVE_TYPE::MaterialColorG:
@@ -213,22 +213,22 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			RenderPlotLine<float>(track);
 			break;
-		case SRE_TRACK_FLAG::BOOL:
+		case SRE_TRACK_DATA_TYPE::BOOL:
 			SetupYAxis(false, true);
 			RenderDragPoints<bool>(track, false, true);
 			RenderPlotLine<bool>(track);
 			break;
-		case SRE_TRACK_FLAG::INT:
+		case SRE_TRACK_DATA_TYPE::INT:
 			SetupFloatingYAxis<int>(track);
 			RenderDragPoints<int>(track);
 			RenderPlotLine<int>(track);
 			break;
-		case SRE_TRACK_FLAG::INDEX:
+		case SRE_TRACK_DATA_TYPE::INDEX:
 			SetupFloatingYAxis<int>(track);
 			RenderDragPoints<int>(track);
 			RenderPlotLine<int>(track);
 			break;
-		case SRE_TRACK_FLAG::COLOR:
+		case SRE_TRACK_DATA_TYPE::COLOR:
 			SetupYAxis(0, 255);
 
 			RenderDragPoints<Color, GetR, SetR>(track, 0, 255, "R", ImVec4(1.0f, 0.0f, 0.0f, 1.0f));

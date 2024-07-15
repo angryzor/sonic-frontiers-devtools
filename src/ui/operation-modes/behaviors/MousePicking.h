@@ -55,7 +55,7 @@ public:
 		if (this->operationMode.CanTakeMouseControl(this)) {
 			if (this->operationMode.IsDragging(this))
 				HandleDragSelect();
-			else if (!draggingPrevFrame && !ImGui::GetIO().WantCaptureMouse && !ImGui::IsAnyItemHovered()) {
+			else if (!draggingPrevFrame && operationMode.IsMouseOverSceneWindow()) {
 				if (ImGui::IsMouseReleased(ImGuiMouseButton_Left)) {
 					this->operationMode.BeginSingleFrameExclusiveMouseControl(this);
 					HandleClickSelect(ImGuiMouseButton_Left);

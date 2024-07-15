@@ -121,7 +121,7 @@ namespace rflops {
 #ifdef DEVTOOLS_TARGET_SDK_wars
 				case hh::fnd::RflClassMember::TYPE_OLD_ARRAY: return ProcessOldArray(objs..., member);
 #endif
-				case hh::fnd::RflClassMember::TYPE_POINTER: return ProcessSingle(*static_cast<void**>(objs)..., member, member->GetSubType());
+				case hh::fnd::RflClassMember::TYPE_POINTER: return (*static_cast<void**>(objs) && ...) ? ProcessSingle(*static_cast<void**>(objs)..., member, member->GetSubType()) : typename V::result_type{};
 				case hh::fnd::RflClassMember::TYPE_ENUM: return ProcessEnum(objs..., member);
 				case hh::fnd::RflClassMember::TYPE_FLAGS: return ProcessFlags(objs..., member);
 				case hh::fnd::RflClassMember::TYPE_SIMPLE_ARRAY:

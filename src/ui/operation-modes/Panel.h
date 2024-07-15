@@ -12,8 +12,15 @@ struct PanelTraits {
 template<typename Context>
 class OperationMode;
 
+class PanelBase : public Component {
+public:
+	using Component::Component;
+	virtual PanelTraits GetPanelTraits() const = 0;
+	virtual void RenderPanel() = 0;
+};
+
 template<typename Context>
-class Panel : public Component {
+class Panel : public PanelBase {
 	OperationMode<Context>& operationMode;
 
 protected:
@@ -21,7 +28,7 @@ protected:
 	template<typename T> T* GetBehavior() { return operationMode.GetBehavior<T>(); }
 
 public:
-	Panel(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Component{ allocator }, operationMode{ operationMode } { }
+	Panel(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : PanelBase{ allocator }, operationMode{ operationMode } { }
 
 	virtual void Render() override
 	{
@@ -38,7 +45,4 @@ public:
 
 		ImGui::End();
 	}
-
-	virtual PanelTraits GetPanelTraits() const = 0;
-	virtual void RenderPanel() = 0;
 };

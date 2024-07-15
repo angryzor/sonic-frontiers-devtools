@@ -1,3 +1,13 @@
+# v0.1.30
+* Added support for ImGui DockSpaces, making it possible to dock windows to the sides of the screen.
+* Added support for ImGui Multi-Viewport mode, allowing you to move windows outside of the main viewport and/or to other monitors.
+* Cleaner shutdown of the DevTools when the game is closed.
+* Cleaner handling of window resizing.
+* Implemented semi-automatic RflClass generation through templates.
+* Added a "managed resource memory" mechanism, making it possible to allocate memory for resources that is automatically freed when the resource is unloaded.
+* Added RflClass implementations for ResSurfRideProject datastructures, preparing for implementation of the export module.
+
+
 # v0.1.29
 * Added beginnings of a ResFxColFile2 editor.
 * Added rebindable shortcuts.

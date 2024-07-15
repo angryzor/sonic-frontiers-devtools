@@ -127,11 +127,14 @@ bool Editor(const char* label, FxColCollisionShape::Type type, FxColCollisionSha
 	}
 }
 
-bool Editor(const char* label, FxColCollisionShape& shape) {
+bool Editor(const char* label, FxColCollisionShape& shape, ResFxColFile2* resource) {
 	bool edited{};
 
 	if (ImGui::TreeNode(label)) {
-		Viewer("Name", shape.name);
+		if (resource == nullptr)
+			Viewer("Name", shape.name);
+		else
+			edited |= InputText("Name", const_cast<char*&>(shape.name), resource);
 
 		ImGui::SeparatorText("Collision shape");
 		edited |= Editor("Position", shape.position);

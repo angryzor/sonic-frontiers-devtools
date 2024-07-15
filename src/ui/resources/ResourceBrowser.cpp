@@ -3,7 +3,7 @@
 #include "editors/ResReflectionEditor.h"
 //#include "editors/ResObjectWorldEditor.h"
 #include "editors/ResMaterialEditor.h"
-#include <hot-reload/ReloadManager.h>
+#include <resources/ReloadManager.h>
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
 #include <utilities/ResourceTypes.h>

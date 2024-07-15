@@ -7,11 +7,10 @@ BOOL WINAPI DllMain(_In_ HINSTANCE hInstance, _In_ DWORD reason, _In_ LPVOID res
 	{
 	case DLL_PROCESS_ATTACH:
 		Context::install_hooks();
-	break;
+		break;
 	case DLL_PROCESS_DETACH:
-		ImGui_ImplDX11_Shutdown();
-		ImGui_ImplWin32_Shutdown();
-		ImGui::DestroyContext();
+		if (Context::inited)
+			Context::deinit();
 		break;
 	case DLL_THREAD_ATTACH:
 	case DLL_THREAD_DETACH:

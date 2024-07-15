@@ -9,7 +9,7 @@ namespace ui::operation_modes::modes::level_editor {
         , public hh::game::ObjectWorldListener
     {
     public:
-        LevelEditor(csl::fnd::IAllocator* allocator);
+        LevelEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host);
         virtual ~LevelEditor();
 
         virtual void ProcessAction(const ActionBase& action) override;

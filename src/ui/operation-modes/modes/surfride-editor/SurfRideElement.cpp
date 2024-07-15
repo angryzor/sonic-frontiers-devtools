@@ -7,6 +7,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	SurfRideElement::SurfRideElement(Type type, SRS_CAMERA* cameraData) : type{ type }, cameraData{ cameraData } {}
 	SurfRideElement::SurfRideElement(Type type, Layer* layer) : type{ type }, layer{ layer } {}
 	SurfRideElement::SurfRideElement(Type type, Cast* cast) : type{ type }, cast{ cast } {}
+	SurfRideElement::SurfRideElement(Type type, SurfRide::SRS_TEXTURE* texture) : type{ type }, texture{ texture } {}
 
 	bool SurfRideElement::operator==(const SurfRideElement& other) const
 	{
@@ -18,6 +19,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		case Type::CAMERA_DATA: return cameraData == other.cameraData;
 		case Type::LAYER: return layer == other.layer;
 		case Type::CAST: return cast == other.cast;
+		case Type::TEXTURE: return texture == other.texture;
 		default: return true;
 		}
 	}
@@ -29,6 +31,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		case Type::CAMERA_DATA: return cameraData->name;
 		case Type::LAYER: return layer->layerData->name;
 		case Type::CAST: return cast->castData->name;
+		case Type::TEXTURE: return texture->name;
 		default: return nullptr;
 		}
 	}

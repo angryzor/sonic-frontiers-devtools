@@ -8,7 +8,7 @@ namespace ui::operation_modes::modes::object_inspection {
         , public hh::game::GameManagerListener
     {
     public:
-        ObjectInspection(csl::fnd::IAllocator* allocator);
+        ObjectInspection(csl::fnd::IAllocator* allocator, OperationModeHost& host);
         ~ObjectInspection();
 
         virtual void ProcessAction(const ActionBase& action) override;

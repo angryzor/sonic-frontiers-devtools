@@ -68,7 +68,7 @@ void LevelEditor::Render() {
 	objectDataInspector.Render();
 	objectLibrary.Render();
 
-	if (ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION)) {
+	if (ImGui::Begin("Main menu")) {
 		ImGui::SameLine();
 		ImGui::Checkbox("Render debug comments", &renderDebugComments);
 	}

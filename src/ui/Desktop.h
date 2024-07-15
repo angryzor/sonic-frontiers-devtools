@@ -5,7 +5,7 @@
 #include "Action.h"
 #include "Shortcuts.h"
 
-class Desktop : public CompatibleObject {
+class Desktop : public CompatibleObject, OperationModeHost {
     struct ShortcutBinding {
         ShortcutId shortcutId;
         ActionId actionId;
@@ -34,17 +34,13 @@ public:
     void Render();
     void RenderOverlayWindow();
     void OpenStandaloneWindow(StandaloneWindow* window);
-    void HandleMousePicking();
-    bool IsPickerMouseReleased() const;
-    const csl::ut::MoveArray<hh::game::GameObject*>& GetPickedObjects() const;
-    const csl::math::Vector3* GetPickedLocation() const;
     
     template<typename T>
     void SwitchToOperationMode() {
         if (operationMode != nullptr)
             operationMode->DeinitBehaviors();
 
-        operationMode = new (GetAllocator()) T{ GetAllocator() };
+        operationMode = new (GetAllocator()) T{ GetAllocator(), *this };
 
         operationMode->InitBehaviors();
     }
@@ -56,4 +52,10 @@ public:
 
     void UnbindShortcut(ShortcutId shortcutId);
     void HandleShortcuts();
+
+    // Inherited via OperationModeHost
+    void RenderPanel(PanelBase& panel) override;
+    bool BeginSceneWindow(PanelBase& panel) override;
+    void EndSceneWindow() override;
+    bool IsMouseOverSceneWindow() override;
 };

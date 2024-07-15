@@ -13,7 +13,8 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/FxColCollisionShape.cpp
         debug-rendering/visuals/Math.cpp
-        hot-reload/ReloadManager.cpp
+        resources/ManagedMemoryRegistry.cpp
+        resources/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
         reflection/serialization/ReflectionSerializer.cpp
         reflection/serialization/resource-rfls/ResObjectWorld.cpp
@@ -88,7 +89,8 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/FxColCollisionShape.h
         debug-rendering/visuals/Math.h
-        hot-reload/ReloadManager.h
+        resources/ManagedMemoryRegistry.h
+        resources/ReloadManager.h
         reflection/ReflectiveOperations.h
         reflection/RflArrayAccessor.h
         reflection/serialization/EndianSwaps.h
@@ -181,12 +183,14 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ObjectDataUtils.h
         utilities/ResourceTypes.h
         utilities/RflDiff.h
+        utilities/RflClassGen.h
         utilities/CompatibleObject.h
 )
 
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
+            reflection/serialization/resource-rfls/ResSurfRideProject.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp

@@ -279,9 +279,11 @@ void SettingsManager::OpenConfigDialog() {
 }
 
 void SettingsManager::ApplySettings() {
+	auto& io = ImGui::GetIO();
+
 	Theme::themes[settings.theme].Load();
 	Translations::SetCurrentLanguage(settings.language);
-	ImGui::GetIO().ConfigFlags = settings.configFlags | ImGuiConfigFlags_DockingEnable;
+	io.ConfigFlags = (settings.configFlags & settingsConfigFlagsMask) | (io.ConfigFlags & ~settingsConfigFlagsMask);
 	defaultFloatStep = settings.rflDefaultFloatStep;
 	rflMinFloatStep = settings.rflMinFloatStep;
 	rflSliderCutOff = settings.rflSliderCutOffRange;

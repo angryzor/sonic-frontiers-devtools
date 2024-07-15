@@ -120,6 +120,8 @@ class SettingsManager
         bool operator!=(const Settings& other) const;
     };
 
+    constexpr static ImGuiConfigFlags settingsConfigFlagsMask = ImGuiConfigFlags_NavEnableGamepad | ImGuiConfigFlags_NavEnableKeyboard;
+
     static ImGuiSettingsHandler settingsHandler;
 
     static bool showConfigDialog;

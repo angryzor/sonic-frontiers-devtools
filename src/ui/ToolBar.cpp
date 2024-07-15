@@ -31,17 +31,9 @@
 using namespace hh::game;
 
 void ToolBar::Render() {
-	ImGuiWindowFlags windowFlags
-		= ImGuiWindowFlags_MenuBar
-		| ImGuiWindowFlags_NoResize
-		| ImGuiWindowFlags_NoMove
-		| ImGuiWindowFlags_NoCollapse;
+	auto& style = ImGui::GetStyle();
 
-	const ImGuiViewport* viewport = ImGui::GetMainViewport();
-	ImGui::SetNextWindowPos(viewport->WorkPos);
-	ImGui::SetNextWindowSize(ImVec2(viewport->Size.x, 0));
-
-	if (!ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION, NULL, windowFlags)) {
+	if (!ImGui::BeginViewportSideBar("Main menu", ImGui::GetMainViewport(), ImGuiDir_Up, 56, ImGuiWindowFlags_MenuBar)) {
 		ImGui::End();
 		return;
 	}

@@ -6,6 +6,6 @@ namespace ui::operation_modes::modes::fxcol_editor {
     class FxColEditor : public OperationMode<Context>
     {
     public:
-        FxColEditor(csl::fnd::IAllocator* allocator);
+        FxColEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host);
     };
 }

@@ -9,7 +9,7 @@ namespace ui::operation_modes::modes::level_editor {
 	using namespace hh::fnd;
 	using namespace hh::game;
 
-	LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator) : OperationMode{ allocator } {
+	LevelEditor::LevelEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host) : OperationMode{ allocator, host } {
 		AddPanel<SetObjectList>();
 		AddPanel<ObjectDataInspector>();
 		AddPanel<ObjectLibrary>();

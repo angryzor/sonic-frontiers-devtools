@@ -62,6 +62,7 @@ bool InputText(const char* label, char (&str)[Len], ImGuiInputTextFlags flags = 
 
 bool InputText(const char* label, csl::ut::VariableString& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 bool InputText(const char* label, csl::ut::String& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+bool InputText(const char* label, char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
 template<typename T>
 bool CheckboxFlags(const char* label, T& v, T value) {

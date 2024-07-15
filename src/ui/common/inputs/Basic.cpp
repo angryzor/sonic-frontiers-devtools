@@ -1,4 +1,5 @@
 #include "Basic.h"
+#include <resources/ManagedMemoryRegistry.h>
 
 static char dummy[1] = { '\0' };
 
@@ -15,6 +16,36 @@ static int StringResizeCallback(ImGuiInputTextCallbackData* data)
 
 bool InputText(const char* label, csl::ut::String& str, ImGuiInputTextFlags flags) {
 	return ImGui::InputText(label, str.c_str() == nullptr ? dummy : str.c_str(), str.size(), flags | ImGuiInputTextFlags_CallbackResize, StringResizeCallback, &str);
+}
+
+struct ManagedResourceString {
+	char* str;
+	hh::fnd::ManagedResource* resource;
+};
+
+static int CStringResizeCallback(ImGuiInputTextCallbackData* data)
+{
+	if (data->EventFlag == ImGuiInputTextFlags_CallbackResize)
+	{
+		auto strData = static_cast<ManagedResourceString*>(data->UserData);
+		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(strData->resource);
+
+		auto* newStr = new (&allocator) char[data->BufSize];
+		strcpy_s(newStr, data->BufSize, strData->str);
+		allocator.Free(strData->str);
+
+		strData->str = newStr;
+		data->Buf = newStr;
+	}
+	return 0;
+}
+
+bool InputText(const char* label, char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags)
+{
+	ManagedResourceString data{ str, resource };
+	bool result = ImGui::InputText(label, str, strlen(str) + 1, flags | ImGuiInputTextFlags_CallbackResize, CStringResizeCallback, &data);
+	str = data.str;
+	return result;
 }
 
 // This is a completely nonstandard hack around the fact that these things don't have resizeable buffers

@@ -26,7 +26,16 @@ public:
 	BehaviorTraitsImpl(typename Context& context) : context{ context } {}
 };
 
+class OperationModeHost {
+public:
+	virtual void RenderPanel(PanelBase& panel) = 0;
+	virtual bool BeginSceneWindow(PanelBase& panel) = 0;
+	virtual void EndSceneWindow() = 0;
+	virtual bool IsMouseOverSceneWindow() = 0;
+};
+
 class OperationModeBase : public Component {
+	OperationModeHost& host;
 	OperationModeBehavior* draggingBehavior{ nullptr };
 	OperationModeBehavior* singleFrameExclusiveMouseControlBehavior{ nullptr };
 
@@ -34,13 +43,14 @@ protected:
 	csl::ut::MoveArray<hh::fnd::Reference<OperationModeBehavior>> behaviors{ GetAllocator() };
 
 public:
-	using Component::Component;
+	OperationModeBase(csl::fnd::IAllocator* allocator, OperationModeHost& host) : Component{ allocator }, host{ host } {}
 
 	virtual void ProcessAction(const ActionBase& action) override;
 	virtual void Render() override;
 
 	void InitBehaviors();
 	void DeinitBehaviors();
+	bool IsMouseOverSceneWindow();
 	bool CanTakeMouseControl(OperationModeBehavior* behavior);
 	void ToggleDragging(OperationModeBehavior* behavior, bool canStart = true);
 	bool IsDragging(OperationModeBehavior* behavior);

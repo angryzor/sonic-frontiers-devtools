@@ -35,9 +35,21 @@ namespace app::game {
 	};
 }
 void Desktop::Render() {
-	RenderOverlayWindow();
+	// These overlay windows need to be created in reverse order, because passing ImGuiWindowFlags_NoBringToFrontOnFocus
+	// to ImGui::Begin will also insert the window at the front of the display list instead of append it to the back,
+	// so the last window will be the first one to be rendered.
 
 	ToolBar::Render();
+	// Pushing a style color here because ImGui::DockSpaceOverViewport draws a background "rectangle with hole" over the
+	// part of the screen that's not covered by the central node, and since our windows have transparent background, we
+	// don't want this as it would apply the background alpha twice.
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, ImVec4{ 0.0f, 0.0f, 0.0f, 0.0f });
+	ImGui::DockSpaceOverViewport(ImGui::GetMainViewport(), ImGuiDockNodeFlags_PassthruCentralNode);
+	ImGui::PopStyleColor();
+	ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
+	ImGuizmo::BeginFrame();
+	RenderOverlayWindow();
+
 	operationMode->Render();
 	ResourceBrowser::RenderDialogs();
 
@@ -123,6 +135,7 @@ void Desktop::RenderOverlayWindow()
 
 	ImGui::SetNextWindowSize(ivp->Size);
 	ImGui::SetNextWindowPos(ivp->Pos);
+	ImGui::SetNextWindowViewport(ivp->ID);
 
 	ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
 	ImGui::PushStyleColor(ImGuiCol_Border, 0);
@@ -174,4 +187,33 @@ void Desktop::HandleShortcuts()
 		if (ImGui::IsKeyChordPressed(binding))
 			Dispatch(ActionBase{ boundShortcut.actionId });
 	}
+}
+
+void Desktop::RenderPanel(PanelBase& panel)
+{
+	const ImGuiWindowFlags windowFlags = 0;
+
+	auto traits = panel.GetPanelTraits();
+
+	ImGui::SetNextWindowPos(traits.position, ImGuiCond_FirstUseEver, traits.pivot);
+	ImGui::SetNextWindowSize(traits.size, ImGuiCond_FirstUseEver);
+
+	if (ImGui::Begin(traits.title, NULL, windowFlags))
+		panel.RenderPanel();
+
+	ImGui::End();
+}
+
+bool Desktop::BeginSceneWindow(PanelBase& panel)
+{
+	return true;
+}
+
+void Desktop::EndSceneWindow()
+{
+}
+
+bool Desktop::IsMouseOverSceneWindow()
+{
+	return !ImGui::GetIO().WantCaptureMouse && !ImGui::IsAnyItemHovered();
 }

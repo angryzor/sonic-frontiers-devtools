@@ -20,7 +20,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			ImGui::Text("Multiple shapes selected");
 		}
 		else {
-			Editor("Shape", *selection[0]);
+			Editor("Shape", *selection[0], fxColManager->resource);
 		}
 	}
 

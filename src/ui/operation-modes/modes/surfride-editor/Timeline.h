@@ -21,14 +21,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		template<typename T>
 		static inline SurfRide::Key<T>& GetKeyFrame(SurfRide::SRS_TRACK& track, size_t i) {
-			switch (static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF)) {
-			case SurfRide::SRE_TRACK_FLAG::CONSTANT:
+			switch (track.GetInterpolationType()) {
+			case SurfRide::SRE_TRACK_INTERPOLATION_TYPE::CONSTANT:
 				return static_cast<SurfRide::KeyLinear<T>*>(track.keyFrame)[i];
-			case SurfRide::SRE_TRACK_FLAG::LINEAR:
+			case SurfRide::SRE_TRACK_INTERPOLATION_TYPE::LINEAR:
 				return static_cast<SurfRide::KeyLinear<T>*>(track.keyFrame)[i];
-			case SurfRide::SRE_TRACK_FLAG::HERMITE:
+			case SurfRide::SRE_TRACK_INTERPOLATION_TYPE::HERMITE:
 				return static_cast<SurfRide::KeyHermite<T>*>(track.keyFrame)[i];
-			case SurfRide::SRE_TRACK_FLAG::INDIVIDUAL:
+			case SurfRide::SRE_TRACK_INTERPOLATION_TYPE::INDIVIDUAL:
 				return static_cast<SurfRide::KeyIndividual<T>*>(track.keyFrame)[i];
 			default:
 				assert(false);
@@ -55,7 +55,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			auto segment = i / POINTS_PER_SEGMENT;
 			auto point = i % POINTS_PER_SEGMENT;
-			auto interpType = static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF) == SurfRide::SRE_TRACK_FLAG::INDIVIDUAL ? static_cast<SurfRide::KeyIndividual<T>&>(GetKeyFrame<T>(track, segment)).interpolationType : static_cast<SurfRide::SRE_INTERPOLATION_TYPE>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF);
+			auto interpType = track.GetInterpolationType() == SurfRide::SRE_TRACK_INTERPOLATION_TYPE::INDIVIDUAL ? static_cast<SurfRide::KeyIndividual<T>&>(GetKeyFrame<T>(track, segment)).interpolationType : static_cast<SurfRide::SRE_INTERPOLATION_TYPE>(track.GetInterpolationType());
 			auto& kf = GetKeyFrame<T>(track, segment);
 
 			if (segment == track.keyCount - 1)
@@ -116,13 +116,13 @@ namespace ui::operation_modes::modes::surfride_editor {
 		template<typename T>
 		static void RenderKeyFrameEditor(SurfRide::SRS_TRACK& track, SurfRide::SRS_KEYFRAME& keyFrame)
 		{
-			auto trackInterpType = static_cast<SurfRide::SRE_TRACK_FLAG>(static_cast<std::underlying_type_t<SurfRide::SRE_TRACK_FLAG>>(track.flags) & 0xF);
+			auto trackInterpType = track.GetInterpolationType();
 
 			RenderValueEditor("Value", static_cast<SurfRide::Key<T>&>(keyFrame).value, 0.01f);
 
-			if (trackInterpType != SurfRide::SRE_TRACK_FLAG::CONSTANT && trackInterpType != SurfRide::SRE_TRACK_FLAG::LINEAR) {
+			if (trackInterpType != SurfRide::SRE_TRACK_INTERPOLATION_TYPE::CONSTANT && trackInterpType != SurfRide::SRE_TRACK_INTERPOLATION_TYPE::LINEAR) {
 				ImGui::SeparatorText("Interpolation");
-				if (trackInterpType == SurfRide::SRE_TRACK_FLAG::INDIVIDUAL)
+				if (trackInterpType == SurfRide::SRE_TRACK_INTERPOLATION_TYPE::INDIVIDUAL)
 					ComboEnum("Interpolation type", static_cast<SurfRide::KeyIndividual<float>&>(keyFrame).interpolationType, interpolationTypes);
 
 				RenderValueEditor("Left derivative", static_cast<SurfRide::KeyHermite<T>&>(keyFrame).derivativeIn, 0.01f);

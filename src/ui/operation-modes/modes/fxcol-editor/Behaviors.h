@@ -175,7 +175,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		}
 
 		void Render() {
-			if (ImGui::Begin(DEVTOOLS_PROJECT_DESCRIPTION)) {
+			if (ImGui::Begin("Main menu")) {
 				ImGui::SameLine();
 				ImGui::Checkbox("Render bounding volumes", &renderBoundingVolumes);
 				ImGui::SameLine();
