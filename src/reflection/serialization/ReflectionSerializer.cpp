@@ -147,7 +147,7 @@ void ReflectionSerializer::WriteRflClass(const void* obj, const RflClass& rflCla
 	for (uint32_t i = 0; i < rflClass.m_pMembers.count; i++) {
 		const RflClassMember& member = rflClass.m_pMembers.items[i];
 		size_t constArrSizeOrZero = member.GetCstyleArraySize();
-		size_t constArrSize = member.m_Flags & 0x4000 ? reinterpret_cast<size_t(*)(const void*)>(member.m_pEnum)(obj) : constArrSizeOrZero == 0 ? 1 : constArrSizeOrZero;
+		size_t constArrSize = member.m_Flags & 0x40000 ? reinterpret_cast<size_t(*)(const void*)>(member.m_pEnum)(obj) : constArrSizeOrZero == 0 ? 1 : constArrSizeOrZero;
 		size_t alignment = member.GetAlignment();
 
 		writer.pad(alignment);
@@ -164,7 +164,7 @@ void ReflectionSerializer::WriteRflClass(const void* obj, const RflClass& rflCla
 				auto ptr = *static_cast<void**>(address);
 
 				writer.add_offset(writer.tell());
-				writer.write_obj(ptr == nullptr ? 0ull : EnqueueChunk({ *static_cast<void**>(address), obj, &member, member.m_Flags & 0x2000 ? reinterpret_cast<size_t(*)(const void*)>(member.m_pEnum)(obj) : 1 }));
+				writer.write_obj(ptr == nullptr ? 0ull : EnqueueChunk({ *static_cast<void**>(address), obj, &member, member.m_Flags & 0x20000 ? reinterpret_cast<size_t(*)(const void*)>(member.m_pEnum)(obj) : 1 }));
 				break;
 			}
 			case RflClassMember::TYPE_ARRAY: {
@@ -259,8 +259,8 @@ void ReflectionSerializer::Write(const void* obj, const RflClass& rflClass) {
 		switch (chunk.member->GetSubType()) {
 		case RflClassMember::TYPE_STRUCT: {
 			const RflClass* rflClass = chunk.member->m_Flags & 0x10000 ? reinterpret_cast<RflClass* (*)(const void*, const void*)>(chunk.member->GetStructClass())(chunk.ptr, chunk.parentPtr) : chunk.member->GetStructClass();
-			size_t itemSize = chunk.member->GetSubTypeSizeInBytes();
-			size_t alignment = chunk.member->GetSubTypeAlignment();
+			size_t itemSize = rflClass->GetSizeInBytes();
+			size_t alignment = rflClass->GetAlignment();
 
 			writer.pad(alignment);
 			assert(chunk.dbgExpectedOffset == writer.tell() - 0x40);
