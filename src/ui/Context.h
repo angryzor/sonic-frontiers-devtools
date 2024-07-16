@@ -11,4 +11,10 @@ public:
     static void install_hooks();
     static void init();
     static void deinit();
+
+    static void init_modules();
+    static void deinit_modules();
+
+    static void init_imgui();
+    static void deinit_imgui();
 };

@@ -93,6 +93,16 @@ HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeB
 
 	createBackBuffer(self->swapChain);
 
+	if (Context::inited) {
+		bool fullScreenState = self->GetFullScreenState();
+		bool viewportsEnabled = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
+
+		if (fullScreenState == viewportsEnabled) {
+			Context::deinit_imgui();
+			Context::init_imgui();
+		}
+	}
+
 	return result;
 }
 
@@ -142,33 +152,23 @@ void Context::install_hooks()
 void Context::init() {
 	if (inited)
 		return;
+	
+	init_modules();
+	init_imgui();
 
-	device = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance())->GetNeedleResourceDevice()->GetNativeDevice();
+	inited = true;
+}
 
-	device->GetImmediateContext(&deviceContext);
+void Context::deinit()
+{
+	inited = false;
 
-	HWND hwnd = reinterpret_cast<HWND>(hh::fw::Application::GetInstance()->frameworkEnvironment->window->hWnd);
+	deinit_imgui();
+	deinit_modules();
+}
 
-	IMGUI_CHECKVERSION();
-	ImGui::CreateContext();
-	ImPlot::CreateContext();
-	ImGuiIO& io = ImGui::GetIO();
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableKeyboard;     // Enable Keyboard Controls
-	io.ConfigFlags |= ImGuiConfigFlags_NavEnableGamepad;      // Enable Gamepad Controls
-	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-	io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	SettingsManager::Init();
-
-	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
-	ImFontConfig fontConfig{};
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoHinting;
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
-	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);// , ranges);
-	io.Fonts->Build();
-
+void Context::init_modules()
+{
 	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 	//auto* allocator = moduleAllocator;
 
@@ -193,25 +193,56 @@ void Context::init() {
 	Desktop::instance = new (allocator) Desktop{ allocator };
 	Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::object_inspection::ObjectInspection>();
 	resources::ManagedMemoryRegistry::Init(allocator);
-
-	// Setup Platform/Renderer backends
-	ImGui_ImplWin32_Init(hwnd);
-	ImGui_ImplDX11_Init(device, deviceContext);
-
-	inited = true;
 }
 
-void Context::deinit()
+void Context::deinit_modules()
 {
-	inited = false;
-	ImGui_ImplDX11_Shutdown();
-	ImGui_ImplWin32_Shutdown();
-
 	resources::ManagedMemoryRegistry::Deinit();
 	Desktop::instance->GetAllocator()->Free(Desktop::instance);
 	GOCVisualDebugDrawRenderer::instance = nullptr;
 	ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
+}
 
+void Context::init_imgui()
+{
+	auto* renderManager = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance());
+	auto* renderingEngine = renderManager->GetNeedleResourceDevice();
+
+	device = renderingEngine->GetNativeDevice();
+
+	device->GetImmediateContext(&deviceContext);
+
+	HWND hwnd = reinterpret_cast<HWND>(hh::fw::Application::GetInstance()->frameworkEnvironment->window->hWnd);
+
+	IMGUI_CHECKVERSION();
+	ImGui::CreateContext();
+	ImPlot::CreateContext();
+
+	ImGuiIO& io = ImGui::GetIO();
+	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
+	if (!renderingEngine->GetSupportFX()->swapDevice->GetFullScreenState())
+		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
+
+	SettingsManager::Init();
+
+	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
+	ImFontConfig fontConfig{};
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoHinting;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
+	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);// , ranges);
+	io.Fonts->Build();
+
+	// Setup Platform/Renderer backends
+	ImGui_ImplWin32_Init(hwnd);
+	ImGui_ImplDX11_Init(device, deviceContext);
+}
+
+void Context::deinit_imgui()
+{
+	ImGui_ImplDX11_Shutdown();
+	ImGui_ImplWin32_Shutdown();
 	ImPlot::DestroyContext();
 	ImGui::DestroyContext();
 }

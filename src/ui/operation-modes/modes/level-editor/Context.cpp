@@ -84,7 +84,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 	void Context::NotifyObject(hh::game::ObjectData* objectData, hh::fnd::Message& msg)
 	{
-		if (auto* obj = focusedChunk->GetGameObjectByObjectId(objectData->id))
+		if (auto* obj = focusedChunk->GetGameObject(objectData))
 			obj->SendMessageImm(msg);
 	}
 
@@ -116,23 +116,21 @@ namespace ui::operation_modes::modes::level_editor {
 	// This is a hack to force the object to reload its parameters
 	void Context::RespawnActiveObject(hh::game::ObjectData* objectData)
 	{
-		auto status = focusedChunk->GetWorldObjectStatusByObjectId(objectData->id);
-		auto idx = focusedChunk->GetObjectIndexById(objectData->id);
-
-		// FIXME: Check if this check is really necessary
-		if (status.objectData && idx != -1) {
-			focusedChunk->DespawnByIndex(idx);
-			focusedChunk->ShutdownPendingObjects();
-			focusedChunk->SpawnByIndex(idx, nullptr);
-			NotifySelectedObject(objectData);
-		}
+		focusedChunk->Despawn(objectData);
+		focusedChunk->ShutdownPendingObjects();
+		focusedChunk->Spawn(objectData);
+		NotifySelectedObject(objectData);
 	}
 
 	void Context::RecalculateDependentTransforms(hh::game::ObjectData* objectData) {
 		// Copy changes to the live object if any.
-		if (auto* obj = focusedChunk->GetGameObjectByObjectId(objectData->id))
+		if (auto* obj = focusedChunk->GetGameObject(objectData))
 			if (auto* gocTransform = obj->GetComponent<GOCTransform>())
 				UpdateGOCTransform(*objectData, *gocTransform);
+
+		// Some tools generate faulty objects with ID 0. Avoid crashing on those.
+		if (!objectData->id.IsNonNull())
+			return;
 
 		for (auto* layer : focusedChunk->GetLayers()) {
 			for (auto* child : layer->GetResource()->GetObjects()) {

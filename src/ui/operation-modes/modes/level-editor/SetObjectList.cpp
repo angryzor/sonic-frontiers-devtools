@@ -90,13 +90,8 @@ namespace ui::operation_modes::modes::level_editor {
 						child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
 						child->parentID = parent->id;
 
-						auto childStatus = focusedChunk->GetWorldObjectStatusByObjectId(child->id);
-						auto childIdx = focusedChunk->GetObjectIndexById(child->id);
-
-						if (childStatus.objectData && childIdx != -1) {
-							focusedChunk->DespawnByIndex(childIdx);
-							childStatus.Restart();
-						}
+						focusedChunk->Despawn(child);
+						focusedChunk->Restart(focusedChunk->GetObjectIndexByObjectData(child), true);
 
 						list.InvalidateTree();
 					}

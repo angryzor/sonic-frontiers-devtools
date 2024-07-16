@@ -76,7 +76,7 @@ bool CalcApproxAabb(hh::game::ObjectWorldChunk* chunk, const csl::ut::MoveArray<
 	bool found{ false };
 
 	for (auto& object : objects) {
-		if (auto* gameObject = chunk->GetGameObjectByObjectId(object->id))
+		if (auto* gameObject = chunk->GetGameObject(object))
 			found |= AddToAabb(gameObject, aabb);
 		else
 			found |= AddToAabb(object, aabb);
