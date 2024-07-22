@@ -1,6 +1,7 @@
 #include "ProjectTree.h"
 #include "SurfRideElement.h"
 #include "Behaviors.h"
+#include <io/binary/containers/swif/SWIF.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	void ProjectTree::RenderPanel()
@@ -36,6 +37,26 @@ namespace ui::operation_modes::modes::surfride_editor {
 		auto* project = context.gocSprite->GetProject();
 		if (project == nullptr) {
 			return;
+		}
+
+		if (ImGui::Button("Export")) {
+			IGFD::FileDialogConfig cfg{};
+			cfg.path = ".";
+			cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
+			cfg.userDatas = project->projectData;
+			ImGuiFileDialog::Instance()->OpenDialog("ResSurfRideProjectExportDialog", "Choose File", ".swif", cfg);
+		}
+
+		if (ImGuiFileDialog::Instance()->Display("ResSurfRideProjectExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				auto* project = static_cast<SurfRide::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
+
+				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				std::wstring wFilePath(filePath.begin(), filePath.end());
+
+				devtools::io::binary::containers::swif::Serialize(wFilePath.c_str(), project);
+			}
+			ImGuiFileDialog::Instance()->Close();
 		}
 
 		const char* sceneName = context.focusedScene ? context.focusedScene->sceneData->name : "<none>";

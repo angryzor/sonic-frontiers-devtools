@@ -28,3 +28,6 @@
 [submodule "vendor/eigen/eigen"]
 	path = vendor/eigen/eigen
 	url = https://gitlab.com/libeigen/eigen.git
+[submodule "vendor/reflect-cpp/reflect-cpp"]
+	path = vendor/reflect-cpp/reflect-cpp
+	url = https://github.com/getml/reflect-cpp.git

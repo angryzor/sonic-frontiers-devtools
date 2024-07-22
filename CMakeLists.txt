@@ -66,7 +66,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
     add_subdirectory(${SDK_PATH} ${DEVTOOLS_TARGET_SDK}-sdk EXCLUDE_FROM_ALL)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
-    target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_17)
+    target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_20)
     target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive-)
     target_compile_definitions(${DEVTOOLS_TARGET}
         PRIVATE
@@ -96,7 +96,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 		target_compile_definitions(${DEVTOOLS_TARGET} PRIVATE DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW=1)
     endif()
 
-    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot)
+    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot reflectcpp)
         target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})
     endforeach()
 

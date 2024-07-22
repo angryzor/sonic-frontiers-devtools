@@ -1,3 +1,5 @@
+#pragma once
+
 namespace hl {
 	template<bool swapOffsets = true>
 	inline void endian_swap(::csl::math::Vector2& v) noexcept
@@ -21,6 +23,15 @@ namespace hl {
 		endian_swap(v(1));
 		endian_swap(v(2));
 		endian_swap(v(3));
+	}
+
+	template<bool swapOffsets = true>
+	inline void endian_swap(::csl::math::Quaternion& v) noexcept
+	{
+		endian_swap(v.x());
+		endian_swap(v.y());
+		endian_swap(v.z());
+		endian_swap(v.w());
 	}
 
 	template<bool swapOffsets = true>

@@ -4,7 +4,6 @@
 #include "ElementInspector.h"
 #include "Behaviors.h"
 #include <ui/common/editors/Reflection.h>
-#include <reflection/serialization/resource-rfls/ResourceRfls.h>
 
 namespace ui::operation_modes::modes::surfride_editor
 {
@@ -24,8 +23,5 @@ namespace ui::operation_modes::modes::surfride_editor
 
 	void SurfRideEditor::Render() {
 		OperationMode::Render();
-
-		//if (GetContext().gocSprite && GetContext().gocSprite->GetProject())
-		//	ReflectionEditor("Raw data", const_cast<SurfRide::SRS_PROJECT*>(GetContext().gocSprite->GetProject()->projectData), &hh::fnd::RflClassTraits<SurfRide::SRS_PROJECT>::rflClass);
 	}
 }

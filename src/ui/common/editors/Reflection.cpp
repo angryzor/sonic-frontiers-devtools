@@ -5,6 +5,7 @@
 #include <ui/common/editors/Basic.h>
 #include <ui/Desktop.h>
 #include <reflection/ReflectiveOperations.h>
+#include <reflection/RflRanges.h>
 
 using namespace hh::fnd;
 
@@ -20,21 +21,11 @@ public:
 	static inline const hh::fnd::RflClassMember* currentMember{};
 	static inline bool defaultOpen{};
 	typedef bool result_type;
-	
-	template<typename T> class rfl_range_info {};
-	template<> class rfl_range_info<int32_t> { public: static constexpr const char* name = "RangeSint32"; };
-	template<> class rfl_range_info<uint32_t> { public: static constexpr const char* name = "RangeUint32"; };
-	template<> class rfl_range_info<int64_t> { public: static constexpr const char* name = "RangeSint64"; };
-	template<> class rfl_range_info<uint64_t> { public: static constexpr const char* name = "RangeUint64"; };
-	template<> class rfl_range_info<float> { public: static constexpr const char* name = "RangeFloat"; };
-	template<> class rfl_range_info<csl::math::Vector2> { public: static constexpr const char* name = "RangeVector2"; };
-	template<> class rfl_range_info<csl::math::Vector3> { public: static constexpr const char* name = "RangeVector3"; };
-	template<> class rfl_range_info<csl::math::Vector4> { public: static constexpr const char* name = "RangeVector4"; };
 
-	template<typename T> static float rfl_step(const T& rangeValue) { return std::fmaxf(rflMinFloatStep, static_cast<float>(rangeValue)); }
-	template<> static float rfl_step<csl::math::Vector2>(const csl::math::Vector2& rangeValue) { return rfl_step(rangeValue.x()); }
-	template<> static float rfl_step<csl::math::Vector3>(const csl::math::Vector3& rangeValue) { return rfl_step(rangeValue.x()); }
-	template<> static float rfl_step<csl::math::Vector4>(const csl::math::Vector4& rangeValue) { return rfl_step(rangeValue.x()); }
+	template<typename T> static float rfl_step(const rfl_range_representation_t<T>& rangeValue) { return std::fmaxf(rflMinFloatStep, static_cast<float>(rangeValue)); }
+	template<> static float rfl_step<RangeVector2>(const rfl_range_representation_t<RangeVector2>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
+	template<> static float rfl_step<RangeVector3>(const rfl_range_representation_t<RangeVector3>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
+	template<> static float rfl_step<RangeVector4>(const rfl_range_representation_t<RangeVector4>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
 
 	template<typename F>
 	static bool NameScope(const char* memberName, F f) {
@@ -56,10 +47,10 @@ public:
 		});
 	}
 
-	template<typename T, typename R, bool allowSliders = true>
+	template<typename T, bool allowSliders = true>
 	static bool InputRflScalar(T* obj) {
-		if (const auto* rangeAttr = currentMember->GetAttribute(rfl_range_info<R>::name)) {
-			auto rangeValues = reinterpret_cast<const R*>(rangeAttr->GetData());
+		if (const auto* rangeAttr = currentMember->GetAttribute(rfl_range_type_t<T>::name)) {
+			auto rangeValues = reinterpret_cast<const rfl_range_representation_t<rfl_range_type_t<T>>*>(rangeAttr->GetData());
 			auto rangeMin = static_cast<T>(rangeValues[0]);
 			auto rangeMax = static_cast<T>(rangeValues[1]);
 			auto rangeStep = rangeValues[2];
@@ -68,7 +59,7 @@ public:
 				if (rangeMax - rangeMin < rflSliderCutOff)
 					return SliderScalar(currentMemberName, *obj, &rangeMin, &rangeMax);
 
-			return DragScalar(currentMemberName, *obj, rfl_step(rangeStep), &rangeMin, &rangeMax);
+			return DragScalar(currentMemberName, *obj, rfl_step<rfl_range_type_t<T>>(rangeStep), &rangeMin, &rangeMax);
 		}
 		else
 			return DragScalar(currentMemberName, *obj);
@@ -117,18 +108,18 @@ public:
 
 	template<typename T>
 	static bool VisitPrimitive(T* obj) { return Editor(currentMemberName, *obj); }
-	static bool VisitPrimitive(int8_t* obj) { return InputRflScalar<int8_t, int32_t>(obj); }
-	static bool VisitPrimitive(uint8_t* obj) { return InputRflScalar<uint8_t, uint32_t>(obj); }
-	static bool VisitPrimitive(int16_t* obj) { return InputRflScalar<int16_t, int32_t>(obj); }
-	static bool VisitPrimitive(uint16_t* obj) { return InputRflScalar<uint16_t, uint32_t>(obj); }
-	static bool VisitPrimitive(int32_t* obj) { return InputRflScalar<int32_t, int32_t>(obj); }
-	static bool VisitPrimitive(uint32_t* obj) { return InputRflScalar<uint32_t, uint32_t>(obj); }
-	static bool VisitPrimitive(int64_t* obj) { return InputRflScalar<int64_t, int64_t>(obj); }
-	static bool VisitPrimitive(uint64_t* obj) { return InputRflScalar<uint64_t, uint64_t>(obj); }
-	static bool VisitPrimitive(float* obj) { return InputRflScalar<float, float>(obj); }
-	static bool VisitPrimitive(csl::math::Vector2* obj) { return InputRflScalar<csl::math::Vector2, csl::math::Vector2, false>(obj); }
-	static bool VisitPrimitive(csl::math::Vector3* obj) { return InputRflScalar<csl::math::Vector3, csl::math::Vector3, false>(obj); }
-	static bool VisitPrimitive(csl::math::Vector4* obj) { return InputRflScalar<csl::math::Vector4, csl::math::Vector4, false>(obj); }
+	static bool VisitPrimitive(int8_t* obj) { return InputRflScalar<int8_t>(obj); }
+	static bool VisitPrimitive(uint8_t* obj) { return InputRflScalar<uint8_t>(obj); }
+	static bool VisitPrimitive(int16_t* obj) { return InputRflScalar<int16_t>(obj); }
+	static bool VisitPrimitive(uint16_t* obj) { return InputRflScalar<uint16_t>(obj); }
+	static bool VisitPrimitive(int32_t* obj) { return InputRflScalar<int32_t>(obj); }
+	static bool VisitPrimitive(uint32_t* obj) { return InputRflScalar<uint32_t>(obj); }
+	static bool VisitPrimitive(int64_t* obj) { return InputRflScalar<int64_t>(obj); }
+	static bool VisitPrimitive(uint64_t* obj) { return InputRflScalar<uint64_t>(obj); }
+	static bool VisitPrimitive(float* obj) { return InputRflScalar<float>(obj); }
+	static bool VisitPrimitive(csl::math::Vector2* obj) { return InputRflScalar<csl::math::Vector2, false>(obj); }
+	static bool VisitPrimitive(csl::math::Vector3* obj) { return InputRflScalar<csl::math::Vector3, false>(obj); }
+	static bool VisitPrimitive(csl::math::Vector4* obj) { return InputRflScalar<csl::math::Vector4, false>(obj); }
 	static bool VisitPrimitive(const char** obj) { ImGui::Text("%s: %s", currentMemberName, *obj); return false; }
 
 	template<typename F, template<typename> typename A, typename C, typename D>
@@ -208,6 +199,11 @@ public:
 	}
 
 	template<typename F>
+	static bool VisitPointer(void** obj, F f) {
+		return obj == nullptr ? false : f(*obj);
+	}
+
+	template<typename F>
 	static bool VisitClassMember(void* obj, const hh::fnd::RflClassMember* member, F f) {
 		return MemberScope(member, [&]() { return f(obj); });
 	}
@@ -225,7 +221,7 @@ public:
 	}
 
 	template<typename F>
-	static bool VisitArrayClassMemberItem(void* obj, size_t idx, F f) {
+	static bool VisitArrayClassMemberItem(void* obj, const hh::fnd::RflClassMember* member, size_t idx, F f) {
 		char name[200] = "";
 		snprintf(name, 200, "%s[%zd]", currentMemberName, idx);
 
@@ -235,6 +231,11 @@ public:
 			ImGui::PopID();
 			return edited;
 		});
+	}
+
+	template<typename F>
+	static bool VisitBaseStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
+		return f(obj);
 	}
 
 	template<typename F>
@@ -322,6 +323,11 @@ public:
 	}
 
 	template<typename F>
+	static bool VisitPointer(void** obj, void* orig, F f) {
+		return RenderStaticReflectionEditor::VisitPointer(obj, [&](void* obj) { return f(obj, orig); });
+	}
+
+	template<typename F>
 	static bool VisitClassMember(void* obj, void* orig, const hh::fnd::RflClassMember* member, F f) {
 		return RenderStaticReflectionEditor::VisitClassMember(obj, member, [&](void* obj) { return f(obj, orig); });
 	}
@@ -332,8 +338,13 @@ public:
 	}
 
 	template<typename F>
-	static bool VisitArrayClassMemberItem(void* obj, void* orig, size_t idx, F f) {
-		return RenderStaticReflectionEditor::VisitArrayClassMemberItem(obj, idx, [&](void* obj) { return f(obj, orig); });
+	static bool VisitArrayClassMemberItem(void* obj, void* orig, const hh::fnd::RflClassMember* member, size_t idx, F f) {
+		return RenderStaticReflectionEditor::VisitArrayClassMemberItem(obj, member, idx, [&](void* obj) { return f(obj, orig); });
+	}
+
+	template<typename F>
+	static bool VisitBaseStruct(void* obj, void* orig, const hh::fnd::RflClass* rflClass, F f) {
+		return RenderStaticReflectionEditor::VisitBaseStruct(obj, rflClass, [&](void* obj) { return f(obj, orig); });
 	}
 
 	template<typename F>

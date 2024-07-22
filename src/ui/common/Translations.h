@@ -10,7 +10,7 @@ public:
 private:
 	struct CaptionTranslation {
 		size_t originalStrAddr;
-		const char* translation;
+		const char8_t* translation;
 	};
 
 	static constexpr size_t TRANSLATION_COUNT = 7867;

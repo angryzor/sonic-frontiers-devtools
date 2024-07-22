@@ -32,9 +32,15 @@ namespace hh::fnd {
 	template<> struct RflPrimitiveTypeTraits<csl::ut::Color<uint8_t>> { static constexpr RflClassMember::Type type = RflClassMember::Type::TYPE_COLOR_BYTE; };
 	template<> struct RflPrimitiveTypeTraits<csl::ut::Color<float>> { static constexpr RflClassMember::Type type = RflClassMember::Type::TYPE_COLOR_FLOAT; };
 
-	template<typename Class, typename Parent> struct RflDynamicStructPointer {};
-	template<typename T, typename Parent> struct RflDynamicPointerArray {};
-	template<typename T, typename Parent> struct RflDynamicInlineArray {};
+	using DynamicRflClassResolver = const hh::fnd::RflClass* (*)(const void*);
+	using DynamicRflArraySizeResolver = size_t (*)(const void*);
+
+	template<DynamicRflClassResolver classResolver> struct RflDynamicStructPointer {};
+	template<DynamicRflClassResolver classResolver> struct RflDynamicStructSelfPointer {};
+	template<DynamicRflClassResolver classResolver, DynamicRflArraySizeResolver arraySizeResolver> struct RflDynamicStructPointerArray {};
+	template<DynamicRflClassResolver classResolver, DynamicRflArraySizeResolver arraySizeResolver> struct RflDynamicStructSelfPointerArray {};
+	template<typename T, DynamicRflArraySizeResolver arraySizeResolver> struct RflDynamicPointerArray {};
+	template<typename T, DynamicRflArraySizeResolver arraySizeResolver> struct RflDynamicInlineArray {};
 }
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers

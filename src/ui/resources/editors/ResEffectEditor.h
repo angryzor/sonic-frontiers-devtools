@@ -1,7 +1,6 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
 #include <ui/common/ReflectionEditor.h>
-#include <reflection/serialization/ReflectionSerializer.h>
 
 namespace heur::resources {
 	class ResEffect;

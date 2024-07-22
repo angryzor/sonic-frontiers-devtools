@@ -183,6 +183,7 @@ protected:
 			}
 		}
 
+		// FIXME: why is this a double pointer
 		void** get(size_t i, const hh::fnd::RflClassMember* member) const {
 			if (!this->m_pBuffer)
 				return nullptr;
@@ -291,5 +292,9 @@ public:
 
 	size_t size() const {
 		return underlying.size();
+	}
+
+	size_t capacity () const {
+		return underlying.capacity();
 	}
 };

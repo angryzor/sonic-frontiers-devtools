@@ -7,8 +7,8 @@
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
 #include <utilities/ResourceTypes.h>
-#include <reflection/serialization/ReflectionSerializer.h>
-#include <reflection/serialization/resource-rfls/ResourceRfls.h>
+#include <io/binary/containers/binary-file/BinaryFile.h>
+#include <io/binary/serialization/resource-rfls/ResObjectWorld.h>
 
 using namespace hh::fnd;
 
@@ -287,6 +287,6 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 
 void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
-		ReflectionSerializer::SerializeToFile(filePath, static_cast<hh::game::ResObjectWorld*>(resource)->binaryData, ResourceRfls::resObjectWorld);
+		devtools::io::binary::containers::BinaryFile::Serialize(filePath, static_cast<hh::game::ResObjectWorld*>(resource)->binaryData, &ResourceRfls::resObjectWorld);
 	}
 }

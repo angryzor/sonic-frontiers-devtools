@@ -43,6 +43,13 @@ public:
 	}
 
 	template<typename F>
+	static bool VisitPointer(void** obj, F f) {
+		if (obj != nullptr)
+			f(*obj);
+		return false;
+	}
+
+	template<typename F>
 	static bool VisitClassMember(void* obj, const hh::fnd::RflClassMember* member, F f) {
 		if (strcmp(member->GetName(), change->path[pathIdx].propertyName) == 0) {
 			pathIdx--;
@@ -63,12 +70,18 @@ public:
 	}
 
 	template<typename F>
-	static bool VisitArrayClassMemberItem(void* obj, size_t idx, F f) {
+	static bool VisitArrayClassMemberItem(void* obj, const hh::fnd::RflClassMember* member, size_t idx, F f) {
 		if (idx == change->path[pathIdx].arrayIdx) {
 			pathIdx--;
 			f(obj);
 			pathIdx++;
 		}
+		return false;
+	}
+
+	template<typename F>
+	static bool VisitBaseStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
+		f(obj);
 		return false;
 	}
 

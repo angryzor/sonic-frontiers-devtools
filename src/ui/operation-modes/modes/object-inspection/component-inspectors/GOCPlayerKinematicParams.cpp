@@ -4,9 +4,7 @@
 
 void RenderComponentInspector(app::player::GOCPlayerKinematicParams& component)
 {
-	Editor("Position", component.position);
-	Editor("Rotation", component.rotation);
-	Editor("Scale", component.scale);
+	Editor("Transform", component.transform);
 	ImGui::PushID("WorldPos");
 	ImGui::SeparatorText("World position");
 	ImGui::PopID();

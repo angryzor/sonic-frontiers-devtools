@@ -25,7 +25,8 @@ bool StandaloneWindow::Render() {
 		= ImGuiWindowFlags_MenuBar;
 
 	bool shouldStayOpen{ true };
-
+	
+	ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 	if (ImGui::Begin(title.c_str(), &shouldStayOpen, windowFlags))
 		RenderContents();
 	ImGui::End();

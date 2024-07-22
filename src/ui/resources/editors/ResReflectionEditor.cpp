@@ -1,5 +1,5 @@
 #include "ResReflectionEditor.h"
-#include <reflection/serialization/ReflectionSerializer.h>
+#include <io/binary/containers/binary-file/BinaryFile.h>
 #include <reflection/ReflectiveOperations.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/viewers/RflDiff.h>
@@ -156,7 +156,7 @@ void ResReflectionEditor::RenderExportDialog()
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			std::wstring wFilePath(filePath.begin(), filePath.end());
 
-			ReflectionSerializer::SerializeToFile(wFilePath.c_str(), self->resource->reflectionData, *self->rflClass);
+			devtools::io::binary::containers::BinaryFile::Serialize(wFilePath.c_str(), self->resource->reflectionData, self->rflClass);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}

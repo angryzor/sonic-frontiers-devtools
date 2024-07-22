@@ -1,4 +1,4 @@
-#include "ResourceRfls.h"
+#include "ResObjectWorld.h"
 
 #include <utilities/ObjectDataUtils.h>
 
@@ -38,7 +38,7 @@ using namespace hh::game;
 //};
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-const RflClass* handleComponentDataData(void* obj, void* parent) {
+const RflClass* handleComponentDataData(void* parent) {
     const char* componentType = static_cast<ComponentData*>(parent)->type;
 
     if (!strcmp(componentType, "RangeSpawning"))
@@ -47,20 +47,20 @@ const RflClass* handleComponentDataData(void* obj, void* parent) {
         return nullptr;
 }
 #else
-const RflClass* handleComponentDataData(void* obj, void* parent) {
+const RflClass* handleComponentDataData(void* parent) {
     return GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(static_cast<ComponentData*>(parent)->type)->rflClass;
 }
 #endif
 
-const RflClass* handleSpawnerData(void* obj, void* parent) {
+const RflClass* handleSpawnerData(void* parent) {
     return GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(static_cast<ObjectData*>(parent)->gameObjectClass)->spawnerDataRflClass;
 }
 
 RflClassMember componentDataMembers[]{
-    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ComponentData, unk1), nullptr },
+    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_VOID, 0, 0x100000, offsetof(ComponentData, unk1), nullptr },
     { "type", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ComponentData, type), nullptr },
     { "size", nullptr, nullptr, RflClassMember::TYPE_UINT64, RflClassMember::TYPE_VOID, 0, 0, offsetof(ComponentData, size), nullptr },
-    { "data", reinterpret_cast<RflClass*> (handleComponentDataData), nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_STRUCT, 0, 0x10000, offsetof(ComponentData, data), nullptr },
+    { "data", reinterpret_cast<RflClass*>(handleComponentDataData), nullptr, RflClassMember::TYPE_POINTER, RflClassMember::TYPE_STRUCT, 0, 0x10000, offsetof(ComponentData, data), nullptr },
 };
 
 RflClass componentData{ "ComponentData", nullptr, sizeof(ComponentData), nullptr, 0, componentDataMembers, 4, nullptr };
@@ -79,7 +79,7 @@ RflClassMember componentDataArrayEntryMembers[]{
 RflClass componentDataArrayEntry{ "ComponentDataArrayEntry", nullptr, 8, nullptr, 0, componentDataArrayEntryMembers, 1, nullptr };
 
 RflClassMember objectDataMembers[]{
-    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectData, flags), nullptr },
+    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0x100000, offsetof(ObjectData, flags), nullptr },
     { "gameObjectClass", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, gameObjectClass), nullptr },
 #ifdef DEVTOOLS_TARGET_SDK_wars
     { "name", nullptr, nullptr, RflClassMember::TYPE_CSTRING, RflClassMember::TYPE_VOID, 0, 0, offsetof(ObjectData, name), nullptr },
@@ -103,9 +103,9 @@ RflClassMember objectDataArrayEntryMembers[]{
 RflClass objectDataArrayEntry{ "ObjectDataArrayEntry", nullptr, 8, nullptr, 0, objectDataArrayEntryMembers, 1, nullptr };
 
 RflClassMember resObjWorldMembers[]{
-    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectWorldData, unk1), nullptr },
-    { "unk2", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectWorldData, unk2), nullptr },
-    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT8, RflClassMember::TYPE_FLAGS, 0, 0, offsetof(ObjectWorldData, flags), nullptr },
+    { "unk1", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0x100000, offsetof(ObjectWorldData, unk1), nullptr },
+    { "unk2", nullptr, nullptr, RflClassMember::TYPE_UINT32, RflClassMember::TYPE_VOID, 0, 0x100000, offsetof(ObjectWorldData, unk2), nullptr },
+    { "flags", nullptr, nullptr, RflClassMember::TYPE_UINT8, RflClassMember::TYPE_VOID, 0, 0x100000, offsetof(ObjectWorldData, flags), nullptr },
     { "objects", &objectDataArrayEntry, nullptr, RflClassMember::TYPE_ARRAY, RflClassMember::TYPE_STRUCT, 0, 0, offsetof(ObjectWorldData, objects), nullptr },
 };
 

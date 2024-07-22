@@ -116,8 +116,33 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (cast.castData->userData)
 			Editor("User data", *cast.castData->userData);
 
-		if (Editor("Transform", *cast.transform))
-			cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.transformAny.m_dummy;
+		size_t castIndex = (reinterpret_cast<size_t>(cast.castData) - reinterpret_cast<size_t>(cast.layer->layerData->casts)) / sizeof(SRS_CASTNODE);
+		if (cast.layer->flags.test(SurfRide::Layer::Flag::IS_3D)) {
+			auto& transform = cast.layer->layerData->transforms.transforms3d[castIndex];
+			if (Editor("Transform", transform)) {
+				cast.transform->position = transform.position;
+				cast.transform->rotation = transform.rotation;
+				cast.transform->scale = transform.scale;
+				cast.transform->materialColor = transform.materialColor;
+				cast.transform->illuminationColor = transform.illuminationColor;
+				cast.transform->display = transform.display;
+
+				cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.transformAny.m_dummy;
+			}
+		}
+		else {
+			auto& transform = cast.layer->layerData->transforms.transforms2d[castIndex];
+			if (Editor("Transform", transform)) {
+				cast.transform->position = { transform.position.x(), transform.position.y(), 0.0f };
+				cast.transform->rotation = { 0, 0, transform.rotation };
+				cast.transform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
+				cast.transform->materialColor = transform.materialColor;
+				cast.transform->illuminationColor = transform.illuminationColor;
+				cast.transform->display = transform.display;
+
+				cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.transformAny.m_dummy;
+			}
+		}
 	}
 
 	void ElementInspector::RenderNormalCastInspector(Cast& cast)

@@ -13,11 +13,12 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/FxColCollisionShape.cpp
         debug-rendering/visuals/Math.cpp
+        io/binary/containers/binary-file/BinaryFile.cpp
+        io/binary/serialization/resource-rfls/ResObjectWorld.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
-        reflection/serialization/ReflectionSerializer.cpp
-        reflection/serialization/resource-rfls/ResObjectWorld.cpp
+        reflection/serialization/HSONTemplateGeneration.cpp
         ui/common/editors/Basic.cpp
         ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
@@ -89,13 +90,17 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/FxColCollisionShape.h
         debug-rendering/visuals/Math.h
+        io/binary/containers/binary-file/BinaryFile.h
+        io/binary/containers/binary-file/EndianSwaps.h
+        io/binary/serialization/Reflection.h
+        io/binary/serialization/resource-rfls/ResObjectWorld.h
+        io/binary/serialization/Types.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
         reflection/ReflectiveOperations.h
         reflection/RflArrayAccessor.h
-        reflection/serialization/EndianSwaps.h
         reflection/serialization/ReflectionSerializer.h
-        reflection/serialization/resource-rfls/ResourceRfls.h
+        reflection/serialization/HSONTemplateGeneration.h
         ui/common/editors/Basic.h
         ui/common/editors/Camera.h
         ui/common/editors/ObjectData.h
@@ -190,7 +195,8 @@ target_sources(${DEVTOOLS_TARGET}
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            reflection/serialization/resource-rfls/ResSurfRideProject.cpp
+            io/binary/containers/swif/SWIF.cpp
+            io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
@@ -228,6 +234,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/resources/editors/ResSurfRideProjectEditor.cpp
             ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
+            io/binary/containers/swif/SWIF.h
+            io/binary/serialization/resource-rfls/ResSurfRideProject.h
             ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h

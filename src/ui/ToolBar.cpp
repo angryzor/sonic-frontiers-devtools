@@ -27,6 +27,7 @@
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
 #endif
+#include "reflection/serialization/HSONTemplateGeneration.h"
 
 using namespace hh::game;
 
@@ -71,6 +72,12 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTesterV2(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("RFL Comparer"))
 				new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("Export HSON template")) {
+				IGFD::FileDialogConfig cfg{};
+				cfg.path = ".";
+				cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
+				ImGuiFileDialog::Instance()->OpenDialog("HSONExportDialog", "Choose File", ".template.hson.json", cfg);
+			}
 			ImGui::EndMenu();
 		}
 
@@ -176,6 +183,12 @@ void ToolBar::Render() {
 	}
 
 	ImGui::Checkbox("Render debug visuals", &GOCVisualDebugDrawRenderer::instance->enabled);
+
+	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk())
+			io::hson::templates::GenerateTemplate(ImGuiFileDialog::Instance()->GetFilePathName());
+		ImGuiFileDialog::Instance()->Close();
+	}
 
 	ImGui::End();
 }

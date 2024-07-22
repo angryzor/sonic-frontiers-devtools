@@ -161,6 +161,9 @@ void Context::init() {
 
 void Context::deinit()
 {
+	if (!inited)
+		return;
+
 	inited = false;
 
 	deinit_imgui();

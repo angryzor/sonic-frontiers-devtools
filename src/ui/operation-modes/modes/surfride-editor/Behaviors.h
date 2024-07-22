@@ -159,8 +159,15 @@ namespace ui::operation_modes::modes::surfride_editor
 			auto* cast = element.cast;
 
 			Eigen::Projective3f parentSelectionSpaceTransform = cast->parentCast == nullptr ? Eigen::Projective3f::Identity() : Eigen::Projective3f{ context.focusedScene->camera.projectionMatrix * context.focusedScene->camera.viewMatrix * cast->parentCast->transform->transformationMatrix };
+			csl::math::Vector3 newPos = (parentSelectionSpaceTransform.inverse() * transform * Eigen::Vector3f::Zero().homogeneous()).hnormalized();
 
-			cast->transform->position = (parentSelectionSpaceTransform.inverse() * transform * Eigen::Vector3f::Zero().homogeneous()).hnormalized();
+			size_t castIndex = (reinterpret_cast<size_t>(cast->castData) - reinterpret_cast<size_t>(cast->layer->layerData->casts)) / sizeof(SRS_CASTNODE);
+			if (cast->layer->flags.test(SurfRide::Layer::Flag::IS_3D))
+				cast->layer->layerData->transforms.transforms3d[castIndex].position = newPos;
+			else
+				cast->layer->layerData->transforms.transforms2d[castIndex].position = { newPos.x(), newPos.y() };
+
+			cast->transform->position = newPos;
 			cast->transform->dirtyFlag.flags.m_dummy |= cast->transform->dirtyFlag.transformAny.m_dummy;
 		}
 	};
