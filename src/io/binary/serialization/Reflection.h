@@ -50,38 +50,46 @@ namespace devtools::io::binary::serialization {
 			std::function<int(void*)> processFunc;
 		};
 
+		// We keep the buffer size as well, since sometimes an earlier reference serialized a smaller slice
+		// of the buffer, and in that case we can't simply point back to this already stored version.
+		// We could do a lot of work to roll back and instead store a larger buffer, but for now I'm just
+		// duplicating the data in that case, since it mostly happens with dangling pointers of empty MoveArrays.
+		struct DisambiguatedPointer {
+			serialized_types::o64_t<void*> offset;
+			size_t bufferSize;
+		};
+
 		B& backend;
 		size_t curChunkId;
-		csl::ut::PointerMap<const void*, serialized_types::o64_t<void*>> processedPointers{ GetAllocator() };
+		csl::ut::PointerMap<const void*, DisambiguatedPointer> processedPointers{ GetAllocator() };
 		csl::ut::MoveArray<WorkQueueEntry> workQueue{ GetAllocator() };
-		size_t nextFreeAddress{};
+		size_t nextFreeOffset{};
+		size_t baseOffset{};
 		const hh::fnd::RflClassMember* currentMember{};
 
 		size_t AllocateBlock(size_t size, size_t alignment) {
-			assert(size != 0);
-			size_t offset = (nextFreeAddress + alignment - 1) & ~(alignment - 1);
-			nextFreeAddress = offset + size;
+			size_t offset = (nextFreeOffset + alignment - 1) & ~(alignment - 1);
+			nextFreeOffset = offset + size;
 			return offset;
 		}
 
 		template<typename F>
 		serialized_types::o64_t<void*> EnqueueMember(const void* obj, const void* parent, const hh::fnd::RflClassMember* member, size_t arraySize, F f) {
-			auto processed = processedPointers.Find(obj);
-			if (processed != processedPointers.end())
-				return *processed;
-
-			// TODO: add to processed pointers
-
 			auto alignment = member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT ? GetStructMemberClass(member, obj, parent)->GetAlignment() : member->GetSubTypeAlignment();
 			auto bufferSize = member->GetSubType() == hh::fnd::RflClassMember::TYPE_STRUCT ? GetRflClassSize(GetStructMemberClass(member, obj, parent), obj) * arraySize : member->GetSubTypeArraySizeInBytes(arraySize);
 
-			size_t offset = AllocateBlock(bufferSize, alignment);
+			auto processed = processedPointers.Find(obj);
+			if (processed != processedPointers.end() && bufferSize <= processed->bufferSize)
+				return processed->offset;
 
-			workQueue.push_back({ curChunkId++, WorkQueueEntry::Type::MEMBER, offset, obj, parent, member, arraySize, f });
+			size_t offset = AllocateBlock(bufferSize, alignment);
 
 			serialized_types::o64_t<void*> result{ offset };
 
-			processedPointers.Insert(obj, result);
+			if (bufferSize > 0)
+				workQueue.push_back({ curChunkId++, WorkQueueEntry::Type::MEMBER, offset, obj, parent, member, arraySize, f });
+
+			processedPointers.Insert(obj, { result, bufferSize });
 
 			return result;
 		}
@@ -246,7 +254,7 @@ namespace devtools::io::binary::serialization {
 					size_t alignment = rflClass->GetAlignment();
 
 					backend.write_padding(alignment);
-					assert(chunk.dbgExpectedOffset == backend.tellp());
+					assert(chunk.dbgExpectedOffset == backend.tellp() - baseOffset);
 
 					for (size_t i = 0; i < chunk.arraySize; i++) {
 						auto* obj = reinterpret_cast<void*>(reinterpret_cast<size_t>(chunk.ptr) + i * itemSize);
@@ -264,7 +272,7 @@ namespace devtools::io::binary::serialization {
 					size_t alignment = chunk.member->GetSubTypeAlignment();
 
 					backend.write_padding(alignment);
-					assert(chunk.dbgExpectedOffset == backend.tellp());
+					assert(chunk.dbgExpectedOffset == backend.tellp() - baseOffset);
 
 					const hh::fnd::RflClassMember* prevMember = currentMember;
 					currentMember = chunk.member;
@@ -282,12 +290,12 @@ namespace devtools::io::binary::serialization {
 		}
 
 	public:
-		ReflectionSerializer(csl::fnd::IAllocator* allocator, B& backend) : CompatibleObject{ allocator }, backend { backend } {}
+		ReflectionSerializer(csl::fnd::IAllocator* allocator, B& backend, size_t baseOffset = 0ull) : CompatibleObject{ allocator }, backend{ backend }, baseOffset{ baseOffset } {}
 
 		ReflectionSerializer(const ReflectionSerializer& other) = delete;
 
 		void Serialize(const void* obj, const hh::fnd::RflClass* rflClass, size_t count = 1) {
-			nextFreeAddress = backend.tellp();
+			nextFreeOffset = backend.tellp() - baseOffset;
 
 			auto classSize = GetRflClassSize(rflClass, obj);
 

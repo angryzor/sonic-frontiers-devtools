@@ -14,5 +14,6 @@ bool Editor(const char* label, SurfRide::SRS_TRS3D& transformData);
 bool Editor(const char* label, SurfRide::SRS_IMAGECAST& imageCastData);
 bool Editor(const char* label, SurfRide::SRS_REFERENCECAST& referenceCastData);
 bool Editor(const char* label, SurfRide::SRS_SLICECAST& sliceCastData);
-bool Editor(const char* label, SurfRide::SRS_DATA& sliceCastData);
-bool Editor(const char* label, SurfRide::SRS_USERDATA& sliceCastData);
+bool Editor(const char* label, SurfRide::SRS_DATA& data);
+bool Editor(const char* label, SurfRide::SRS_USERDATA& userData);
+bool Editor(const char* label, SurfRide::SRS_TEXTDATA& textData);

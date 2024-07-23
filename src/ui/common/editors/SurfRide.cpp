@@ -74,26 +74,75 @@ bool Editor(const char* label, Transform& transform) {
 	return edited;
 }
 
+const char* verticalAlignmentNames[]{ "Top", "Center", "Bottom" };
+bool Editor(const char* label, SRS_TEXTDATA& textData) {
+	bool edited{};
+
+	auto verticalAlignment = textData.GetVerticalAlignment();
+	if (ComboEnum("Pivot type", verticalAlignment, verticalAlignmentNames)) {
+		textData.SetVerticalAlignment(verticalAlignment);
+		edited = true;
+	}
+	Viewer("Text", textData.str);
+	edited |= Editor("Font index", textData.fontIndex);
+	edited |= Editor("Scale", textData.scale);
+	edited |= Editor("Padding left", textData.paddingLeft);
+	edited |= Editor("Padding right", textData.paddingRight);
+	edited |= Editor("Padding top", textData.paddingTop);
+	edited |= Editor("Padding bottom", textData.paddingBottom);
+	edited |= Editor("Tracking", textData.tracking);
+	edited |= Editor("Line height", textData.lineHeight);
+
+	return edited;
+}
+
+const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
+const char* orientationNames[]{ "Up", "Left", "Down", "Right" };
 const char* effectTypeNames[]{ "None", "Blur", "Reflect" };
 bool Editor(const char* label, SRS_IMAGECAST& imageCastData) {
 	bool edited{};
 	ImGui::PushID(label);
 	ImGui::SeparatorText(label);
 	edited |= Editor("Size", imageCastData.size);
-	edited |= Editor("Pivot", imageCastData.pivot);
+
+	auto pivotType = imageCastData.GetPivotType();
+	if (ComboEnum("Pivot type", pivotType, pivotTypeNames)) {
+		imageCastData.SetPivotType(pivotType);
+		edited = true;
+	}
+
+	if (pivotType == SurfRide::EPivotType::CUSTOM)
+		edited |= Editor("Pivot", imageCastData.pivot);
+
+	ImGui::Separator();
+	//edited |= CheckboxFlags("Disable Texture Color", imageCastData.flags, 0x1u);
+	//edited |= CheckboxFlags("Disable Material Color", imageCastData.flags, 0x2u);
+	//edited |= CheckboxFlags("Disable Illumination Color", imageCastData.flags, 0x4u);
 	edited |= Editor("Vertex Color Top Left", imageCastData.vertexColorTopLeft);
 	edited |= Editor("Vertex Color Bottom Left", imageCastData.vertexColorBottomLeft);
 	edited |= Editor("Vertex Color Top Right", imageCastData.vertexColorTopRight);
 	edited |= Editor("Vertex Color Bottom Right", imageCastData.vertexColorBottomRight);
+
+	ImGui::Separator();
+	auto orientation = imageCastData.GetOrientation();
+	if (ComboEnum("Orientation", orientation, orientationNames)) {
+		imageCastData.SetOrientation(orientation);
+		edited = true;
+	}
+	edited |= CheckboxFlags("Flip horizontally", imageCastData.flags, 0x10u);
+	edited |= CheckboxFlags("Flip vertically", imageCastData.flags, 0x20u);
 	edited |= Editor("Crop Index 0", imageCastData.cropIndex0);
 	edited |= Editor("Crop Index 1", imageCastData.cropIndex1);
-	//edited |= Editor("Text Data", *imageCastData.textData);
+	if (imageCastData.textData)
+		edited |= Editor("Text Data", *imageCastData.textData);
+
+	ImGui::Separator();
 	edited |= ComboEnum("Effect type", *reinterpret_cast<SRE_EFFECT_TYPE*>(&imageCastData.effectType), effectTypeNames);
 	ImGui::PopID();
 	return edited;
 }
 
-bool Editor(const char* label, SurfRide::SRS_REFERENCECAST& referenceCastData)
+bool Editor(const char* label, SRS_REFERENCECAST& referenceCastData)
 {
 	bool edited{};
 	ImGui::PushID(label);
@@ -129,13 +178,33 @@ bool Editor(const char* label, SurfRide::SRS_REFERENCECAST& referenceCastData)
 	return edited;
 }
 
-bool Editor(const char* label, SurfRide::SRS_SLICECAST& sliceCastData)
+bool Editor(const char* label, SRS_SLICECAST& sliceCastData)
 {
 	bool edited{};
 	ImGui::PushID(label);
 	ImGui::SeparatorText(label);
 	edited |= Editor("Size", sliceCastData.size);
-	edited |= Editor("Pivot", sliceCastData.pivot);
+
+	auto pivotType = sliceCastData.GetPivotType();
+	if (ComboEnum("Pivot type", pivotType, pivotTypeNames)) {
+		sliceCastData.SetPivotType(pivotType);
+		edited = true;
+	}
+
+	if (pivotType == SurfRide::EPivotType::CUSTOM)
+		edited |= Editor("Pivot", sliceCastData.pivot);
+
+	auto orientation = sliceCastData.GetOrientation();
+	if (ComboEnum("Orientation", orientation, orientationNames)) {
+		sliceCastData.SetOrientation(orientation);
+		edited = true;
+	}
+
+	//edited |= CheckboxFlags("Disable Texture Color", sliceCastData.flags, 0x1u);
+	//edited |= CheckboxFlags("Disable Material Color", sliceCastData.flags, 0x2u);
+	//edited |= CheckboxFlags("Disable Illumination Color", sliceCastData.flags, 0x4u);
+	edited |= CheckboxFlags("Flip horizontally", sliceCastData.flags, 0x10u);
+	edited |= CheckboxFlags("Flip vertically", sliceCastData.flags, 0x20u);
 	edited |= Editor("Fixed size", sliceCastData.fixedSize);
 	edited |= Editor("Vertex Color Top Left", sliceCastData.vertexColorTopLeft);
 	edited |= Editor("Vertex Color Bottom Left", sliceCastData.vertexColorBottomLeft);
@@ -146,7 +215,7 @@ bool Editor(const char* label, SurfRide::SRS_SLICECAST& sliceCastData)
 }
 
 const char* userDataTypes[]{ "Boolean", "Signed integer", "Unsigned integer", "Float", "Unknown", "String"};
-bool Editor(const char* label, SurfRide::SRS_DATA& data)
+bool Editor(const char* label, SRS_DATA& data)
 {
 	bool edited{};
 	if (ImGui::TreeNode(label)) {
@@ -167,7 +236,7 @@ bool Editor(const char* label, SurfRide::SRS_DATA& data)
 	return edited;
 }
 
-bool Editor(const char* label, SurfRide::SRS_USERDATA& userData)
+bool Editor(const char* label, SRS_USERDATA& userData)
 {
 	bool edited{};
 	ImGui::PushID(label);

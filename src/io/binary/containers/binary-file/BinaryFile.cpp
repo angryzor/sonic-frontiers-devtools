@@ -60,7 +60,7 @@ namespace devtools::io::binary::containers {
 		writer.start_data_block();
 
 		Backend backend{ writer };
-		serialization::ReflectionSerializer<Backend> serializer{ Desktop::instance->GetAllocator(), backend };
+		serialization::ReflectionSerializer<Backend> serializer{ Desktop::instance->GetAllocator(), backend, writer.tell() };
 
 		serializer.Serialize(obj, rflClass);
 

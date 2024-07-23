@@ -168,6 +168,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 			cast.cropIndex[1] = cast.imageCastData->cropIndex1;
 			cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.cellAny.m_dummy;
 		}
+
+		if (cast.text && cast.text->textData) {
+			if (Editor("Live text", *cast.text->textData)) {
+				cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.cellAny.m_dummy;
+			}
+		}
 	}
 
 	void ElementInspector::RenderReferenceCastInspector(SurfRide::ReferenceCast& cast)

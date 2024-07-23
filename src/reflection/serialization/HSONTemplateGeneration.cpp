@@ -51,7 +51,7 @@ namespace io::hson::templates {
 	template<typename T>
 	struct EnumValueDefT {
 		T value{};
-		std::optional<rfl::Object<std::wstring>> descriptions{};
+		std::optional<rfl::Object<std::string>> descriptions{};
 	};
 
 	template<typename T>
@@ -90,7 +90,7 @@ namespace io::hson::templates {
 		std::string type{};
 		std::optional<std::string> subtype{};
 		std::optional<unsigned int> array_size{};
-		std::optional<rfl::Object<std::wstring>> descriptions{};
+		std::optional<rfl::Object<std::string>> descriptions{};
 	};
 
 	template<typename T>
@@ -102,7 +102,7 @@ namespace io::hson::templates {
 		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> max_range{};
 		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> step{};
 		std::optional<unsigned int> array_size{};
-		std::optional<rfl::Object<std::wstring>> descriptions{};
+		std::optional<rfl::Object<std::string>> descriptions{};
 	};
 
 	using MemberDef = rfl::Variant<
@@ -174,8 +174,8 @@ namespace io::hson::templates {
 
 	template<typename T>
 	EnumValueDefT<T> GenerateEnumValueDefT(const hh::fnd::RflClassEnumMember& value) {
-		rfl::Object<std::wstring> descs{};
-		descs["ja"] = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>{}.from_bytes(value.GetJapaneseName());
+		rfl::Object<std::string> descs{};
+		descs["ja"] = value.GetJapaneseName();
 
 		EnumValueDefT<T> def{};
 		def.value = static_cast<T>(value.GetIndex());
@@ -225,11 +225,11 @@ namespace io::hson::templates {
 	MemberDefT<T> GenerateMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
 		auto* caption = member->GetAttribute("Caption");
 		auto arraySize = member->GetCstyleArraySize();
-		std::optional<rfl::Object<std::wstring>> captionOpt{ std::nullopt };
+		std::optional<rfl::Object<std::string>> captionOpt{ std::nullopt };
 
 		if (caption) {
-			rfl::Object<std::wstring> descs{};
-			descs["ja"] = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>{}.from_bytes(*static_cast<const char* const*>(caption->GetData()));
+			rfl::Object<std::string> descs{};
+			descs["ja"] = *static_cast<const char* const*>(caption->GetData());
 			captionOpt = std::move(descs);
 		}
 
@@ -246,11 +246,11 @@ namespace io::hson::templates {
 	RangeMemberDefT<T> GenerateRangeMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
 		auto* caption = member->GetAttribute("Caption");
 		auto arraySize = member->GetCstyleArraySize();
-		std::optional<rfl::Object<std::wstring>> captionOpt{ std::nullopt };
+		std::optional<rfl::Object<std::string>> captionOpt{ std::nullopt };
 
 		if (caption) {
-			rfl::Object<std::wstring> descs{};
-			descs["ja"] = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>{}.from_bytes(*static_cast<const char* const*>(caption->GetData()));
+			rfl::Object<std::string> descs{};
+			descs["ja"] = *static_cast<const char* const*>(caption->GetData());
 			captionOpt = std::move(descs);
 		}
 
@@ -460,9 +460,7 @@ namespace io::hson::templates {
 			templateDef.objects[objClass->name] = { rflClass->GetName(), static_cast<const char*>(objClass->GetAttributeValue("category")) };
 		}
 
-		std::wofstream ofs{ filename, std::ios::trunc };
-		std::string out = rfl::json::write(templateDef);
-		std::wstring outU16 = std::wstring_convert<std::codecvt_utf8<wchar_t>, wchar_t>{}.from_bytes(out);
-		ofs << outU16;
+		std::ofstream ofs{ filename, std::ios::trunc };
+		rfl::json::write(templateDef, ofs, YYJSON_WRITE_PRETTY_TWO_SPACES);
 	}
 }

@@ -1,3 +1,13 @@
+# v0.1.34
+* Added SWIF file export.
+* Added pivot type selection to the SWIF editor (selection box will be fixed soon).
+* Added crop orientation and mirroring options to the SWIF editor.
+* Added text data editor to the SWIF editor.
+* Added an option to export a HSON template for all loaded objects in the Tools menu.
+* Refactored I/O system.
+* Upgraded to C++20.
+
+
 # v0.1.33
 * Fixed a bug/crash in the gedit export code introduced by v0.1.30.
 
