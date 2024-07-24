@@ -13,7 +13,6 @@ void GameUpdaterInspector::PreRender()
 void GameUpdaterInspector::RenderContents()
 {
 	auto& gameUpdater = hh::game::GameApplication::GetInstance()->GetGameUpdater();
-	auto* gameManager = hh::game::GameManager::GetInstance();
 
 	ImGui::DragFloat("FPS", (*reinterpret_cast<float**>(0x143D907A0) + 5));
 	ImGui::DragFloat("Timescale", &gameUpdater.timeScale, 0.01f);
@@ -32,14 +31,14 @@ void GameUpdaterInspector::RenderContents()
 		ImGui::TableSetupColumn("Unk3");
 		ImGui::TableHeadersRow();
 
-		for (size_t i = 0; i < 32; i++) {
+		for (int i = 0; i < 32; i++) {
 			char name[20];
-			snprintf(name, sizeof(name), "Layer %zd", i);
+			snprintf(name, sizeof(name), "Layer %d", i);
 
 			ImGui::PushID(i);
 			ImGui::TableNextRow();
 			ImGui::TableNextColumn();
-			ImGui::Text("%zd", i);
+			ImGui::Text("%d", i);
 			ImGui::TableNextColumn();
 			ImGui::CheckboxFlags("##layersActiveDuringNormalOperation", &gameUpdater.layersActiveDuringNormalOperation, 1 << i);
 			ImGui::TableNextColumn();

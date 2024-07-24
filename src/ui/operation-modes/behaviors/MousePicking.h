@@ -46,8 +46,6 @@ public:
 		: OperationModeBehavior{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
 	virtual void Render() override {
-		auto& io = ImGui::GetIO();
-
 		this->picked = false;
 		this->locationPicked = false;
 		this->pickedObjects.clear();

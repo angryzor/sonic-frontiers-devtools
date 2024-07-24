@@ -67,7 +67,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
     target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_20)
-    target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive-)
+    target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive- /W4 /wd4100 /wd4458 /wd4324)
     target_compile_definitions(${DEVTOOLS_TARGET}
         PRIVATE
             DEVTOOLS_BINARY_FILENAME=$<TARGET_FILE_NAME:${DEVTOOLS_TARGET}>

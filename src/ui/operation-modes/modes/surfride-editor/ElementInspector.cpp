@@ -69,7 +69,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::Text("Name: %s", layer.layerData->name);
 
 		if (ImGui::BeginCombo("Current animation", layer.layerData->animations[layer.currentAnimationIndex].name)) {
-			for (size_t i = 0; i < layer.layerData->animationCount; i++) {
+			for (int i = 0; i < layer.layerData->animationCount; i++) {
 				if (ImGui::Selectable(layer.layerData->animations[i].name, layer.currentAnimationIndex == i))
 					layer.StartAnimation(i);
 				if (layer.currentAnimationIndex == i)
@@ -140,6 +140,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 				cast.transform->display = transform.display;
 
 				cast.transform->dirtyFlag.SetTransformAll();
+#ifdef DEVTOOLS_TARGET_SDK_wars
+				cast.UpdateParentsAndThisTransformRecursively();
+#endif
 			}
 		}
 		else {
@@ -157,6 +160,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 				cast.transform->display = transform.display;
 
 				cast.transform->dirtyFlag.SetTransformAll();
+#ifdef DEVTOOLS_TARGET_SDK_wars
+				cast.UpdateParentsAndThisTransformRecursively();
+#endif
 			}
 		}
 	}
@@ -185,11 +191,17 @@ namespace ui::operation_modes::modes::surfride_editor {
 			cast.cropIndex[0] = cast.imageCastData->cropIndex0;
 			cast.cropIndex[1] = cast.imageCastData->cropIndex1;
 			cast.transform->dirtyFlag.SetCellAll();
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			cast.UpdateParentsAndThisTransformRecursively();
+#endif
 		}
 
 		if (cast.text && cast.text->textData) {
 			if (Editor("Live text", *cast.text->textData)) {
 				cast.transform->dirtyFlag.SetCellAll();
+#ifdef DEVTOOLS_TARGET_SDK_wars
+				cast.UpdateParentsAndThisTransformRecursively();
+#endif
 			}
 		}
 	}
@@ -220,6 +232,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 			cast.vertexColorBottomRight = cast.sliceCastData->vertexColorBottomRight;
 #endif
 			cast.transform->dirtyFlag.SetCellAll();
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			cast.UpdateParentsAndThisTransformRecursively();
+#endif
 		}
 	}
 

@@ -102,7 +102,7 @@ namespace devtools::io::binary::containers::swif {
 			stream.write_padding(16);
 
 			size_t end = stream.tellp();
-			chunkHeader.chunkSize = end - dataStart;
+			chunkHeader.chunkSize = static_cast<unsigned int>(end - dataStart);
 
 			stream.seekp(start);
 			stream.write(chunkHeader);

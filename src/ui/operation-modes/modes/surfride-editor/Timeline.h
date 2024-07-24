@@ -91,12 +91,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<>
-		static void RenderValueEditor<bool>(const char* name, bool& value, float step) {
+		void RenderValueEditor<bool>(const char* name, bool& value, float step) {
 			ImGui::Checkbox(name, &value);
 		}
 
 		template<>
-		static void RenderValueEditor<SurfRide::Color>(const char* name, SurfRide::Color& value, float step) {
+		void RenderValueEditor<SurfRide::Color>(const char* name, SurfRide::Color& value, float step) {
 			float colorAsFloat[]{
 				static_cast<float>(value.r) / 255,
 				static_cast<float>(value.g) / 255,
@@ -150,7 +150,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		template<typename T, double (*Selector)(const T& x) = DefaultSelector, void (*Setter)(T& x, double y) = DefaultSetter>
 		static void RenderDragPoints(SurfRide::SRS_TRACK& track, double min, double max, const char* id = "Points", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f)) {
 			ImGui::PushID(id);
-			for (size_t i = 0; i < track.keyCount; i++) {
+			for (unsigned short i = 0; i < track.keyCount; i++) {
 				auto& kf = GetKeyFrame<T>(track, i);
 				double frame = kf.frame;
 				double value = Selector(kf.value);

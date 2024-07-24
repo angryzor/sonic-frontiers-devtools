@@ -1,7 +1,7 @@
 #pragma once
 #include "RflArrayAccessor.h"
 #include <tuple>
-#include <utilities/RflClassGenFwd.h>
+#include <reflection/RflClassGenFwd.h>
 
 namespace rflops {
 	namespace traversals {

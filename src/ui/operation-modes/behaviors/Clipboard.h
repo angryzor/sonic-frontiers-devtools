@@ -25,6 +25,16 @@ public:
 	static constexpr unsigned int id = 0;
 	virtual unsigned int GetId() override { return id; }
 
+	virtual void Init() override {
+		Desktop::instance->BindShortcut<CopyAction>(ShortcutId::COPY);
+		Desktop::instance->BindShortcut<PasteAction>(ShortcutId::PASTE);
+	}
+
+	virtual void Deinit() override {
+		Desktop::instance->UnbindShortcut(ShortcutId::COPY);
+		Desktop::instance->UnbindShortcut(ShortcutId::PASTE);
+	}
+
 	virtual void ProcessAction(const ActionBase& action) override {
 		switch (action.id) {
 		case CopyAction::id:

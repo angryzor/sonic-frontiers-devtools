@@ -1,5 +1,5 @@
 #pragma once
-#include <utilities/RflClassGenFwd.h>
+#include <reflection/RflClassGenFwd.h>
 
 struct ResourceRfls {
     static hh::fnd::RflClass resObjectWorld;

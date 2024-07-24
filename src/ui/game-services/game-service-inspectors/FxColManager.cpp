@@ -18,7 +18,6 @@ void RenderGameServiceInspector(app::gfx::FxColManager& service) {
 		Editor("Resource", *service.resource);
 
 		ImGui::SeparatorText("Active collision shapes");
-		size_t i{};
 		for (auto shapeIdx : service.activeCollisionShapes) {
 			ImGui::PushID(shapeIdx);
 			char desc[20];

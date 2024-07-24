@@ -30,7 +30,7 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 			ImGui::Text("Do not drag non-NeedleFxSceneData RFL resources into this window!");
 		}
 		else {
-			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), resource);
+			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), &*resource);
 
 			if (ImGui::Checkbox("Set NeedleFX Parameter", &setParam)) {
 				if (setParam) {

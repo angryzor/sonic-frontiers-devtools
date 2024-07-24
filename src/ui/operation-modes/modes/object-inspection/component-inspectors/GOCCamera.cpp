@@ -10,7 +10,7 @@ void RenderComponentInspector(app_cmn::camera::GOCCamera& component)
 			}
 
 			ImGui::SeparatorText("Controller");
-			ImGui::Text("Addr: %zx", unit.controller);
+			ImGui::Text("Addr: %zx", &*unit.controller);
 			ImGui::Text("Name: %s", unit.controller->name.c_str());
 			if (ImGui::TreeNode("Parameters")) {
 				Editor("Parameters", unit.controller->parameter);

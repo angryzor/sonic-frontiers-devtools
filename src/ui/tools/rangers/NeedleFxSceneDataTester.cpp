@@ -43,7 +43,7 @@ void NeedleFxSceneDataTester::RenderContents()
 			ImGui::Text("Save your work! Changing levels now will crash your game due to a bug in this tool!");
 		}
 		else {
-			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), resource);
+			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), &*resource);
 
 			ImGui::Checkbox("Set Scene Config", &setConfig);
 			ImGui::Checkbox("Set NeedleFX Parameter", &setParam);

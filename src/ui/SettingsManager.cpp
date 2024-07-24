@@ -130,22 +130,22 @@ void SettingsManager::Render() {
 							if (ImGui::BeginTable("Filters", 33))
 							{
 								ImGui::TableSetupColumn("Filter categories", ImGuiTableColumnFlags_WidthStretch);
-								for (size_t j = 0; j < 32; j++) {
+								for (int j = 0; j < 32; j++) {
 									char header[10];
-									snprintf(header, 10, "%zd", j);
+									snprintf(header, 10, "%d", j);
 									ImGui::TableSetupColumn(header, ImGuiTableColumnFlags_WidthFixed, 24.0f);
 								}
 
 								ImGui::TableHeadersRow();
 
-								for (size_t i = 0; i < 32; i++)
+								for (int i = 0; i < 32; i++)
 								{
 									ImGui::PushID(i);
 									ImGui::TableNextRow();
 									ImGui::TableNextColumn();
-									ImGui::Text("Layer %zd", i);
+									ImGui::Text("Layer %d", i);
 
-									for (size_t j = 0; j < 32; j++) {
+									for (int j = 0; j < 32; j++) {
 										ImGui::PushID(j);
 										ImGui::TableNextColumn();
 										ImGui::Checkbox("", &tempSettings.selectionColliderFilters[i][j]);
@@ -181,22 +181,22 @@ void SettingsManager::Render() {
 							if (ImGui::BeginTable("Filters", 33))
 							{
 								ImGui::TableSetupColumn("Filter categories", ImGuiTableColumnFlags_WidthStretch);
-								for (size_t j = 0; j < 32; j++) {
+								for (int j = 0; j < 32; j++) {
 									char header[10];
-									snprintf(header, 10, "%zd", j);
+									snprintf(header, 10, "%d", j);
 									ImGui::TableSetupColumn(header, ImGuiTableColumnFlags_WidthFixed, 24.0f);
 								}
 
 								ImGui::TableHeadersRow();
 
-								for (size_t i = 0; i < 32; i++)
+								for (int i = 0; i < 32; i++)
 								{
 									ImGui::PushID(i);
 									ImGui::TableNextRow();
 									ImGui::TableNextColumn();
-									ImGui::Text("Layer %zd", i);
+									ImGui::Text("Layer %d", i);
 
-									for (size_t j = 0; j < 32; j++) {
+									for (int j = 0; j < 32; j++) {
 										ImGui::PushID(j);
 										ImGui::TableNextColumn();
 										ImGui::Checkbox("", &tempSettings.debugRenderingColliderFilters[i][j]);
@@ -326,7 +326,6 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	unsigned int u;
 	float f;
 	char s[300];
-	char s2[10];
 	if (sscanf_s(line, "Theme=%u", &u) == 1) { settings.theme = u; return; }
 	if (sscanf_s(line, "Translations=%u", &u) == 1) { settings.language = static_cast<Translations::Language>(u); return; }
 	// if (sscanf_s(line, "FontSize=%f", &f) == 1) { settings.fontSize = f; return; }
@@ -339,7 +338,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingRenderGOCVisualDebugDraw=%u", &u) == 1) { settings.debugRenderingRenderGOCVisualDebugDraw = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderColliders=%u", &u) == 1) { settings.debugRenderingRenderColliders = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderOcclusionCapsules=%u", &u) == 1) { settings.debugRenderingRenderOcclusionCapsules = u; return; }
-	if (sscanf_s(line, "DebugRenderingGOCVisualDebugDrawOpacity=%u", &u) == 1) { settings.debugRenderingGOCVisualDebugDrawOpacity = u; return; }
+	if (sscanf_s(line, "DebugRenderingGOCVisualDebugDrawOpacity=%u", &u) == 1) { settings.debugRenderingGOCVisualDebugDrawOpacity = static_cast<uint8_t>(u); return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderDistance=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderDistance = f; return; }

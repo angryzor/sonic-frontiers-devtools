@@ -90,7 +90,7 @@ size_t RflMaxScoreArray(const void* obj1, const RflClassMember* member)
 	auto* arr1 = static_cast<const csl::ut::MoveArray<void*>*>(obj1);
 
 	for (auto& item : *arr1)
-		score += RflMaxScoreSingle(obj1, member, member->GetSubType());
+		score += RflMaxScoreSingle(item, member, member->GetSubType());
 
 	return score;
 }

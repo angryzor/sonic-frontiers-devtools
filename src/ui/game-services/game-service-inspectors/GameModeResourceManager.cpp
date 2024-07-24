@@ -5,7 +5,7 @@ void RenderGameServiceInspector(app::game::GameModeResourceManager& service)
 			ImGui::Text("Module flags: %x", module->flags);
 			if (ImGui::TreeNode("Resources")) {
 				for (auto& resource : module->resourceCollection->resources) {
-					ImGui::Text("%s", resource.name);
+					ImGui::Text("%s", resource.name.c_str());
 				}
 				ImGui::TreePop();
 			}

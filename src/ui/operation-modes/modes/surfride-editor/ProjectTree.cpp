@@ -12,7 +12,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (context.gocSprite != nullptr)
 			snprintf(spriteName, sizeof(spriteName), "%s - %zx", context.gocSprite->owner->name.c_str(), reinterpret_cast<size_t>(&*context.gocSprite));
 		else
-			strcpy(spriteName, "none");
+			strcpy_s(spriteName, "none");
 
 		if (ImGui::BeginCombo("GOCSprite", spriteName)) {
 			for (auto* obj : hh::game::GameManager::GetInstance()->objects)
@@ -49,12 +49,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (ImGuiFileDialog::Instance()->Display("ResSurfRideProjectExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
-				auto* project = static_cast<SurfRide::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
+				auto* exportProjectData = static_cast<SurfRide::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
 				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 				std::wstring wFilePath(filePath.begin(), filePath.end());
 
-				devtools::io::binary::containers::swif::Serialize(wFilePath.c_str(), project);
+				devtools::io::binary::containers::swif::Serialize(wFilePath.c_str(), exportProjectData);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}

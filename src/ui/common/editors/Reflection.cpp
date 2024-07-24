@@ -23,9 +23,9 @@ public:
 	typedef bool result_type;
 
 	template<typename T> static float rfl_step(const rfl_range_representation_t<T>& rangeValue) { return std::fmaxf(rflMinFloatStep, static_cast<float>(rangeValue)); }
-	template<> static float rfl_step<RangeVector2>(const rfl_range_representation_t<RangeVector2>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
-	template<> static float rfl_step<RangeVector3>(const rfl_range_representation_t<RangeVector3>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
-	template<> static float rfl_step<RangeVector4>(const rfl_range_representation_t<RangeVector4>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
+	template<> float rfl_step<RangeVector2>(const rfl_range_representation_t<RangeVector2>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
+	template<> float rfl_step<RangeVector3>(const rfl_range_representation_t<RangeVector3>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
+	template<> float rfl_step<RangeVector4>(const rfl_range_representation_t<RangeVector4>& rangeValue) { return rfl_step<RangeFloat>(rangeValue.x()); }
 
 	template<typename F>
 	static bool NameScope(const char* memberName, F f) {
@@ -160,10 +160,11 @@ public:
 			auto* values = enumClass->GetValues();
 
 			for (size_t i = 0; i < enumClass->GetValueCount(); i++) {
-				bool is_selected = currentValue == values[i].GetIndex();
+				int64_t index = static_cast<int64_t>(values[i].GetIndex());
+				bool is_selected = currentValue == index;
 
 				if (ImGui::Selectable(values[i].GetEnglishName(), is_selected)) {
-					WritePrimitiveInt(obj, values[i].GetIndex(), type);
+					WritePrimitiveInt(obj, index, type);
 					edited = true;
 				}
 

@@ -11,10 +11,10 @@ void RenderGameServiceInspector(app::level::LevelInfo& service)
 		ImGui::Text("No stage data loaded.");
 
 	if (ImGui::TreeNode("PlayerInformation")) {
-		for (size_t i = 0; i < 2; i++) {
+		for (char i = 0; i < 2; i++) {
 			auto* playerInfo = service.GetPlayerInformation(i);
 			char nodeName[50];
-			snprintf(nodeName, sizeof(nodeName), "Player %zd", i);
+			snprintf(nodeName, sizeof(nodeName), "Player %d", i);
 
 			if (ImGui::TreeNode(nodeName)) {
 				Editor(nodeName, *playerInfo);

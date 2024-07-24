@@ -181,6 +181,9 @@ namespace ui::operation_modes::modes::surfride_editor
 				cast->layer->layerData->transforms.transforms2d[castIndex].position = { newPos.x(), newPos.y() };
 
 			cast->SetPosition(newPos);
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			cast->UpdateParentsAndThisTransformRecursively();
+#endif
 		}
 	};
 

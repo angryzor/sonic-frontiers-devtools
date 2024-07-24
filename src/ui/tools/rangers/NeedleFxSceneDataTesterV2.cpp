@@ -5,27 +5,9 @@ using namespace hh::fnd;
 NeedleFxSceneDataTesterV2::NeedleFxSceneDataTesterV2(csl::fnd::IAllocator* allocator) : StandaloneWindow(allocator)
 {
 	SetTitle("NeedleFxSceneData testing tool V2");
-
-	auto* gameManager = hh::game::GameManager::GetInstance();
-
-	//if (auto* fxColMgr = gameManager->GetService<app::gfx::FxColManager>()) {
-	//	fxColManager = fxColMgr;
-	//	gameManager->UnregisterService(fxColMgr);
-	//}
-
-	//if (auto* fxParamMgr = gameManager->GetService<app::gfx::FxParamManager>()) {
-	//	fxParamManager = fxParamMgr;
-	//	gameManager->UnregisterService(fxParamMgr);
-	//}
 }
 
 NeedleFxSceneDataTesterV2::~NeedleFxSceneDataTesterV2() {
-	auto* gameManager = hh::game::GameManager::GetInstance();
-
-	//if (fxParamManager != nullptr)
-	//	gameManager->RegisterService(fxParamManager);
-	//if (fxColManager != nullptr)
-	//	gameManager->RegisterService(fxColManager);
 }
 
 void NeedleFxSceneDataTesterV2::PreRender() {
@@ -51,7 +33,7 @@ void NeedleFxSceneDataTesterV2::RenderContents()
 			ImGui::Text("Do not drag non-NeedleFxSceneData RFL resources into this window!");
 		}
 		else {
-			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), resource);
+			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource->GetName(), &*resource);
 
 			if (ImGui::Checkbox("Set Scene Config", &setConfig)) {
 				if (setConfig)

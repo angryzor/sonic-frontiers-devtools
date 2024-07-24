@@ -16,10 +16,10 @@ void ResMaterialEditor::RenderContents()
 {
 	ImGui::BeginGroup();
 	void* data = resource->resource->GetMaterialParameterValues();
-	for (size_t i = 0; i < resource->resource->GetMaterialParameterCount(); i++) {
+	for (uint32_t i = 0; i < resource->resource->GetMaterialParameterCount(); i++) {
 		auto& info = resource->resource->GetMaterialParameterInfos()[i];
 
-		ImGui::PushID(i);
+		ImGui::PushID(static_cast<int>(i));
 		switch (info.type) {
 		case hh::needle::ParameterType::FLOAT:
 			RenderFloatParameterEditor(i, static_cast<ParameterFloatValue*>(data));
@@ -74,11 +74,11 @@ void ResMaterialEditor::RenderFloatParameterEditor(size_t idx, ParameterFloatVal
 		for (size_t i = 0; i < itemCount; i++) {
 			char buf[256];
 			snprintf(buf, sizeof(buf), "%s[%zd]", data->name->name, i);
-			ImGui::DragFloat4(buf, reinterpret_cast<float*>(&(&data->values)[i]), 0.01);
+			ImGui::DragFloat4(buf, reinterpret_cast<float*>(&(&data->values)[i]), 0.01f);
 		}
 	}
 	else {
-		ImGui::DragFloat4(data->name->name, reinterpret_cast<float*>(&(&data->values)[0]), 0.01);
+		ImGui::DragFloat4(data->name->name, reinterpret_cast<float*>(&(&data->values)[0]), 0.01f);
 	}
 }
 

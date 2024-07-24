@@ -1,6 +1,6 @@
 #pragma once
-#include <utilities/RflClassGenFwd.h>
 #include <utilities/CompatibleObject.h>
+#include <reflection/RflClassGenFwd.h>
 #include <reflection/RflArrayAccessor.h>
 #include <reflection/ReflectiveOperations.h>
 #include <reflection/Concepts.h>

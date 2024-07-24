@@ -7,13 +7,13 @@ void RenderDebugVisual(hh::gfnd::DrawContext& ctx, const KdTreeNode& node) {
 	switch (node.type) {
 	case KdTreeNode::Type::SPLIT_X:
 		ctx.DrawPlane(
-			Eigen::Affine3f{ Eigen::Translation3f{ node.deadzoneStartCoord, node.aabb.Center().y(), node.aabb.Center().z() } * Eigen::AngleAxisf{ 1.5707964, Eigen::Vector3f::UnitY() } },
+			Eigen::Affine3f{ Eigen::Translation3f{ node.deadzoneStartCoord, node.aabb.Center().y(), node.aabb.Center().z() } * Eigen::AngleAxisf{ 1.5707964f, Eigen::Vector3f::UnitY() } },
 			node.aabb.max.z() - node.aabb.min.z(),
 			node.aabb.max.y() - node.aabb.min.y(),
 			csl::ut::Color8{ 255, 0, 0, 255 }
 		);
 		ctx.DrawPlane(
-			Eigen::Affine3f{ Eigen::Translation3f{ node.deadzoneEndCoord, node.aabb.Center().y(), node.aabb.Center().z() } *Eigen::AngleAxisf{ 1.5707964, Eigen::Vector3f::UnitY() } },
+			Eigen::Affine3f{ Eigen::Translation3f{ node.deadzoneEndCoord, node.aabb.Center().y(), node.aabb.Center().z() } *Eigen::AngleAxisf{ 1.5707964f, Eigen::Vector3f::UnitY() } },
 			node.aabb.max.z() - node.aabb.min.z(),
 			node.aabb.max.y() - node.aabb.min.y(),
 			csl::ut::Color8{ 0, 255, 0, 255 }
@@ -23,13 +23,13 @@ void RenderDebugVisual(hh::gfnd::DrawContext& ctx, const KdTreeNode& node) {
 		break;
 	case KdTreeNode::Type::SPLIT_Y:
 		ctx.DrawPlane(
-			Eigen::Affine3f{ Eigen::Translation3f{ node.aabb.Center().x(), node.deadzoneStartCoord, node.aabb.Center().z() } *Eigen::AngleAxisf{ 1.5707964, Eigen::Vector3f::UnitX() } },
+			Eigen::Affine3f{ Eigen::Translation3f{ node.aabb.Center().x(), node.deadzoneStartCoord, node.aabb.Center().z() } *Eigen::AngleAxisf{ 1.5707964f, Eigen::Vector3f::UnitX() } },
 			node.aabb.max.x() - node.aabb.min.x(),
 			node.aabb.max.z() - node.aabb.min.z(),
 			csl::ut::Color8{ 255, 0, 0, 255 }
 		);
 		ctx.DrawPlane(
-			Eigen::Affine3f{ Eigen::Translation3f{ node.aabb.Center().x(), node.deadzoneEndCoord, node.aabb.Center().z() } *Eigen::AngleAxisf{ 1.5707964, Eigen::Vector3f::UnitX() } },
+			Eigen::Affine3f{ Eigen::Translation3f{ node.aabb.Center().x(), node.deadzoneEndCoord, node.aabb.Center().z() } *Eigen::AngleAxisf{ 1.5707964f, Eigen::Vector3f::UnitX() } },
 			node.aabb.max.x() - node.aabb.min.x(),
 			node.aabb.max.z() - node.aabb.min.z(),
 			csl::ut::Color8{ 0, 255, 0, 255 }

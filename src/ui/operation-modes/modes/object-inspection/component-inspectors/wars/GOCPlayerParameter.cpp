@@ -30,8 +30,6 @@ void RenderModeParameterInspector(const char* label, R (&parameters)[4]) {
 const char* playerParameterModes[] = { "Forward view", "Side view", "Forward view water", "Side view water" };
 
 void RenderComponentInspector(app::player::GOCPlayerParameter& component) {
-	auto* obj = component.owner;
-
 	ComboEnum("Mode", component.mode, playerParameterModes);
 
 	if (ImGui::TreeNode("Currently loaded parameters")) {

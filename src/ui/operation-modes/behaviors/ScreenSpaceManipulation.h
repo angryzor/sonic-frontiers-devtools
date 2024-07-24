@@ -22,7 +22,6 @@ public:
 
 		auto selectionAabb = selAabb->GetAabb();
 
-		auto& io = ImGui::GetIO();
 		auto mousePos = ImGui::GetMousePos();
 
 		auto min = NDCCoordsToImGui({ selectionAabb.min.x(), selectionAabb.max.y() });

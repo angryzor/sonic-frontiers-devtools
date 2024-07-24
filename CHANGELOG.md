@@ -1,3 +1,8 @@
+# v0.1.35
+* Fixed ClipboardBehavior not registering shortcuts.
+* Moved to /W4 warning level and fixed most warnings.
+
+
 # v0.1.34
 * Added SWIF file export.
 * Added pivot type selection to the SWIF editor (selection box will be fixed soon).

@@ -66,8 +66,6 @@ HOOK(LRESULT, __fastcall, WndProcHook, wndProcAddr, HWND hWnd, UINT msg, WPARAM 
 		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 			return true;
 
-		ImGuiIO& io = ImGui::GetIO();
-
 		if (ShouldCaptureMouseInputs() && msg >= WM_MOUSEFIRST && msg <= WM_MOUSELAST)
 			return true;
 

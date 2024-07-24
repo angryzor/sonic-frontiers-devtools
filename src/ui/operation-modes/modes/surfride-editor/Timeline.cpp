@@ -38,7 +38,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		if (ImGui::BeginChild("Animation list", ImVec2(100.0f, 0.0f))) {
-			for (size_t i = 0; i < focusedLayer->layerData->animationCount; i++) {
+			for (int i = 0; i < focusedLayer->layerData->animationCount; i++) {
 				if (ImGui::Selectable(focusedLayer->layerData->animations[i].name, focusedLayer->currentAnimationIndex == i))
 					focusedLayer->StartAnimation(i);
 				if (focusedLayer->currentAnimationIndex == i)
@@ -91,7 +91,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::TableNextColumn();
 		auto cellPos = ImGui::GetCursorPos();
 		auto cellScreenPos = ImGui::GetCursorScreenPos();
-		auto playHeadFrame = std::fminf(layer.currentFrame3, animation.frameCount);
+		auto playHeadFrame = std::fminf(layer.currentFrame3, static_cast<float>(animation.frameCount));
 		for (size_t i = 0; i < motion.trackCount; i++) {
 			RenderTrack(layer, animation, motion, motion.tracks[i]);
 		}
@@ -129,7 +129,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImGui::SetCursorPos(posBefore + ImVec2(0, 20));
 		}
 		else {
-			auto height = 80;
+			auto height = 80.0f;
 			if (ImGui::BeginChild("TimelineItem", ImVec2(width, height + ImGui::GetTextLineHeightWithSpacing()))) {
 				ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + ImVec2(width, ImGui::GetTextLineHeightWithSpacing()), 0xFF5A6AED);
 				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 0, 0, 1));

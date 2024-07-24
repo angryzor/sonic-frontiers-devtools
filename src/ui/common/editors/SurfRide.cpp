@@ -157,7 +157,7 @@ bool Editor(const char* label, SRS_REFERENCECAST& referenceCastData)
 			castAnimIdx = i;
 
 	if (ImGui::BeginCombo("Animation", referenceCastData.layer->animations[castAnimIdx].name)) {
-		for (size_t i = 0; i < referenceCastData.layer->animationCount; i++) {
+		for (int i = 0; i < referenceCastData.layer->animationCount; i++) {
 			auto& anim = referenceCastData.layer->animations[i];
 
 			if (ImGui::Selectable(anim.name, anim.id == referenceCastData.animationId)) {

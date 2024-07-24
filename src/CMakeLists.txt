@@ -19,8 +19,9 @@ target_sources(${DEVTOOLS_TARGET}
         io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
+        reflection/HSONTemplateGeneration.cpp
         reflection/ReflectiveOperations.cpp
-        reflection/serialization/HSONTemplateGeneration.cpp
+        reflection/RflDiff.cpp
         ui/common/editors/Basic.cpp
         ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
@@ -89,7 +90,6 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/math/MathUtils.cpp
         utilities/ObjectDataUtils.cpp
         utilities/ResourceTypes.cpp
-        utilities/RflDiff.cpp
         utilities/CompatibleObject.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
@@ -108,10 +108,12 @@ target_sources(${DEVTOOLS_TARGET}
         io/binary/serialization/Types.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
+        reflection/HSONTemplateGeneration.h
         reflection/ReflectiveOperations.h
         reflection/RflArrayAccessor.h
-        reflection/serialization/ReflectionSerializer.h
-        reflection/serialization/HSONTemplateGeneration.h
+        reflection/RflDiff.h
+        reflection/RflClassGen.h
+        reflection/RflClassGenFwd.h
         ui/common/editors/Basic.h
         ui/common/editors/Camera.h
         ui/common/editors/ObjectData.h
@@ -204,8 +206,6 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/math/Ray.h
         utilities/ObjectDataUtils.h
         utilities/ResourceTypes.h
-        utilities/RflDiff.h
-        utilities/RflClassGen.h
         utilities/CompatibleObject.h
 )
 

@@ -1,13 +1,19 @@
 #include "ToolBar.h"
-#include "common/Theme.h"
+#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <reflection/HSONTemplateGeneration.h>
 #include "Desktop.h"
 #include "SettingsManager.h"
+#include "common/Theme.h"
+#include "common/inputs/Basic.h"
 #include "resources/ResourceBrowser.h"
 #include "game-services/GameServiceInspector.h"
 #include "core-services/MemoryInspector.h"
+#include "tools/RflComparer.h"
+
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include "tools/wars/NeedleFxSceneDataTesterV2.h"
 #endif
+
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "game-modes/GameModeInspector.h"
 #include "core-services/GameUpdaterInspector.h"
@@ -18,20 +24,15 @@
 #include "tools/rangers/NeedleFxSceneDataTester.h"
 #include "tools/rangers/NeedleFxSceneDataTesterV2.h"
 #endif
-#include "tools/RflComparer.h"
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include "operation-modes/modes/level-editor/LevelEditor.h"
 #include "operation-modes/modes/fxcol-editor/FxColEditor.h"
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
-#include "reflection/serialization/HSONTemplateGeneration.h"
 
 using namespace hh::game;
 
 void ToolBar::Render() {
-	auto& style = ImGui::GetStyle();
-
 	if (!ImGui::BeginViewportSideBar("Main menu", ImGui::GetMainViewport(), ImGuiDir_Up, 56, ImGuiWindowFlags_MenuBar)) {
 		ImGui::End();
 		return;
@@ -99,16 +100,12 @@ void ToolBar::Render() {
 
 	auto& gameUpdater = GameApplication::GetInstance()->GetGameUpdater();
 
-	unsigned int gameUpdaterFlags = static_cast<unsigned int>(gameUpdater.flags.m_dummy);
-
-	ImGui::CheckboxFlags("Object pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::OBJECT_PAUSE));
+	CheckboxFlags("Object pause", gameUpdater.flags, GameUpdater::Flags::OBJECT_PAUSE);
 	ImGui::SetItemTooltip("Pauses only standard object layers. Certain layers and services (e.g. weather service) keep running. (Hotkey: F3)");
 	ImGui::SameLine();
-	ImGui::CheckboxFlags("Debug pause", &gameUpdaterFlags, 1 << static_cast<uint8_t>(GameUpdater::Flags::DEBUG_PAUSE));
+	CheckboxFlags("Debug pause", gameUpdater.flags, GameUpdater::Flags::DEBUG_PAUSE);
 	ImGui::SetItemTooltip("Pauses (almost) every object layer. (Hotkey: F4)");
 	ImGui::SameLine();
-
-	gameUpdater.flags.m_dummy = gameUpdaterFlags;
 
 	if (ImGui::Button("Step frame"))
 		gameUpdater.flags.set(GameUpdater::Flags::DEBUG_STEP_FRAME);

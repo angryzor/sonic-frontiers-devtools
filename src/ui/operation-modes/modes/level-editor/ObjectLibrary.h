@@ -29,7 +29,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 	class LevelEditor;
 	class ObjectLibrary : public Panel<Context> {
-		friend class ObjectLibraryTreeViewNode;
+		friend struct ObjectLibraryTreeViewNode;
 		TreeView<ObjectLibraryTreeViewNode> tree{ BuildTree() };
 		const hh::game::GameObjectClass* selectedClass{};
 	public:

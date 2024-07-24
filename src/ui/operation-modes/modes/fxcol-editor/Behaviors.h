@@ -163,8 +163,6 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			if (renderKdTree)
 				RenderDebugVisual(ctx, fxColMgr->collisionTree);
 
-			auto& selection = operationMode.GetBehavior<SelectionBehavior<Context>>()->GetSelection();
-
 			if (renderBoundingVolumes)
 				for (size_t i = 0; i < fxColMgr->resource->fxColData->boundingVolumeCount; i++)
 					ctx.DrawAABB(fxColMgr->resource->fxColData->boundingVolumes[i].aabbMin, fxColMgr->resource->fxColData->boundingVolumes[i].aabbMax, { 0, 0, 255, 255 });

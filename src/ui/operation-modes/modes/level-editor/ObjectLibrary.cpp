@@ -10,7 +10,6 @@ namespace ui::operation_modes::modes::level_editor {
 
 	void ObjectLibrary::RenderPanel() {
 		auto& context = GetContext();
-		auto* registry = GameObjectSystem::GetInstance()->gameObjectRegistry;
 
 		auto* focusedChunk = context.GetFocusedChunk();
 		if (focusedChunk) {

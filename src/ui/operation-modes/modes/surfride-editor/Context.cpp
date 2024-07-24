@@ -6,8 +6,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 	{
 		auto resolution = SurfRide::GetScreenResolution();
 		auto projectionMatrix = csl::math::CreatePerspectiveProjectionMatrix(
-			static_cast<float>(scene->camera.camera.cameraData.fov) * 0.000095873802,
-			resolution.width / resolution.height,
+			static_cast<float>(scene->camera.camera.cameraData.fov) * 0.000095873802f,
+			static_cast<float>(resolution.width) / static_cast<float>(resolution.height),
 			scene->camera.camera.cameraData.nearPlane,
 			scene->camera.camera.cameraData.farPlane
 		);

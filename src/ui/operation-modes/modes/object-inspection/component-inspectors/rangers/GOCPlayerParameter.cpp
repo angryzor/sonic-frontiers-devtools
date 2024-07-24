@@ -31,8 +31,6 @@ const char* playerParameterModes[] = { "Normal", "Water", "Cyberspace Forward Vi
 const char* playerParameterSuperStates[] = { "Normal", "Super Sonic", "Super Sonic 2" };
 
 void RenderComponentInspector(app::player::GOCPlayerParameter& component) {
-	auto* obj = component.owner;
-
 	ImGui::Text("Character:");
 	ImGui::SameLine();
 	switch (component.characterId) {

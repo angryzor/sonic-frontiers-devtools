@@ -73,7 +73,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 		for (auto* obj : selection)
 			avg += obj->transform.position.cwiseProduct(basis);
-		avg /= selection.size();
+		avg /= static_cast<float>(selection.size());
 
 		size_t idx{};
 		float startOffset{ -static_cast<float>(selection.size() - 1) / 2.0f };

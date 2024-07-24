@@ -11,8 +11,10 @@ bool BitFieldEditor(const char* label, ImGuiDataType dtype, T* field, T startBit
 	T orig = (*field >> startBit) & maxVal;
 	T v = orig;
 
-	if (edited = ImGui::DragScalar(label, dtype, &v, 1.0f, &minVal, &maxVal))
+	if (ImGui::DragScalar(label, dtype, &v, 1.0f, &minVal, &maxVal)) {
 		*field = (*field & ~(maxVal << startBit)) | (v << startBit);
+		edited = true;
+	}
 
 	return edited;
 }

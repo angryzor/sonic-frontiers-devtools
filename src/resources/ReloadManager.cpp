@@ -54,7 +54,6 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 			return;
 		}
 
-		auto* gameManager = hh::game::GameManager::GetInstance();
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 		if (gameManager) {
 			gameManager->PreResourceReloadCallback(request->resource);

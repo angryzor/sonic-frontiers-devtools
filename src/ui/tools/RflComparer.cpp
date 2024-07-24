@@ -14,7 +14,7 @@ void RflComparer::RenderContents()
 			ImGui::Text("Drag an RFL resource here.");
 		}
 		else {
-			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource1->GetName(), resource1);
+			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource1->GetName(), &*resource1);
 		}
 	}
 	ImGui::EndChild();
@@ -35,7 +35,7 @@ void RflComparer::RenderContents()
 			ImGui::Text("Drag an RFL resource here.");
 		}
 		else {
-			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource2->GetName(), resource2);
+			ImGui::Text("Linked to resource \"%s\" (ResReflection @ 0x%zx)", resource2->GetName(), &*resource2);
 		}
 	}
 	ImGui::EndChild();

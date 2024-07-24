@@ -1,6 +1,6 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
-#include <utilities/RflDiff.h>
+#include <reflection/RflDiff.h>
 
 class ResReflectionEditor : public StandaloneWindow {
 	hh::fnd::Reference<hh::fnd::ResReflection> resource;
