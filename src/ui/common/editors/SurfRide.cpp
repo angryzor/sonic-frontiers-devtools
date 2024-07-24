@@ -60,19 +60,19 @@ bool Editor(const char* label, SRS_TRS3D& transformData) {
 	return edited;
 }
 
-bool Editor(const char* label, Transform& transform) {
-	bool edited{};
-	ImGui::PushID(label);
-	ImGui::SeparatorText(label);
-	edited |= Editor("Position", transform.position);
-	edited |= Editor("Rotation", transform.rotation);
-	edited |= Editor("Scale", transform.scale);
-	edited |= Editor("Material color", transform.materialColor);
-	edited |= Editor("Illumination color", transform.illuminationColor);
-	edited |= Editor("Display", transform.display);
-	ImGui::PopID();
-	return edited;
-}
+//bool Editor(const char* label, Transform& transform) {
+//	bool edited{};
+//	ImGui::PushID(label);
+//	ImGui::SeparatorText(label);
+//	edited |= Editor("Position", transform.position);
+//	edited |= Editor("Rotation", transform.rotation);
+//	edited |= Editor("Scale", transform.scale);
+//	edited |= Editor("Material color", transform.materialColor);
+//	edited |= Editor("Illumination color", transform.illuminationColor);
+//	edited |= Editor("Display", transform.display);
+//	ImGui::PopID();
+//	return edited;
+//}
 
 const char* verticalAlignmentNames[]{ "Top", "Center", "Bottom" };
 bool Editor(const char* label, SRS_TEXTDATA& textData) {

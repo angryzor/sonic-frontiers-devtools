@@ -25,7 +25,7 @@ csl::math::Transform Affine3fToTransform(const Eigen::Affine3f& affine) {
 	return { affine.translation(), Eigen::Quaternionf{ rotation }, scaling.diagonal() };
 }
 
-Ray3f ScreenPosToWorldRay(const Eigen::Vector2f& screenPos, const Eigen::Matrix4f& inverseCameraMatrix)
+Ray3f ScreenPosToWorldRay(const Eigen::Vector2f& screenPos, const Eigen::Projective3f& inverseCameraMatrix)
 {
 	Eigen::Vector3f nearPoint{ (inverseCameraMatrix * Eigen::Vector4f{ screenPos.x(), screenPos.y(), 0.0f, 1.0f }).hnormalized() };
 	Eigen::Vector3f farPoint{ (inverseCameraMatrix * Eigen::Vector4f{ screenPos.x(), screenPos.y(), 1.0f, 1.0f }).hnormalized() };
@@ -33,12 +33,12 @@ Ray3f ScreenPosToWorldRay(const Eigen::Vector2f& screenPos, const Eigen::Matrix4
 	return { nearPoint, farPoint };
 }
 
-Ray3f ScreenPosToWorldRay(const ImVec2 screenPos, const Eigen::Matrix4f& inverseCameraMatrix)
+Ray3f ScreenPosToWorldRay(const ImVec2 screenPos, const Eigen::Projective3f& inverseCameraMatrix)
 {
 	return ScreenPosToWorldRay(ImGuiCoordsToNDC(screenPos), inverseCameraMatrix);
 }
 
-FrustumRays ScreenRectToFrustumRays(const Eigen::Vector2f& screenRect1, const Eigen::Vector2f& screenRect2, const Eigen::Matrix4f inverseCameraMatrix)
+FrustumRays ScreenRectToFrustumRays(const Eigen::Vector2f& screenRect1, const Eigen::Vector2f& screenRect2, const Eigen::Projective3f& inverseCameraMatrix)
 {
 	Eigen::Vector2f botLeft{ std::fminf(screenRect1.x(), screenRect2.x()), std::fminf(screenRect1.y(), screenRect2.y()) };
 	Eigen::Vector2f topRight{ std::fmaxf(screenRect1.x(), screenRect2.x()), std::fmaxf(screenRect1.y(), screenRect2.y()) };
@@ -54,17 +54,17 @@ FrustumRays ScreenRectToFrustumRays(const Eigen::Vector2f& screenRect1, const Ei
 	};
 }
 
-FrustumRays ScreenRectToFrustumRays(const ImVec2& screenRect1, const ImVec2& screenRect2, const Eigen::Matrix4f inverseCameraMatrix)
+FrustumRays ScreenRectToFrustumRays(const ImVec2& screenRect1, const ImVec2& screenRect2, const Eigen::Projective3f& inverseCameraMatrix)
 {
 	return ScreenRectToFrustumRays(ImGuiCoordsToNDC(screenRect1), ImGuiCoordsToNDC(screenRect2), inverseCameraMatrix);
 }
 
-Frustum ScreenRectToFrustum(const Eigen::Vector2f& screenRect1, const Eigen::Vector2f& screenRect2, const Eigen::Matrix4f inverseCameraMatrix)
+Frustum ScreenRectToFrustum(const Eigen::Vector2f& screenRect1, const Eigen::Vector2f& screenRect2, const Eigen::Projective3f& inverseCameraMatrix)
 {
 	return ScreenRectToFrustumRays(screenRect1, screenRect2, inverseCameraMatrix);
 }
 
-Frustum ScreenRectToFrustum(const ImVec2& screenRect1, const ImVec2& screenRect2, const Eigen::Matrix4f inverseCameraMatrix)
+Frustum ScreenRectToFrustum(const ImVec2& screenRect1, const ImVec2& screenRect2, const Eigen::Projective3f& inverseCameraMatrix)
 {
 	return ScreenRectToFrustum(ImGuiCoordsToNDC(screenRect1), ImGuiCoordsToNDC(screenRect2), inverseCameraMatrix);
 }

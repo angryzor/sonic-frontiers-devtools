@@ -40,7 +40,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (ImGui::BeginChild("Animation list", ImVec2(100.0f, 0.0f))) {
 			for (size_t i = 0; i < focusedLayer->layerData->animationCount; i++) {
 				if (ImGui::Selectable(focusedLayer->layerData->animations[i].name, focusedLayer->currentAnimationIndex == i))
-					focusedLayer->StartAnimation(i, 0, false);
+					focusedLayer->StartAnimation(i);
 				if (focusedLayer->currentAnimationIndex == i)
 					ImGui::SetItemDefaultFocus();
 			}

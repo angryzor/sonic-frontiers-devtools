@@ -29,7 +29,7 @@ public:
 		if (!camera)
 			return;
 
-		auto cameraMatrix{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
+		Eigen::Projective3f cameraMatrix{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
 
 		auto* ivp = ImGui::GetMainViewport();
 
@@ -44,7 +44,7 @@ public:
 					if (msgGetDbgCmt.comment[0] == 0)
 						continue;
 
-					Eigen::Matrix4f fullMatrix{ cameraMatrix * TransformToAffine3f(gocTransform->GetFrame().fullTransform).matrix() };
+					Eigen::Projective3f fullMatrix{ cameraMatrix * TransformToAffine3f(gocTransform->GetFrame().fullTransform).matrix() };
 					Eigen::Vector4f clipSpaceOrigin{ fullMatrix * Eigen::Vector4f{ 0.0f, 0.0f, 0.0f, 1.0f } };
 
 					// Cull

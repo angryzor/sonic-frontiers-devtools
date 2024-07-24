@@ -43,7 +43,5 @@ namespace hh::fnd {
 	template<typename T, DynamicRflArraySizeResolver arraySizeResolver> struct RflDynamicInlineArray {};
 }
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 template<> struct hh::fnd::RflClassTraits<SurfRide::Color> : hh::fnd::RflClassTraitsImpl<SurfRide::Color> {};
 template<> struct hh::fnd::RflClassTraits<SurfRide::Colorf> : hh::fnd::RflClassTraitsImpl<SurfRide::Colorf> {};
-#endif

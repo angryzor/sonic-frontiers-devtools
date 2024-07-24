@@ -5,9 +5,7 @@
 #include "resources/ResourceBrowser.h"
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include "operation-modes/modes/level-editor/LevelEditor.h"
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
-#endif
 #include <utilities/math/MathUtils.h>
 #include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"

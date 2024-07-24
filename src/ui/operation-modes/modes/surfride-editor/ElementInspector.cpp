@@ -51,12 +51,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::DragFloat2("Resolution", scene.sceneData->resolution.data());
 		Editor("Background color", *reinterpret_cast<csl::ut::Color8*>(&scene.sceneData->backgroundColor));
 		if (ImGui::CollapsingHeader("Active camera")) {
-			ImGui::Text("ID: %d", scene.camera.camera.id);
-			ImGui::Text("Name: %s", scene.camera.camera.name);
+			ImGui::Text("ID: %d", scene.camera.GetCameraData().id);
+			ImGui::Text("Name: %s", scene.camera.GetCameraData().name);
 			ImGui::SeparatorText("View matrix:");
 			Viewer("View matrix", scene.camera.viewMatrix);
 			ImGui::SeparatorText("Projection matrix:");
+#ifndef DEVTOOLS_TARGET_SDK_wars
 			Viewer("Projection matrix", scene.camera.projectionMatrix);
+#endif
 		}
 	}
 
@@ -69,7 +71,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (ImGui::BeginCombo("Current animation", layer.layerData->animations[layer.currentAnimationIndex].name)) {
 			for (size_t i = 0; i < layer.layerData->animationCount; i++) {
 				if (ImGui::Selectable(layer.layerData->animations[i].name, layer.currentAnimationIndex == i))
-					layer.StartAnimation(i, 0, false);
+					layer.StartAnimation(i);
 				if (layer.currentAnimationIndex == i)
 					ImGui::SetItemDefaultFocus();
 			}
@@ -90,11 +92,13 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::Checkbox("atAnimationEnd", &layer.atAnimationEnd);
 		ImGui::Checkbox("playInReverse", &layer.playInReverse);
 		ImGui::Checkbox("unk16", &layer.unk16);
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		ImGui::Text("unk17: %x", layer.unk17);
 		ImGui::Text("unk18: %x", layer.unk18);
 		ImGui::Text("unk19: %x", layer.unk19);
 
-		Editor("Transform", layer.rootTransform);
+		//Editor("Transform", layer.rootTransform);
+#endif
 	}
 
 	void ElementInspector::RenderCastInspector(Cast& cast)
@@ -116,31 +120,43 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (cast.castData->userData)
 			Editor("User data", *cast.castData->userData);
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		size_t castIndex = cast.index;
+#else
 		size_t castIndex = (reinterpret_cast<size_t>(cast.castData) - reinterpret_cast<size_t>(cast.layer->layerData->casts)) / sizeof(SRS_CASTNODE);
+#endif
 		if (cast.layer->flags.test(SurfRide::Layer::Flag::IS_3D)) {
 			auto& transform = cast.layer->layerData->transforms.transforms3d[castIndex];
 			if (Editor("Transform", transform)) {
+#ifdef DEVTOOLS_TARGET_SDK_wars
+				static_cast<Cast3D&>(cast).position = transform.position;
+#else
 				cast.transform->position = transform.position;
 				cast.transform->rotation = transform.rotation;
 				cast.transform->scale = transform.scale;
+#endif
 				cast.transform->materialColor = transform.materialColor;
 				cast.transform->illuminationColor = transform.illuminationColor;
 				cast.transform->display = transform.display;
 
-				cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.transformAny.m_dummy;
+				cast.transform->dirtyFlag.SetTransformAll();
 			}
 		}
 		else {
 			auto& transform = cast.layer->layerData->transforms.transforms2d[castIndex];
 			if (Editor("Transform", transform)) {
+#ifdef DEVTOOLS_TARGET_SDK_wars
+				static_cast<Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
+#else
 				cast.transform->position = { transform.position.x(), transform.position.y(), 0.0f };
 				cast.transform->rotation = { 0, 0, transform.rotation };
 				cast.transform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
+#endif
 				cast.transform->materialColor = transform.materialColor;
 				cast.transform->illuminationColor = transform.illuminationColor;
 				cast.transform->display = transform.display;
 
-				cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.transformAny.m_dummy;
+				cast.transform->dirtyFlag.SetTransformAll();
 			}
 		}
 	}
@@ -160,18 +176,20 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (Editor("Image cast properties", *cast.imageCastData)) {
 			cast.size = cast.imageCastData->size;
+#ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.vertexColorTopLeft = cast.imageCastData->vertexColorTopLeft;
 			cast.vertexColorBottomLeft = cast.imageCastData->vertexColorBottomLeft;
 			cast.vertexColorTopRight = cast.imageCastData->vertexColorTopRight;
 			cast.vertexColorBottomRight = cast.imageCastData->vertexColorBottomRight;
+#endif
 			cast.cropIndex[0] = cast.imageCastData->cropIndex0;
 			cast.cropIndex[1] = cast.imageCastData->cropIndex1;
-			cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.cellAny.m_dummy;
+			cast.transform->dirtyFlag.SetCellAll();
 		}
 
 		if (cast.text && cast.text->textData) {
 			if (Editor("Live text", *cast.text->textData)) {
-				cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.cellAny.m_dummy;
+				cast.transform->dirtyFlag.SetCellAll();
 			}
 		}
 	}
@@ -195,11 +213,13 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (Editor("Slice cast properties", *cast.sliceCastData)) {
 			cast.size = cast.sliceCastData->size;
+#ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.vertexColorTopLeft = cast.sliceCastData->vertexColorTopLeft;
 			cast.vertexColorBottomLeft = cast.sliceCastData->vertexColorBottomLeft;
 			cast.vertexColorTopRight = cast.sliceCastData->vertexColorTopRight;
 			cast.vertexColorBottomRight = cast.sliceCastData->vertexColorBottomRight;
-			cast.transform->dirtyFlag.flags.m_dummy |= cast.transform->dirtyFlag.cellAny.m_dummy;
+#endif
+			cast.transform->dirtyFlag.SetCellAll();
 		}
 	}
 
@@ -209,10 +229,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 		Viewer("Name", camera.name);
 		Editor("Position", camera.position);
 		Editor("Target", camera.target);
-		Viewer("Flags", camera.flags);
+		Editor("Orthogonal", camera.isOrthogonal);
 		Editor("FOV", camera.fov);
 		Editor("Near clipping plane", camera.nearPlane);
 		Editor("Far clipping plane", camera.farPlane);
-		Viewer("Unk", camera.unk);
+		Viewer("Unk1", camera.unk1);
+		Viewer("Unk2", camera.unk2);
 	}
 }

@@ -8,6 +8,8 @@
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <resources/ReloadManager.h>
 #include <resources/ManagedMemoryRegistry.h>
+#include "Context.h"
+#include "Context.h"
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;

@@ -62,7 +62,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		const char* sceneName = context.focusedScene ? context.focusedScene->sceneData->name : "<none>";
 
 		if (ImGui::BeginCombo("Scene", sceneName)) {
-			for (auto* scene : project->scenes) {
+			for (auto* scene : project->GetScenes()) {
 				if (ImGui::Selectable(scene->sceneData->name, scene == context.focusedScene)) {
 					GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
 					context.focusedScene = scene;
@@ -99,7 +99,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImGui::TreePop();
 		}
 		if (ImGui::TreeNodeEx("Layers", nodeFlags)) {
-			for (auto* layer : scene->layers)
+			for (auto* layer : scene->GetLayers())
 				RenderLayer(layer);
 			ImGui::TreePop();
 		}
@@ -127,7 +127,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			selectionBehavior->Select(selection);
 
 		if (isOpen) {
-			for (auto* cast : layer->topLevelCasts)
+			for (auto* cast : layer->GetCasts())
 				RenderCast(cast);
 			ImGui::TreePop();
 		}
@@ -146,7 +146,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (selected.find(selection) != -1)
 			nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
-		if (cast->children.size() == 0 && !refLayer)
+		if (!cast->GetChildren().empty() == 0 && !refLayer)
 			ImGui::TreeNodeEx(cast, nodeFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", cast->castData->name);
 		else
 			isOpen = ImGui::TreeNodeEx(cast, nodeFlags, "%s", cast->castData->name);
@@ -158,7 +158,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (refLayer)
 				RenderLayer(refLayer);
 
-			for (auto* child : cast->children)
+			for (auto* child : cast->GetChildren())
 				RenderCast(child);
 
 			ImGui::TreePop();

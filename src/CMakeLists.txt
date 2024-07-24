@@ -13,8 +13,10 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/FxColCollisionShape.cpp
         debug-rendering/visuals/Math.cpp
+        io/binary/containers/swif/SWIF.cpp
         io/binary/containers/binary-file/BinaryFile.cpp
         io/binary/serialization/resource-rfls/ResObjectWorld.cpp
+        io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
         reflection/ReflectiveOperations.cpp
@@ -24,6 +26,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/Reflection.cpp
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
+        ui/common/editors/SurfRide.cpp
         ui/common/editors/Resources.cpp
         ui/common/editors/FxCol.cpp
         ui/common/viewers/Basic.cpp
@@ -63,6 +66,12 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
         ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
         ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
+        ui/operation-modes/modes/surfride-editor/Context.cpp
+        ui/operation-modes/modes/surfride-editor/Timeline.cpp
+        ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
+        ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
+        ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
+        ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
         ui/operation-modes/OperationModeBehavior.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
@@ -90,10 +99,12 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/FxColCollisionShape.h
         debug-rendering/visuals/Math.h
+        io/binary/containers/swif/SWIF.h
         io/binary/containers/binary-file/BinaryFile.h
         io/binary/containers/binary-file/EndianSwaps.h
         io/binary/serialization/Reflection.h
         io/binary/serialization/resource-rfls/ResObjectWorld.h
+        io/binary/serialization/resource-rfls/ResSurfRideProject.h
         io/binary/serialization/Types.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
@@ -166,6 +177,12 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/fxcol-editor/FxColEditor.h
         ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
         ui/operation-modes/modes/fxcol-editor/ShapeList.h
+        ui/operation-modes/modes/surfride-editor/Context.h
+        ui/operation-modes/modes/surfride-editor/Timeline.h
+        ui/operation-modes/modes/surfride-editor/ProjectTree.h
+        ui/operation-modes/modes/surfride-editor/ElementInspector.h
+        ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
+        ui/operation-modes/modes/surfride-editor/SurfRideElement.h
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h
         ui/resources/editors/ResObjectWorldEditor.h
@@ -195,8 +212,6 @@ target_sources(${DEVTOOLS_TARGET}
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            io/binary/containers/swif/SWIF.cpp
-            io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
@@ -206,7 +221,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.cpp
             ui/common/editors/Camera.cpp
             ui/common/editors/Needle.cpp
-            ui/common/editors/SurfRide.cpp
             ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
             ui/common/inputs/Needle.cpp
             ui/core-services/GameUpdaterInspector.cpp
@@ -223,19 +237,11 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerBlackboard.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerKinematicParams.cpp
-            ui/operation-modes/modes/surfride-editor/Context.cpp
-            ui/operation-modes/modes/surfride-editor/Timeline.cpp
-            ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
-            ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
-            ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
-            ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
             ui/resources/editors/ResEffectEditor.cpp
             ui/resources/editors/ResMaterialEditor.cpp
             ui/resources/editors/ResSurfRideProjectEditor.cpp
             ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
-            io/binary/containers/swif/SWIF.h
-            io/binary/serialization/resource-rfls/ResSurfRideProject.h
             ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h
@@ -244,12 +250,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.h
-            ui/operation-modes/modes/surfride-editor/Context.h
-            ui/operation-modes/modes/surfride-editor/Timeline.h
-            ui/operation-modes/modes/surfride-editor/ProjectTree.h
-            ui/operation-modes/modes/surfride-editor/ElementInspector.h
-            ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
-            ui/operation-modes/modes/surfride-editor/SurfRideElement.h
             ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.h
     )
 endif()

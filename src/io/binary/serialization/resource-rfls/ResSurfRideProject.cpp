@@ -104,8 +104,8 @@ namespace reflection::serialization::resource_rfls::surfride {
 		int,
 		unsigned int,
 		RflDynamicPointerArray<SRS_LAYER, [](const void* parent) -> size_t { return static_cast<const SurfRide::SRS_SCENE*>(parent)->layerCount; }>,
-		short,
-		short,
+		unsigned short,
+		unsigned short,
 		RflDynamicPointerArray<SRS_CAMERA, [](const void* parent) -> size_t {  return static_cast<const SurfRide::SRS_SCENE*>(parent)->cameraCount; }>,
 		int,
 		Vector2,
@@ -130,8 +130,9 @@ namespace reflection::serialization::resource_rfls::surfride {
 		int,
 		csl::math::Vector3,
 		csl::math::Vector3,
+		bool,
 		int,
-		int,
+		float,
 		float,
 		float,
 		uint64_t
@@ -140,11 +141,12 @@ namespace reflection::serialization::resource_rfls::surfride {
 		"id",
 		"position",
 		"target",
-		"flags",
+		"isOrthogonal",
 		"fov",
 		"nearClip",
 		"farClip",
-		"unk"
+		"unk1",
+		"unk2"
 	);
 
 	auto srsLayerMembers = CreateRflClassMembers<void,

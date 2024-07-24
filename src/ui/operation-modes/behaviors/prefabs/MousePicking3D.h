@@ -13,7 +13,7 @@ struct MousePicking3DMousePickingBehaviorTraitsImpl {
 
 	template<typename F>
 	void WithCameraMatrix(F f) {
-		Eigen::Matrix4f inverseCameraMatrix;
+		Eigen::Projective3f inverseCameraMatrix;
 
 		if (!cameraProvider.GetCameraMatrix(inverseCameraMatrix))
 			return;
@@ -22,19 +22,19 @@ struct MousePicking3DMousePickingBehaviorTraitsImpl {
 	}
 
 	void GetAllClickResults(const ImVec2& position, csl::ut::MoveArray<ObjectType>& results) {
-		return WithCameraMatrix([&](const Eigen::Matrix4f& inverseCameraMatrix) {
+		return WithCameraMatrix([&](const Eigen::Projective3f& inverseCameraMatrix) {
 			traits.GetAllRaycastResults(ScreenPosToWorldRay(position, inverseCameraMatrix), results);
 		});
 	}
 
 	void GetBestClickResult(const ImVec2& position, csl::ut::MoveArray<ObjectType>& results, typename LocationType& location, bool& pickedLocation) {
-		return WithCameraMatrix([&](const Eigen::Matrix4f& inverseCameraMatrix) {
+		return WithCameraMatrix([&](const Eigen::Projective3f& inverseCameraMatrix) {
 			traits.GetBestRaycastResult(ScreenPosToWorldRay(position, inverseCameraMatrix), results, location, pickedLocation);
 		});
 	}
 
 	void GetDragResults(const ImVec2& start, const ImVec2 end, csl::ut::MoveArray<ObjectType>& results) {
-		return WithCameraMatrix([&](const Eigen::Matrix4f& inverseCameraMatrix) {
+		return WithCameraMatrix([&](const Eigen::Projective3f& inverseCameraMatrix) {
 			traits.GetFrustumResults(ScreenRectToFrustum(start, end, inverseCameraMatrix), results);
 		});
 	}

@@ -24,9 +24,7 @@
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include "operation-modes/modes/level-editor/LevelEditor.h"
 #include "operation-modes/modes/fxcol-editor/FxColEditor.h"
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
-#endif
 #include "reflection/serialization/HSONTemplateGeneration.h"
 
 using namespace hh::game;
@@ -88,10 +86,8 @@ void ToolBar::Render() {
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::level_editor::LevelEditor>();
 			if (ImGui::MenuItem("FxCol Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::fxcol_editor::FxColEditor>();
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("SurfRide Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
-#endif
 			ImGui::EndMenu();
 		}
 

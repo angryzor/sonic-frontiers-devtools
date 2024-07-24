@@ -7,7 +7,7 @@ template<> inline float default_step<SurfRide::Rotation3>() {
 
 bool Editor(const char* label, SurfRide::Color& color);
 bool Editor(const char* label, SurfRide::Colorf& color);
-bool Editor(const char* label, SurfRide::Transform& transform);
+//bool Editor(const char* label, SurfRide::Transform& transform);
 
 bool Editor(const char* label, SurfRide::SRS_TRS2D& transformData);
 bool Editor(const char* label, SurfRide::SRS_TRS3D& transformData);
