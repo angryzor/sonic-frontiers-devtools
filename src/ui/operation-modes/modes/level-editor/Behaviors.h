@@ -112,26 +112,19 @@ namespace ui::operation_modes::modes::level_editor {
 
 	template<> struct DeleteBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) {
-			auto* focusedChunk = context.GetFocusedChunk();
-
-			for (auto* obj : objects)
-				focusedChunk->Despawn(obj);
-
-			focusedChunk->ShutdownPendingObjects();
-
-			for (auto* obj : objects)
-				for (auto* layer : focusedChunk->GetLayers())
-					for (auto* object : layer->GetResource()->GetObjects())
-						if (object == obj)
-							layer->RemoveObjectData(obj);
-		}
+		void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) { context.DeleteObjects(objects); }
 	};
 
 	template<> struct ClipboardBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
+		bool CanPlace() { return context.placementTargetLayer != nullptr; }
 		ClipboardEntry<Context> CreateClipboardEntry(ObjectData* objData) { return { context, objData }; }
-		ObjectData* CreateObject(const ClipboardEntry<Context>& entry) { return context.CopyObjectForPlacement(entry.proto); }
+		void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) { context.DeleteObjects(objects); }
+		ObjectData* CreateObject(const ClipboardEntry<Context>& entry) {
+			auto* obj = context.CopyObjectForPlacement(entry.proto);
+			context.SpawnObject(obj);
+			return obj;
+		}
 	};
 }
 
@@ -158,12 +151,8 @@ namespace ui::operation_modes::modes::level_editor {
 
 	template<> struct PlacementBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		bool CanPlace() const {
-			return context.placementTargetLayer != nullptr && context.objectClassToPlace != nullptr;
-		}
-		ObjectData* PlaceObject(csl::math::Vector3 location) {
-			return context.SpawnObject(location);
-		}
+		bool CanPlace() const { return context.placementTargetLayer != nullptr && context.objectClassToPlace != nullptr; }
+		ObjectData* PlaceObject(csl::math::Vector3 location) { return context.SpawnObject(location); }
 	};
 
 	template<> struct GizmoBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {

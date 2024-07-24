@@ -20,6 +20,9 @@ static ImFont* font;
 bool Context::visible = false;
 bool Context::passThroughMouse = false;
 bool Context::inited = false;
+bool Context::imguiInited = false;
+bool Context::enableViewports = true;
+bool Context::reinitImGuiNextFrame = false;
 
 using namespace hh::game;
 using namespace hh::needle;
@@ -54,6 +57,12 @@ extern IMGUI_IMPL_API LRESULT ImGui_ImplWin32_WndProcHandler(HWND hWnd, UINT msg
 
 HOOK(LRESULT, __fastcall, WndProcHook, wndProcAddr, HWND hWnd, UINT msg, WPARAM wParam, LPARAM lParam)
 {
+	if (msg == WM_DESTROY) {
+		// Deinitialize ImGui before the window is destroyed.
+		// If we don't do this, the game will crash when closing the window, because ImGui pops out
+		// all the windows into new viewports with invalid handles.
+		Context::deinit_imgui();
+	}
 	if (msg == WM_KEYDOWN && wParam == VK_F8) {
 		Context::visible = !Context::visible;
 		return true;
@@ -62,7 +71,7 @@ HOOK(LRESULT, __fastcall, WndProcHook, wndProcAddr, HWND hWnd, UINT msg, WPARAM 
 		Context::passThroughMouse = !Context::passThroughMouse;
 		return true;
 	}
-	if (Context::visible) {
+	if (Context::imguiInited && Context::visible) {
 		if (ImGui_ImplWin32_WndProcHandler(hWnd, msg, wParam, lParam))
 			return true;
 
@@ -93,7 +102,7 @@ HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeB
 
 	createBackBuffer(self->swapChain);
 
-	if (Context::inited) {
+	if (Context::imguiInited) {
 		bool fullScreenState = self->GetFullScreenState();
 		bool viewportsEnabled = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
 
@@ -108,7 +117,7 @@ HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeB
 
 HOOK(bool, __fastcall, DisplaySwapDevice_Present, displaySwapDevicePresentAddr, hh::needle::ImplDX11::DisplaySwapDeviceDX11* self, unsigned int flags)
 {
-	if (Context::inited && Context::visible) {
+	if (Context::imguiInited && Context::visible) {
 		ShowCursor(true);
 		if (!renderTargetView) {
 			createBackBuffer(self->swapChain);
@@ -152,7 +161,7 @@ void Context::install_hooks()
 void Context::init() {
 	if (inited)
 		return;
-	
+
 	init_modules();
 	init_imgui();
 
@@ -208,6 +217,9 @@ void Context::deinit_modules()
 
 void Context::init_imgui()
 {
+	if (imguiInited)
+		return;
+
 	auto* renderManager = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance());
 	auto* renderingEngine = renderManager->GetNeedleResourceDevice();
 
@@ -221,12 +233,12 @@ void Context::init_imgui()
 	ImGui::CreateContext();
 	ImPlot::CreateContext();
 
+	SettingsManager::Init();
+
 	ImGuiIO& io = ImGui::GetIO();
 	io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;         // IF using Docking Branch
-	if (!renderingEngine->GetSupportFX()->swapDevice->GetFullScreenState())
+	if (enableViewports && !renderingEngine->GetSupportFX()->swapDevice->GetFullScreenState())
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
-
-	SettingsManager::Init();
 
 	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
 	ImFontConfig fontConfig{};
@@ -240,18 +252,46 @@ void Context::init_imgui()
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
 	ImGui_ImplDX11_Init(device, deviceContext);
+
+	imguiInited = true;
 }
 
 void Context::deinit_imgui()
 {
+	if (!imguiInited)
+		return;
+
+	imguiInited = false;
+
 	ImGui_ImplDX11_Shutdown();
 	ImGui_ImplWin32_Shutdown();
 	ImPlot::DestroyContext();
 	ImGui::DestroyContext();
 }
 
+void Context::set_enable_viewports(bool enable)
+{
+	bool prevEnableViewports = enableViewports;
+
+	if (prevEnableViewports == enable)
+		return;
+
+	enableViewports = enable;
+
+	if (!imguiInited)
+		return;
+
+	reinitImGuiNextFrame = true;
+}
+
 void Context::update()
 {
+	if (reinitImGuiNextFrame) {
+		Context::deinit_imgui();
+		Context::init_imgui();
+		reinitImGuiNextFrame = false;
+	}
+
 	//if (font != nullptr && font->FontSize != SettingsManager::settings.fontSize) {
 	//	ImFontConfig fontConfig{};
 	//	ImGuiIO& io = ImGui::GetIO();

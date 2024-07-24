@@ -199,6 +199,20 @@ namespace ui::operation_modes::modes::level_editor {
 		return CopyObject(GetAllocator(), otherObject);
 	}
 
+	void Context::DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects)
+	{
+		for (auto* obj : objects)
+			focusedChunk->Despawn(obj);
+
+		focusedChunk->ShutdownPendingObjects();
+
+		for (auto* obj : objects)
+			for (auto* layer : focusedChunk->GetLayers())
+				for (auto* object : layer->GetResource()->GetObjects())
+					if (object == obj)
+						layer->RemoveObjectData(obj);
+	}
+
 	void Context::TerminateClipboardObject(hh::game::ObjectData* objectData)
 	{
 		TerminateObjectData(GetAllocator(), objectData);

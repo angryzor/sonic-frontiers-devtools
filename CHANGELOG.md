@@ -1,5 +1,9 @@
 # v0.1.35
-* Fixed ClipboardBehavior not registering shortcuts.
+* Fixed Copy/Paste being broken after OperationMode refactor.
+* Added Cut.
+* Added setting to disable multiple viewports
+* Also made it possible for standalone windows to be dragged out of the main viewport.
+* Fixed a crash when closing the game related to multiple viewports.
 * Moved to /W4 warning level and fixed most warnings.
 
 

@@ -1,6 +1,7 @@
 #include "SettingsManager.h"
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Reflection.h>
+#include <ui/Context.h>
 #include <ui/Desktop.h>
 #include <ui/input/Input.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
@@ -20,6 +21,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& rflDefaultFloatStep == other.rflDefaultFloatStep
 		&& rflMinFloatStep == other.rflMinFloatStep
 		&& rflSliderCutOffRange == other.rflSliderCutOffRange
+		&& enableViewports == other.enableViewports
 		&& debugRenderingRenderGOCVisualDebugDraw == other.debugRenderingRenderGOCVisualDebugDraw
 		&& debugRenderingRenderColliders == other.debugRenderingRenderColliders
 		&& debugRenderingRenderOcclusionCapsules == other.debugRenderingRenderOcclusionCapsules
@@ -106,6 +108,7 @@ void SettingsManager::Render() {
 						}
 						ImGui::EndCombo();
 					}
+					ImGui::Checkbox("Enable multiple viewports", &tempSettings.enableViewports);
 					ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
 					ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
 					ImGui::SeparatorText("Reflection editor");
@@ -287,6 +290,7 @@ void SettingsManager::ApplySettings() {
 	defaultFloatStep = settings.rflDefaultFloatStep;
 	rflMinFloatStep = settings.rflMinFloatStep;
 	rflSliderCutOff = settings.rflSliderCutOffRange;
+	Context::set_enable_viewports(settings.enableViewports);
 	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
 	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
 	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;
@@ -335,6 +339,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DefaultFloatStep=%f", &f) == 1) { settings.rflDefaultFloatStep = f; return; }
 	if (sscanf_s(line, "MinFloatStep=%f", &f) == 1) { settings.rflMinFloatStep = f; return; }
 	if (sscanf_s(line, "SliderCutOffRange=%u", &u) == 1) { settings.rflSliderCutOffRange = u; return; }
+	if (sscanf_s(line, "EnableViewports=%u", &u) == 1) { settings.enableViewports = static_cast<bool>(u); return; }
 	if (sscanf_s(line, "DebugRenderingRenderGOCVisualDebugDraw=%u", &u) == 1) { settings.debugRenderingRenderGOCVisualDebugDraw = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderColliders=%u", &u) == 1) { settings.debugRenderingRenderColliders = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderOcclusionCapsules=%u", &u) == 1) { settings.debugRenderingRenderOcclusionCapsules = u; return; }
@@ -388,6 +393,7 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DefaultFloatStep=%f\n", settings.rflDefaultFloatStep);
 	out_buf->appendf("MinFloatStep=%f\n", settings.rflMinFloatStep);
 	out_buf->appendf("SliderCutOffRange=%u\n", settings.rflSliderCutOffRange);
+	out_buf->appendf("EnableViewports=%u\n", settings.enableViewports);
 	out_buf->appendf("DebugRenderingRenderGOCVisualDebugDraw=%u\n", settings.debugRenderingRenderGOCVisualDebugDraw);
 	out_buf->appendf("DebugRenderingRenderColliders=%u\n", settings.debugRenderingRenderColliders);
 	out_buf->appendf("DebugRenderingRenderOcclusionCapsules=%u\n", settings.debugRenderingRenderOcclusionCapsules);

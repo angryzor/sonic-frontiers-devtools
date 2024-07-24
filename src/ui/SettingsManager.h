@@ -20,6 +20,7 @@ class SettingsManager
         float rflDefaultFloatStep{ 0.01f };
         float rflMinFloatStep{ 0.01f };
         unsigned int rflSliderCutOffRange{ 3000 };
+        bool enableViewports{ true };
         bool debugRenderingColliderFilters[32][32]{
             //    0      1      2      3      4      5      6      7      8      9     10     11     12     13     14     15     16     17     18     19     20     21     22     23     24     25     26     27     28     29     30     31
             {  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true,  true }, // 0

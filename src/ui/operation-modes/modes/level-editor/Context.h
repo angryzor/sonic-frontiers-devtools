@@ -24,6 +24,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 		hh::game::ObjectData* CopyObjectForPlacement(hh::game::ObjectData* otherObject);
 		hh::game::ObjectData* CopyObjectForClipboard(hh::game::ObjectData* otherObject);
+		void DeleteObjects(const csl::ut::MoveArray<hh::game::ObjectData*>& objects);
 		void TerminateClipboardObject(hh::game::ObjectData* objectData);
 
 		hh::game::ObjectWorldChunk* GetFocusedChunk() const;
