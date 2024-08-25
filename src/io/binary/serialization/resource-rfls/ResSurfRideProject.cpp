@@ -411,7 +411,9 @@ namespace reflection::serialization::resource_rfls::surfride {
 	);
 
 	auto srsTextureMembers = CreateRflClassMembers<void,
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		const char*,
+#endif
 		const char*,
 		unsigned int,
 		unsigned short,
@@ -421,7 +423,9 @@ namespace reflection::serialization::resource_rfls::surfride {
 		RflDynamicPointerArray<SRS_CROP, [](const void* parent) -> size_t { return static_cast<const SurfRide::SRS_TEXTURE*>(parent)->cropCount; }>,
 		SRS_USERDATA*
 	>(
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		"name",
+#endif
 		"fileName",
 		"id",
 		"width",

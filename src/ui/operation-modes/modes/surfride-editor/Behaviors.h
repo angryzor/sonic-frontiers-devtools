@@ -33,8 +33,15 @@ namespace ui::operation_modes::modes::surfride_editor {
 			for (auto* layer : context.focusedScene->GetLayers())
 				if (!(layer->flags & 0x100))
 					for (auto* cast : layer->GetCasts())
-						if (cast->transform->display && frustum.Test(cast->transform->transformationMatrix * Eigen::Vector3f::Zero()))
-							results.push_back({ SurfRideElement::Type::CAST, cast });
+						GetFrustumResultsForCast(cast, frustum, results);
+		}
+
+		void GetFrustumResultsForCast(Cast* cast, const Frustum& frustum, csl::ut::MoveArray<SurfRideElement>& results) {
+			if (cast->transform->display && frustum.Test(cast->transform->transformationMatrix * Eigen::Vector3f::Zero()))
+				results.push_back({ SurfRideElement::Type::CAST, cast });
+
+			for (auto* child : cast->GetChildren())
+				GetFrustumResultsForCast(child, frustum, results);
 		}
 
 		bool Intersects(const Cast* cast, const Ray3f& ray) {
@@ -180,7 +187,15 @@ namespace ui::operation_modes::modes::surfride_editor
 			else
 				cast->layer->layerData->transforms.transforms2d[castIndex].position = { newPos.x(), newPos.y() };
 
-			cast->SetPosition(newPos);
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			static_cast<SRS_TRS3D*>(cast->transformData)->position = newPos;
+			static_cast<Cast3D*>(cast)->position = newPos;
+#else
+			cast->transform->position = newPos;
+#endif
+
+			cast->transform->dirtyFlag.SetTransformAll();
+
 #ifdef DEVTOOLS_TARGET_SDK_wars
 			cast->UpdateParentsAndThisTransformRecursively();
 #endif

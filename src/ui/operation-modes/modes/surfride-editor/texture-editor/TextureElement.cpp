@@ -24,7 +24,11 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 	{
 		switch (type) {
 		case Type::TEXTURELIST: return textureList.GetTextureList().name;
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		case Type::TEXTURE: return texture.GetTexture().filename;
+#else
 		case Type::TEXTURE: return texture.GetTexture().name;
+#endif
 		case Type::CROP: return "Crop";
 		default: return nullptr;
 		}

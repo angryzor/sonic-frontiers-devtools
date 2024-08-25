@@ -1,3 +1,11 @@
+# v0.1.37
+* Fixed a bug in the selection tool introduced in `v0.1.36`.
+* Fixed a bug with multiselect in the SWIF editor introduced in `v0.1.34`.
+
+## Sonic Forces
+* Ported the SWIF editor (minus a small issue that prevents playing the animations).
+
+
 # v0.1.36
 * Added texture / crop editor to the SWIF editor.
 * Added editors for the Blur and Reflect effects in the SWIF editor.

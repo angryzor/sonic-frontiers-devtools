@@ -46,6 +46,7 @@ void Desktop::Render() {
 	ImGui::SetNextWindowViewport(ImGui::GetMainViewport()->ID);
 	ImGuizmo::BeginFrame();
 	RenderOverlayWindow();
+	RenderSceneWindow();
 
 	operationMode->Render();
 	ResourceBrowser::RenderDialogs();
@@ -85,6 +86,25 @@ void Desktop::Render() {
 	//	GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
 
 	//}
+}
+
+void Desktop::RenderSceneWindow()
+{
+	auto* ivp = ImGui::GetMainViewport();
+
+	ImGui::SetNextWindowSize(ivp->Size);
+	ImGui::SetNextWindowPos(ivp->Pos);
+	ImGui::SetNextWindowViewport(ivp->ID);
+
+	ImGui::PushStyleColor(ImGuiCol_WindowBg, 0);
+	ImGui::PushStyleColor(ImGuiCol_Border, 0);
+	ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+
+	ImGui::Begin("Scene", nullptr, ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoInputs | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_NoFocusOnAppearing | ImGuiWindowFlags_NoBringToFrontOnFocus);
+	ImGui::End();
+	ImGui::PopStyleVar();
+	ImGui::PopStyleColor(3);
 }
 
 void Desktop::RenderOverlayWindow()
@@ -164,11 +184,12 @@ void Desktop::RenderPanel(PanelBase& panel)
 
 bool Desktop::BeginSceneWindow()
 {
-	return true;
+	return ImGui::Begin("Scene");
 }
 
 void Desktop::EndSceneWindow()
 {
+	ImGui::End();
 }
 
 bool Desktop::BeginOverlayWindow()

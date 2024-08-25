@@ -164,7 +164,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (isOpen) {
 			if (refLayer) {
-				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 1.0f, 0.0f, 1.0f });
+				auto textCol = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+				textCol.w = 0.5;
+				ImGui::PushStyleColor(ImGuiCol_Text, textCol);
 				RenderLayer(refLayer);
 				ImGui::PopStyleColor();
 			}

@@ -47,7 +47,9 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		auto& texture = textureRef.GetTexture();
 
 		Viewer("ID", texture.id);
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		Viewer("Name", texture.name);
+#endif
 		Viewer("Filename", texture.filename);
 		edited |= Editor("Width", texture.width);
 		edited |= Editor("Height", texture.height);

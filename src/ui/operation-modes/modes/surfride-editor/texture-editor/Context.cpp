@@ -12,17 +12,21 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		auto* resourceTextureData = static_cast<hh::ui::surfride::SurfRideTextureDataMIRAGE*>(&*gocSprite->projectResource->textureDatas[textureListRef.textureListIndex]);
 		auto* instanceTextureData = static_cast<hh::ui::surfride::SurfRideTextureDataMIRAGE*>(&*textureList->textureData);
 
-		char* filename = new (&managedAllocator) char[strlen(textureResource->GetName()) + 1];
-		strcpy(filename, textureResource->GetName());
-
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		char* name = new (&managedAllocator) char[strlen(textureResource->GetName()) + 1];
 		strcpy(name, textureResource->GetName());
+#endif
+
+		char* filename = new (&managedAllocator) char[strlen(textureResource->GetName()) + 1];
+		strcpy(filename, textureResource->GetName());
 
 		SRS_TEXTURE srsTexture{};
 		srsTexture.width = static_cast<unsigned short>(textureResource->GetTexture()->width);
 		srsTexture.height = static_cast<unsigned short>(textureResource->GetTexture()->height);
 		srsTexture.id = 0xDEADBEEF;
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		srsTexture.name = name;
+#endif
 		srsTexture.filename = filename;
 
 		resources::ManagedCArray textures{ gocSprite->projectResource, textureList->textureListData->textures, textureList->textureListData->textureCount };
@@ -60,8 +64,10 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		auto* resourceTextureData = static_cast<hh::ui::surfride::SurfRideTextureDataMIRAGE*>(&*gocSprite->projectResource->textureDatas[textureRef.textureListIndex]);
 		auto* instanceTextureData = static_cast<hh::ui::surfride::SurfRideTextureDataMIRAGE*>(&*textureList->textureData);
 
-		managedAllocator.Free(const_cast<char*>(texture.filename));
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		managedAllocator.Free(const_cast<char*>(texture.name));
+#endif
+		managedAllocator.Free(const_cast<char*>(texture.filename));
 		managedAllocator.Free(const_cast<SRS_CROP*>(texture.crops));
 
 		resources::ManagedCArray textures{ gocSprite->projectResource, textureList->textureListData->textures, textureList->textureListData->textureCount };

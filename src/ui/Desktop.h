@@ -32,6 +32,7 @@ public:
     Desktop(csl::fnd::IAllocator* allocator);
     ~Desktop();
     void Render();
+    void RenderSceneWindow();
     void RenderOverlayWindow();
     void OpenStandaloneWindow(StandaloneWindow* window);
     

@@ -125,11 +125,27 @@ namespace ui::operation_modes::modes::surfride_editor {
 #else
 		size_t castIndex = (reinterpret_cast<size_t>(cast.castData) - reinterpret_cast<size_t>(cast.layer->layerData->casts)) / sizeof(SRS_CASTNODE);
 #endif
+
+		bool transformEdited{};
+
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		transformEdited |= CheckboxFlags("Disable rotation", cast.castData->flags, 0x200u);
+		transformEdited |= CheckboxFlags("Disable scale", cast.castData->flags, 0x400u);
+#endif
+
 		if (cast.layer->flags.test(SurfRide::Layer::Flag::IS_3D)) {
 			auto& transform = cast.layer->layerData->transforms.transforms3d[castIndex];
-			if (Editor("Transform", transform)) {
+
+			transformEdited |= Editor("Transform", transform);
+
+			if (transformEdited) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
+				auto* castTransform = static_cast<SRS_TRS3D*>(cast.transformData);
+				castTransform->position = transform.position;
+				castTransform->rotation = transform.rotation;
+				castTransform->scale = transform.scale;
 				static_cast<Cast3D&>(cast).position = transform.position;
+				cast.flags = cast.castData->flags;
 #else
 				cast.transform->position = transform.position;
 				cast.transform->rotation = transform.rotation;
@@ -147,9 +163,17 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 		else {
 			auto& transform = cast.layer->layerData->transforms.transforms2d[castIndex];
-			if (Editor("Transform", transform)) {
+
+			transformEdited |= Editor("Transform", transform);
+
+			if (transformEdited) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
+				auto* castTransform = static_cast<SRS_TRS3D*>(cast.transformData);
+				castTransform->position = { transform.position.x(), transform.position.y(), 0.0f };
+				castTransform->rotation = { 0, 0, transform.rotation };
+				castTransform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
 				static_cast<Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
+				cast.flags = cast.castData->flags;
 #else
 				cast.transform->position = { transform.position.x(), transform.position.y(), 0.0f };
 				cast.transform->rotation = { 0, 0, transform.rotation };
@@ -163,6 +187,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 #ifdef DEVTOOLS_TARGET_SDK_wars
 				cast.UpdateParentsAndThisTransformRecursively();
 #endif
+			}
+		}
+
+		if (transformEdited) {
+			if (cast.layer->flags.test(SurfRide::Layer::Flag::IS_3D)) {
 			}
 		}
 	}

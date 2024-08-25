@@ -76,8 +76,13 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 		ImGui::PushID(&texture);
-
-		bool isOpen = ImGui::TreeNodeEx("TreeItem", nodeFlags | (selection.find(textureRef) != -1 ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None), "%s", texture.name);
+		
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		const char* name = texture.filename;
+#else
+		const char* name = texture.name;
+#endif
+		bool isOpen = ImGui::TreeNodeEx("TreeItem", nodeFlags | (selection.find(textureRef) != -1 ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None), "%s", name);
 
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Left)) {
 			context.focusedTexture = textureRef;

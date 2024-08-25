@@ -31,7 +31,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 		case Type::CAMERA_DATA: return cameraData->name;
 		case Type::LAYER: return layer->layerData->name;
 		case Type::CAST: return cast->castData->name;
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		case Type::TEXTURE: return texture->filename;
+#else
 		case Type::TEXTURE: return texture->name;
+#endif
 		default: return nullptr;
 		}
 	}
