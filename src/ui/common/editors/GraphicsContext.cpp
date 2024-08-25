@@ -14,8 +14,10 @@ bool Editor(const char* label, hh::gfnd::ViewportData& viewport)
 	edited |= Editor("Y", viewport.viewportDimensions.y);
 	edited |= Editor("Resolution X", viewport.viewportDimensions.resX);
 	edited |= Editor("Resolution Y", viewport.viewportDimensions.resY);
+#ifndef DEVTOOLS_TARGET_SDK_wars
 	edited |= Editor("Render resolution X", viewport.viewportDimensions.renderResX);
 	edited |= Editor("Render resolution Y", viewport.viewportDimensions.renderResY);
+#endif
 	ImGui::EndGroup();
 
 	ImGui::SeparatorText("View settings");

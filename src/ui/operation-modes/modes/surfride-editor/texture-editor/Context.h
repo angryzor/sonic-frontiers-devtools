@@ -17,8 +17,10 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		void RemoveCrop(const CropRef& cropRef);
 
 		void RefreshAfterTextureUpdate(const TextureRef& textureRef);
+		void RefreshCastAfterTextureUpdate(const TextureRef& textureRef, SurfRide::Cast* cast);
 		static bool IsAffectedByTextureUpdate(const TextureRef& textureRef, SurfRide::SRS_CASTNODE& cast);
 		void RefreshAfterCropUpdate(const CropRef& cropRef);
+		void RefreshCastAfterCropUpdate(const CropRef& cropRef, SurfRide::Cast* cast);
 		static bool IsAffectedByCropUpdate(const CropRef& cropRef, SurfRide::SRS_CASTNODE& cast);
 	};
 }

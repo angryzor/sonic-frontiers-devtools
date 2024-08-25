@@ -58,7 +58,7 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 			auto topLeftOffset = ImVec2(crop.left * size.x, crop.top * size.y);
 			auto bottomRightOffset = ImVec2(crop.right * size.x, crop.bottom * size.y);
 
-			dl->AddRect(pos + topLeftOffset, pos + bottomRightOffset, selection.find(TextureElement{ CropRef{ context.gocSprite->project, context.focusedTexture->textureListIndex, context.focusedTexture->textureIndex, j } }) == -1 ? IM_COL32(255, 0, 255, 255) : IM_COL32(0, 255, 0, 255));
+			dl->AddRect(pos + topLeftOffset, pos + bottomRightOffset, selection.find(TextureElement{ CropRef{ context.gocSprite->GetProject(), context.focusedTexture->textureListIndex, context.focusedTexture->textureIndex, j}}) == -1 ? IM_COL32(255, 0, 255, 255) : IM_COL32(0, 255, 0, 255));
 
 			ImGui::SetCursorPos(cursorPos + topLeftOffset + ImVec2(2, 0));
 			ImGui::Text("%d", j);

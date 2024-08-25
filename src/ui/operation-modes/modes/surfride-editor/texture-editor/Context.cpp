@@ -87,18 +87,29 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 
 		resources::ManagedCArray crops{ gocSprite->projectResource, texture.crops, texture.cropCount };
 
-		crops.remove(cropRef.cropIndex);
+		crops.remove(static_cast<unsigned int>(cropRef.cropIndex));
 	}
 
 	void Context::RefreshAfterTextureUpdate(const TextureRef& textureRef)
 	{
-		for (auto* scene : gocSprite->project->scenes)
-			for (auto* layer : scene->layers)
-				for (auto* cast : layer->casts)
+		for (auto* scene : gocSprite->GetProject()->GetScenes())
+			for (auto* layer : scene->GetLayers())
+				for (auto* cast : layer->GetCasts())
 					if (IsAffectedByTextureUpdate(textureRef, *cast->castData)) {
 						cast->transform->dirtyFlag.SetCellAll();
 						cast->transform->dirtyFlag.SetTransformAll();
 					}
+	}
+
+	void Context::RefreshCastAfterTextureUpdate(const TextureRef& textureRef, SurfRide::Cast* cast)
+	{
+		if (IsAffectedByTextureUpdate(textureRef, *cast->castData)) {
+			cast->transform->dirtyFlag.SetCellAll();
+			cast->transform->dirtyFlag.SetTransformAll();
+		}
+
+		for (auto* child : cast->GetChildren())
+			RefreshCastAfterTextureUpdate(textureRef, child);
 	}
 
 	bool Context::IsAffectedByTextureUpdate(const TextureRef& textureRef, SurfRide::SRS_CASTNODE& cast)
@@ -129,11 +140,19 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 
 	void Context::RefreshAfterCropUpdate(const CropRef& cropRef)
 	{
-		for (auto* scene : gocSprite->project->scenes)
-			for (auto* layer : scene->layers)
-				for (auto* cast : layer->casts)
-					if (IsAffectedByCropUpdate(cropRef, *cast->castData))
-						cast->transform->dirtyFlag.SetCellCropUV();
+		for (auto* scene : gocSprite->GetProject()->GetScenes())
+			for (auto* layer : scene->GetLayers())
+				for (auto* cast : layer->GetCasts())
+					RefreshCastAfterCropUpdate(cropRef, cast);
+	}
+
+	void Context::RefreshCastAfterCropUpdate(const CropRef& cropRef, SurfRide::Cast* cast)
+	{
+		if (IsAffectedByCropUpdate(cropRef, *cast->castData))
+			cast->transform->dirtyFlag.SetCellCropUV();
+
+		for (auto* child : cast->GetChildren())
+			RefreshCastAfterCropUpdate(cropRef, child);
 	}
 
 	bool Context::IsAffectedByCropUpdate(const CropRef& cropRef, SurfRide::SRS_CASTNODE& cast)
