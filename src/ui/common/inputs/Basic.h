@@ -22,6 +22,8 @@ template<> class imgui_datatype<double> { public: static constexpr ImGuiDataType
 template<typename T> class imgui_datatype<T, std::enable_if_t<std::is_base_of_v<Eigen::Matrix<typename T::Scalar, T::RowsAtCompileTime, 1, T::Options, T::MaxRowsAtCompileTime, 1>, T>>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<typename T::Scalar>::dtype; static constexpr int components = T::RowsAtCompileTime; };
 //template<typename T> class imgui_datatype<T, std::enable_if_t<std::is_base_of_v<Eigen::AlignedVector3<typename T::Scalar>, T>>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<typename T::Scalar>::dtype; static constexpr int components = T::RowsAtCompileTime; };
 template<typename U> class imgui_datatype<csl::ut::Color<U>> { public: static constexpr ImGuiDataType dtype = imgui_datatype<U>::dtype; static constexpr int components = 4; };
+template<> class imgui_datatype<hh::needle::uint_vector4> { public: static constexpr ImGuiDataType dtype = imgui_datatype<uint32_t>::dtype; static constexpr int components = 4; };
+template<> class imgui_datatype<hh::needle::float_vector4> { public: static constexpr ImGuiDataType dtype = imgui_datatype<float>::dtype; static constexpr int components = 4; };
 
 template<typename T> float default_step() {
 	if constexpr (std::numeric_limits<T>::is_integer)

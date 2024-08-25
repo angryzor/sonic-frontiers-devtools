@@ -85,45 +85,6 @@ void Desktop::Render() {
 	//	GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
 
 	//}
-
-	//if (ImGui::Button("Viewport")) {
-	//	if (auto* fxParamMgr = GameManager::GetInstance()->GetService<app::gfx::FxParamManager>()) {
-	//		auto& stageConfig = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig;
-	//		if (auto* camSrv = GameManager::GetInstance()->GetService<app::camera::CameraService>()) {
-	//			camSrv->CreateDefaultCameraFrame(2, 1, 0, stageConfig.camera.zNear, stageConfig.camera.zFar, stageConfig.camera.fovy);
-	//		}
-	//	}
-	//}
-
-
-
-	//	auto* gameManager = GameManager::GetInstance();
-
-	//	for (uint8_t i = 0; i < 4; i++) {
-	//		if (ImGui::Selectable(charaNames[i])) {
-	//			if (auto* levelInfo = gameManager->GetService<app::level::LevelInfo>()) {
-	//				if (auto* fxParamMgr = gameManager->GetService<app::gfx::FxParamManager>()) {
-	//					if (levelInfo->stageData->attributeFlags.test(charaAttrFlags[i])) {
-	//						app::player::Player::Kill(gameManager, 1);
-	//						app::player::Player::PlayerSetupInfo psi;
-	//						psi.playerId = 1;
-	//						psi.characterId = static_cast<app::player::CharacterIdU8>(i);
-	//						psi.worldPos.m_Position = pickedLocation;
-	//						psi.worldPos.m_Rotation = csl::math::Quaternion::Identity;
-	//						psi.deadFallTime = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig.common.deadFallTime;
-	//						psi.deadline = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig.common.deadline;
-	//						psi.oceanSurface = fxParamMgr->sceneParameters[fxParamMgr->currentSceneParameters]->sceneData->stageConfig.common.oceanSurface;
-	//						psi.unk6 = 1;
-	//						psi.startType = app::player::Player::StartType::STAND;
-	//						app::player::Player::Spawn(gameManager, psi);
-	//					}
-	//				}
-	//			}
-	//			ImGui::CloseCurrentPopup();
-	//		}
-	//	}
-	//	ImGui::EndPopup();
-	//}
 }
 
 void Desktop::RenderOverlayWindow()
@@ -201,13 +162,23 @@ void Desktop::RenderPanel(PanelBase& panel)
 	ImGui::End();
 }
 
-bool Desktop::BeginSceneWindow(PanelBase& panel)
+bool Desktop::BeginSceneWindow()
 {
 	return true;
 }
 
 void Desktop::EndSceneWindow()
 {
+}
+
+bool Desktop::BeginOverlayWindow()
+{
+	return ImGui::Begin("Overlay");
+}
+
+void Desktop::EndOverlayWindow()
+{
+	ImGui::End();
 }
 
 bool Desktop::IsMouseOverSceneWindow()

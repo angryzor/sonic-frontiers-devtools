@@ -5,6 +5,25 @@
 
 using namespace hh::gfx;
 
+bool Editor(const char* label, hh::gfnd::RenderManagerBase::SetupInfo& setupInfo) {
+	bool edited{};
+
+	Viewer("Shader packfile path", setupInfo.shaderPackfilePath);
+	edited |= Editor("Aspect ratio", setupInfo.aspectRatio);
+	edited |= Editor("unk2a", setupInfo.unk2a);
+	edited |= Editor("unk3", setupInfo.unk3);
+	edited |= Editor("Resolution X", setupInfo.resX);
+	edited |= Editor("Resolution Y", setupInfo.resY);
+	edited |= Editor("Render Resolution X", setupInfo.renderResX);
+	edited |= Editor("Render Resolution Y", setupInfo.renderResY);
+	edited |= Editor("unk6", setupInfo.unk6);
+	edited |= Editor("unk7", setupInfo.unk7);
+	edited |= Editor("unk8", setupInfo.unk8);
+	edited |= Editor("unk9", setupInfo.unk9);
+
+	return edited;
+}
+
 RenderManagerInspector::RenderManagerInspector(csl::fnd::IAllocator* allocator) : StandaloneWindow{ allocator }
 {
 	SetTitle("RenderManager");
@@ -27,19 +46,7 @@ void RenderManagerInspector::RenderContents()
 		Editor("unk6", renderMgr->implementation->unk6);
 		Editor("maybeSupportFXWidth", renderMgr->implementation->maybeSupportFXWidth);
 		Editor("maybeSupportFXHeight", renderMgr->implementation->maybeSupportFXHeight);
-		Editor("unk12", renderMgr->implementation->unk12);
-		Editor("unk13", renderMgr->implementation->unk13);
-		Editor("unk14", renderMgr->implementation->unk14);
-		Editor("unk15", renderMgr->implementation->unk15);
-		Editor("width", renderMgr->implementation->width);
-		Editor("height", renderMgr->implementation->height);
-		Editor("maybeRenderWidth", renderMgr->implementation->maybeRenderWidth);
-		Editor("maybeRenderHeight", renderMgr->implementation->maybeRenderHeight);
-		Editor("unk18", renderMgr->implementation->unk18);
-		Editor("unk19", renderMgr->implementation->unk19);
-		Editor("unk20", renderMgr->implementation->unk20);
-		Editor("unk21", renderMgr->implementation->unk21);
-		Editor("unk22", renderMgr->implementation->unk22);
+		Editor("Setup info", renderMgr->implementation->setupInfo);
 		Editor("unk25", renderMgr->implementation->unk25);
 
 		Editor("unk29suppfx", renderMgr->implementation->renderingEngine->GetSupportFX()->unk29);

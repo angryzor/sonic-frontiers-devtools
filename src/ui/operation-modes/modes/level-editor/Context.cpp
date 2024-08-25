@@ -274,4 +274,16 @@ namespace ui::operation_modes::modes::level_editor {
 		placementTargetLayer = nullptr;
 		objectClassToPlace = nullptr;
 	}
+
+	void Context::SetObjectParent(hh::game::ObjectData* child, hh::game::ObjectData* parent)
+	{
+		auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
+		auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
+
+		child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
+		child->parentID = parent->id;
+
+		focusedChunk->Despawn(child);
+		focusedChunk->Restart(focusedChunk->GetObjectIndexByObjectData(child), true);
+	}
 }

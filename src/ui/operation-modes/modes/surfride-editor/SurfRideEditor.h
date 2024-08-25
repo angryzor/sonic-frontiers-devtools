@@ -8,7 +8,5 @@ namespace ui::operation_modes::modes::surfride_editor
 	{
 	public:
 		SurfRideEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host);
-
-		virtual void Render() override;
 	};
 }

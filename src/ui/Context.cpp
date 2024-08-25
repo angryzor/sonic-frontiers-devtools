@@ -133,6 +133,7 @@ HOOK(bool, __fastcall, DisplaySwapDevice_Present, displaySwapDevicePresentAddr, 
 //	return originalCreateRenderingDeviceDX11(renderingDevice, renderingDeviceContext, deviceCreationSetting, displaySwapDevice, D3D11_CREATE_DEVICE_DEBUG);
 //}
 
+//#ifdef DEVTOOLS_TARGET_SDK_rangers
 //HOOK(bool, __fastcall, GOCCamera_PushController, 0x14D39B880, app_cmn::camera::GOCCamera* self, hh::fnd::Handle<hh::fnd::Messenger>& cameraFrame, unsigned int controllerId, unsigned int unkParam1, app_cmn::camera::CameraInterpolator* interpolator)
 //{
 //	if (self->owner->objectClass == app::player::Sonic::GetClass() || self->owner->objectClass == app::player::Amy::GetClass() || self->owner->objectClass == app::player::Knuckles::GetClass() || self->owner->objectClass == app::player::Tails::GetClass()) {
@@ -143,6 +144,7 @@ HOOK(bool, __fastcall, DisplaySwapDevice_Present, displaySwapDevicePresentAddr, 
 //	else
 //		return originalGOCCamera_PushController(self, cameraFrame, controllerId, unkParam1, interpolator);
 //}
+//#endif
 
 void Context::install_hooks()
 {
@@ -153,7 +155,9 @@ void Context::install_hooks()
 	INSTALL_HOOK(DisplaySwapDevice_Present);
 	InstallInputHooks();
 	//INSTALL_HOOK(RenderingEngineRangers_SetupMainRenderUnit);
-	//INSTALL_HOOK(GOCCamera_PushController);
+//#ifdef DEVTOOLS_TARGET_SDK_rangers
+//	INSTALL_HOOK(GOCCamera_PushController);
+//#endif
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
 	GOCVisualDebugDrawRenderer::InstallHooks();
 }

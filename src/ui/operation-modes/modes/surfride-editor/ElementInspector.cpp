@@ -180,7 +180,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		RenderBaseCastInspector(cast);
 
-		if (Editor("Image cast properties", *cast.imageCastData)) {
+		if (Editor("Image cast properties", GetContext().gocSprite->projectResource, *cast.imageCastData)) {
 			cast.size = cast.imageCastData->size;
 #ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.vertexColorTopLeft = cast.imageCastData->vertexColorTopLeft;
@@ -190,6 +190,13 @@ namespace ui::operation_modes::modes::surfride_editor {
 #endif
 			cast.cropIndex[0] = cast.imageCastData->cropIndex0;
 			cast.cropIndex[1] = cast.imageCastData->cropIndex1;
+
+#ifndef DEVTOOLS_TARGET_SDK_wars
+			cast.blurEffect = nullptr;
+			cast.reflectEffect = nullptr;
+			cast.CreateEffectCast(cast.imageCastData->effectData);
+#endif
+
 			cast.transform->dirtyFlag.SetCellAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
 			cast.UpdateParentsAndThisTransformRecursively();
@@ -223,13 +230,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		RenderBaseCastInspector(cast);
 
-		if (Editor("Slice cast properties", *cast.sliceCastData)) {
+		if (Editor("Slice cast properties", GetContext().gocSprite->projectResource, *cast.sliceCastData)) {
 			cast.size = cast.sliceCastData->size;
 #ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.vertexColorTopLeft = cast.sliceCastData->vertexColorTopLeft;
 			cast.vertexColorBottomLeft = cast.sliceCastData->vertexColorBottomLeft;
 			cast.vertexColorTopRight = cast.sliceCastData->vertexColorTopRight;
 			cast.vertexColorBottomRight = cast.sliceCastData->vertexColorBottomRight;
+#endif
+#ifndef DEVTOOLS_TARGET_SDK_wars
+			cast.blurEffect = nullptr;
+			cast.reflectEffect = nullptr;
+			cast.CreateEffectCast(cast.sliceCastData->effectData);
 #endif
 			cast.transform->dirtyFlag.SetCellAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars

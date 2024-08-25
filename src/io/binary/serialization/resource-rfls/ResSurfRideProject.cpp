@@ -382,7 +382,7 @@ namespace reflection::serialization::resource_rfls::surfride {
 		"verticalFixedCount",
 		"cropRef0Count",
 		"cropRef1Count",
-		"cropRef0Offset",
+		"cropRefs0",
 		"effectType",
 		"effectData",
 		"slices"

@@ -133,13 +133,15 @@ namespace ui::operation_modes::modes::level_editor {
 		return strstr(GetLabel(), searchString);
 	}
 
-	bool ObjectLibraryTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
+	bool ObjectLibraryTreeViewNode::IsSelected() const {
+		return type == Type::OBJECT_CLASS && library.GetContext().objectClassToPlace == objectClass;
+	}
+
+	void ObjectLibraryTreeViewNode::PreRender() const {
+	}
+
+	void ObjectLibraryTreeViewNode::PostRender() const
 	{
-		if (type == Type::OBJECT_CLASS && library.GetContext().objectClassToPlace == objectClass)
-			nodeflags |= ImGuiTreeNodeFlags_Selected;
-
-		bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
-
 		if (type == Type::OBJECT_CLASS) {
 			if (ImGui::BeginDragDropSource()) {
 				ImGui::SetDragDropPayload("GameObjectClass", &objectClass, sizeof(objectClass));
@@ -148,7 +150,5 @@ namespace ui::operation_modes::modes::level_editor {
 			else if (ImGui::IsItemClicked())
 				library.GetContext().objectClassToPlace = objectClass;
 		}
-
-		return isOpen;
 	}
 }

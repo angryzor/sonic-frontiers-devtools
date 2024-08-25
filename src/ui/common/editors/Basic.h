@@ -2,6 +2,7 @@
 
 #include <ui/common/inputs/Basic.h>
 #include <utilities/math/MathUtils.h>
+#include <resources/managed-memory/ManagedCArray.h>
 
 // Editors
 template<typename T, ImGuiDataType = imgui_datatype<T>::dtype>
@@ -80,8 +81,10 @@ static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
 	if (ImGui::TreeNode(label, "%s[0..]", label)) {
 		for (int i = 0; i < arr.size(); i++) {
 			ImGui::PushID(i);
-			if (ImGui::Button("x"))
+			if (ImGui::Button("x")) {
 				arr.remove(i);
+				edited = true;
+			}
 			ImGui::SameLine();
 
 			char indexedName[200];
@@ -92,8 +95,10 @@ static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
 			ImGui::PopID();
 		}
 
-		if (ImGui::Button("Add item"))
+		if (ImGui::Button("Add item")) {
 			arr.emplace_back();
+			edited = true;
+		}
 
 		ImGui::TreePop();
 	}
@@ -111,6 +116,38 @@ static bool Editor(const char* label, T(&arr)[Len]) {
 		for (size_t i = 0; i < Len; i++) {
 			snprintf(name, sizeof(name), "%s[%zd]", label, i);
 			edited |= Editor(name, arr[i]);
+		}
+
+		ImGui::TreePop();
+	}
+
+	return edited;
+}
+
+template<typename T, typename S>
+static bool Editor(const char* label, resources::ManagedCArray<T, S>& arr) {
+	bool edited{};
+
+	if (ImGui::TreeNode(label, "%s[0..]", label)) {
+		for (S i = 0; i < arr.size(); i++) {
+			ImGui::PushID(static_cast<int>(i));
+			if (ImGui::Button("x")) {
+				arr.remove(i);
+				edited = true;
+			}
+			ImGui::SameLine();
+
+			char indexedName[200];
+			snprintf(indexedName, sizeof(indexedName), "%s[%d]", label, i);
+
+			edited |= Editor(indexedName, arr[i]);
+
+			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Add item")) {
+			arr.emplace_back();
+			edited = true;
 		}
 
 		ImGui::TreePop();

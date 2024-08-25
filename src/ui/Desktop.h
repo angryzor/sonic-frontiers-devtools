@@ -55,7 +55,9 @@ public:
 
     // Inherited via OperationModeHost
     void RenderPanel(PanelBase& panel) override;
-    bool BeginSceneWindow(PanelBase& panel) override;
+    bool BeginSceneWindow() override;
     void EndSceneWindow() override;
+    bool BeginOverlayWindow() override;
+    void EndOverlayWindow() override;
     bool IsMouseOverSceneWindow() override;
 };

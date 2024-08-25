@@ -49,14 +49,27 @@ protected:
 		ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 		if (children.size() != 0) {
-			if (node.Render(nodeflags)) {
+			if (RenderSelf(nodeflags)) {
 				ImGui::Indent();
 				RenderChildren(tv, startIdx, count - 1);
 				ImGui::Unindent();
 			}
 		}
 		else
-			node.Render(nodeflags | ImGuiTreeNodeFlags_Leaf);
+			RenderSelf(nodeflags | ImGuiTreeNodeFlags_Leaf);
+	}
+
+	bool RenderSelf(ImGuiTreeNodeFlags nodeflags) {
+		if (node.IsSelected())
+			nodeflags |= ImGuiTreeNodeFlags_Selected;
+
+		node.PreRender();
+
+		bool isOpen = ImGui::TreeNodeEx(node.GetID(), nodeflags, "%s", node.GetLabel());
+
+		node.PostRender();
+
+		return isOpen;
 	}
 
 	void RenderChildren(TreeView<T>& tv, int startIdx, int count) {

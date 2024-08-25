@@ -1,5 +1,4 @@
 #pragma once
-#include <ui/Desktop.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include "ForwardDeclarations.h"
 #include "Selection.h"
@@ -22,11 +21,11 @@ public:
 	virtual TransformType GetSelectionTransform() const = 0;
 
 	void SetSelectionTransform(const TransformType transform) {
-		Desktop::instance->Dispatch(SetSelectionTransformAction{ transform });
+		Dispatch(SetSelectionTransformAction{ transform });
 	}
 
 	void TransformSelectionTransform(const TransformType transform) {
-		Desktop::instance->Dispatch(SetSelectionTransformAction{ transform * GetSelectionTransform() });
+		Dispatch(SetSelectionTransformAction{ transform * GetSelectionTransform() });
 	}
 };
 

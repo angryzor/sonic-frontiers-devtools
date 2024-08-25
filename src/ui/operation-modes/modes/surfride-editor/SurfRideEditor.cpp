@@ -20,8 +20,4 @@ namespace ui::operation_modes::modes::surfride_editor
 		AddBehavior<MousePickingBehavior>();
 		AddBehavior<SelectionMousePickingBehavior>();
 	}
-
-	void SurfRideEditor::Render() {
-		OperationMode::Render();
-	}
 }

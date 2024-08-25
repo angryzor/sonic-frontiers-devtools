@@ -33,7 +33,7 @@ public:
 
 		auto* ivp = ImGui::GetMainViewport();
 
-		if (ImGui::Begin("Overlay")) {
+		if (operationMode.BeginOverlayWindow()) {
 			ImGui::PushStyleColor(ImGuiCol_Text, ImVec4{ 1.0f, 1.0f, 1.0f, 1.0f });
 
 			for (auto* obj : gameManager->objects) {
@@ -66,6 +66,6 @@ public:
 
 			ImGui::PopStyleColor();
 		}
-		ImGui::End();
+		operationMode.EndOverlayWindow();
 	}
 };

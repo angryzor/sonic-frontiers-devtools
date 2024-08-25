@@ -1,44 +1,58 @@
 #include "OperationMode.h"
 
-void OperationModeBase::Render()
-{
-	singleFrameExclusiveMouseControlBehavior = nullptr;
+void OperationModeBase::Render() {
+	if (host.BeginSceneWindow()) {
+		singleFrameExclusiveMouseControlBehavior = nullptr;
 
-	for (auto& behavior : behaviors)
-		behavior->Render();
+		RenderScene();
+
+		for (auto& behavior : behaviors)
+			behavior->Render();
+	}
+	host.EndSceneWindow();
 }
 
-void OperationModeBase::ProcessAction(const ActionBase& action)
+void OperationModeBase::RenderScene()
 {
+}
+
+void OperationModeBase::Dispatch(const ActionBase& action) {
+	host.Dispatch(action);
+}
+
+void OperationModeBase::ProcessAction(const ActionBase& action) {
 	for (auto& behavior : behaviors)
 		behavior->ProcessAction(action);
 }
 
-void OperationModeBase::InitBehaviors()
-{
+void OperationModeBase::InitBehaviors() {
 	for (auto& behavior : behaviors)
 		behavior->Init();
 }
 
-void OperationModeBase::DeinitBehaviors()
-{
+void OperationModeBase::DeinitBehaviors() {
 	for (auto i = behaviors.end(); i != behaviors.begin();)
 		(*(--i))->Deinit();
 }
 
-bool OperationModeBase::IsMouseOverSceneWindow()
-{
+bool OperationModeBase::BeginOverlayWindow() {
+	return host.BeginOverlayWindow();
+}
+
+void OperationModeBase::EndOverlayWindow() {
+	return host.EndOverlayWindow();
+}
+
+bool OperationModeBase::IsMouseOverSceneWindow() {
 	return host.IsMouseOverSceneWindow();
 }
 
-bool OperationModeBase::CanTakeMouseControl(OperationModeBehavior* behavior)
-{
+bool OperationModeBase::CanTakeMouseControl(OperationModeBehavior* behavior) {
 	return (draggingBehavior == nullptr || draggingBehavior == behavior)
 		&& (singleFrameExclusiveMouseControlBehavior == nullptr || singleFrameExclusiveMouseControlBehavior == behavior);
 }
 
-void OperationModeBase::ToggleDragging(OperationModeBehavior* behavior, bool canStart)
-{
+void OperationModeBase::ToggleDragging(OperationModeBehavior* behavior, bool canStart) {
 	if (!CanTakeMouseControl(behavior))
 		return;
 
@@ -50,12 +64,10 @@ void OperationModeBase::ToggleDragging(OperationModeBehavior* behavior, bool can
 		draggingBehavior = nullptr;
 }
 
-bool OperationModeBase::IsDragging(OperationModeBehavior* behavior)
-{
+bool OperationModeBase::IsDragging(OperationModeBehavior* behavior) {
 	return draggingBehavior == behavior;
 }
 
-void OperationModeBase::BeginSingleFrameExclusiveMouseControl(OperationModeBehavior* behavior)
-{
+void OperationModeBase::BeginSingleFrameExclusiveMouseControl(OperationModeBehavior* behavior) {
 	singleFrameExclusiveMouseControlBehavior = behavior;
 }

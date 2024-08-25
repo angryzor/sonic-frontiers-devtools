@@ -36,7 +36,9 @@ namespace ui::operation_modes::modes::level_editor {
 		const void* GetID() const;
 		const char* GetLabel() const;
 		bool MatchesSearchString(const char* searchString) const;
-		bool Render(ImGuiTreeNodeFlags nodeflags) const;
+		bool IsSelected() const;
+		void PreRender() const;
+		void PostRender() const;
 		SetObjectListTreeViewNode(SetObjectList& list, hh::game::ObjectData* objData);
 		SetObjectListTreeViewNode(SetObjectList& list, hh::game::ObjectWorldChunkLayer* layer);
 		SetObjectListTreeViewNode(SetObjectList& list, const char* label);

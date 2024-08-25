@@ -1,5 +1,4 @@
 #pragma once
-#include <ui/Component.h>
 #include "OperationModeBehavior.h"
 
 struct PanelTraits {
@@ -12,9 +11,10 @@ struct PanelTraits {
 template<typename Context>
 class OperationMode;
 
-class PanelBase : public Component {
+class PanelBase : public CompatibleObject {
 public:
-	using Component::Component;
+	using CompatibleObject::CompatibleObject;
+
 	virtual PanelTraits GetPanelTraits() const = 0;
 	virtual void RenderPanel() = 0;
 };
@@ -30,7 +30,7 @@ protected:
 public:
 	Panel(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : PanelBase{ allocator }, operationMode{ operationMode } { }
 
-	virtual void Render() override
+	void Render()
 	{
 		const ImGuiWindowFlags windowFlags = 0;
 
@@ -44,5 +44,12 @@ public:
 		}
 
 		ImGui::End();
+	}
+
+	void Dispatch(const ActionBase& action) {
+		operationMode.Dispatch(action);
+	}
+
+	virtual void ProcessAction(const ActionBase& action) {
 	}
 };

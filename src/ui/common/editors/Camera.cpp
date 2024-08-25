@@ -7,8 +7,8 @@ bool Editor(const char* label, CameraParameter::Target& target) {
     bool edited{};
     ImGui::PushID(label);
     
-	edited |= Editor("Unk1", target.unk1);
-	edited |= Editor("Unk2", target.unk2);
+	edited |= Editor("Position", target.position);
+	edited |= Editor("Offset", target.offset);
 	edited |= Editor("Unk3", target.unk3);
 
     ImGui::PopID();
@@ -66,7 +66,7 @@ bool Editor(const char* label, CameraPose& pose) {
     bool edited{};
     ImGui::PushID(label);
     
-	edited |= Editor("Unk1", pose.unk1);
+	edited |= Editor("LookAt position", pose.lookAtPos);
 	edited |= Editor("Position", pose.position);
 	edited |= Editor("Unk3", pose.unk3);
 

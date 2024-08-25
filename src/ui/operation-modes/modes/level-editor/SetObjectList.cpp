@@ -23,27 +23,19 @@ namespace ui::operation_modes::modes::level_editor {
 
 	const void* SetObjectListTreeViewNode::GetID() const {
 		switch (type) {
-		case SetObjectListTreeViewNode::Type::OBJECT:
-			return object.object;
-		case SetObjectListTreeViewNode::Type::LAYER:
-			return layer.layer;
-		case SetObjectListTreeViewNode::Type::GROUP:
-			return group.label;
-		default:
-			return nullptr;
+		case SetObjectListTreeViewNode::Type::OBJECT: return object.object;
+		case SetObjectListTreeViewNode::Type::LAYER: return layer.layer;
+		case SetObjectListTreeViewNode::Type::GROUP: return group.label;
+		default: return nullptr;
 		}
 	}
 
 	const char* SetObjectListTreeViewNode::GetLabel() const {
 		switch (type) {
-		case SetObjectListTreeViewNode::Type::OBJECT:
-			return object.object->GetName();
-		case SetObjectListTreeViewNode::Type::LAYER:
-			return layer.layer->GetName();
-		case SetObjectListTreeViewNode::Type::GROUP:
-			return group.label;
-		default:
-			return nullptr;
+		case SetObjectListTreeViewNode::Type::OBJECT: return object.object->GetName();
+		case SetObjectListTreeViewNode::Type::LAYER: return layer.layer->GetName();
+		case SetObjectListTreeViewNode::Type::GROUP: return group.label;
+		default: return nullptr;
 		}
 	}
 
@@ -52,18 +44,22 @@ namespace ui::operation_modes::modes::level_editor {
 		return strstr(GetLabel(), searchString);
 	}
 
-	bool SetObjectListTreeViewNode::Render(ImGuiTreeNodeFlags nodeflags) const
+	bool SetObjectListTreeViewNode::IsSelected() const
 	{
 		auto* selectionBehavior = list.GetBehavior<SelectionBehavior<Context>>();
-		auto* focusedChunk = list.GetContext().GetFocusedChunk();
 
-		if (type == SetObjectListTreeViewNode::Type::OBJECT && selectionBehavior->IsSelected(object.object))
-			nodeflags |= ImGuiTreeNodeFlags_Selected;
+		return type == SetObjectListTreeViewNode::Type::OBJECT && selectionBehavior->IsSelected(object.object);
+	}
 
+	void SetObjectListTreeViewNode::PreRender() const
+	{
 		if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull())
 			ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
+	}
 
-		bool isOpen = ImGui::TreeNodeEx(GetID(), nodeflags, "%s", GetLabel());
+	void SetObjectListTreeViewNode::PostRender() const
+	{
+		auto* selectionBehavior = list.GetBehavior<SelectionBehavior<Context>>();
 
 		if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull()) {
 			ImGui::PopStyleColor();
@@ -84,15 +80,7 @@ namespace ui::operation_modes::modes::level_editor {
 					ObjectData* child = *static_cast<ObjectData**>(payload->Data);
 
 					if (parent != child) {
-						auto parentAbsoluteTransform = ObjectTransformDataToAffine3f(parent->transform);
-						auto childAbsoluteTransform = ObjectTransformDataToAffine3f(child->transform);
-
-						child->localTransform = Affine3fToObjectTransformData(parentAbsoluteTransform.inverse() * childAbsoluteTransform);
-						child->parentID = parent->id;
-
-						focusedChunk->Despawn(child);
-						focusedChunk->Restart(focusedChunk->GetObjectIndexByObjectData(child), true);
-
+						list.GetContext().SetObjectParent(child, parent);
 						list.InvalidateTree();
 					}
 				}
@@ -113,8 +101,6 @@ namespace ui::operation_modes::modes::level_editor {
 			}
 			ImGui::PopID();
 		}
-
-		return isOpen;
 	}
 
 	void SetObjectList::ProcessAction(const ActionBase& action)

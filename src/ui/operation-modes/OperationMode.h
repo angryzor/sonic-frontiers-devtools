@@ -1,40 +1,11 @@
 #pragma once
-#include <ui/Component.h>
-#include "OperationModeBehavior.h"
+#include <ui/Action.h>
+#include <utilities/CompatibleObject.h>
 #include "Panel.h"
+#include "OperationModeHost.h"
 
-//template<typename Context, typename T>
-//class WithContext : public T {
-//protected:
-//	Context& context;
-//
-//public:
-//	WithContext(Context& context) : context(context), T{} {}
-//};
-//
-//template<typename Context, typename Behavior>
-//class BehaviorContext : public WithContext<Context, Behavior::Operations> {
-//	using WithContext::WithContext;
-//};
-
-template<typename Context>
-class BehaviorTraitsImpl {
-protected:
-	typename Context& context;
-
-public:
-	BehaviorTraitsImpl(typename Context& context) : context{ context } {}
-};
-
-class OperationModeHost {
-public:
-	virtual void RenderPanel(PanelBase& panel) = 0;
-	virtual bool BeginSceneWindow(PanelBase& panel) = 0;
-	virtual void EndSceneWindow() = 0;
-	virtual bool IsMouseOverSceneWindow() = 0;
-};
-
-class OperationModeBase : public Component {
+class OperationModeBehavior;
+class OperationModeBase : public CompatibleObject {
 	OperationModeHost& host;
 	OperationModeBehavior* draggingBehavior{ nullptr };
 	OperationModeBehavior* singleFrameExclusiveMouseControlBehavior{ nullptr };
@@ -43,13 +14,17 @@ protected:
 	csl::ut::MoveArray<hh::fnd::Reference<OperationModeBehavior>> behaviors{ GetAllocator() };
 
 public:
-	OperationModeBase(csl::fnd::IAllocator* allocator, OperationModeHost& host) : Component{ allocator }, host{ host } {}
+	OperationModeBase(csl::fnd::IAllocator* allocator, OperationModeHost& host) : CompatibleObject{ allocator }, host{ host } {}
 
-	virtual void ProcessAction(const ActionBase& action) override;
-	virtual void Render() override;
+	void Dispatch(const ActionBase& action);
+	virtual void ProcessAction(const ActionBase& action);
+	virtual void Render();
+	virtual void RenderScene();
 
 	void InitBehaviors();
 	void DeinitBehaviors();
+	bool BeginOverlayWindow();
+	void EndOverlayWindow();
 	bool IsMouseOverSceneWindow();
 	bool CanTakeMouseControl(OperationModeBehavior* behavior);
 	void ToggleDragging(OperationModeBehavior* behavior, bool canStart = true);
@@ -66,29 +41,25 @@ public:
 	}
 };
 
+template<typename Context>
+class BehaviorTraitsImpl {
+protected:
+	typename Context& context;
+
+public:
+	BehaviorTraitsImpl(typename Context& context) : context{ context } {}
+};
+
 template<typename _Context>
 class OperationMode : public OperationModeBase {
 public:
 	using Context = _Context;
 
 private:
-	//template<typename Behavior, typename TraitImpls, typename I = std::make_index_sequence<std::tuple_size<TraitImpls>::value>>
-	//struct BehaviorWithTraitsImpls;
-
-	//template<typename Behavior, typename TraitImpls, size_t... Is>
-	//struct BehaviorWithTraitsImpls<Behavior, TraitImpls, std::index_sequence<Is...>> : public BehaviorWithTraitsImplsBase {
-	//	Behavior inlineBehavior;
-	//	TraitImpls traitImpls;
-
-	//	BehaviorWithTraitsImpls(csl::fnd::IAllocator* allocator, OperationMode& operationMode)
-	//		: traitImpls{ std::make_tuple(std::tuple_element_t<Is, TraitImpls>{ operationMode.context }...) }
-	//		, inlineBehavior{ allocator, operationMode, std::get<Is>(traitImpls)... }
-	//		, BehaviorWithTraitsImplsBase{ allocator, &inlineBehavior } {}
-	//};
-
 	friend class Panel<Context>;
 	csl::ut::MoveArray<hh::fnd::Reference<Panel<Context>>> panels{ GetAllocator() };
 	Context context{ GetAllocator() };
+
 public:
 	Context& GetContext() { return context; }
 	using OperationModeBase::OperationModeBase;

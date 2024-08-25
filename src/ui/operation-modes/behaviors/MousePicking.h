@@ -3,6 +3,7 @@
 #include <utilities/math/Frustum.h>
 #include <utilities/math/MathUtils.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
+#include "Zoom.h"
 #include "ForwardDeclarations.h"
 
 template<typename OpModeContext>
@@ -73,15 +74,21 @@ public:
 	}
 
 	void HandleDragSelect() {
-		auto mouseStart = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
-		auto mouseEnd = ImGui::GetMousePos();
+		auto* zoomBehavior = operationMode.GetBehavior<ZoomBehavior>();
+		auto zoom = zoomBehavior == nullptr ? 1.0f : zoomBehavior->zoomLevel;
+		auto mouseScreenStartAbs = ImGui::GetMousePos() - ImGui::GetMouseDragDelta();
+		auto mouseScreenEndAbs = ImGui::GetMousePos();
+		auto mouseScreenMinAbs = ImVec2(std::min(mouseScreenStartAbs.x, mouseScreenEndAbs.x), std::min(mouseScreenStartAbs.y, mouseScreenEndAbs.y));
+		auto mouseScreenMaxAbs = ImVec2(std::max(mouseScreenStartAbs.x, mouseScreenEndAbs.x), std::max(mouseScreenStartAbs.y, mouseScreenEndAbs.y));
+		auto mouseMin = (mouseScreenMinAbs - ImGui::GetWindowContentRegionMin() - ImGui::GetWindowPos()) / zoom;
+		auto mouseMax = (mouseScreenMaxAbs - ImGui::GetWindowContentRegionMin() - ImGui::GetWindowPos()) / zoom;
 
-		if (ImGui::Begin("Overlay")) {
-			ImGui::GetWindowDrawList()->AddRectFilled(mouseStart, mouseEnd, 0x40FFFFFF);
+		if (operationMode.BeginOverlayWindow()) {
+			ImGui::GetWindowDrawList()->AddRectFilled(mouseScreenStartAbs, mouseScreenEndAbs, 0x40FFFFFF);
 		}
-		ImGui::End();
+		operationMode.EndOverlayWindow();
 
-		traits.GetDragResults(mouseStart, mouseEnd, this->pickedObjects);
+		traits.GetDragResults(mouseMin, mouseMax, this->pickedObjects);
 
 		this->mouseButton = ImGuiMouseButton_Left;
 		this->picked = true;
@@ -90,7 +97,9 @@ public:
 	}
 
 	void HandleClickSelect(ImGuiMouseButton button) {
-		auto mousePos = ImGui::GetMousePos();
+		auto* zoomBehavior = operationMode.GetBehavior<ZoomBehavior>();
+		auto zoom = zoomBehavior == nullptr ? 1.0f : zoomBehavior->zoomLevel;
+		auto mousePos = (ImGui::GetMousePos() - ImGui::GetWindowContentRegionMin() - ImGui::GetWindowPos()) / zoom;
 
 		if (ImGui::IsKeyDown(ImGuiKey_LeftAlt) || ImGui::IsKeyDown(ImGuiKey_RightAlt)) {
 			this->intermediateResults.clear();

@@ -19,9 +19,13 @@ enum class ActionId {
 	COPY,
 	PASTE,
 	CHANGE_COORDINATE_SYSTEM,
+	TRANSFORM_MODE,
 	TRANSLATE_MODE,
+	NO_TRANSLATE_MODE,
 	ROTATE_MODE,
+	NO_ROTATE_MODE,
 	SCALE_MODE,
+	NO_SCALE_MODE,
 	ONLY_X_AXIS,
 	LOCK_X_AXIS,
 	ONLY_Y_AXIS,
@@ -61,7 +65,7 @@ struct Action : ActionBase {
 
 class ActionDispatcher {
 protected:
-	static void Dispatch(const ActionBase& action);
+	void Dispatch(const ActionBase& action);
 };
 
 class ActionProcessor {

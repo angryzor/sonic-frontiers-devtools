@@ -1,6 +1,10 @@
+bool Editor(const char* label, SurfRide::SRS_CROPREF& cropRef);
+
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
+#include <resources/ManagedMemoryRegistry.h>
+#include <ui/operation-modes/modes/surfride-editor/texture-editor/References.h>
 #include "SurfRide.h"
 
 using namespace SurfRide;
@@ -74,6 +78,47 @@ bool Editor(const char* label, SRS_TRS3D& transformData) {
 //	return edited;
 //}
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+const char* blendModeNames[]{ "Default", "Add", "Mode2", "Mode3" };
+bool Editor(const char* label, SRS_BLUR3D& effect) {
+	bool edited{};
+	edited |= Editor("Unk1", effect.unk1);
+	edited |= Editor("Unk2", effect.unk2);
+	edited |= Editor("Crop count", effect.cropCount);
+	edited |= Editor("Steps", effect.steps);
+	edited |= Editor("Duration", effect.duration);
+	edited |= Editor("Color", effect.color);
+
+	auto blendMode = effect.GetBlendMode();
+	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
+		effect.SetBlendMode(blendMode);
+		edited = true;
+	}
+
+	return edited;
+}
+
+bool Editor(const char* label, SRS_REFLECT3D& effect) {
+	bool edited{};
+	edited |= Editor("Unk1", effect.unk1);
+	edited |= Editor("Unk2", effect.unk2);
+	edited |= Editor("Unk3", effect.unk3);
+	edited |= Editor("Unk4", effect.unk4);
+	edited |= Editor("Unk5", effect.unk5);
+	edited |= Editor("Unk6", effect.unk6);
+	edited |= Editor("Unk7", effect.unk7);
+	edited |= Editor("Color", effect.color);
+
+	auto blendMode = effect.GetBlendMode();
+	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
+		effect.SetBlendMode(blendMode);
+		edited = true;
+	}
+
+	return edited;
+}
+#endif
+
 const char* verticalAlignmentNames[]{ "Top", "Center", "Bottom" };
 bool Editor(const char* label, SRS_TEXTDATA& textData) {
 	bool edited{};
@@ -96,10 +141,44 @@ bool Editor(const char* label, SRS_TEXTDATA& textData) {
 	return edited;
 }
 
+bool Editor(const char* label, SRS_CROPREF& cropRef) {
+	bool edited{};
+
+	ImGui::BeginGroup();
+	edited |= Editor("Texture List index", cropRef.textureListIndex);
+	edited |= Editor("Texture index", cropRef.textureIndex);
+	edited |= Editor("Crop index", cropRef.cropIndex);
+	ImGui::EndGroup();
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (auto* payload = ImGui::AcceptDragDropPayload("surfride:TextureRef")) {
+			auto textureRef = *static_cast<ui::operation_modes::modes::surfride_editor::texture_editor::TextureRef*>(payload->Data);
+
+			cropRef.textureListIndex = static_cast<short>(textureRef.textureListIndex);
+			cropRef.textureIndex = static_cast<short>(textureRef.textureIndex);
+			cropRef.cropIndex = -1;
+
+			edited = true;
+		}
+		else if (auto* payload = ImGui::AcceptDragDropPayload("surfride:CropRef")) {
+			auto sourceCropRef = *static_cast<ui::operation_modes::modes::surfride_editor::texture_editor::CropRef*>(payload->Data);
+
+			cropRef.textureListIndex = static_cast<short>(sourceCropRef.textureListIndex);
+			cropRef.textureIndex = static_cast<short>(sourceCropRef.textureIndex);
+			cropRef.cropIndex = static_cast<short>(sourceCropRef.cropIndex);
+
+			edited = true;
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	return edited;
+}
+
 const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
 const char* orientationNames[]{ "Up", "Left", "Down", "Right" };
 const char* effectTypeNames[]{ "None", "Blur", "Reflect" };
-bool Editor(const char* label, SRS_IMAGECAST& imageCastData) {
+bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SRS_IMAGECAST& imageCastData) {
 	bool edited{};
 	ImGui::PushID(label);
 	ImGui::SeparatorText(label);
@@ -133,11 +212,43 @@ bool Editor(const char* label, SRS_IMAGECAST& imageCastData) {
 	edited |= CheckboxFlags("Flip vertically", imageCastData.flags, 0x20u);
 	edited |= Editor("Crop Index 0", imageCastData.cropIndex0);
 	edited |= Editor("Crop Index 1", imageCastData.cropIndex1);
+
+	resources::ManagedCArray cropRefs0{ resource, imageCastData.cropRefs0, imageCastData.cropRef0Count };
+	resources::ManagedCArray cropRefs1{ resource, imageCastData.cropRefs1, imageCastData.cropRef1Count };
+
+	edited |= Editor("Crop References 0", cropRefs0);
+	edited |= Editor("Crop References 1", cropRefs1);
+
 	if (imageCastData.textData)
 		edited |= Editor("Text Data", *imageCastData.textData);
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 	ImGui::Separator();
-	edited |= ComboEnum("Effect type", *reinterpret_cast<SRE_EFFECT_TYPE*>(&imageCastData.effectType), effectTypeNames);
+	auto effectType = imageCastData.GetEffectType();
+	if (ComboEnum("Effect type", effectType, effectTypeNames)) {
+		edited = true;
+		imageCastData.SetEffectType(effectType);
+
+		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+		if (imageCastData.effectData)
+			allocator.Free(imageCastData.effectData);
+	
+		switch (effectType) {
+		case SRE_EFFECT_TYPE::BLUR: imageCastData.effectData = new (&allocator) SRS_BLUR3D{}; break;
+		case SRE_EFFECT_TYPE::REFLECT: imageCastData.effectData = new (&allocator) SRS_REFLECT3D{}; break;
+		default: imageCastData.effectData = nullptr; break;
+		}
+	}
+
+	if (imageCastData.effectData) {
+		switch (effectType) {
+		case SRE_EFFECT_TYPE::BLUR: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_BLUR3D*>(imageCastData.effectData)); break;
+		case SRE_EFFECT_TYPE::REFLECT: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_REFLECT3D*>(imageCastData.effectData)); break;
+		}
+	}
+#endif
+
 	ImGui::PopID();
 	return edited;
 }
@@ -178,7 +289,7 @@ bool Editor(const char* label, SRS_REFERENCECAST& referenceCastData)
 	return edited;
 }
 
-bool Editor(const char* label, SRS_SLICECAST& sliceCastData)
+bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SRS_SLICECAST& sliceCastData)
 {
 	bool edited{};
 	ImGui::PushID(label);
@@ -210,6 +321,34 @@ bool Editor(const char* label, SRS_SLICECAST& sliceCastData)
 	edited |= Editor("Vertex Color Bottom Left", sliceCastData.vertexColorBottomLeft);
 	edited |= Editor("Vertex Color Top Right", sliceCastData.vertexColorTopRight);
 	edited |= Editor("Vertex Color Bottom Right", sliceCastData.vertexColorBottomRight);
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	ImGui::Separator();
+	auto effectType = sliceCastData.GetEffectType();
+	if (ComboEnum("Effect type", effectType, effectTypeNames)) {
+		edited = true;
+		sliceCastData.SetEffectType(effectType);
+
+		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+		if (sliceCastData.effectData)
+			allocator.Free(sliceCastData.effectData);
+
+		switch (effectType) {
+		case SRE_EFFECT_TYPE::BLUR: sliceCastData.effectData = new (&allocator) SRS_BLUR3D{}; break;
+		case SRE_EFFECT_TYPE::REFLECT: sliceCastData.effectData = new (&allocator) SRS_REFLECT3D{}; break;
+		default: sliceCastData.effectData = nullptr; break;
+		}
+	}
+
+	if (sliceCastData.effectData) {
+		switch (effectType) {
+		case SRE_EFFECT_TYPE::BLUR: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_BLUR3D*>(sliceCastData.effectData)); break;
+		case SRE_EFFECT_TYPE::REFLECT: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_REFLECT3D*>(sliceCastData.effectData)); break;
+		}
+	}
+#endif
+
 	ImGui::PopID();
 	return edited;
 }

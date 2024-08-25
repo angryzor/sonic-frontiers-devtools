@@ -6,6 +6,7 @@ namespace resources {
 		hh::fnd::ManagedResource* resource;
 	public:
 		ManagedAllocator(hh::fnd::ManagedResource* resource);
+		ManagedAllocator(const ManagedAllocator& other);
 		void* Alloc(size_t in_size, size_t in_alignment) override;
 		void Free(void* in_pMemory) override;
 	};

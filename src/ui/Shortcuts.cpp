@@ -1,15 +1,19 @@
 #include "Shortcuts.h"
 
-ShortcutDescription shortcutDescriptions[16]{
+ShortcutDescription shortcutDescriptions[shortcutCount]{
 	{ "Go back", "Go back to the previous state in various situations, e.g. deselect an object." },
 	{ "Cut", "Clipboard cut" },
 	{ "Copy", "Clipboard copy" },
 	{ "Paste", "Clipboard paste" },
 	{ "Delete", "Delete selected object" },
 	{ "Change Coordinate System", "Change the coordinate system" },
+	{ "Transform Mode", "Switch to transform mode" },
 	{ "Translate Mode", "Switch to translate mode" },
+	{ "No-Translate Mode", "Switch to no-translate mode" },
 	{ "Rotate Mode", "Switch to rotate mode" },
+	{ "No-Rotate Mode", "Switch to no-rotate mode" },
 	{ "Scale Mode", "Switch to scale mode" },
+	{ "No-Scale Mode", "Switch to no-scale mode" },
 	{ "Only X Axis", "Lock movement to the X axis" },
 	{ "Lock X Axis", "Lock movement along the X axis" },
 	{ "Only Y Axis", "Lock movement to the Y axis" },
@@ -19,16 +23,20 @@ ShortcutDescription shortcutDescriptions[16]{
 	{ "Toggle Place Mode", "Toggle place mode" },
 };
 
-ImGuiKeyChord shortcutBindings[16]{
+ImGuiKeyChord shortcutBindings[shortcutCount]{
 	ImGuiKey_Escape,
 	ImGuiMod_Ctrl | ImGuiKey_X,
 	ImGuiMod_Ctrl | ImGuiKey_C,
 	ImGuiMod_Ctrl | ImGuiKey_V,
 	ImGuiKey_Delete,
 	ImGuiMod_Alt | ImGuiKey_Space,
+	ImGuiKey_T,
 	ImGuiKey_G,
+	ImGuiMod_Shift | ImGuiKey_G,
 	ImGuiKey_R,
+	ImGuiMod_Shift | ImGuiKey_R,
 	ImGuiKey_S,
+	ImGuiMod_Shift | ImGuiKey_S,
 	ImGuiKey_X,
 	ImGuiMod_Shift | ImGuiKey_X,
 	ImGuiKey_Y,

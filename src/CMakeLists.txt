@@ -73,6 +73,12 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
         ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
         ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
+        ui/operation-modes/modes/surfride-editor/texture-editor/References.cpp
+        ui/operation-modes/modes/surfride-editor/texture-editor/Context.cpp
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.cpp
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.cpp
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.cpp
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.cpp
         ui/operation-modes/OperationModeBehavior.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
@@ -106,6 +112,7 @@ target_sources(${DEVTOOLS_TARGET}
         io/binary/serialization/resource-rfls/ResObjectWorld.h
         io/binary/serialization/resource-rfls/ResSurfRideProject.h
         io/binary/serialization/Types.h
+        resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
         reflection/HSONTemplateGeneration.h
@@ -164,6 +171,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/behaviors/SelectionMousePicking.h
         ui/operation-modes/behaviors/SelectionTransformation.h
         ui/operation-modes/behaviors/SelectionVisual.h
+        ui/operation-modes/behaviors/Zoom.h
         ui/operation-modes/modes/level-editor/Context.h
         ui/operation-modes/modes/level-editor/LevelEditor.h
         ui/operation-modes/modes/level-editor/ObjectDataInspector.h
@@ -185,6 +193,15 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/surfride-editor/ElementInspector.h
         ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
         ui/operation-modes/modes/surfride-editor/SurfRideElement.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/Behaviors.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/Context.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/References.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.h
+        ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.h
+        ui/operation-modes/OperationModeHost.h
+        ui/operation-modes/OperationModeBehavior.h
         ui/operation-modes/OperationMode.h
         ui/resources/editors/ResEffectEditor.h
         ui/resources/editors/ResObjectWorldEditor.h
@@ -207,6 +224,7 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ObjectDataUtils.h
         utilities/ResourceTypes.h
         utilities/CompatibleObject.h
+        utilities/NameHash.h
 )
 
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")

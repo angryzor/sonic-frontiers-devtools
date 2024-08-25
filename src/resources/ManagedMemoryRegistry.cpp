@@ -5,6 +5,8 @@ namespace resources {
 
 	ManagedAllocator::ManagedAllocator(hh::fnd::ManagedResource* resource) : resource{ resource } {}
 
+	ManagedAllocator::ManagedAllocator(const ManagedAllocator& other) : resource{ other.resource } {}
+
 	void* ManagedAllocator::Alloc(size_t in_size, size_t in_alignment)
 	{
 		auto* ptr = ManagedMemoryRegistry::instance->GetAllocator()->Alloc(in_size, in_alignment);

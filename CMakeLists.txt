@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.35
+project(devtools VERSION 0.1.36
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
@@ -41,7 +41,7 @@ if(DEVTOOLS_INSTALL_TO_UPDATE_SERVER)
 endif()
 
 # The main target
-foreach(DEVTOOLS_TARGET_SDK rangers wars)
+foreach(DEVTOOLS_TARGET_SDK rangers)#- wars)
     set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
     set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
     set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")

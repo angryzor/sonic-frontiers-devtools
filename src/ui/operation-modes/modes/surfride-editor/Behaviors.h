@@ -187,6 +187,13 @@ namespace ui::operation_modes::modes::surfride_editor
 		}
 	};
 
+	template<> struct ScreenSpaceManipulationBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+		Eigen::Vector3f ImGuiToSelectionSpace(const ImVec2 vec) {
+			auto res = ImGuiCoordsToNDC(vec);
+
+			return { res.x(), res.y(), 0.0f };
+		}
+	};
 }
 
 #include <ui/operation-modes/behaviors/Selection.h>

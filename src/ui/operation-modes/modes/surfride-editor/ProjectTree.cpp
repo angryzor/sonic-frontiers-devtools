@@ -1,7 +1,9 @@
 #include "ProjectTree.h"
 #include "SurfRideElement.h"
 #include "Behaviors.h"
+#include "texture-editor/TextureEditor.h"
 #include <io/binary/containers/swif/SWIF.h>
+#include <ui/common/StandaloneOperationModeHost.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	void ProjectTree::RenderPanel()
@@ -45,6 +47,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 			cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 			cfg.userDatas = project->projectData;
 			ImGuiFileDialog::Instance()->OpenDialog("ResSurfRideProjectExportDialog", "Choose File", ".swif", cfg);
+		}
+
+		ImGui::SameLine();
+		if (ImGui::Button("Texture editor")) {
+			auto* host = new (GetAllocator()) StandaloneOperationModeHost<texture_editor::TextureEditor>{ GetAllocator() };
+			host->operationMode.GetContext().gocSprite = context.gocSprite;
 		}
 
 		if (ImGuiFileDialog::Instance()->Display("ResSurfRideProjectExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
@@ -155,8 +163,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 			selectionBehavior->Select(selection);
 
 		if (isOpen) {
-			if (refLayer)
+			if (refLayer) {
+				ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 1.0f, 0.0f, 1.0f });
 				RenderLayer(refLayer);
+				ImGui::PopStyleColor();
+			}
 
 			for (auto* child : cast->GetChildren())
 				RenderCast(child);

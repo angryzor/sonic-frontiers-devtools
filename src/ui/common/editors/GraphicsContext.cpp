@@ -12,10 +12,10 @@ bool Editor(const char* label, hh::gfnd::ViewportData& viewport)
 	ImGui::BeginGroup();
 	edited |= Editor("X", viewport.viewportDimensions.x);
 	edited |= Editor("Y", viewport.viewportDimensions.y);
-	edited |= Editor("Width", viewport.viewportDimensions.width);
-	edited |= Editor("Height", viewport.viewportDimensions.height);
-	// Viewer("Render width", viewport.viewportDimensions.maybeRenderWidth);
-	// Viewer("Render height", viewport.viewportDimensions.maybeRenderHeight);
+	edited |= Editor("Resolution X", viewport.viewportDimensions.resX);
+	edited |= Editor("Resolution Y", viewport.viewportDimensions.resY);
+	edited |= Editor("Render resolution X", viewport.viewportDimensions.renderResX);
+	edited |= Editor("Render resolution Y", viewport.viewportDimensions.renderResY);
 	ImGui::EndGroup();
 
 	ImGui::SeparatorText("View settings");

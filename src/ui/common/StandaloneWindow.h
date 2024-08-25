@@ -4,8 +4,8 @@
 
 class StandaloneWindow : public CompatibleObject
 {
-	csl::ut::VariableString title{ GetAllocator() };
 protected:
+	csl::ut::VariableString title{ GetAllocator() };
 	void SetTitle(const char* title);
 public:
 	StandaloneWindow(csl::fnd::IAllocator* allocator);

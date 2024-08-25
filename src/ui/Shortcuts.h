@@ -11,9 +11,13 @@ enum class ShortcutId {
 	PASTE,
 	DELETE,
 	CHANGE_COORDINATE_SYSTEM,
+	TRANSFORM_MODE,
 	TRANSLATE_MODE,
+	NO_TRANSLATE_MODE,
 	ROTATE_MODE,
+	NO_ROTATE_MODE,
 	SCALE_MODE,
+	NO_SCALE_MODE,
 	ONLY_X_AXIS,
 	LOCK_X_AXIS,
 	ONLY_Y_AXIS,
@@ -23,7 +27,7 @@ enum class ShortcutId {
 	TOGGLE_PLACE_MODE,
 };
 
-constexpr size_t shortcutCount = 16;
+constexpr size_t shortcutCount = 20;
 
 struct ShortcutDescription {
 	const char* name;

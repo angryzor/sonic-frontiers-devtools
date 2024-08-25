@@ -18,8 +18,10 @@ namespace ui::operation_modes::modes::level_editor {
 
 		const void* GetID() const;
 		const char* GetLabel() const;
+		bool IsSelected() const;
 		bool MatchesSearchString(const char* searchString) const;
-		bool Render(ImGuiTreeNodeFlags nodeflags) const;
+		void PreRender() const;
+		void PostRender() const;
 
 		ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator, const hh::game::GameObjectClass* objectClass);
 		ObjectLibraryTreeViewNode(ObjectLibrary& library, csl::fnd::IAllocator* allocator, csl::ut::VariableString&& groupLabel);
