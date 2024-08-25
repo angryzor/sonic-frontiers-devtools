@@ -1,3 +1,18 @@
+# v0.1.36
+* Added texture / crop editor to the SWIF editor.
+* Added editors for the Blur and Reflect effects in the SWIF editor.
+* Added full transform mode in transform gizmo. You can now press T to enter this mode, and use Shift-G, Shift-R and Shift-S
+  to invert the behavior of G, R and S, i.e. analogous to the X, Y and Z shortcuts.
+* Added `SceneParamContainer` editor tree to the `RenderingEngine` panel.
+* Added view of render targets to the `RenderingEngine` panel.
+* Added list of render jobs to the `RenderingEngine` panel.
+* Slightly cleaned up the `RenderingEngine` panel.
+* Properly named some fields in the Camera parameter panels.
+* Identified various fields in the RenderingEngine and RenderManager panels previously marked as unknown.
+* Fixed a use after free error regarding intrusive pointers in arrays.
+* Fixed a bug where adding or removing an array item did not mark the array as "edited".
+
+
 # v0.1.35
 * Fixed Copy/Paste being broken after OperationMode refactor.
 * Added Cut.
