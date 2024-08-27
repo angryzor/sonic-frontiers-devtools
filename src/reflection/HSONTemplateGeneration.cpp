@@ -317,6 +317,7 @@ namespace io::hson::templates {
 	}
 
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass);
+	std::string GenerateRflClassDecl(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass);
 	MemberDef GeneratePrimitiveMember(const hh::fnd::RflClassMember* member, hh::fnd::RflClassMember::Type type, const char* typeName = nullptr) {
 		switch (type) {
 		case hh::fnd::RflClassMember::TYPE_BOOL:
@@ -420,11 +421,8 @@ namespace io::hson::templates {
 	MemberDef GenerateSingleMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
 		switch (member->GetType()) {
 		case hh::fnd::RflClassMember::TYPE_STRUCT: {
-			auto* rflClass = member->GetStructClass();
-			auto namespacedName = curNamespace + rflClass->GetName();
-
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
-			return GenerateMemberT<bool>(member, namespacedName.c_str());
+			std::string name = GenerateRflClassDecl(templateDef, curNamespace, member->GetStructClass());
+			return GenerateMemberT<bool>(member, name.c_str());
 		}
 		case hh::fnd::RflClassMember::TYPE_ENUM: {
 			auto* enumClass = member->GetEnumClass();
@@ -442,11 +440,8 @@ namespace io::hson::templates {
 	MemberDef GenerateArrayMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
 		switch (member->GetSubType()) {
 		case hh::fnd::RflClassMember::TYPE_STRUCT: {
-			auto* rflClass = member->GetStructClass();
-			auto namespacedName = curNamespace + rflClass->GetName();
-
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
-			return GenerateArrayMemberT<bool>(member, namespacedName.c_str());
+			std::string name = GenerateRflClassDecl(templateDef, curNamespace, member->GetStructClass());
+			return GenerateArrayMemberT<bool>(member, name.c_str());
 		}
 		default:
 			return GenerateArrayPrimitiveMember(member, member->GetSubType());
@@ -466,48 +461,59 @@ namespace io::hson::templates {
 		}
 	}
 
-	void GenerateRflClassDecl(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
+	std::string GenerateRflClassDecl(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
 		std::string namespacedName = curNamespace + rflClass->GetName();
-		if (templateDef.structs.contains(namespacedName))
-			return;
-		templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, rflClass);
+		if (!templateDef.structs.contains(namespacedName))
+			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, rflClass);
+		return namespacedName;
 	}
 
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
-		GenerateRflClassDecl(templateDef, curNamespace, rflClass);
-
-		auto rflClassDef = templateDef.structs[rflClass->GetName()];
+		RflClassDef rflClassDef{};
 		auto* parent = rflClass->m_pParent;
 
-		if (parent) {
-			std::string namespacedName = curNamespace + parent->GetName();
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, parent);
-			rflClassDef.parent = std::move(namespacedName);
+		if (parent){
+			std::string name = GenerateRflClassDecl(templateDef, curNamespace, parent);
+			rflClassDef.parent = std::move(name);
 		}
 
-		for (size_t i = 0; i < rflClass->m_pMembers.count; i++) {
+		for (size_t i = 0; i < rflClass->m_pMembers.count; i++)
 			rflClassDef.fields.push_back(GenerateMember(templateDef, curNamespace + rflClass->GetName() + std::string{ "::" }, &rflClass->m_pMembers.items[i]));
-		}
 
 		return rflClassDef;
 	}
 
-	void GenerateTemplate(const std::string& filename, bool rfl) {
+
+	void GenerateHSONTemplate(const std::string& filename, const csl::ut::MoveArray<const hh::game::GameObjectClass*> objects) {
 		Template templateDef{};
 		templateDef.version = 1;
-		if (rfl) {
-			templateDef.format = "rfl";
-		}
-		else {
-		#ifdef DEVTOOLS_TARGET_SDK_wars
-			templateDef.format = "gedit_v2";
-		#else
-			templateDef.format = "gedit_v3";
-		#endif
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		templateDef.format = "gedit_v2";
+#else
+		templateDef.format = "gedit_v3";
+#endif
+
+		for (auto& objClass : objects) {
+			auto* rflClass = objClass->spawnerDataRflClass;
+
+			if (rflClass == nullptr)
+				continue;
+
+			GenerateRflClassDecl(templateDef, "", rflClass);
+			templateDef.objects[objClass->name] = { rflClass->GetName(), static_cast<const char*>(objClass->GetAttributeValue("category")) };
 		}
 
-		if (rfl) {
-			std::map<std::string, const hh::fnd::RflClass*> spawnerData;
+		std::ofstream ofs{ filename, std::ios::trunc };
+		rfl::json::write(templateDef, ofs, YYJSON_WRITE_PRETTY_TWO_SPACES);
+	}
+
+	void GenerateRFLTemplate(const std::string& filename, const csl::ut::StringMap<const hh::fnd::RflClass*>& rflClasses, bool includeSpawnerData) {
+		Template templateDef{};
+		templateDef.version = 1;
+		templateDef.format = "rfl";
+
+		std::map<std::string, const hh::fnd::RflClass*> spawnerData{};
+		if (!includeSpawnerData) {
 			for (auto& objClass : hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses()) {
 				auto* rflClass = objClass->spawnerDataRflClass;
 
@@ -515,27 +521,27 @@ namespace io::hson::templates {
 					continue;
 				spawnerData[rflClass->GetName()] = rflClass;
 			}
-			for (auto* rflClass : hh::fnd::RflClassNameRegistry::GetInstance()->GetItems()) {
-				if (rflClass == nullptr)
-					continue;
-
-				if (!spawnerData.contains(rflClass->GetName()) && !templateDef.structs.contains(rflClass->GetName()))
-					templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
-			}
 		}
-		else {
-			for (auto& objClass : hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses()) {
-				auto* rflClass = objClass->spawnerDataRflClass;
+		for (auto* rflClass : rflClasses) {
+			if (rflClass == nullptr)
+				continue;
 
-				if (rflClass == nullptr)
-					continue;
-
-				templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
-				templateDef.objects[objClass->name] = { rflClass->GetName(), static_cast<const char*>(objClass->GetAttributeValue("category")) };
-			}
+			if (!spawnerData.contains(rflClass->GetName()))
+				GenerateRflClassDecl(templateDef, "", rflClass);
 		}
 
 		std::ofstream ofs{ filename, std::ios::trunc };
 		rfl::json::write(templateDef, ofs, YYJSON_WRITE_PRETTY_TWO_SPACES);
+	}
+
+	void GenerateTemplate(const std::string& filename, TemplateType type) {
+		switch (type) {
+		case HSON:
+			GenerateHSONTemplate(filename, hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses());
+			break;
+		case RFL:
+			GenerateRFLTemplate(filename, hh::fnd::RflClassNameRegistry::GetInstance()->GetItems(), false);
+			break;
+		}
 	}
 }
