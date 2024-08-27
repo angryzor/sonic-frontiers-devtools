@@ -466,11 +466,15 @@ namespace io::hson::templates {
 		}
 	}
 
+	void GenerateRflClassDecl(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
+		std::string namespacedName = curNamespace + rflClass->GetName();
+		if (templateDef.structs.contains(namespacedName))
+			return;
+		templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, rflClass);
+	}
+
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
-		if (templateDef.structs.contains(rflClass->GetName()))
-			return templateDef.structs[rflClass->GetName()];
-		else
-			templateDef.structs[rflClass->GetName()] = RflClassDef{};
+		GenerateRflClassDecl(templateDef, curNamespace, rflClass);
 
 		auto rflClassDef = templateDef.structs[rflClass->GetName()];
 		auto* parent = rflClass->m_pParent;
@@ -502,18 +506,7 @@ namespace io::hson::templates {
 		#endif
 		}
 
-		if (!rfl) {
-			for (auto& objClass : hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses()) {
-				auto* rflClass = objClass->spawnerDataRflClass;
-
-				if (rflClass == nullptr)
-					continue;
-
-				templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
-				templateDef.objects[objClass->name] = { rflClass->GetName(), static_cast<const char*>(objClass->GetAttributeValue("category")) };
-			}
-		}
-		else {
+		if (rfl) {
 			std::map<std::string, const hh::fnd::RflClass*> spawnerData;
 			for (auto& objClass : hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses()) {
 				auto* rflClass = objClass->spawnerDataRflClass;
@@ -528,6 +521,17 @@ namespace io::hson::templates {
 
 				if (!spawnerData.contains(rflClass->GetName()) && !templateDef.structs.contains(rflClass->GetName()))
 					templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
+			}
+		}
+		else {
+			for (auto& objClass : hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses()) {
+				auto* rflClass = objClass->spawnerDataRflClass;
+
+				if (rflClass == nullptr)
+					continue;
+
+				templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
+				templateDef.objects[objClass->name] = { rflClass->GetName(), static_cast<const char*>(objClass->GetAttributeValue("category")) };
 			}
 		}
 
