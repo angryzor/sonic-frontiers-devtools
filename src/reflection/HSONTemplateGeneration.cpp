@@ -434,7 +434,6 @@ namespace io::hson::templates {
 			return GeneratePrimitiveMember(member, member->GetSubType(), namespacedName.c_str());
 		}
 		default:
-			//std::cout << (int)member->GetType() << std::endl;
 			return GeneratePrimitiveMember(member, member->GetType());
 		}
 	}
