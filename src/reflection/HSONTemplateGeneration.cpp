@@ -317,7 +317,6 @@ namespace io::hson::templates {
 	}
 
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass);
-	std::string GenerateRflClassDecl(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass);
 	MemberDef GeneratePrimitiveMember(const hh::fnd::RflClassMember* member, hh::fnd::RflClassMember::Type type, const char* typeName = nullptr) {
 		switch (type) {
 		case hh::fnd::RflClassMember::TYPE_BOOL:
@@ -421,8 +420,11 @@ namespace io::hson::templates {
 	MemberDef GenerateSingleMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
 		switch (member->GetType()) {
 		case hh::fnd::RflClassMember::TYPE_STRUCT: {
-			std::string name = GenerateRflClassDecl(templateDef, curNamespace, member->GetStructClass());
-			return GenerateMemberT<bool>(member, name.c_str());
+			auto* rflClass = member->GetStructClass();
+			auto namespacedName = rflClass->GetName();
+
+			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, "", member->GetStructClass());
+			return GenerateMemberT<bool>(member, namespacedName);
 		}
 		case hh::fnd::RflClassMember::TYPE_ENUM: {
 			auto* enumClass = member->GetEnumClass();
@@ -440,8 +442,11 @@ namespace io::hson::templates {
 	MemberDef GenerateArrayMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
 		switch (member->GetSubType()) {
 		case hh::fnd::RflClassMember::TYPE_STRUCT: {
-			std::string name = GenerateRflClassDecl(templateDef, curNamespace, member->GetStructClass());
-			return GenerateArrayMemberT<bool>(member, name.c_str());
+			auto* rflClass = member->GetStructClass();
+			auto namespacedName = rflClass->GetName();
+
+			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, "", member->GetStructClass());
+			return GenerateArrayMemberT<bool>(member, namespacedName);
 		}
 		default:
 			return GenerateArrayPrimitiveMember(member, member->GetSubType());
@@ -461,24 +466,23 @@ namespace io::hson::templates {
 		}
 	}
 
-	std::string GenerateRflClassDecl(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
-		std::string namespacedName = curNamespace + rflClass->GetName();
-		if (!templateDef.structs.contains(namespacedName))
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, rflClass);
-		return namespacedName;
-	}
-
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
-		RflClassDef rflClassDef{};
+		if (templateDef.structs.contains(rflClass->GetName()))
+			return templateDef.structs[rflClass->GetName()];
+		else
+			templateDef.structs[rflClass->GetName()] = RflClassDef{};
+
+		auto rflClassDef = templateDef.structs[rflClass->GetName()];
 		auto* parent = rflClass->m_pParent;
 
-		if (parent){
-			std::string name = GenerateRflClassDecl(templateDef, curNamespace, parent);
-			rflClassDef.parent = std::move(name);
+		if (parent) {
+			templateDef.structs[parent->GetName()] = GenerateRflClass(templateDef, "", parent);
+			rflClassDef.parent = std::move(parent->GetName());
 		}
 
-		for (size_t i = 0; i < rflClass->m_pMembers.count; i++)
+		for (size_t i = 0; i < rflClass->m_pMembers.count; i++) {
 			rflClassDef.fields.push_back(GenerateMember(templateDef, curNamespace + rflClass->GetName() + std::string{ "::" }, &rflClass->m_pMembers.items[i]));
+		}
 
 		return rflClassDef;
 	}
@@ -499,7 +503,7 @@ namespace io::hson::templates {
 			if (rflClass == nullptr)
 				continue;
 
-			GenerateRflClassDecl(templateDef, "", rflClass);
+			templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
 			templateDef.objects[objClass->name] = { rflClass->GetName(), static_cast<const char*>(objClass->GetAttributeValue("category")) };
 		}
 
@@ -527,7 +531,7 @@ namespace io::hson::templates {
 				continue;
 
 			if (!spawnerData.contains(rflClass->GetName()))
-				GenerateRflClassDecl(templateDef, "", rflClass);
+				templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, "", rflClass);
 		}
 
 		std::ofstream ofs{ filename, std::ios::trunc };
