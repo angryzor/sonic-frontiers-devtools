@@ -1,3 +1,8 @@
+# v0.1.38
+* Added model instance material parameters editor to GOCVisualModel.
+* Added extremely experimental "Add Image Cast" option to SurfRide editor tree view context menu. Don't use unless you know exactly what you are doing and you have backups.
+
+
 # v0.1.37
 * Fixed a bug in the selection tool introduced in `v0.1.36`.
 * Fixed a bug with multiselect in the SWIF editor introduced in `v0.1.34`.

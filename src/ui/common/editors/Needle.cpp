@@ -29,12 +29,40 @@ void Viewer(const char* label, hh::needle::Texture& texture)
 bool Editor(const char* label, hh::needle::intrusive_ptr<hh::needle::Texture>& texture)
 {
 	Viewer(label, *texture);
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (auto* payload = ImGui::AcceptDragDropPayload("Resource")) {
+			auto* res = *static_cast<hh::fnd::ManagedResource**>(payload->Data);
+			const hh::fnd::ResourceTypeInfo* typeInfo = &res->GetClass();
+
+			if (typeInfo == hh::gfnd::ResTexture::GetTypeInfo()) {
+				auto* resTexture = static_cast<hh::gfnd::ResTexture*>(res);
+				texture = resTexture->GetTexture();
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	return false;
 }
 
 bool Editor(const char* label, hh::needle::Texture*& texture)
 {
 	Viewer(label, *texture);
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (auto* payload = ImGui::AcceptDragDropPayload("Resource")) {
+			auto* res = *static_cast<hh::fnd::ManagedResource**>(payload->Data);
+			const hh::fnd::ResourceTypeInfo* typeInfo = &res->GetClass();
+
+			if (typeInfo == hh::gfnd::ResTexture::GetTypeInfo()) {
+				auto* resTexture = static_cast<hh::gfnd::ResTexture*>(res);
+				texture = resTexture->GetTexture();
+			}
+		}
+		ImGui::EndDragDropTarget();
+	}
+
 	return false;
 }
 
@@ -264,7 +292,7 @@ bool Editor(const char* label, hh::needle::InstanceParameterContainerData& ipcd)
 	return edited;
 }
 
-bool Editor(const char* label, hh::needle::ParameterValueObject& pvo) {
+bool Editor(const char* label, hh::needle::ParameterValueObjectContainer& pvo) {
 	bool edited{};
 
 	if (ImGui::TreeNode(label)) {
@@ -422,5 +450,57 @@ bool Editor(const char* label, hh::needle::RenderTextureHandle& renderTexture)
 	Editor("RenderUnit", static_cast<hh::needle::RenderUnit&>(renderTexture));
 	Viewer("Camera", *renderTexture.camera);
 	ImGui::PopID();
+	return edited;
+}
+
+bool Editor(const char* label, hh::needle::MeshResource& meshResource)
+{
+	bool edited{};
+	if (ImGui::TreeNode(label)) {
+		auto lodCount = meshResource.GetLODCount();
+
+		for (unsigned int lodIdx = 0; lodIdx < lodCount; lodIdx++) {
+			char lodNodeName[40];
+			snprintf(lodNodeName, 40, "LOD %d", lodIdx);
+
+			if (ImGui::TreeNode(lodNodeName)) {
+				Viewer("ID", meshResource.GetLODID(lodIdx));
+
+				auto scenePassIDStartIdx = meshResource.GetScenePassIDStartIndex(lodIdx);
+				auto scenePassIDCount = meshResource.GetScenePassIDCount(lodIdx);
+
+				for (unsigned int scenePassIDOffset = 0; scenePassIDOffset < scenePassIDCount; scenePassIDOffset++) {
+					auto scenePassIDIdx = scenePassIDStartIdx + scenePassIDOffset;
+
+					char scenePassIDNodeName[40];
+					snprintf(scenePassIDNodeName, 40, "Scene Pass ID %d", lodIdx);
+
+					if (ImGui::TreeNode(scenePassIDNodeName)) {
+						Viewer("ID", meshResource.GetScenePassID(scenePassIDIdx));
+						Viewer("Mesh count", meshResource.GetMeshCount(scenePassIDIdx));
+						ImGui::TreePop();
+					}
+				}
+				ImGui::TreePop();
+			}
+		}
+
+		auto nodeCount = meshResource.GetNodeCount();
+
+		for (unsigned int nodeIdx = 0; nodeIdx < nodeCount; nodeIdx++) {
+			char nodeNodeName[40];
+			snprintf(nodeNodeName, 40, "Node %d", nodeIdx);
+
+			if (ImGui::TreeNode(nodeNodeName)) {
+				ImGui::Text("Not yet implemented");
+				//auto* nodeMaterialResource = meshResource.GetNodeMaterialResource(nodeIdx);
+				//if (nodeMaterialResource)
+				//	edited |= Editor(nodeMaterialResource->GetMaterialInstanceParameter());
+				ImGui::TreePop();
+			}
+		}
+
+		ImGui::TreePop();
+	}
 	return edited;
 }

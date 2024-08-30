@@ -12,7 +12,7 @@ namespace resources {
 		ManagedCArray(hh::fnd::ManagedResource* resource, T*& arr, S& length) : allocator{ ManagedMemoryRegistry::instance->GetManagedAllocator(resource) }, arr { arr }, length{ length } {}
 
 		void push_back(const T& item) {
-			auto* newBuffer = new (&allocator) T[length + 1];
+			auto* newBuffer = new (&allocator) T[length + 1]{};
 			
 			for (S i = 0; i < length; i++)
 				newBuffer[i] = std::move(arr[i]);
@@ -26,7 +26,7 @@ namespace resources {
 		}
 
 		void push_back(T&& item) {
-			auto* newBuffer = new (&allocator) T[length + 1];
+			auto* newBuffer = new (&allocator) T[length + 1]{};
 
 			for (S i = 0; i < length; i++)
 				newBuffer[i] = std::move(arr[i]);
@@ -40,7 +40,7 @@ namespace resources {
 		}
 
 		void emplace_back() {
-			auto* newBuffer = new (&allocator) T[length + 1];
+			auto* newBuffer = new (&allocator) T[length + 1]{};
 
 			for (S i = 0; i < length; i++)
 				newBuffer[i] = std::move(arr[i]);

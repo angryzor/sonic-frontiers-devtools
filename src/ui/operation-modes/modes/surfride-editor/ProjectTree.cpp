@@ -134,6 +134,15 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 			selectionBehavior->Select(selection);
 
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::BeginMenu("Add")) {
+				if (ImGui::MenuItem("Image cast"))
+					GetContext().AddImageCast(layer);
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
+
 		if (isOpen) {
 			for (auto* cast : layer->GetCasts())
 				RenderCast(cast);
@@ -161,6 +170,15 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 			selectionBehavior->Select(selection);
+
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::BeginMenu("Add")) {
+				if (ImGui::MenuItem("Image cast"))
+					GetContext().AddImageCast(cast);
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
+		}
 
 		if (isOpen) {
 			if (refLayer) {

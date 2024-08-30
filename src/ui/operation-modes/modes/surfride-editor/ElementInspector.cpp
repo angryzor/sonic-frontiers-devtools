@@ -115,7 +115,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	void ElementInspector::RenderBaseCastInspector(Cast& cast)
 	{
 		Viewer("ID", cast.castData->id);
-		Viewer("Name", cast.castData->name);
+		InputText("Name", const_cast<char*&>(cast.castData->name), GetContext().gocSprite->projectResource);
 
 		if (cast.castData->userData)
 			Editor("User data", *cast.castData->userData);
@@ -219,6 +219,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 #endif
 			cast.cropIndex[0] = cast.imageCastData->cropIndex0;
 			cast.cropIndex[1] = cast.imageCastData->cropIndex1;
+			//cast.cropRectDirty[0] = true;
+			//cast.cropRectDirty[1] = true;
 
 #ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.blurEffect = nullptr;

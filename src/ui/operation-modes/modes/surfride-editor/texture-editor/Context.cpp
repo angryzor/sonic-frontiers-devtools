@@ -23,7 +23,7 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		SRS_TEXTURE srsTexture{};
 		srsTexture.width = static_cast<unsigned short>(textureResource->GetTexture()->width);
 		srsTexture.height = static_cast<unsigned short>(textureResource->GetTexture()->height);
-		srsTexture.id = 0xDEADBEEF;
+		srsTexture.id = mt();
 #ifndef DEVTOOLS_TARGET_SDK_wars
 		srsTexture.name = name;
 #endif

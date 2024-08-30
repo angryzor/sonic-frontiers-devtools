@@ -1,6 +1,7 @@
 #include "GOCVisual.h"
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
+#include <ui/common/editors/Needle.h>
 
 void RenderComponentInspector(hh::gfx::GOCVisual& component) {
     bool isVisible{ component.IsVisible() };
@@ -52,5 +53,23 @@ void RenderComponentInspector(hh::gfx::GOCVisualModel& component) {
 	if (auto& model = component.model)
 		Viewer("Model resource", model->GetName());
 	if (auto& skeleton = component.skeleton)
-		Viewer("Model resource", skeleton->GetName());
+		Viewer("Skeleton resource", skeleton->GetName());
+
+	if (ImGui::TreeNode("Material instance parameters")) {
+		if (auto* meshResource = component.model->GetMeshResource()) {
+			for (auto materialIdx = 0; materialIdx < meshResource->GetMaterialCount(); materialIdx++) {
+				auto* materialNameID = meshResource->GetMaterialNameID(materialIdx);
+				if (ImGui::TreeNode(materialNameID, "%s", materialNameID->name)) {
+					auto* modelInstance = component.implementation.modelInstance;
+
+					if (auto paramsIdx = modelInstance->GetParameterValueObjectContainerByName(materialNameID))
+					if (auto* params = modelInstance->GetParameterValueObjectContainer(paramsIdx))
+						Editor("Parameters", *params);
+
+					ImGui::TreePop();
+				}
+			}
+		}
+		ImGui::TreePop();
+	}
 }

@@ -9,6 +9,7 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		using CompatibleObject::CompatibleObject;
 		hh::fnd::Reference<hh::ui::GOCSprite> gocSprite{};
 		std::optional<TextureRef> focusedTexture{};
+		std::mt19937 mt{ std::random_device{}() };
 
 		void AddTexture(const TextureListRef& textureListRef, hh::gfnd::ResTexture* textureResource);
 		void ReplaceTexture(const TextureRef& textureRef, hh::gfnd::ResTexture* textureResource);
