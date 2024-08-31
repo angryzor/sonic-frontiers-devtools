@@ -6,6 +6,7 @@
 #include <ui/input/Input.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <ui/operation-modes/behaviors/ObjectLocationVisual3D.h>
+#include <ui/GlobalSettings.h>
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
 SettingsManager::Settings SettingsManager::settings{};
@@ -29,6 +30,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
 		&& debugRenderingLevelEditorDebugBoxRenderDistance == other.debugRenderingLevelEditorDebugBoxRenderDistance
+		&& !strcmp(defaultFileDialogDir, other.defaultFileDialogDir)
 		;
 
 	for (size_t i = 0; i < 32; i++)
@@ -117,6 +119,8 @@ void SettingsManager::Render() {
 					ImGui::DragFloat("Minimum step size for float values", &tempSettings.rflMinFloatStep, 0.01f);
 					ImGui::SetItemTooltip("The drag control's precision for float values will be capped to this value if the game specifies a smaller precision. Intended to correct for the game often specifying the excessively precise value 0.001.");
 					ImGui::DragScalar("Slider cut-off range", ImGuiDataType_U32, &tempSettings.rflSliderCutOffRange, 1.0f);
+					ImGui::SetItemTooltip("Range between minimum and maximum value at which the editor will choose to use drag controls instead of sliders.");
+					InputDirectory("Default file dialog directory", tempSettings.defaultFileDialogDir);
 					ImGui::SetItemTooltip("Range between minimum and maximum value at which the editor will choose to use drag controls instead of sliders.");
 					ImGui::EndTabItem();
 				}
@@ -296,6 +300,7 @@ void SettingsManager::ApplySettings() {
 	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;
 	GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
 	ObjectLocationVisual3DBehaviorBase::ApplySettings(settings.debugRenderingLevelEditorDebugBoxScale, settings.debugRenderingLevelEditorDebugBoxRenderLimit, settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	strcpy_s(GlobalSettings::defaultFileDialogDirectory, settings.defaultFileDialogDir);
 
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
@@ -329,7 +334,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 {
 	unsigned int u;
 	float f;
-	char s[300];
+	char s[512];
 	if (sscanf_s(line, "Theme=%u", &u) == 1) { settings.theme = u; return; }
 	if (sscanf_s(line, "Translations=%u", &u) == 1) { settings.language = static_cast<Translations::Language>(u); return; }
 	// if (sscanf_s(line, "FontSize=%f", &f) == 1) { settings.fontSize = f; return; }
@@ -347,7 +352,8 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderDistance=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderDistance = f; return; }
-	if (sscanf_s(line, "SelectionColliderFilters=%256s", s, 300) == 1 && strlen(s) == 256) {
+	if (sscanf_s(line, "DefaultFileDialogDirectory=%511[^\r\n]", s, 512) == 1) { strcpy_s(settings.defaultFileDialogDir, s); return; }
+	if (sscanf_s(line, "SelectionColliderFilters=%256s", s, 512) == 1 && strlen(s) == 256) {
 		for (size_t i = 0; i < 32; i++) {
 			sscanf_s(s + i * 8, "%8x", &u);
 			for (size_t j = 0; j < 32; j++) {
@@ -356,7 +362,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 		}
 		return;
 	}
-	if (sscanf_s(line, "DebugRenderingColliderFilters=%256s", s, 300) == 1 && strlen(s) == 256) {
+	if (sscanf_s(line, "DebugRenderingColliderFilters=%256s", s, 512) == 1 && strlen(s) == 256) {
 		for (size_t i = 0; i < 32; i++) {
 			sscanf_s(s + i * 8, "%8x", &u);
 			for (size_t j = 0; j < 32; j++) {
@@ -365,9 +371,9 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 		}
 		return;
 	}
-	if (sscanf_s(line, "Shortcut[%128[^]]]=%u", &s, 300, &u) == 2) {
+	if (sscanf_s(line, "Shortcut[%128[^]]]=%u", s, 512, &u) == 2) {
 		for (size_t i = 0; i < shortcutCount; i++) {
-			if (strcmp(s, GetShortcutDescription(static_cast<ShortcutId>(i)).name) == 0) {
+			if (!strcmp(s, GetShortcutDescription(static_cast<ShortcutId>(i)).name)) {
 				settings.shortcutBindings[i] = u;
 				return;
 			}
@@ -401,6 +407,7 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderDistance=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	out_buf->appendf("DefaultFileDialogDirectory=%s\n", settings.defaultFileDialogDir);
 
 	out_buf->appendf("SelectionColliderFilters=");
 	for (size_t i = 0; i < 32; i++) {
@@ -427,5 +434,5 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("\n");
 
 	for(size_t i = 0; i < shortcutCount; i++)
-		out_buf->appendf("Shortcut[%s]=%u\n", GetShortcutDescription(static_cast<ShortcutId>(i)), settings.shortcutBindings[i]);
+		out_buf->appendf("Shortcut[%s]=%u\n", GetShortcutDescription(static_cast<ShortcutId>(i)).name, settings.shortcutBindings[i]);
 }

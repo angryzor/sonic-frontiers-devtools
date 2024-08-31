@@ -4,6 +4,8 @@
 #include "texture-editor/TextureEditor.h"
 #include <io/binary/containers/swif/SWIF.h>
 #include <ui/common/StandaloneOperationModeHost.h>
+#include <ui/common/viewers/Basic.h>
+#include <ui/GlobalSettings.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	void ProjectTree::RenderPanel()
@@ -41,9 +43,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 			return;
 		}
 
+		Viewer("Resource", context.gocSprite->projectResource->GetName());
+
 		if (ImGui::Button("Export")) {
 			IGFD::FileDialogConfig cfg{};
-			cfg.path = ".";
+			cfg.path = GlobalSettings::defaultFileDialogDirectory;
 			cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 			cfg.userDatas = project->projectData;
 			ImGuiFileDialog::Instance()->OpenDialog("ResSurfRideProjectExportDialog", "Choose File", ".swif", cfg);

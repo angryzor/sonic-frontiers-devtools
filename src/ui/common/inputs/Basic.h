@@ -66,6 +66,30 @@ bool InputText(const char* label, csl::ut::VariableString& str, ImGuiInputTextFl
 bool InputText(const char* label, csl::ut::String& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 bool InputText(const char* label, char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
+template<size_t Len>
+bool InputDirectory(const char* label, char(&str)[Len]) {
+	bool edited{};
+	ImGui::PushID(label);
+	edited |= InputText(label, str);
+	ImGui::SameLine();
+	if (ImGui::Button("Browse...")) {
+		IGFD::FileDialogConfig config;
+		config.path = str;
+		config.flags = ImGuiFileDialogFlags_Modal;
+		ImGuiFileDialog::Instance()->OpenDialog("DirectoryChoiceDialog", "Choose a directory", nullptr, config);
+	}
+	if (ImGuiFileDialog::Instance()->Display("DirectoryChoiceDialog"))
+	{
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			strcpy_s(str, ImGuiFileDialog::Instance()->GetCurrentPath().c_str());
+			edited = true;
+		}
+		ImGuiFileDialog::Instance()->Close();
+	}
+	ImGui::PopID();
+	return edited;
+}
+
 template<typename T>
 bool CheckboxFlags(const char* label, T& v, T value) {
 	if constexpr (sizeof(T) < sizeof(unsigned int)) {

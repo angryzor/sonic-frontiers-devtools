@@ -60,15 +60,15 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		casts.push_back(std::move(newNode));
 
+		for (int i = 0; i < prevSize; i++)
+			layer->casts[i]->castData = &layer->layerData->casts[i];
+
 		auto* p{ sibling->castData };
 
 		while (p->siblingIndex != -1)
 			p = &layer->layerData->casts[p->siblingIndex];
 
 		p->siblingIndex = static_cast<short>(prevSize);
-
-		for (int i = 0; i < prevSize; i++)
-			layer->casts[i]->castData = &layer->layerData->casts[i];
 
 		resources::ManagedCArray<SRS_TRS3D, int> transforms{ gocSprite->projectResource, layer->layerData->transforms.transforms3d, prevSize };
 		transforms.emplace_back();
@@ -78,7 +78,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void Context::AddImageCast(Layer* layer)
 	{
-		CreateImageCast(layer->casts[0]);
+		CreateImageCast(*layer->GetCasts().begin());
 	}
 
 	void Context::AddImageCast(Cast* parent) {

@@ -45,6 +45,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Action.cpp
         ui/Component.cpp
         ui/Desktop.cpp
+        ui/GlobalSettings.cpp
         ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
         ui/game-services/game-service-inspectors/FxColManager.cpp
         ui/game-services/game-service-inspectors/ObjectWorld.cpp
@@ -121,6 +122,7 @@ target_sources(${DEVTOOLS_TARGET}
         reflection/RflDiff.h
         reflection/RflClassGen.h
         reflection/RflClassGenFwd.h
+        ui/GlobalSettings.h
         ui/common/editors/Basic.h
         ui/common/editors/Camera.h
         ui/common/editors/ObjectData.h

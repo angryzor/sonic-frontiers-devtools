@@ -14,12 +14,7 @@ class Desktop : public CompatibleObject, OperationModeHost {
     hh::fnd::Reference<hh::gfnd::ResTexture> iconTexture{};
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windows{ GetAllocator() };
     csl::ut::MoveArray<hh::fnd::Reference<StandaloneWindow>> windowsThatOpened{ GetAllocator() };
-    csl::ut::MoveArray<hh::physics::PhysicsQueryResult> pickerResults{ GetAllocator() };
-    bool pickerClicked{ false };
-    bool locationPicked{ false };
-    csl::ut::MoveArray<hh::game::GameObject*> pickedObjects{ GetAllocator() };
     csl::ut::MoveArray<ShortcutBinding> boundShortcuts{ GetAllocator() };
-    csl::math::Vector3 pickedLocation;
     void AddStandaloneWindow(StandaloneWindow* window);
     void RemoveStandaloneWindow(StandaloneWindow* window);
 public:

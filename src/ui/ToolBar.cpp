@@ -3,6 +3,7 @@
 #include <reflection/HSONTemplateGeneration.h>
 #include "Desktop.h"
 #include "SettingsManager.h"
+#include "GlobalSettings.h"
 #include "common/Theme.h"
 #include "common/inputs/Basic.h"
 #include "resources/ResourceBrowser.h"
@@ -73,7 +74,7 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("Export HSON template")) {
 				IGFD::FileDialogConfig cfg{};
-				cfg.path = ".";
+				cfg.path = GlobalSettings::defaultFileDialogDirectory;
 				cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 				ImGuiFileDialog::Instance()->OpenDialog("HSONExportDialog", "Choose File", ".template.hson.json", cfg);
 			}

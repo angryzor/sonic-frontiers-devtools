@@ -1,3 +1,9 @@
+# v0.1.39
+* Added option to set default directory for file dialogs.
+* Fixed a bug in the shortcut settings serialization.
+* Fixed a bug in the experimental "Add Image Cast" option.
+
+
 # v0.1.38
 * Added model instance material parameters editor to GOCVisualModel.
 * Added extremely experimental "Add Image Cast" option to SurfRide editor tree view context menu. Don't use unless you know exactly what you are doing and you have backups.

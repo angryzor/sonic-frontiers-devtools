@@ -3,6 +3,7 @@
 #include <reflection/ReflectiveOperations.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/viewers/RflDiff.h>
+#include <ui/GlobalSettings.h>
 
 using namespace hh::fnd;
 
@@ -137,7 +138,7 @@ void ResReflectionEditor::RenderContents() {
 
 		if (clicked_export) {
 			IGFD::FileDialogConfig cfg{};
-			cfg.path = ".";
+			cfg.path = GlobalSettings::defaultFileDialogDirectory;
 			cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 			cfg.userDatas = this;
 			ImGuiFileDialog::Instance()->OpenDialog("ResReflectionExportDialog", "Choose File", ".rfl", cfg);

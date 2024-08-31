@@ -6,6 +6,7 @@
 #include <resources/ReloadManager.h>
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
+#include <ui/GlobalSettings.h>
 #include <utilities/ResourceTypes.h>
 #include <io/binary/containers/binary-file/BinaryFile.h>
 #include <io/binary/serialization/resource-rfls/ResObjectWorld.h>
@@ -71,7 +72,7 @@ void ResourceBrowser::RenderContents() {
 		//}
 		if (ImGui::MenuItem("Watch directory...")) {
 			IGFD::FileDialogConfig cfg{};
-			cfg.path = ".";
+			cfg.path = GlobalSettings::defaultFileDialogDirectory;
 			cfg.flags = ImGuiFileDialogFlags_Modal;
 			ImGuiFileDialog::Instance()->OpenDialog("ResourceBrowserWatchDirectory", "Choose directory", nullptr, cfg);
 		}
@@ -205,7 +206,7 @@ void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
 	snprintf(extbuf, 20, ".%s", ext);
 
 	IGFD::FileDialogConfig cfg{};
-	cfg.path = ".";
+	cfg.path = GlobalSettings::defaultFileDialogDirectory;
 	cfg.flags = ImGuiFileDialogFlags_Modal;
 	cfg.userDatas = resource;
 	ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", extbuf, cfg);
@@ -228,7 +229,7 @@ void ResourceBrowser::ShowExportResourceDialog(hh::fnd::ManagedResource* resourc
 	snprintf(extbuf, 20, ".%s", ext);
 
 	IGFD::FileDialogConfig cfg{};
-	cfg.path = ".";
+	cfg.path = GlobalSettings::defaultFileDialogDirectory;
 	cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 	cfg.userDatas = resource;
 	ImGuiFileDialog::Instance()->OpenDialog("ResourceExportDialog", "Choose File", extbuf, cfg);

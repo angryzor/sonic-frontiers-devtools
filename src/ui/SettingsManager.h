@@ -120,6 +120,7 @@ class SettingsManager
             ImGuiMod_Shift | ImGuiKey_Z,
             ImGuiKey_CapsLock,
         };
+        char defaultFileDialogDir[512]{ "." };
 
         bool operator==(const Settings& other) const;
         bool operator!=(const Settings& other) const;
