@@ -1,5 +1,5 @@
 # v0.1.40
-* Added toggles to transform the material color, illumination color and an unknown value.
+* Added toggles to transform the material color, illumination color and display flag.
 
 
 # v0.1.39
