@@ -1,3 +1,7 @@
+# v0.1.40
+* Added toggles to transform the material color, illumination color and an unknown value.
+
+
 # v0.1.39
 * Added option to set default directory for file dialogs.
 * Fixed a bug in the shortcut settings serialization.

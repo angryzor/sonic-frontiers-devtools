@@ -133,6 +133,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 		transformEdited |= CheckboxFlags("Disable scale", cast.castData->flags, 0x400u);
 #endif
 
+		//transformEdited |= CheckboxFlags("TF flag 1", cast.castData->flags, 0x10000u);
+		//transformEdited |= CheckboxFlags("TF flag 2", cast.castData->flags, 0x20000u);
+		//transformEdited |= CheckboxFlags("TF flag 3", cast.castData->flags, 0x40000u);
+
+		transformEdited |= CheckboxFlags("Transform material color", cast.castData->flags, 0x20u);
+		transformEdited |= CheckboxFlags("Transform illumination color", cast.castData->flags, 0x80u);
+		transformEdited |= CheckboxFlags("Transform display flag", cast.castData->flags, 0x40u);
+
 		if (cast.layer->flags.test(SurfRide::Layer::Flag::IS_3D)) {
 			auto& transform = cast.layer->layerData->transforms.transforms3d[castIndex];
 
@@ -145,12 +153,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 				castTransform->rotation = transform.rotation;
 				castTransform->scale = transform.scale;
 				static_cast<Cast3D&>(cast).position = transform.position;
-				cast.flags = cast.castData->flags;
 #else
 				cast.transform->position = transform.position;
 				cast.transform->rotation = transform.rotation;
 				cast.transform->scale = transform.scale;
 #endif
+				cast.flags = cast.castData->flags;
 				cast.transform->materialColor = transform.materialColor;
 				cast.transform->illuminationColor = transform.illuminationColor;
 				cast.transform->display = transform.display;
