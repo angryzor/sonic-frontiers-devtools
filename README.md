@@ -63,6 +63,7 @@ Building the INSTALL project will install the mod into HedgeModManager's `Mods` 
 DevTools has a builtin level editor complete with rendering of debug visualizations such as volumes and colliders:
 
 ![The level editor](/.github/editor.png)
+![Debug comments in the level editor](/.github/editor2.png)
 
 As well as debug information left in the game's binary:
 
@@ -80,6 +81,16 @@ DevTools can edit NeedleFXSceneData graphics parameters in realtime, giving you 
 
 ![NeedleFxSceneData editing](/.github/lighting.jpg)
 
-DevTools provides inspectors for a variety of game systems, such as the memory allocation system:
+DevTools can edit materials and scene parameters in realtime:
+
+![Material and scene param editing](/.github/materials-and-scene-params.png)
+
+DevTools can edit SurfRide (SWIF) projects in realtime:
+
+![Material and scene param editing](/.github/surfride-editor.png)
+
+DevTools provides inspectors for a variety of game systems, such as the memory allocation system, the rendering engine, GraphicsContext and GameUpdater:
 
 ![The memory inspector](/.github/memory-inspector.png)
+![The rendering engine inspector](/.github/rendering-engine-inspector.png)
+![The GameUpdater inspector](/.github/game-updater-inspector.png)

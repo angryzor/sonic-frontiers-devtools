@@ -1,5 +1,6 @@
 #include "GOCVisualDebugDrawRenderer.h"
 #include <utilities/math/MathUtils.h>
+#include "visuals/AabbTree.h"
 
 using namespace hh::game;
 using namespace hh::gfx;
@@ -214,6 +215,21 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 
 		//	renderer->drawContext->DrawPrimitive(hh::gfnd::PrimitiveType::LINE_LIST, vertices, indices, 8);
 		//}
+
+//#ifdef DEVTOOLS_TARGET_SDK_rangers
+//		if (auto* objectWorld = gameManager->GetService<ObjectWorld>()) {
+//			for (auto* extension : objectWorld->extensions) {
+//				if (extension->GetRuntimeTypeInfo() == reinterpret_cast<void*>(0x143CCFAE0ull)) {
+//					auto* islandRangeSpawningMgr = static_cast<app::game::IslandRangeSpawningManager*>(extension);
+//
+//					RenderDebugVisual(*renderer->drawContext, islandRangeSpawningMgr->aabbTree);
+//
+//					for (auto& chunkHandle : islandRangeSpawningMgr->worldChunkAabbTreeHandles)
+//						RenderDebugVisual(*renderer->drawContext, chunkHandle->aabbTree);
+//				}
+//			}
+//		}
+//#endif
 	}
 
 	for (auto* debugRenderable : renderer->additionalRenderables)

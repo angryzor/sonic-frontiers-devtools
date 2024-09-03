@@ -19,4 +19,40 @@ void RenderComponentInspector(app::player::GOCPlayerKinematicParams& component)
 	Editor("Unk6", component.unk6);
 	ImGui::Text("Unk7");
 	Viewer("Unk7", component.unk7);
+
+	Editor("Unk9.unk1", component.unk9.unk1);
+	Editor("Unk9.unk2", component.unk9.unk2);
+	Editor("Unk11.unk3", component.unk11.unk3);
+	Editor("Unk14.unk1", component.unk14.unk1);
+	Editor("Unk14.unk2", component.unk14.unk2);
+	Editor("Unk14.unk3", component.unk14.unk3);
+	Editor("Unk14.unk102", component.unk14.unk102);
+	Editor("Unk14.unk103", component.unk14.unk103);
+	Editor("Unk15.unk1", component.unk15.unk1);
+	Editor("Unk15.unk2", component.unk15.unk2);
+	Editor("Unk15.unk3", component.unk15.unk3);
+	Editor("Unk15.unk102", component.unk15.unk102);
+	Editor("Unk15.unk103", component.unk15.unk103);
+	Editor("Unk16.unk1", component.unk16.unk1);
+	Editor("Unk16.unk2", component.unk16.unk2);
+
+	if (ImGui::TreeNode("Movement flags")) {
+		for (size_t i = 0; i < 16; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(idxName, component.unk9.unk7, static_cast<uint16_t>(1 << i));
+		}
+		ImGui::TreePop();
+	}
+
+	if (ImGui::TreeNode("Movement flags 2")) {
+		for (size_t i = 0; i < 16; i++) {
+			char idxName[10];
+			snprintf(idxName, sizeof(idxName), "%zd", i);
+
+			CheckboxFlags(idxName, component.unk10.unk7, static_cast<uint16_t>(1 << i));
+		}
+		ImGui::TreePop();
+	}
 }

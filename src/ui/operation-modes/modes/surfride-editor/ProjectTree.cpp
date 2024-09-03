@@ -184,6 +184,30 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImGui::EndPopup();
 		}
 
+		//if (ImGui::BeginDragDropTarget()) {
+		//	if (auto* payload = ImGui::AcceptDragDropPayload("surfride:Cast")) {
+		//		auto* otherCast = *static_cast<Cast**>(payload->Data);
+
+		//		if (cast->layer == otherCast->layer && cast->parentCast == otherCast->parentCast) {
+		//			auto castNode
+		//			auto oldNodeIndex = (cast->castData - cast->layer->layerData->casts) / sizeof(SRS_CASTNODE);
+
+		//			SRS_CASTNODE oldNode = *cast->castData;
+
+		//			*cast->castData = cast->
+
+		//			cast->castData = otherCast->castData;
+		//			cast->castData
+		//		}
+		//	}
+		//	ImGui::EndDragDropTarget();
+		//}
+
+		//if (ImGui::BeginDragDropSource()) {
+		//	ImGui::SetDragDropPayload("surfride:Cast", &cast, sizeof(cast));
+		//	ImGui::EndDragDropSource();
+		//}
+
 		if (isOpen) {
 			if (refLayer) {
 				auto textCol = ImGui::GetStyleColorVec4(ImGuiCol_Text);
