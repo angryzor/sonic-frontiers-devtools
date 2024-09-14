@@ -29,13 +29,13 @@ bool Editor(const char* label, csl::math::Transform& transform) {
 bool Editor(const char* label, csl::ut::Color<float>& color) {
 	float editableColor[4]{ color.r, color.g, color.b , color.a };
 
-	bool edited = ImGui::ColorEdit4(label, reinterpret_cast<float*>(&color), ImGuiColorEditFlags_Float);
+	bool edited = ImGui::ColorEdit4(label, editableColor, ImGuiColorEditFlags_Float);
 
 	if (edited) {
 		color.r = editableColor[0];
-		color.g = editableColor[0];
-		color.b = editableColor[0];
-		color.a = editableColor[0];
+		color.g = editableColor[1];
+		color.b = editableColor[2];
+		color.a = editableColor[3];
 	}
 
 	return edited;

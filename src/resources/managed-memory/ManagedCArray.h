@@ -70,8 +70,8 @@ namespace resources {
 		bool empty() const { return length == 0; }
 		const T& operator[](S i) const { return arr[i]; }
 		T& operator[](S i) { return arr[i]; }
-		T* begin() { return arr[0]; }
-		T* end() { return arr[length]; }
+		T* begin() { return &arr[0]; }
+		T* end() { return &arr[length]; }
 		S size() const { return length; }
 		S capacity() const { return length; }
 	};

@@ -19,17 +19,63 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 		auto* fxColData = fxColManager->resource->fxColData;
 
+		auto& context = GetContext();
+		const char* targetBoundingVolumePreview = "<none>";
+		char targetBoundingVolumeName[100];
+
+		for (size_t i = 0; i < fxColData->boundingVolumeCount; i++) {
+			auto& boundingVolume = fxColData->boundingVolumes[i];
+
+			if (context.placementVolume == &boundingVolume) {
+				snprintf(targetBoundingVolumeName, sizeof(targetBoundingVolumeName), "Bounding Volume %zd", i);
+
+				targetBoundingVolumePreview = targetBoundingVolumeName;
+			}
+		}
+
+		if (ImGui::BeginCombo("Target placement volume", targetBoundingVolumePreview)) {
+			for (size_t i = 0; i < fxColData->boundingVolumeCount; i++) {
+				auto& boundingVolume = fxColData->boundingVolumes[i];
+				char name[100];
+				snprintf(name, sizeof(name), "Bounding Volume %zd", i);
+
+				if (ImGui::Selectable(name, context.placementVolume == &boundingVolume))
+					context.placementVolume = &boundingVolume;
+				if (context.placementVolume == &boundingVolume)
+					ImGui::SetItemDefaultFocus();
+			}
+			ImGui::EndCombo();
+		}
+
+		if (ImGui::BeginPopupContextItem()) {
+			if (ImGui::MenuItem("Create bounding volume"))
+				GetContext().AddBoundingVolume();
+			ImGui::EndPopup();
+		}
+
 		for (size_t i = 0; i < fxColData->boundingVolumeCount; i++) {
 			auto& boundingVolume = fxColData->boundingVolumes[i];
 			char name[100];
 			snprintf(name, sizeof(name), "Bounding Volume %zd", i);
 
-			if (ImGui::TreeNode(&boundingVolume, name)) {
+			ImGui::PushID(&boundingVolume);
+
+			bool isOpen = ImGui::TreeNode(&boundingVolume, name);
+
+			if (ImGui::BeginPopupContextItem()) {
+				if (ImGui::MenuItem("Remove bounding volume"))
+					GetContext().RemoveBoundingVolume(&boundingVolume);
+				ImGui::EndPopup();
+			}
+
+			if (isOpen) {
 				for (size_t j = 0; j < boundingVolume.shapeCount; j++)
 					RenderShapeItem(fxColData->collisionShapes[boundingVolume.shapeStartIdx + j]);
 
 				ImGui::TreePop();
 			}
+
+			ImGui::PopID();
 		}
 
 		for (size_t i = 0; i < fxColData->collisionShapeCount; i++) {
@@ -57,7 +103,9 @@ namespace ui::operation_modes::modes::fxcol_editor {
 	{
 		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 
+		ImGui::PushID(&shape);
 		if (ImGui::Selectable(shape.name, selectionBehavior->GetSelection().find(&shape) != -1))
 			selectionBehavior->Select(&shape);
+		ImGui::PopID();
 	}
 }

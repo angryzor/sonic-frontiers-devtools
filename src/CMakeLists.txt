@@ -239,6 +239,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/SoundDirector.cpp
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.cpp
+            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.cpp
             ui/common/editors/Camera.cpp
             ui/common/editors/Needle.cpp
             ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
@@ -266,6 +267,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/SoundDirector.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.h
+            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h

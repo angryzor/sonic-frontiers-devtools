@@ -14,5 +14,8 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		AddBehavior<MousePickingBehavior>();
 		AddBehavior<SelectionMousePickingBehavior>();
 		AddBehavior<RenderFxColBehavior>();
+		AddBehavior<PlacementBehavior>();
+		AddBehavior<DeleteBehavior>();
+		AddBehavior<GroundContextMenuBehavior>();
 	}
 }

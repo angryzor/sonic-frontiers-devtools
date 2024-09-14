@@ -10,6 +10,7 @@ class ResReflectionEditor : public StandaloneWindow {
 	bool forcedRflClass{ false };
 	bool showdiff{ false };
 	void* origData{};
+	char searchStr[200]{ "" };
 
 	ResReflectionEditor(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection* resource, const hh::fnd::RflClass* rflClass);
 	ResReflectionEditor(csl::fnd::IAllocator* allocator, hh::fnd::ResReflection* resource);

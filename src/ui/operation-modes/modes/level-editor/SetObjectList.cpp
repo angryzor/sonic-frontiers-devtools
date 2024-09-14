@@ -108,6 +108,7 @@ namespace ui::operation_modes::modes::level_editor {
 		switch (action.id) {
 		case FocusedChunkChangedAction::id:
 		case PlacementBehavior<Context>::ObjectPlacedAction::id:
+		case DeleteBehavior<Context>::DeleteAction::id:
 			InvalidateTree();
 			break;
 		}

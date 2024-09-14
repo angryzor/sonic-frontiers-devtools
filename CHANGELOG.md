@@ -1,3 +1,13 @@
+# v0.1.41
+* You can now place objects from the context menu.
+* Added ability to create bounding volumes and collision shapes in the FxCol editor.
+* Added a search box to the ResReflection editor in order to find RFL classes more quickly.
+* Fixed a bug with float type color editors.
+
+## Sonic Frontiers
+* Added MonologueService inspector.
+
+
 # v0.1.40
 * Added toggles to transform the material color, illumination color and display flag.
 

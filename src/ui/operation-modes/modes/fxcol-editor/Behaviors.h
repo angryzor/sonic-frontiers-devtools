@@ -2,6 +2,7 @@
 #include "Context.h"
 #include <utilities/math/Ray.h>
 #include <utilities/math/Frustum.h>
+#include <ui/Desktop.h>
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/operation-modes/behaviors/ForwardDeclarations.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
@@ -33,11 +34,11 @@ namespace ui::operation_modes::modes::fxcol_editor {
 	};
 }
 
-#include <ui/operation-modes/behaviors/prefabs/MousePicking3DRecursiveRaycast.h>
+#include <ui/operation-modes/behaviors/prefabs/MousePicking3DRecursiveRaycastWithPhysicsLocation.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
-	template<> struct MousePicking3DBehaviorTraits<Context> : MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl<Context> {
-		using MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl::MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl;
+	template<> struct MousePicking3DBehaviorTraits<Context> : MousePicking3DRecursiveRaycastWithPhysicsLocationMousePicking3DBehaviorTraitsImpl<Context> {
+		using MousePicking3DRecursiveRaycastWithPhysicsLocationMousePicking3DBehaviorTraitsImpl::MousePicking3DRecursiveRaycastWithPhysicsLocationMousePicking3DBehaviorTraitsImpl;
 	};
 }
 
@@ -134,6 +135,23 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		static constexpr bool allowRotate = true;
 		static constexpr bool allowScale = false;
 	};
+
+	template<> struct PlacementBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+		using BehaviorTraitsImpl::BehaviorTraitsImpl;
+		constexpr static bool is3D = true;
+		bool CanPlace() const { return context.placementVolume; }
+		app::gfx::FxColCollisionShape* PlaceObject(const csl::math::Vector3& location) {
+			return context.AddCollisionShape(context.placementVolume, location);
+		}
+	};
+
+	template<> struct DeleteBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+		using BehaviorTraitsImpl::BehaviorTraitsImpl;
+		void DeleteObjects(const csl::ut::MoveArray<app::gfx::FxColCollisionShape*>& objects) {
+			for (auto* obj : objects)
+				context.RemoveCollisionShape(obj);
+		}
+	};
 }
 
 #include <ui/operation-modes/behaviors/Selection.h>
@@ -142,6 +160,9 @@ namespace ui::operation_modes::modes::fxcol_editor {
 #include <ui/operation-modes/behaviors/Gizmo.h>
 #include <ui/operation-modes/behaviors/MousePicking.h>
 #include <ui/operation-modes/behaviors/SelectionMousePicking.h>
+#include <ui/operation-modes/behaviors/GroundContextMenu.h>
+#include <ui/operation-modes/behaviors/Placement.h>
+#include <ui/operation-modes/behaviors/Delete.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	class RenderFxColBehavior : public OperationModeBehavior, public DebugRenderable {

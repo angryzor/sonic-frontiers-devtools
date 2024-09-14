@@ -64,11 +64,12 @@ void ResReflectionEditor::RenderContents() {
 		const char* previewValue = rflClass == nullptr ? "<none>" : rflClass->GetName();
 		csl::ut::MoveArray<const RflClass*> matchingRflClasses{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
+		ImGui::InputText("Search", searchStr, 200);
 		for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
 			auto resSize = resource->GetSize();
 			auto rflSize = rflc->GetSizeInBytes();
 
-			if (resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF))
+			if ((resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF)) && (strlen(searchStr) == 0 || strstr(rflc->GetName(), searchStr)))
 				matchingRflClasses.push_back(rflc);
 		}
 
@@ -91,14 +92,16 @@ void ResReflectionEditor::RenderContents() {
 				for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
 					bool is_selected = rflClass == rflc;
 
-					if (ImGui::Selectable(rflc->GetName(), is_selected)) {
-						FreeOriginalCopy();
-						rflClass = rflc;
-						MakeOriginalCopy();
-					}
+					if (is_selected || strlen(searchStr) == 0 || strstr(rflc->GetName(), searchStr)) {
+						if (ImGui::Selectable(rflc->GetName(), is_selected)) {
+							FreeOriginalCopy();
+							rflClass = rflc;
+							MakeOriginalCopy();
+						}
 
-					if (is_selected)
-						ImGui::SetItemDefaultFocus();
+						if (is_selected)
+							ImGui::SetItemDefaultFocus();
+					}
 				}
 			}
 

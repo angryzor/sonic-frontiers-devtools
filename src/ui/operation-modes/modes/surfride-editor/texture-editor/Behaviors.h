@@ -132,10 +132,13 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 	};
 
 	template<> struct ScreenSpaceManipulationBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+		using BehaviorTraitsImpl::BehaviorTraitsImpl;
 		Eigen::Vector3f ImGuiToSelectionSpace(const ImVec2 delta) { return Eigen::Vector3f{ delta.x / context.focusedTexture->GetTexture().width, delta.y / context.focusedTexture->GetTexture().height, 0.0f }; }
 	};
 
 	template<> struct PlacementBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+		using BehaviorTraitsImpl::BehaviorTraitsImpl;
+		constexpr static bool is3D = false;
 		bool CanPlace() const { return context.focusedTexture.has_value(); }
 		TextureElement PlaceObject(ImVec2 location) {
 			auto placeLoc = ImVec2(location.x / context.focusedTexture->GetTexture().width, location.y / context.focusedTexture->GetTexture().height);

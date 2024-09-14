@@ -151,6 +151,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 	template<> struct PlacementBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
+		constexpr static bool is3D = true;
 		bool CanPlace() const { return context.placementTargetLayer != nullptr && context.objectClassToPlace != nullptr; }
 		ObjectData* PlaceObject(csl::math::Vector3 location) { return context.SpawnObject(location); }
 	};

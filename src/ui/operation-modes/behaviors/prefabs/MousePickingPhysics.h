@@ -13,64 +13,64 @@ struct MousePickingPhysicsMousePicking3DBehaviorTraitsImpl {
 
 	void GetAllRaycastResults(const Ray3f& ray, csl::ut::MoveArray<ObjectType>& results) {
 		if (auto* gameManager = hh::game::GameManager::GetInstance())
-			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
-				csl::ut::MoveArray<hh::physics::PhysicsQueryResult> physicsResults{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
+			csl::ut::MoveArray<hh::physics::PhysicsQueryResult> physicsResults{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
-				if (physicsWorld->RayCastAllHits(ray.start, ray.end, 0xFFFFFFFF, physicsResults)) {
-					csl::ut::PointerMap<ObjectType, bool> unique{ hh::fnd::MemoryRouter::GetTempAllocator() };
+			if (physicsWorld->RayCastAllHits(ray.start, ray.end, 0xFFFFFFFF, physicsResults)) {
+				csl::ut::PointerMap<ObjectType, bool> unique{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
-					for (auto& result : physicsResults) {
-						if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
-							auto* gameObject = collider->GetOwnerGameObject();
+				for (auto& result : physicsResults) {
+					if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
+						auto* gameObject = collider->GetOwnerGameObject();
 
-							if (!traits.IsSelectable(gameObject))
-								continue;
+						if (!traits.IsSelectable(gameObject))
+							continue;
 
-							auto* object = traits.GetObjectForGameObject(gameObject);
+						auto* object = traits.GetObjectForGameObject(gameObject);
 
-							if (unique.Find(object) == unique.end())
-								results.push_back(object);
+						if (unique.Find(object) == unique.end())
+							results.push_back(object);
 
-							unique.Insert(object, true);
-						}
+						unique.Insert(object, true);
 					}
 				}
 			}
+		}
 	}
 
 	void GetBestRaycastResult(const Ray3f& ray, csl::ut::MoveArray<ObjectType>& results, csl::math::Vector3& location, bool& pickedLocation) {
 		if (auto* gameManager = hh::game::GameManager::GetInstance())
-			if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
-				csl::ut::MoveArray<hh::physics::PhysicsQueryResult> physicsResults{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		if (auto* physicsWorld = gameManager->GetService<hh::physics::PhysicsWorld>()) {
+			csl::ut::MoveArray<hh::physics::PhysicsQueryResult> physicsResults{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
-				if (physicsWorld->RayCastAllHits(ray.start, ray.end, 0xFFFFFFFF, physicsResults)) {
-					std::optional<csl::math::Vector3> fallbackLocation{};
+			if (physicsWorld->RayCastAllHits(ray.start, ray.end, 0xFFFFFFFF, physicsResults)) {
+				std::optional<csl::math::Vector3> fallbackLocation{};
 
-					for (auto& result : physicsResults) {
-						if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
-							auto* gameObject = collider->GetOwnerGameObject();
+				for (auto& result : physicsResults) {
+					if (auto* collider = hh::game::GameObjectSystem::GetComponentByHandle(result.collider)) {
+						auto* gameObject = collider->GetOwnerGameObject();
 
-							if (Desktop::selectionColliderFilters[gameObject->layer][collider->filterCategory]) {
-								if (!traits.IsSelectable(gameObject)) {
-									if (!fallbackLocation.has_value())
-										fallbackLocation = result.hitLocation;
-									continue;
-								}
-
-								results.push_back(traits.GetObjectForGameObject(gameObject));
-								location = result.hitLocation;
-								pickedLocation = true;
-								return;
+						if (Desktop::selectionColliderFilters[gameObject->layer][collider->filterCategory]) {
+							if (!traits.IsSelectable(gameObject)) {
+								if (!fallbackLocation.has_value())
+									fallbackLocation = result.hitLocation;
+								continue;
 							}
+
+							results.push_back(traits.GetObjectForGameObject(gameObject));
+							location = result.hitLocation;
+							pickedLocation = true;
+							return;
 						}
 					}
+				}
 
-					if (fallbackLocation.has_value()) {
-						location = *fallbackLocation;
-						pickedLocation = true;
-					}
+				if (fallbackLocation.has_value()) {
+					location = *fallbackLocation;
+					pickedLocation = true;
 				}
 			}
+		}
 	}
 
 	void GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<ObjectType>& results) {

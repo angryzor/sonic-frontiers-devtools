@@ -4,6 +4,7 @@
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include "ForwardDeclarations.h"
 #include "MousePicking.h"
+#include "GroundContextMenu.h"
 
 template<typename OpModeContext>
 class PlacementBehavior : public OperationModeBehavior {
@@ -46,7 +47,19 @@ public:
 	void Render() override {
 		auto* mousePicking = operationMode.GetBehavior<MousePickingBehavior<OpModeContext>>();
 
-		if (CanPlace() && (placing || ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) && mousePicking->locationPicked)
-			Dispatch(ObjectPlacedAction{ traits.PlaceObject(mousePicking->pickedLocation) });
+		if (CanPlace()) {
+			if ((placing || ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) && mousePicking->locationPicked)
+				Dispatch(ObjectPlacedAction{ traits.PlaceObject(mousePicking->pickedLocation) });
+
+			if constexpr (Traits::is3D) {
+				auto* groundContextMenu = operationMode.GetBehavior<GroundContextMenuBehavior<OpModeContext>>();
+				if (groundContextMenu && ImGui::BeginPopup("WorldContext")) {
+					if (ImGui::MenuItem("Place object", nullptr, nullptr))
+						Dispatch(ObjectPlacedAction{ traits.PlaceObject(groundContextMenu->pickedLocation) });
+
+					ImGui::EndPopup();
+				}
+			}
+		}
 	}
 };

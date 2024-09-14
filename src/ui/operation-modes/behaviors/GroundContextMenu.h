@@ -4,8 +4,9 @@
 
 template<typename OpModeContext>
 class GroundContextMenuBehavior : public OperationModeBehavior {
-	typename MousePickingBehaviorTraits<OpModeContext>::LocationType pickedLocation{ 0.0f, 0.0f, 0.0f };
 public:
+	typename MousePickingBehaviorTraits<OpModeContext>::LocationType pickedLocation{ 0.0f, 0.0f, 0.0f };
+
 	static constexpr unsigned int id = 12;
 	virtual unsigned int GetId() override { return id; }
 
