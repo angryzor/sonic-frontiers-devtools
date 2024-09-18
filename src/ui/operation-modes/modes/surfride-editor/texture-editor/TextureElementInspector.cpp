@@ -39,11 +39,12 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
     }
 
     void TextureElementInspector::RenderTextureListInspector(const TextureListRef& textureListRef) {
+		auto& textureList = textureListRef.GetTextureList();
+
+		Editor("User data", GetContext().gocSprite->projectResource, textureList.userData);
     }
 
     void TextureElementInspector::RenderTextureInspector(const TextureRef& textureRef) {
-		bool edited{};
-
 		auto& texture = textureRef.GetTexture();
 
 		Viewer("ID", texture.id);
@@ -51,9 +52,11 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		Viewer("Name", texture.name);
 #endif
 		Viewer("Filename", texture.filename);
-		edited |= Editor("Width", texture.width);
-		edited |= Editor("Height", texture.height);
-		if (texture.userData) Editor("User data", *texture.userData);
+		Editor("Width", texture.width);
+		Editor("Height", texture.height);
+
+		ImGui::Separator();
+		Editor("User data", GetContext().gocSprite->projectResource, texture.userData);
     }
 
     void TextureElementInspector::RenderCropInspector(const CropRef& cropRef) {

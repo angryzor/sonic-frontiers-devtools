@@ -2,6 +2,7 @@
 #include "Context.h"
 #include <utilities/math/Ray.h>
 #include <utilities/math/Frustum.h>
+#include <utilities/BoundingBoxes.h>
 #include <ui/Desktop.h>
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/operation-modes/behaviors/ForwardDeclarations.h>
@@ -75,6 +76,8 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		void SetSelectionSpaceTransform(FxColCollisionShape* obj, const Eigen::Affine3f& transform) {
 			obj->position = csl::math::Position{ transform.translation() };
 			obj->rotation = csl::math::Rotation{ transform.rotation() };
+
+			context.RecalculateBoundingVolume(context.GetBoundingVolumeOfShape(obj));
 		}
 	};
 
@@ -86,46 +89,10 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			if (objects.size() == 0)
 				return false;
 
-			for (auto* shape : objects) {
-				switch (shape->shape) {
-				case FxColCollisionShape::Shape::SPHERE: {
-					auto& extents = shape->extents.sphere;
-					aabb.AddPoint(shape->position + csl::math::Vector3{ extents.radius, extents.radius, extents.radius });
-					aabb.AddPoint(shape->position - csl::math::Vector3{ extents.radius, extents.radius, extents.radius });
-					break;
-				}
-				case FxColCollisionShape::Shape::CYLINDER: {
-					auto& extents = shape->extents.cylinder;
-					AddOBB(aabb, shape->position, shape->rotation, { extents.radius, extents.halfHeight, extents.radius });
-					break;
-				}
-				case FxColCollisionShape::Shape::ANISOTROPIC_OBB: {
-					auto& extents = shape->extents.anisotropicObb;
-					AddOBB(aabb, shape->position, shape->rotation, { extents.width / 2, extents.height / 2, extents.depth / 2 });
-					break;
-				}
-				case FxColCollisionShape::Shape::ISOTROPIC_OBB: {
-					auto& extents = shape->extents.isotropicObb;
-					AddOBB(aabb, shape->position, shape->rotation, { extents.width / 2, extents.height / 2, extents.depth / 2 });
-					break;
-				}
-				}
-			}
+			for (auto* shape : objects)
+				AddAabb(aabb, Context::CalculateAabb(shape));
 
 			return true;
-		}
-
-		void AddOBB(csl::geom::Aabb& aabb, const csl::math::Position& position, const csl::math::Rotation& rotation, const csl::math::Vector3& halfExtents) {
-			Eigen::Affine3f transform{ Eigen::Translation3f{ position } *rotation };
-
-			aabb.AddPoint(transform * -halfExtents);
-			aabb.AddPoint(transform * halfExtents);
-			aabb.AddPoint(transform * -csl::math::Vector3{ halfExtents.x(), halfExtents.y(), -halfExtents.z() });
-			aabb.AddPoint(transform * csl::math::Vector3{ halfExtents.x(), halfExtents.y(), -halfExtents.z() });
-			aabb.AddPoint(transform * -csl::math::Vector3{ halfExtents.x(), -halfExtents.y(), halfExtents.z() });
-			aabb.AddPoint(transform * csl::math::Vector3{ halfExtents.x(), -halfExtents.y(), halfExtents.z() });
-			aabb.AddPoint(transform * -csl::math::Vector3{ halfExtents.x(), -halfExtents.y(), -halfExtents.z() });
-			aabb.AddPoint(transform * csl::math::Vector3{ halfExtents.x(), -halfExtents.y(), -halfExtents.z() });
 		}
 	};
 

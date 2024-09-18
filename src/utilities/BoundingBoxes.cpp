@@ -84,3 +84,58 @@ bool CalcApproxAabb(hh::game::ObjectWorldChunk* chunk, const csl::ut::MoveArray<
 
 	return found;
 }
+
+void AddAabb(csl::geom::Aabb& aabb, const csl::geom::Aabb& other)
+{
+	aabb.min = aabb.min.cwiseMin(other.min);
+	aabb.max = aabb.max.cwiseMax(other.max);
+}
+
+csl::geom::Aabb Union(const csl::geom::Aabb& one, const csl::geom::Aabb& other)
+{
+	csl::geom::Aabb res{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
+	AddAabb(res, one);
+	AddAabb(res, other);
+	return res;
+}
+
+csl::geom::Aabb CalcAabb(const csl::geom::Sphere& sphere)
+{
+	return {
+		sphere.position - sphere.radius * Eigen::Vector3f{ 1.0f, 1.0f, 1.0f },
+		sphere.position + sphere.radius * Eigen::Vector3f{ 1.0f, 1.0f, 1.0f },
+	};
+}
+
+csl::geom::Aabb CalcAabb(const csl::geom::Cylinder& cylinder)
+{
+	Eigen::Vector3f normal = (cylinder.segment.end - cylinder.segment.start).normalized();
+	Eigen::Vector3f dot{ normal.dot(Eigen::Vector3f::UnitX()), normal.dot(Eigen::Vector3f::UnitY()), normal.dot(Eigen::Vector3f::UnitZ()) };
+	Eigen::Vector3f delta = cylinder.radius * (Eigen::Vector3f{ 1.0f, 1.0f, 1.0f } - dot.cwiseSquare());
+
+	csl::geom::Aabb startExtent{ cylinder.segment.start - delta, cylinder.segment.start + delta };
+	csl::geom::Aabb endExtent{ cylinder.segment.end - delta, cylinder.segment.end + delta };
+
+	return Union(startExtent, endExtent);
+}
+
+csl::geom::Aabb CalcAabb(const csl::geom::Obb& obb)
+{
+	csl::math::Vector3 corners[8]{
+		obb.min,
+		obb.min + obb.extentX,
+		obb.min + obb.extentY,
+		obb.min + obb.extentZ,
+		obb.min + obb.extentX + obb.extentY,
+		obb.min + obb.extentX + obb.extentZ,
+		obb.min + obb.extentY + obb.extentZ,
+		obb.min + obb.extentX + obb.extentY + obb.extentZ,
+	};
+
+	csl::geom::Aabb res{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
+
+	for (size_t i = 0; i < 8; i++)
+		res.AddPoint(corners[i]);
+
+	return res;
+}

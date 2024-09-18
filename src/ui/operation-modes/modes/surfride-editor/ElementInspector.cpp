@@ -1,6 +1,7 @@
 #include "ElementInspector.h"
 #include "SurfRideElement.h"
 #include "Behaviors.h"
+#include <resources/ManagedMemoryRegistry.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/editors/SurfRide.h>
 #include <ui/common/viewers/Basic.h>
@@ -50,6 +51,10 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::Text("Name: %s", scene.sceneData->name);
 		ImGui::DragFloat2("Resolution", scene.sceneData->resolution.data());
 		Editor("Background color", *reinterpret_cast<csl::ut::Color8*>(&scene.sceneData->backgroundColor));
+		ImGui::Separator();
+		Editor("User data", GetContext().gocSprite->projectResource, scene.sceneData->userData);
+		ImGui::Separator();
+
 		if (ImGui::CollapsingHeader("Active camera")) {
 			ImGui::Text("ID: %d", scene.camera.GetCameraData().id);
 			ImGui::Text("Name: %s", scene.camera.GetCameraData().name);
@@ -77,6 +82,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 			}
 			ImGui::EndCombo();
 		}
+
+		ImGui::Separator();
+		Editor("User data", GetContext().gocSprite->projectResource, layer.layerData->userData);
+
+		ImGui::Separator();
 		ImGui::SliderFloat("currentFrame", &layer.currentFrame, layer.startFrame, layer.endFrame);
 		ImGui::SliderFloat("currentFrame2", &layer.currentFrame2, layer.startFrame, layer.endFrame);
 		ImGui::DragFloat("startFrame", &layer.startFrame, 0.01f);
@@ -117,9 +127,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 		Viewer("ID", cast.castData->id);
 		InputText("Name", const_cast<char*&>(cast.castData->name), GetContext().gocSprite->projectResource);
 
-		if (cast.castData->userData)
-			Editor("User data", *cast.castData->userData);
-
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		size_t castIndex = cast.index;
 #else
@@ -140,6 +147,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 		transformEdited |= CheckboxFlags("Transform material color", cast.castData->flags, 0x20u);
 		transformEdited |= CheckboxFlags("Transform illumination color", cast.castData->flags, 0x80u);
 		transformEdited |= CheckboxFlags("Transform display flag", cast.castData->flags, 0x40u);
+
+		ImGui::Separator();
+		Editor("User data", GetContext().gocSprite->projectResource, cast.castData->userData);
 
 		if (cast.layer->flags.test(SurfRide::Layer::Flag::IS_3D)) {
 			auto& transform = cast.layer->layerData->transforms.transforms3d[castIndex];

@@ -1,4 +1,5 @@
 #include "GOCAnimator.h"
+#include <ui/common/viewers/Basic.h>
 
 void RenderBlendNode(hh::anim::BlendNodeBase* node) {
 	const char* type;
@@ -40,6 +41,14 @@ void RenderBlendNode(hh::anim::BlendNodeBase* node) {
 	}
 }
 
+//void RenderLayerState(hh::anim::AnimationStateMachine::LayerStateBase& layerState) {
+//	if (layerState.GetRuntimeTypeInfo() == reinterpret_cast<void*>(0x1416FD3C8ull)) {
+//		auto& layerStateTransition = static_cast<hh::anim::AnimationStateMachine::LayerStateTransition&>(layerState);
+//
+//
+//	}
+//}
+
 void RenderComponentInspector(hh::anim::GOCAnimator& component)
 {
 	bool nope{ false };
@@ -62,23 +71,28 @@ void RenderComponentInspector(hh::anim::GOCAnimator& component)
 	}
 	//}
 
-	if (component.animationStateMachine->blendTree) {
-		ImGui::SeparatorText("BlendNodes");
-		RenderBlendNode(component.animationStateMachine->blendTree);
+	if (component.animationStateMachine->layerBlendTree) {
+		ImGui::SeparatorText("Layer Blend Tree");
+		RenderBlendNode(component.animationStateMachine->layerBlendTree);
 	}
 
 	ImGui::SeparatorText("Layers");
 	for (auto& layer : component.animationStateMachine->layers) {
 		if (ImGui::TreeNodeEx(&layer, ImGuiTreeNodeFlags_None, "%d - %s", layer.layerId, component.asmResourceManager->animatorResource->binaryData->layers[layer.layerId].name)) {
-			ImGui::Text("%d", layer.layerId);
-			ImGui::Text("%x", layer.unk2);
-			ImGui::Text("%x", layer.unk3);
-			ImGui::Text("%x", layer.unk4);
-			ImGui::Text("%x", layer.unk5);
-			ImGui::Text("%x", layer.unk6);
-			ImGui::Text("%x", layer.unk7);
-			ImGui::Text("%x", layer.unk8);
+			Viewer("Layer ID", layer.layerId);
+			Viewer("Unk2", layer.unk2);
+			Viewer("Unk3", layer.unk3);
+			Viewer("Next sequence number", layer.nextSequenceNumber);
+			Viewer("Unk5", layer.unk5);
+			Viewer("Unk6", layer.unk6);
+			Viewer("Transition ID", layer.transitionId);
 			RenderBlendNode(layer.blendNode);
+
+			if (layer.layerState != nullptr && ImGui::TreeNode("Layer state")) {
+
+				ImGui::TreePop();
+			}
+
 			ImGui::TreePop();
 		}
 	}

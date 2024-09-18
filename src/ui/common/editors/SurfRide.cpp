@@ -1,4 +1,5 @@
 bool Editor(const char* label, SurfRide::SRS_CROPREF& cropRef);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_DATA& data);
 
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
@@ -178,7 +179,7 @@ bool Editor(const char* label, SRS_CROPREF& cropRef) {
 const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
 const char* orientationNames[]{ "Up", "Left", "Down", "Right" };
 const char* effectTypeNames[]{ "None", "Blur", "Reflect" };
-bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SRS_IMAGECAST& imageCastData) {
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST& imageCastData) {
 	bool edited{};
 	ImGui::PushID(label);
 	ImGui::SeparatorText(label);
@@ -289,7 +290,7 @@ bool Editor(const char* label, SRS_REFERENCECAST& referenceCastData)
 	return edited;
 }
 
-bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SRS_SLICECAST& sliceCastData)
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_SLICECAST& sliceCastData)
 {
 	bool edited{};
 	ImGui::PushID(label);
@@ -354,20 +355,35 @@ bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SRS_SLICECA
 }
 
 const char* userDataTypes[]{ "Boolean", "Signed integer", "Unsigned integer", "Float", "Unknown", "String"};
-bool Editor(const char* label, SRS_DATA& data)
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& data)
 {
 	bool edited{};
 	if (ImGui::TreeNode(label)) {
-		Viewer("Name", data.name);
-		ComboEnum("Type", data.type, userDataTypes);
+		InputText("Name", const_cast<char*&>(data.name), resource);
+
+		auto prevType = data.type;
+		if (ComboEnum("Type", data.type, userDataTypes)) {
+			auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+			managedAllocator.Free(data.value);
+
+			switch (data.type) {
+			case SRS_DATA::Type::BOOL: data.value = new (&managedAllocator) bool{}; break;
+			case SRS_DATA::Type::INT: data.value = new (&managedAllocator) int{}; break;
+			case SRS_DATA::Type::UINT: data.value = new (&managedAllocator) unsigned int{}; break;
+			case SRS_DATA::Type::FLOAT: data.value = new (&managedAllocator) float{}; break;
+			case SRS_DATA::Type::STRING: data.value = const_cast<char*>(""); break;
+			default: break;
+			}
+		}
 
 		switch (data.type) {
-		case SRS_DATA::Type::BOOL: edited |= Editor("Value", *reinterpret_cast<bool*>(data.value)); break;
-		case SRS_DATA::Type::INT: edited |= Editor("Value", *reinterpret_cast<int*>(data.value)); break;
-		case SRS_DATA::Type::UINT: edited |= Editor("Value", *reinterpret_cast<unsigned int*>(data.value)); break;
-		case SRS_DATA::Type::FLOAT: edited |= Editor("Value", *reinterpret_cast<float*>(data.value)); break;
-		case SRS_DATA::Type::STRING: Viewer("Value", reinterpret_cast<const char*>(data.value)); break;
-		default: Viewer("Value", reinterpret_cast<void*>(data.value)); break;
+		case SRS_DATA::Type::BOOL: edited |= Editor("Value", *static_cast<bool*>(data.value)); break;
+		case SRS_DATA::Type::INT: edited |= Editor("Value", *static_cast<int*>(data.value)); break;
+		case SRS_DATA::Type::UINT: edited |= Editor("Value", *static_cast<unsigned int*>(data.value)); break;
+		case SRS_DATA::Type::FLOAT: edited |= Editor("Value", *static_cast<float*>(data.value)); break;
+		case SRS_DATA::Type::STRING: edited |= InputText("Value", reinterpret_cast<char*&>(static_cast<void*&>(data.value)), resource); break;
+		default: Viewer("Value", static_cast<void*>(data.value)); break;
 		}
 
 		ImGui::TreePop();
@@ -375,15 +391,57 @@ bool Editor(const char* label, SRS_DATA& data)
 	return edited;
 }
 
-bool Editor(const char* label, SRS_USERDATA& userData)
+void InitData(hh::fnd::ManagedResource* resource, SRS_DATA& data) {
+	data.name = "New data";
+	data.type = SRS_DATA::Type::STRING;
+	data.value = const_cast<char*>("");
+}
+
+void DeinitData(hh::fnd::ManagedResource* resource, SRS_DATA& data) {
+	auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+	managedAllocator.Free(const_cast<char*>(data.name));
+	managedAllocator.Free(data.value);
+}
+
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA& userData)
 {
 	bool edited{};
-	ImGui::PushID(label);
+	resources::ManagedCArray items{ resource, userData.items, userData.count };
 
-	if (ImGui::CollapsingHeader(label))
-		for (size_t i = 0; i < userData.count; i++)
-			edited |= Editor(userData.items[i].name, userData.items[i]);
+	edited |= Editor(label, resource, items, &InitData, &DeinitData);
 
-	ImGui::PopID();
+	return edited;
+}
+
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*& userData)
+{
+	bool edited{};
+
+	if (userData != nullptr) {
+		edited |= Editor(label, resource, *userData);
+		if (ImGui::Button("Remove all user data")) {
+			resources::ManagedAllocator managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+			resources::ManagedCArray items{ resource, userData->items, userData->count };
+
+			for (auto& item : items)
+				DeinitData(resource, item);
+
+			managedAllocator.Free(userData->items);
+
+			userData = nullptr;
+		}
+	}
+	else {
+		if (ImGui::Button("Add user data")) {
+			resources::ManagedAllocator managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+			userData = new (&managedAllocator) SRS_USERDATA{};
+
+			edited = true;
+		}
+	}
+
 	return edited;
 }

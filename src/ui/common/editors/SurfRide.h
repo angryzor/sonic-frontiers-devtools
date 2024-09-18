@@ -11,9 +11,10 @@ bool Editor(const char* label, SurfRide::Colorf& color);
 
 bool Editor(const char* label, SurfRide::SRS_TRS2D& transformData);
 bool Editor(const char* label, SurfRide::SRS_TRS3D& transformData);
-bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SurfRide::SRS_IMAGECAST& imageCastData);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_IMAGECAST& imageCastData);
 bool Editor(const char* label, SurfRide::SRS_REFERENCECAST& referenceCastData);
-bool Editor(const char* label, hh::ui::ResSurfRideProject* resource, SurfRide::SRS_SLICECAST& sliceCastData);
-bool Editor(const char* label, SurfRide::SRS_DATA& data);
-bool Editor(const char* label, SurfRide::SRS_USERDATA& userData);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_SLICECAST& sliceCastData);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_DATA& data);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_USERDATA& userData);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_USERDATA*& userData);
 bool Editor(const char* label, SurfRide::SRS_TEXTDATA& textData);

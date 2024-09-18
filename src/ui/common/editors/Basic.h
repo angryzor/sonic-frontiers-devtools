@@ -155,3 +155,37 @@ static bool Editor(const char* label, resources::ManagedCArray<T, S>& arr) {
 
 	return edited;
 }
+
+template<typename T, typename S, typename I, typename D>
+static bool Editor(const char* label, hh::fnd::ManagedResource* resource, resources::ManagedCArray<T, S>& arr, I init, D deinit) {
+	bool edited{};
+
+	if (ImGui::TreeNode(label, "%s[0..]", label)) {
+		for (S i = 0; i < arr.size(); i++) {
+			ImGui::PushID(static_cast<int>(i));
+			if (ImGui::Button("x")) {
+				deinit(resource, arr[i]);
+				arr.remove(i);
+				edited = true;
+			}
+			ImGui::SameLine();
+
+			char indexedName[200];
+			snprintf(indexedName, sizeof(indexedName), "%s[%d]", label, i);
+
+			edited |= Editor(indexedName, resource, arr[i]);
+
+			ImGui::PopID();
+		}
+
+		if (ImGui::Button("Add item")) {
+			arr.emplace_back();
+			init(resource, arr[arr.size() - 1]);
+			edited = true;
+		}
+
+		ImGui::TreePop();
+	}
+
+	return edited;
+}

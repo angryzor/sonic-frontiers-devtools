@@ -1,3 +1,9 @@
+# v0.1.42
+* SWIF user data can now be edited properly.
+* Adding and deleting FxCol shapes updates bounding boxes.
+* Placing a new object now selects it in all operation modes.
+
+
 # v0.1.41
 * You can now place objects from the context menu.
 * Added ability to create bounding volumes and collision shapes in the FxCol editor.

@@ -16,5 +16,9 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		void RemoveCollisionShape(app::gfx::FxColCollisionShape* collisionShape);
 
 		void RecalculateBoundingVolume(app::gfx::FxColBoundingVolume* boundingVolume);
+		void RecalculateKdTree();
+
+		static csl::geom::Aabb CalculateAabb(const app::gfx::FxColCollisionShape* collisionShape);
+		static csl::geom::Aabb CalculateAabbForObb(const csl::math::Position& position, const csl::math::Rotation& rotation, const csl::math::Vector3& halfExtents);
 	};
 }

@@ -10,10 +10,20 @@ template<typename OpModeContext>
 class PlacementBehavior : public OperationModeBehavior {
 public:
 	using Traits = PlacementBehaviorTraits<OpModeContext>;
+	using LocationType = typename MousePickingBehavior<OpModeContext>::LocationType;
 
 private:
 	Traits traits;
 	bool placing{};
+
+	void PerformPlace(const LocationType& location) {
+		auto obj = traits.PlaceObject(location);
+
+		if (auto* selection = operationMode.GetBehavior<SelectionBehavior<OpModeContext>>())
+			selection->Select(obj);
+
+		Dispatch(ObjectPlacedAction{ obj });
+	}
 
 public:
 	static constexpr unsigned int id = 13;
@@ -49,13 +59,13 @@ public:
 
 		if (CanPlace()) {
 			if ((placing || ImGui::IsKeyDown(ImGuiKey_LeftShift) || ImGui::IsKeyDown(ImGuiKey_RightShift)) && mousePicking->locationPicked)
-				Dispatch(ObjectPlacedAction{ traits.PlaceObject(mousePicking->pickedLocation) });
+				PerformPlace(mousePicking->pickedLocation);
 
 			if constexpr (Traits::is3D) {
 				auto* groundContextMenu = operationMode.GetBehavior<GroundContextMenuBehavior<OpModeContext>>();
 				if (groundContextMenu && ImGui::BeginPopup("WorldContext")) {
 					if (ImGui::MenuItem("Place object", nullptr, nullptr))
-						Dispatch(ObjectPlacedAction{ traits.PlaceObject(groundContextMenu->pickedLocation) });
+						PerformPlace(groundContextMenu->pickedLocation);
 
 					ImGui::EndPopup();
 				}
