@@ -31,3 +31,9 @@
 [submodule "vendor/reflect-cpp/reflect-cpp"]
 	path = vendor/reflect-cpp/reflect-cpp
 	url = https://github.com/getml/reflect-cpp.git
+[submodule "vendor/imgui-node-editor/imgui-node-editor"]
+	path = vendor/imgui-node-editor/imgui-node-editor
+	url = https://github.com/thedmd/imgui-node-editor.git
+[submodule "vendor/ogdf/ogdf"]
+	path = vendor/ogdf/ogdf
+	url = https://github.com/ogdf/ogdf.git

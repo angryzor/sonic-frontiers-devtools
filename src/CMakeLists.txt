@@ -249,6 +249,9 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/core-services/RenderManagerInspector.cpp
             ui/core-services/RenderingEngineInspector.cpp
             ui/game-modes/GameModeInspector.cpp
+            ui/operation-modes/modes/asm-editor/Context.cpp
+            ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
+            ui/operation-modes/modes/asm-editor/ASMEditor.cpp
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.cpp
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCEvent.cpp
@@ -268,6 +271,9 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.h
+            ui/operation-modes/modes/asm-editor/Context.h
+            ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
+            ui/operation-modes/modes/asm-editor/ASMEditor.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h

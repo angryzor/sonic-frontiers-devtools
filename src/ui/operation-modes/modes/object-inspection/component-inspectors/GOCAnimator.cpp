@@ -1,5 +1,9 @@
 #include "GOCAnimator.h"
 #include <ui/common/viewers/Basic.h>
+#include <ui/Desktop.h>
+#include <ui/common/StandaloneOperationModeHost.h>
+#include <ui/operation-modes/modes/asm-editor/BlendTreeEditor.h>
+#include <ui/operation-modes/modes/asm-editor/ASMEditor.h>
 
 void RenderBlendNode(hh::anim::BlendNodeBase* node) {
 	const char* type;
@@ -52,6 +56,11 @@ void RenderBlendNode(hh::anim::BlendNodeBase* node) {
 void RenderComponentInspector(hh::anim::GOCAnimator& component)
 {
 	bool nope{ false };
+	if (ImGui::Button("ASM Editor")) {
+		auto* host = new (Desktop::instance->GetAllocator()) StandaloneOperationModeHost<ui::operation_modes::modes::asm_editor::ASMEditor>{ Desktop::instance->GetAllocator() };
+		host->operationMode.GetContext().gocAnimator = &component;
+	}
+
 	const char* select{ "Select one" };
 	if (ImGui::BeginCombo("Current state", select)) {
 		auto& stateIds = component.asmResourceManager->animatorResource->stateIdsByName;
@@ -73,6 +82,8 @@ void RenderComponentInspector(hh::anim::GOCAnimator& component)
 
 	if (component.animationStateMachine->layerBlendTree) {
 		ImGui::SeparatorText("Layer Blend Tree");
+		if (ImGui::Button("Layer Blend Tree Editor"))
+			new (Desktop::instance->GetAllocator()) ui::operation_modes::modes::asm_editor::BlendTreeEditor{ Desktop::instance->GetAllocator(), &component, component.animationStateMachine->layerBlendTree, component.asmResourceManager->animatorResource->binaryData->blendTreeRootNodeId };
 		RenderBlendNode(component.animationStateMachine->layerBlendTree);
 	}
 
@@ -84,7 +95,7 @@ void RenderComponentInspector(hh::anim::GOCAnimator& component)
 			Viewer("Unk3", layer.unk3);
 			Viewer("Next sequence number", layer.nextSequenceNumber);
 			Viewer("Unk5", layer.unk5);
-			Viewer("Unk6", layer.unk6);
+			Viewer("Speed", layer.speed);
 			Viewer("Transition ID", layer.transitionId);
 			RenderBlendNode(layer.blendNode);
 

@@ -96,7 +96,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers wars)
 		target_compile_definitions(${DEVTOOLS_TARGET} PRIVATE DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW=1)
     endif()
 
-    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imguizmo implot reflectcpp)
+    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imguizmo implot reflectcpp OGDF)
         target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})
     endforeach()
 
