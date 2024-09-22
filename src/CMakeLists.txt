@@ -22,6 +22,7 @@ target_sources(${DEVTOOLS_TARGET}
         reflection/HSONTemplateGeneration.cpp
         reflection/ReflectiveOperations.cpp
         reflection/RflDiff.cpp
+        ui/common/NodeEditorAutoLayout.cpp
         ui/common/editors/Basic.cpp
         ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
@@ -123,6 +124,7 @@ target_sources(${DEVTOOLS_TARGET}
         reflection/RflClassGen.h
         reflection/RflClassGenFwd.h
         ui/GlobalSettings.h
+        ui/common/NodeEditorAutoLayout.h
         ui/common/editors/Basic.h
         ui/common/editors/Camera.h
         ui/common/editors/ObjectData.h
@@ -261,6 +263,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerBlackboard.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerKinematicParams.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCColliderQuery.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerCollider.cpp
             ui/resources/editors/ResEffectEditor.cpp
             ui/resources/editors/ResMaterialEditor.cpp
             ui/resources/editors/ResSurfRideProjectEditor.cpp
@@ -278,6 +282,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.h
+            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCColliderQuery.h
+            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerCollider.h
             ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.h
     )
 endif()

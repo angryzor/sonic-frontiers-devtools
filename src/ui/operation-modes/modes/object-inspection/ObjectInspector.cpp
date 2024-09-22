@@ -33,6 +33,8 @@ typedef std::tuple<
 #include "component-inspectors/GOCPlayerKinematicParams.h"
 #include "component-inspectors/GOCCamera.h"
 #include "component-inspectors/rangers/GOCPlayerParameter.h"
+#include "component-inspectors/rangers/GOCPlayerCollider.h"
+#include "component-inspectors/rangers/GOCColliderQuery.h"
 
 typedef std::tuple<
 	hh::game::GOCTransform,
@@ -49,7 +51,9 @@ typedef std::tuple<
 	app::game::GOCEventCollision,
 	app::player::GOCPlayerKinematicParams,
 	app::player::GOCPlayerBlackboard,
-	app::player::GOCPlayerParameter
+	app::player::GOCPlayerParameter,
+	app::player::GOCPlayerCollider,
+	app::physics::GOCMoveSphereColliderQuery
 > InspectableComponents;
 #endif
 

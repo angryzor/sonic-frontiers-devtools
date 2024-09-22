@@ -1,6 +1,7 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
 #include <imgui_node_editor.h>
+#include <ui/common/NodeEditorAutoLayout.h>
 
 namespace ui::operation_modes::modes::asm_editor {
 	class BlendTreeEditor : public StandaloneWindow {
@@ -9,6 +10,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		hh::fnd::Reference<hh::anim::BlendNodeBase> focusedRootBlendNode{};
 		short focusedRootBlendNodeIndex{ -1 };
 		ax::NodeEditor::EditorContext* context{};
+		NodeEditorAutoLayout autoLayout{ GetAllocator(), context };
 
 		BlendTreeEditor(csl::fnd::IAllocator* allocator, hh::anim::GOCAnimator* gocAnimator, hh::anim::BlendNodeBase* focusedRootBlendNode, short focusedRootBlendNodeIndex);
 		virtual ~BlendTreeEditor();
@@ -67,6 +69,7 @@ namespace ui::operation_modes::modes::asm_editor {
 			ImGui::PopID();
 
 			ax::NodeEditor::EndNode();
+			autoLayout.AddNode(GetNodeId(nodeId));
 
 			RenderNodeLinks(node, nodeId, blendNodeData);
 		}

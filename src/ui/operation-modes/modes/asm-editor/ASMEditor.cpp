@@ -34,79 +34,16 @@ namespace ui::operation_modes::modes::asm_editor
 
 		auto& asmData = *context.gocAnimator->asmResourceManager->animatorResource->binaryData;
 
-		if (!autoLayouted) {
-			for (unsigned short i = 0; i < asmData.stateCount; i++) {
-				auto dims = ImGui::CalcTextSize(asmData.states[i].name);
-				ogdf::node n = autoLayoutGraph.newNode();
-				autoLayoutGraphAttributes.height(n) = dims.x * 1.4f + 20.0f;
-				autoLayoutGraphAttributes.width(n) = dims.y * 1.4f + 10.0f;
-				autoLayout.push_back(n);
-			}
-
-			for (unsigned short i = 0; i < asmData.stateCount; i++) {
-				auto& state = asmData.states[i];
-				auto targetStateIndex = state.stateEndTransition.transitionInfo.targetStateIndex;
-
-				if (targetStateIndex != -1)
-					autoLayoutGraph.newEdge(autoLayout[i], autoLayout[targetStateIndex]);
-
-				for (unsigned short j = 0; j < state.eventCount; j++) {
-					auto& event = asmData.events[state.eventOffset + j];
-
-					autoLayoutGraph.newEdge(autoLayout[i], autoLayout[event.transition.transitionInfo.targetStateIndex]);
-				}
-
-				//if (state.transitionArrayIndex != -1) {
-				//	auto& transitionArray = asmData.transitionArrays[state.transitionArrayIndex];
-				//	auto* transitions = &asmData.transitions[transitionArray.offset];
-
-				//	for (int j = 0; j < transitionArray.size; j++)
-				//		autoLayoutGraph.newEdge(autoLayout[i], autoLayout[transitions[j].transitionInfo.targetStateIndex]);
-				//}
-			}
-
-			ogdf::SugiyamaLayout sl{};
-			sl.setRanking(new ogdf::OptimalRanking{});
-			sl.setCrossMin(new ogdf::MedianHeuristic{});
-
-			//auto* fhl = new ogdf::FastHierarchyLayout{};
-			//fhl->layerDistance(300.0);
-			//fhl->nodeDistance(50.0);
-			//sl.setLayout(fhl);
-
-			auto* ohl = new ogdf::OptimalHierarchyLayout{};
-			//ohl->layerDistance(300.0);
-			ohl->nodeDistance(50.0);
-			ohl->weightBalancing(0.8);
-			sl.setLayout(ohl);
-			sl.call(autoLayoutGraphAttributes);
-		}
-
-		ImPlot::PushColormap(ImPlotColormap_Cool);
+		ImPlot::PushColormap(ImPlotColormap_Deep);
 		NodeEd::SetCurrentEditor(edContext);
 		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowDuration, 0.25f);
 		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowMarkerDistance, 45.0f);
 		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowSpeed, 300.0f);
 		NodeEd::Begin("Editor");
-
-		//csl::ut::MoveArray<std::optional<short>> activeStates{ hh::fnd::MemoryRouter::GetTempAllocator() };
-		//csl::ut::MoveArray<std::optional<std::pair<short, short>>> activeTransitions{ hh::fnd::MemoryRouter::GetTempAllocator() };
-
-		//for (auto l : context.gocAnimator->animationStateMachine->layers) {
-		//	if (l.layerState == nullptr)
-		//		continue;
-
-		//	auto* prevAnimState = l.layerState->GetPreviousAnimationState();
-		//	auto* nextAnimState = l.layerState->GetNextAnimationState();
-
-		//	activeStates.push_back(nextAnimState ? std::make_optional(static_cast<short>(nextAnimState->stateData - asmData.states)) : std::nullopt);
-		//	activeTransitions.push_back(prevAnimState != nullptr && prevAnimState != nextAnimState ? std::make_optional(std::make_pair(prevAnimState->stateData - asmData.states, nextAnimState->stateData - asmData.states)) : std::nullopt);
-		//}
-
+		autoLayout.Begin();
 
 		for (unsigned short i = 0; i < asmData.stateCount; i++) {
 			auto& state = asmData.states[i];
-			auto autoLayoutNode = autoLayout[i];
 
 			auto color = NodeEd::GetStyle().Colors[NodeEd::StyleColor_NodeBorder];
 			AnimationStateMachine::LayerInfo* layer = nullptr;
@@ -131,82 +68,104 @@ namespace ui::operation_modes::modes::asm_editor
 			}
 
 			NodeEd::PushStyleColor(NodeEd::StyleColor_NodeBorder, color);
-			if (!autoLayouted)
-				NodeEd::SetNodePosition(GetStateId(i), { static_cast<float>(autoLayoutGraphAttributes.y(autoLayoutNode)), static_cast<float>(autoLayoutGraphAttributes.x(autoLayoutNode)) });
-			NodeEd::BeginNode(GetStateId(i));
+			NodeEd::BeginNode(GetNodeId(i));
 
 			ImGui::PushID(i);
 
 			ImGui::BeginGroup();
-			NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowSize, 10.0f);
-			NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowWidth, 10.0f);
-			NodeEd::BeginPin(GetInputPinId(i), NodeEd::PinKind::Input);
-			ImGui::Dummy({ 10.0f, 10.0f });
-			//ImGui::Text("In");
-			NodeEd::EndPin();
-			NodeEd::PopStyleVar(2);
+			RenderInputPin(i);
 			ImGui::EndGroup();
 
 			ImGui::SameLine();
 
 			ImGui::BeginGroup();
-			ImGui::Text("%s", state.name);
+			auto textSize = ImGui::CalcTextSize(state.name).x + 10.0f;
+			bool found = false;
+			for (auto l : context.gocAnimator->animationStateMachine->layers) {
+				if (l.layerState == nullptr)
+					continue;
+
+				auto* prevAnimState = l.layerState->GetPreviousAnimationState();
+				auto* nextAnimState = l.layerState->GetNextAnimationState();
+
+				auto layerColor = ImPlot::GetColormapColor(l.layerId);
+
+				if (nextAnimState && nextAnimState->stateData == &state) {
+					ImGui::ProgressBar(nextAnimState->implementation.currentTime / nextAnimState->implementation.duration, { textSize, 0.0f }, state.name);
+					found = true;
+					break;
+				}
+				else if (prevAnimState && prevAnimState->stateData == &state) {
+					ImGui::ProgressBar(prevAnimState->implementation.currentTime / prevAnimState->implementation.duration, { textSize, 0.0f }, state.name);
+					found = true;
+					break;
+				}
+			}
+			if (!found)
+				ImGui::ProgressBar(0.0f, { textSize, 0.0f }, state.name);
+
+			Editor("Duration", state.speed);
+			if (state.type == StateType::CLIP) {
+				auto& clipData = asmData.clips[state.rootBlendNodeOrClipIndex];
+				ImGui::Text("Resanem: %s", clipData.name);
+				//Viewer("Animation resource", clipData.name);
+				Editor("Animation start", clipData.animationSettings.start);
+				Editor("Animation end", clipData.animationSettings.end);
+				Editor("Animation speed", clipData.animationSettings.speed);
+				Editor("Looping", clipData.animationSettings.loops);
+			}
+
 			ImGui::EndGroup();
 
 			ImGui::SameLine();
 
 			ImGui::BeginGroup();
-			NodeEd::BeginPin(GetOutputPinId(i), NodeEd::PinKind::Output);
-			ImGui::Dummy({ 10.0f, 10.0f });
-			//ImGui::Text("Out");
-			NodeEd::EndPin();
+
+			float maxTextWidth = 0.0f;
+			for (unsigned short j = 0; j < state.eventCount; j++) {
+				auto& event = asmData.events[state.eventOffset + j];
+				maxTextWidth = std::fmaxf(maxTextWidth, ImGui::CalcTextSize(event.name).x);
+			}
+
+			RenderDefaultTransitionPin(i, maxTextWidth);
+			RenderTransitionPin(i, maxTextWidth);
+
+			for (unsigned short j = 0; j < state.eventCount; j++)
+				RenderEventPin(i, j, asmData.events[state.eventOffset + j], maxTextWidth);
+
 			ImGui::EndGroup();
 
 			ImGui::PopID();
 
 			NodeEd::EndNode();
+			autoLayout.AddNode(GetNodeId(i));
 			NodeEd::PopStyleColor();
 		}
 
 		for (unsigned short i = 0; i < asmData.stateCount; i++) {
 			auto& state = asmData.states[i];
 			auto targetStateIndex = state.stateEndTransition.transitionInfo.targetStateIndex;
-			
+
 			if (targetStateIndex != -1) {
-				NodeEd::Link(GetLinkId(i, targetStateIndex), GetOutputPinId(i), GetInputPinId(targetStateIndex), { 0.6f, 0.6f, 0.6f, 1.0f });
+				RenderLink(GetDefaultTransitionPinId(i), targetStateIndex, {1.0f, 1.0f, 1.0f, 1.0f});
+				autoLayout.AddLink(GetNodeId(i), GetNodeId(targetStateIndex));
 			}
 
 
 			for (unsigned short j = 0; j < state.eventCount; j++) {
 				auto& event = asmData.events[state.eventOffset + j];
 
-				NodeEd::Link(GetLinkId(i, event.transition.transitionInfo.targetStateIndex), GetOutputPinId(i), GetInputPinId(event.transition.transitionInfo.targetStateIndex), { 0.0f, 0.4f, 0.8f, 1.0f });
+				RenderLink(GetEventPinId(i, j), event.transition.transitionInfo.targetStateIndex, {0.965f, 0.243f, 0.235f, 1.0f});
+				autoLayout.AddLink(GetNodeId(i), GetNodeId(event.transition.transitionInfo.targetStateIndex));
 			}
 
 			if (state.transitionArrayIndex != -1) {
-				if (NodeEd::IsNodeSelected(GetStateId(i))) {
+				if (NodeEd::IsNodeSelected(GetNodeId(i))) {
 					auto& transitionArray = asmData.transitionArrays[state.transitionArrayIndex];
 					auto* transitions = &asmData.transitions[transitionArray.offset];
 
 					for (int j = 0; j < transitionArray.size; j++)
-						NodeEd::Link(GetLinkId(i, transitions[j].transitionInfo.targetStateIndex), GetOutputPinId(i), GetInputPinId(transitions[j].transitionInfo.targetStateIndex), { 0.6f, 0.6f, 0.0f, 1.0f });
-				}
-				else {
-					for (auto l : context.gocAnimator->animationStateMachine->layers) {
-						if (l.layerState == nullptr)
-							continue;
-
-						auto* prevAnimState = l.layerState->GetPreviousAnimationState();
-						auto* nextAnimState = l.layerState->GetNextAnimationState();
-
-						if (prevAnimState && nextAnimState && prevAnimState != nextAnimState) {
-							short prevId = prevAnimState->stateData - asmData.states;
-							short nextId = nextAnimState->stateData - asmData.states;
-
-							if (prevId == i)
-								NodeEd::Link(GetLinkId(prevId, nextId), GetOutputPinId(prevId), GetInputPinId(nextId));
-						}
-					}
+						RenderLink(GetTransitionPinId(i), transitions[j].transitionInfo.targetStateIndex, { 0.0f, 0.8f, 0.8f, 1.0f });
 				}
 			}
 		}
@@ -221,38 +180,138 @@ namespace ui::operation_modes::modes::asm_editor
 			if (prevAnimState && nextAnimState && prevAnimState != nextAnimState) {
 				short prevId = prevAnimState->stateData - asmData.states;
 				short nextId = nextAnimState->stateData - asmData.states;
+				auto outputPin = ResolveOutputPin(prevId, nextId);
 
-				auto layerColor = ImPlot::GetColormapColor(l.layerId);
-
-				NodeEd::Flow(GetLinkId(prevId, nextId));
+				NodeEd::Flow(GetLinkId(outputPin, nextId));
 			}
 		}
+
+		autoLayout.End();
 
 		NodeEd::End();
 		NodeEd::PopStyleVar(3);
 		NodeEd::SetCurrentEditor(nullptr);
 		ImPlot::PopColormap();
-
-		autoLayouted = true;
 	}
 
-	ax::NodeEditor::NodeId ASMEditor::GetStateId(short stateId)
+	ax::NodeEditor::NodeId ASMEditor::GetNodeId(short stateId)
 	{
 		return stateId;
 	}
 
+	ax::NodeEditor::PinId ASMEditor::GetPinId(short stateId, PinType type, unsigned short idx)
+	{
+		unsigned long long lStateId = stateId;
+		unsigned long long lType = static_cast<unsigned long long>(type);
+		unsigned long long lIdx = idx;
+
+		return (lStateId << 16) | (lType << 14) | lIdx;
+	}
+
 	ax::NodeEditor::PinId ASMEditor::GetInputPinId(short stateId)
 	{
-		return (stateId << 1) | 0;
+		return GetPinId(stateId, PinType::INPUT, 0);
 	}
 
-	ax::NodeEditor::PinId ASMEditor::GetOutputPinId(short stateId)
+	ax::NodeEditor::PinId ASMEditor::GetDefaultTransitionPinId(short stateId)
 	{
-		return (stateId << 1) | 1;
+		return GetPinId(stateId, PinType::DEFAULT_TRANSITION, 0);
 	}
 
-	ax::NodeEditor::LinkId ASMEditor::GetLinkId(short fromStateId, short toStateId)
+	ax::NodeEditor::PinId ASMEditor::GetTransitionPinId(short stateId)
 	{
-		return (fromStateId << 16) | toStateId;
+		return GetPinId(stateId, PinType::TRANSITION, 0);
+	}
+
+	ax::NodeEditor::PinId ASMEditor::GetEventPinId(short stateId, unsigned short idx)
+	{
+		return GetPinId(stateId, PinType::EVENT, idx);
+	}
+
+	ax::NodeEditor::LinkId ASMEditor::GetLinkId(ax::NodeEditor::PinId fromPinId, short toState)
+	{
+		unsigned long long lFromPinId = fromPinId.Get();
+		unsigned long long lToPinId = GetInputPinId(toState).Get();
+
+		return (lFromPinId << 32) | lToPinId;
+	}
+
+	ax::NodeEditor::PinId ASMEditor::ResolveOutputPin(short prevStateId, short nextStateId)
+	{
+		auto& asmData = *GetContext().gocAnimator->asmResourceManager->animatorResource->binaryData;
+		auto& state = asmData.states[prevStateId];
+
+		if (state.stateEndTransition.transitionInfo.targetStateIndex == nextStateId)
+			return GetDefaultTransitionPinId(prevStateId);
+		
+		for (unsigned short j = 0; j < state.eventCount; j++) {
+			auto& event = asmData.events[state.eventOffset + j];
+
+			if (event.transition.transitionInfo.targetStateIndex == nextStateId)
+				return GetEventPinId(prevStateId, j);
+		}
+
+		if (state.transitionArrayIndex == -1 || !NodeEd::IsNodeSelected(GetNodeId(prevStateId)))
+			RenderLink(GetTransitionPinId(prevStateId), nextStateId, { 0.0f, 0.8f, 0.8f, 1.0f });
+
+		return GetTransitionPinId(prevStateId);
+	}
+
+	void ASMEditor::RenderInputPin(short stateId)
+	{
+		NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowSize, 10.0f);
+		NodeEd::PushStyleVar(NodeEd::StyleVar_PinArrowWidth, 10.0f);
+		NodeEd::BeginPin(GetInputPinId(stateId), NodeEd::PinKind::Input);
+		ImGui::Dummy({ 10.0f, 10.0f });
+		auto itemRectMin = ImGui::GetItemRectMin();
+		ImVec2 arrowHead[] = { { itemRectMin.x, itemRectMin.y }, { itemRectMin.x + 5.0f, itemRectMin.y }, { itemRectMin.x + 10.0f, itemRectMin.y + 5.0f }, { itemRectMin.x + 5.0f, itemRectMin.y + 10.0f }, { itemRectMin.x, itemRectMin.y + 10.0f } };
+		ImGui::GetWindowDrawList()->AddConvexPolyFilled(arrowHead, 5, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
+		NodeEd::EndPin();
+		NodeEd::PopStyleVar(2);
+	}
+
+	void ASMEditor::RenderDefaultTransitionPin(short stateId, float textWidth)
+	{
+		NodeEd::BeginPin(GetDefaultTransitionPinId(stateId), NodeEd::PinKind::Output);
+		ImGui::Dummy({ textWidth, 0.0f });
+		ImGui::SameLine();
+		ImGui::Dummy({ 10.0f, 10.0f });
+		auto itemRectMin = ImGui::GetItemRectMin();
+		ImVec2 arrowHead[] = { { itemRectMin.x, itemRectMin.y }, { itemRectMin.x + 5.0f, itemRectMin.y }, { itemRectMin.x + 10.0f, itemRectMin.y + 5.0f }, { itemRectMin.x + 5.0f, itemRectMin.y + 10.0f }, { itemRectMin.x, itemRectMin.y + 10.0f } };
+		ImGui::GetWindowDrawList()->AddConvexPolyFilled(arrowHead, 5, ImGui::GetColorU32({ 1.0f, 1.0f, 1.0f, 1.0f }));
+		NodeEd::EndPin();
+	}
+
+	void ASMEditor::RenderTransitionPin(short stateId, float textWidth)
+	{
+		NodeEd::BeginPin(GetTransitionPinId(stateId), NodeEd::PinKind::Output);
+		ImGui::Dummy({ textWidth, 0.0f });
+		ImGui::SameLine();
+		ImGui::Dummy({ 10.0f, 10.0f });
+		auto itemRectMin = ImGui::GetItemRectMin();
+		ImVec2 arrowHead[] = { { itemRectMin.x, itemRectMin.y }, { itemRectMin.x + 5.0f, itemRectMin.y }, { itemRectMin.x + 10.0f, itemRectMin.y + 5.0f }, { itemRectMin.x + 5.0f, itemRectMin.y + 10.0f }, { itemRectMin.x, itemRectMin.y + 10.0f } };
+		ImGui::GetWindowDrawList()->AddConvexPolyFilled(arrowHead, 5, ImGui::GetColorU32({ 0.0f, 0.8f, 0.8f, 1.0f }));
+		NodeEd::EndPin();
+	}
+
+	void ASMEditor::RenderEventPin(short stateId, short eventId, EventData& event, float textWidth)
+	{
+		NodeEd::BeginPin(GetEventPinId(stateId, eventId), NodeEd::PinKind::Output);
+		ImGui::Dummy({ textWidth - ImGui::CalcTextSize(event.name).x - ImGui::GetStyle().ItemSpacing.x, 0.0f});
+		ImGui::SameLine();
+		ImGui::PushStyleColor(ImGuiCol_Text, { 0.965f, 0.243f, 0.235f, 1.0f });
+		ImGui::Text("%s", event.name);
+		ImGui::PopStyleColor();
+		ImGui::SameLine();
+		ImGui::Dummy({ 10.0f, 10.0f });
+		auto itemRectMin = ImGui::GetItemRectMin();
+		auto itemRectMax = ImGui::GetItemRectMax();
+		ImGui::GetWindowDrawList()->AddRectFilled(itemRectMin, itemRectMax, ImGui::GetColorU32({ 0.965f, 0.243f, 0.235f, 1.0f }));
+		NodeEd::EndPin();
+	}
+
+	void ASMEditor::RenderLink(ax::NodeEditor::PinId sourcePin, short targetStateId, const ImVec4& color)
+	{
+		NodeEd::Link(GetLinkId(sourcePin, targetStateId), sourcePin, GetInputPinId(targetStateId), color);
 	}
 }

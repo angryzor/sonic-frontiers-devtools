@@ -27,7 +27,11 @@ namespace ui::operation_modes::modes::asm_editor {
 		auto& asmData = *gocAnimator->asmResourceManager->animatorResource->binaryData;
 
 		NodeEd::SetCurrentEditor(context);
+		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowDuration, 0.25f);
+		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowMarkerDistance, 45.0f);
+		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowSpeed, 300.0f);
 		NodeEd::Begin("Editor");
+		autoLayout.Begin();
 		for (unsigned short i = 0; i < asmData.stateCount; i++) {
 			auto& state = asmData.states[i];
 
@@ -35,7 +39,9 @@ namespace ui::operation_modes::modes::asm_editor {
 				RenderNode(nullptr, state.rootBlendNodeOrClipIndex);
 		}
 		RenderNode(focusedRootBlendNode, focusedRootBlendNodeIndex);
+		autoLayout.End();
 		NodeEd::End();
+		NodeEd::PopStyleVar(3);
 		NodeEd::SetCurrentEditor(nullptr);
 	}
 
@@ -130,6 +136,7 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		auto& clipData = gocAnimator->asmResourceManager->animatorResource->binaryData->clips[nodeData.childNodeArrayOffset];
 		Viewer("Animation resource", clipData.name);
+		CheckboxFlags("Mirror", clipData.animationSettings.flags, ClipData::AnimationSettings::Flag::MIRROR);
 		Editor("Animation start", clipData.animationSettings.start);
 		Editor("Animation end", clipData.animationSettings.end);
 		Editor("Animation speed", clipData.animationSettings.speed);
@@ -172,17 +179,32 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	void BlendTreeEditor::RenderNodeLinks(hh::anim::BranchBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
 	{
-		for (unsigned short i = 0; i < nodeData.childNodeArraySize; i++)
+		for (unsigned short i = 0; i < nodeData.childNodeArraySize; i++) {
 			NodeEd::Link(GetLinkId(nodeData.childNodeArrayOffset + i, 0, nodeId, i), GetOutputPinId(nodeData.childNodeArrayOffset + i, 0), GetInputPinId(nodeId, i));
+			autoLayout.AddLink(GetNodeId(nodeData.childNodeArrayOffset + i), GetNodeId(nodeId));
+		}
 	}
 
 	void BlendTreeEditor::RenderNodeLinks(hh::anim::LayerBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
 	{
 		auto& layer = gocAnimator->animationStateMachine->layers[nodeData.childNodeArrayOffset];
 
-		if (AnimationStateMachine::LayerStateBase* layerState = layer.layerState)
-			if (auto* animationState = layerState->GetNextAnimationState())
-				NodeEd::Link(GetLinkId(animationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(animationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
+		if (AnimationStateMachine::LayerStateBase* layerState = layer.layerState) {
+			auto* nextAnimationState = layerState->GetNextAnimationState();
+			auto* prevAnimationState = layerState->GetPreviousAnimationState();
+
+			if (nextAnimationState && nextAnimationState->stateData->type == StateType::BLEND_TREE) {
+				NodeEd::Link(GetLinkId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
+				if (prevAnimationState && nextAnimationState != prevAnimationState)
+					NodeEd::Flow(GetLinkId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), NodeEd::FlowDirection::Backward);
+			}
+
+			if (prevAnimationState && prevAnimationState->stateData->type == StateType::BLEND_TREE) {
+				NodeEd::Link(GetLinkId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
+				if (nextAnimationState && nextAnimationState != prevAnimationState)
+					NodeEd::Flow(GetLinkId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0));
+			}
+		}
 	}
 
 	ax::NodeEditor::NodeId BlendTreeEditor::GetNodeId(short nodeId)
@@ -192,15 +214,26 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	ax::NodeEditor::PinId BlendTreeEditor::GetInputPinId(short nodeId, unsigned short idx)
 	{
-		return (nodeId << 17) | (0 << 16) | idx;
+		unsigned long long lNodeId = nodeId;
+		unsigned long long lIdx = idx;
+
+		return (lNodeId << 17) | (0 << 16) | lIdx;
 	}
 
 	ax::NodeEditor::PinId BlendTreeEditor::GetOutputPinId(short nodeId, unsigned short idx)
 	{
-		return (nodeId << 17) | (1 << 16) | idx;
+		unsigned long long lNodeId = nodeId;
+		unsigned long long lIdx = idx;
+
+		return (lNodeId << 17) | (1 << 16) | lIdx;
 	}
 	ax::NodeEditor::LinkId BlendTreeEditor::GetLinkId(short fromNodeId, unsigned short fromOutputPinIdx, short toNodeId, unsigned short toOutputPinIdx)
 	{
-		return (((fromNodeId << 16) | fromOutputPinIdx) << 32) | ((toNodeId << 16) | toOutputPinIdx);
+		unsigned long long lFromNodeId = fromNodeId;
+		unsigned long long lFromOutputPinIdx = fromOutputPinIdx;
+		unsigned long long lToNodeId = toNodeId;
+		unsigned long long lToOutputPinIdx = toOutputPinIdx;
+
+		return (((lFromNodeId << 16) | lFromOutputPinIdx) << 32) | ((lToNodeId << 16) | lToOutputPinIdx);
 	}
 }

@@ -8,6 +8,10 @@ void RenderComponentInspector(hh::physics::GOCCollider& component)
 	ImGui::Text("Shape type: %d", component.shapeType);
 	ImGui::Text("Filter category: %d", component.filterCategory);
 
+	bool enabled = component.flags.test(hh::physics::GOCCollider::Flag::ENABLED);
+	if (Editor("Enabled", enabled))
+		component.SetEnabled(enabled);
+
 #ifndef DEVTOOLS_TARGET_SDK_wars
 	ImGui::SeparatorText("Local world position (editable form)");
 	ImGui::BeginGroup();
