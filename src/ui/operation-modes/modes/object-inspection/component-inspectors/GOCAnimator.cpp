@@ -58,7 +58,7 @@ void RenderComponentInspector(hh::anim::GOCAnimator& component)
 	bool nope{ false };
 	if (ImGui::Button("ASM Editor")) {
 		auto* host = new (Desktop::instance->GetAllocator()) StandaloneOperationModeHost<ui::operation_modes::modes::asm_editor::ASMEditor>{ Desktop::instance->GetAllocator() };
-		host->operationMode.GetContext().gocAnimator = &component;
+		host->operationMode.SetGOCAnimator(&component);
 	}
 
 	const char* select{ "Select one" };

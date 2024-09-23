@@ -18,6 +18,7 @@ namespace resources {
 		class ResourceListener : public hh::fnd::ResourceManager::Listener {
 		public:
 			ResourceListener();
+			virtual ~ResourceListener();
 			virtual void ResourceRemovedCallback(hh::fnd::ManagedResource* resource) override;
 		};
 		ResourceListener resourceListener{};

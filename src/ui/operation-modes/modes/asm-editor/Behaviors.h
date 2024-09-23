@@ -7,7 +7,7 @@
 #include "SurfRideElement.h"
 #include "Context.h"
 
-namespace ui::operation_modes::modes::surfride_editor {
+namespace ui::operation_modes::modes::asm_editor {
 	using namespace SurfRide;
 
 	template<> struct MousePicking3DRecursiveRaycastBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {

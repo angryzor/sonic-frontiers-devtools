@@ -1,5 +1,8 @@
 #include "ShapeList.h"
 #include "Behaviors.h"
+#include <ui/GlobalSettings.h>
+#include <io/binary/containers/binary-file/BinaryFile.h>
+#include <io/binary/serialization/resource-rfls/ResFxColFile2.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
@@ -18,6 +21,26 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		}
 
 		auto* fxColData = fxColManager->resource->fxColData;
+
+		if (ImGui::Button("Export")) {
+			IGFD::FileDialogConfig cfg{};
+			cfg.path = GlobalSettings::defaultFileDialogDirectory;
+			cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
+			cfg.userDatas = fxColData;
+			ImGuiFileDialog::Instance()->OpenDialog("ResFxColFile2ExportDialog", "Choose File", ".fxcol", cfg);
+		}
+
+		if (ImGuiFileDialog::Instance()->Display("ResFxColFile2ExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				auto* exportData = static_cast<app::gfx::FxColData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+
+				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				std::wstring wFilePath(filePath.begin(), filePath.end());
+
+				devtools::io::binary::containers::BinaryFile::Serialize(wFilePath.c_str(), exportData, &hh::fnd::RflClassTraits<app::gfx::FxColData>::rflClass);
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
 
 		auto& context = GetContext();
 		const char* targetBoundingVolumePreview = "<none>";

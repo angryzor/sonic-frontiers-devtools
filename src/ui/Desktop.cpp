@@ -138,11 +138,6 @@ void Desktop::OpenStandaloneWindow(StandaloneWindow* window) {
 	this->windowsThatOpened.push_back(hh::fnd::Reference<StandaloneWindow>{ window });
 }
 
-Desktop::~Desktop()
-{
-	delete operationMode;
-}
-
 void Desktop::Dispatch(const ActionBase& action)
 {
 	operationMode->ProcessAction(action);

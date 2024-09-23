@@ -179,9 +179,3 @@ namespace hh::fnd {
 		};
 	}
 }
-
-auto srsColorMembers = hh::fnd::CreateRflClassMembers<void, unsigned char, unsigned char, unsigned char, unsigned char>("r", "g", "b", "a");
-auto srsColorfMembers = hh::fnd::CreateRflClassMembers<void, float, float, float, float>("a", "r", "g", "b");
-
-const hh::fnd::RflClass hh::fnd::RflClassTraitsImpl<SurfRide::Color>::rflClass{ "SurfRideColor", nullptr, static_cast<uint32_t>(sizeof(SurfRide::Color)), nullptr, 0, srsColorMembers.data(), static_cast<uint32_t>(srsColorMembers.size()), nullptr };
-const hh::fnd::RflClass hh::fnd::RflClassTraitsImpl<SurfRide::Colorf>::rflClass{ "SurfRideColorf", nullptr, static_cast<uint32_t>(sizeof(SurfRide::Colorf)), nullptr, 0, srsColorfMembers.data(), static_cast<uint32_t>(srsColorfMembers.size()), nullptr };

@@ -1,7 +1,6 @@
 #pragma once
 #include <utilities/CompatibleObject.h>
 #include <random>
-#include "SurfRideElement.h"
 
 namespace ui::operation_modes::modes::asm_editor {
 	class Context : public CompatibleObject {

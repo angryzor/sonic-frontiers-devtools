@@ -50,6 +50,7 @@ namespace resources {
 
 	void ManagedMemoryRegistry::Deinit()
 	{
+		instance->~ManagedMemoryRegistry();
 		instance->GetAllocator()->Free(instance);
 	}
 
@@ -97,6 +98,11 @@ namespace resources {
 	ManagedMemoryRegistry::ResourceListener::ResourceListener()
 	{
 		hh::fnd::ResourceManager::GetInstance()->AddListener(this);
+	}
+
+	ManagedMemoryRegistry::ResourceListener::~ResourceListener()
+	{
+		hh::fnd::ResourceManager::GetInstance()->RemoveListener(this);
 	}
 
 	void ManagedMemoryRegistry::ResourceListener::ResourceRemovedCallback(hh::fnd::ManagedResource* resource)

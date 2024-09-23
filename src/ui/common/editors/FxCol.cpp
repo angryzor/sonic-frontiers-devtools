@@ -145,9 +145,10 @@ bool Editor(const char* label, FxColCollisionShape& shape, ResFxColFile2* resour
 		ImGui::SeparatorText("Parameters");
 		edited |= Editor("Priority", shape.priority);
 		edited |= Editor("Unk1", shape.unk1);
-		edited |= Editor("Unk11", shape.unk11);
-		edited |= Editor("Unk12", shape.unk12);
-		edited |= Editor("Unk13", shape.unk13);
+		if (resource == nullptr)
+			Viewer("Name", shape.unk2);
+		else
+			edited |= InputText("Name", const_cast<char*&>(shape.unk2), resource);
 
 		edited |= ComboEnum("Type", shape.type, collisionShapeTypeNames);
 		edited |= Editor("Parameters", shape.type, shape.parameters);

@@ -25,7 +25,6 @@ public:
 
     ID3D11ShaderResourceView* iconView;
     Desktop(csl::fnd::IAllocator* allocator);
-    ~Desktop();
     void Render();
     void RenderSceneWindow();
     void RenderOverlayWindow();

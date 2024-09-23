@@ -77,9 +77,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		shape.extents.sphere.borderThickness = 1.0f;
 		shape.parameters.sceneParameterIndex.sceneParameterIndex = 0;
 		shape.parameters.sceneParameterIndex.interpolationTime = 1.0f;
-		shape.unk11 = 0;
-		shape.unk12 = 0;
-		shape.unk13 = 0;
+		shape.unk2 = nullptr;
 		shape.position = position;
 		shape.rotation = Eigen::Quaternionf::Identity();
 

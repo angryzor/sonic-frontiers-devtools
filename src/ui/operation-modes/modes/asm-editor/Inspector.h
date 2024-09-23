@@ -2,8 +2,8 @@
 #include <ui/operation-modes/Panel.h>
 #include "Context.h"
 
-namespace ui::operation_modes::modes::surfride_editor {
-    class ElementInspector : public Panel<Context> {
+namespace ui::operation_modes::modes::asm_editor {
+    class Inspector : public Panel<Context> {
     public:
         using Panel::Panel;
 

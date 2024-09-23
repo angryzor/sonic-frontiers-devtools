@@ -2,46 +2,44 @@
 #include <imgui_node_editor.h>
 #include <ui/operation-modes/OperationMode.h>
 #include "Context.h"
-//#include <ogdf/basic/Graph.h>
-//#include <ogdf/basic/GraphAttributes.h>
 #include <ui/common/NodeEditorAutoLayout.h>
+#include "NodeEditor.h"
 
 namespace ui::operation_modes::modes::asm_editor
 {
 	class ASMEditor : public OperationMode<Context>
 	{
-		ax::NodeEditor::EditorContext* edContext{};
-		NodeEditorAutoLayout autoLayout{ GetAllocator(), edContext};
-		//ogdf::Graph autoLayoutGraph{};
-		//ogdf::GraphAttributes autoLayoutGraphAttributes{ autoLayoutGraph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics };
-		//csl::ut::MoveArray<ogdf::node> autoLayout{ GetAllocator() };
-		//bool autoLayouted{ false };
+		hh::fnd::Reference<NodeEditor> nodeEditor{};
+		csl::ut::MoveArray<float> outputPinTextWidths{ GetAllocator() };
+		bool initialized{};
 
 	public:
-		ASMEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host);
-		virtual ~ASMEditor();
+		using OperationMode<Context>::OperationMode;
+
 		virtual void RenderScene() override;
+		void SetGOCAnimator(hh::anim::GOCAnimator* gocAnimator);
 
 	private:
-		enum class PinType : unsigned char {
-			INPUT,
-			DEFAULT_TRANSITION,
-			TRANSITION,
-			EVENT,
+		struct ActiveLayerInfo {
+			hh::anim::AnimationStateMachine::LayerInfo& layer;
+			hh::anim::AnimationState* prevState;
+			hh::anim::AnimationState* nextState;
 		};
 
-		static ax::NodeEditor::NodeId GetNodeId(short stateId);
-		static ax::NodeEditor::PinId GetPinId(short stateId, PinType type, unsigned short idx);
-		static ax::NodeEditor::PinId GetInputPinId(short stateId);
-		static ax::NodeEditor::PinId GetDefaultTransitionPinId(short stateId);
-		static ax::NodeEditor::PinId GetTransitionPinId(short stateId);
-		static ax::NodeEditor::PinId GetEventPinId(short stateId, unsigned short idx);
-		static ax::NodeEditor::LinkId GetLinkId(ax::NodeEditor::PinId fromPinId, short toState);
-		ax::NodeEditor::PinId ResolveOutputPin(short prevStateId, short nextStateId);
-		static void RenderInputPin(short stateId);
-		static void RenderDefaultTransitionPin(short stateId, float textWidth);
-		static void RenderTransitionPin(short stateId, float textWidth);
-		static void RenderEventPin(short stateId, short eventId, hh::anim::EventData& event, float textWidth);
-		static void RenderLink(ax::NodeEditor::PinId sourcePin, short targetStateId, const ImVec4& color);
+		auto GetActiveLayers() {
+			return std::views::all(GetContext().gocAnimator->animationStateMachine->layers)
+				| std::views::filter([](auto l) { return l.layerState != nullptr; })
+				| std::views::transform([](auto l) { return ActiveLayerInfo{ l, l.layerState->GetPreviousAnimationState(), l.layerState->GetNextAnimationState() }; });
+		}
+
+
+		void CalculateOutputPinWidths();
+		ImVec4 CalculateNodeColor(hh::anim::StateData& state);
+		float CalculateProgress(hh::anim::StateData& state);
+
+		void RenderNodes();
+		void RenderTransitions();
+		void RenderFlow();
+		void RenderFlow(short prevStateId, short nextStateId);
 	};
 }

@@ -1,4 +1,4 @@
-#include "ElementInspector.h"
+#include "Inspector.h"
 #include "SurfRideElement.h"
 #include "Behaviors.h"
 #include <resources/ManagedMemoryRegistry.h>
@@ -6,10 +6,10 @@
 #include <ui/common/editors/SurfRide.h>
 #include <ui/common/viewers/Basic.h>
 
-namespace ui::operation_modes::modes::surfride_editor {
+namespace ui::operation_modes::modes::asm_editor {
 	using namespace SurfRide;
 
-	void ElementInspector::RenderPanel()
+	void Inspector::RenderPanel()
 	{
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
@@ -39,12 +39,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	PanelTraits ElementInspector::GetPanelTraits() const
+	PanelTraits Inspector::GetPanelTraits() const
 	{
 		return { "Element inspector", ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImVec2(1, 0) };
 	}
 
-	void ElementInspector::RenderSceneInspector(Scene& scene)
+	void Inspector::RenderSceneInspector(Scene& scene)
 	{
 		ImGui::SeparatorText("Scene");
 		ImGui::Text("ID: %d", scene.sceneData->id);
@@ -67,7 +67,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderLayerInspector(Layer& layer)
+	void Inspector::RenderLayerInspector(Layer& layer)
 	{
 		ImGui::SeparatorText("Layer");
 		ImGui::Text("ID: %d", layer.layerData->id);
@@ -111,7 +111,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 #endif
 	}
 
-	void ElementInspector::RenderCastInspector(Cast& cast)
+	void Inspector::RenderCastInspector(Cast& cast)
 	{
 		switch (static_cast<SurfRide::SRS_CASTNODE::Type>(cast.flags & 0xF)) {
 		case SurfRide::SRS_CASTNODE::Type::NORMAL: RenderNormalCastInspector(static_cast<ImageCast&>(cast)); break;
@@ -122,7 +122,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderBaseCastInspector(Cast& cast)
+	void Inspector::RenderBaseCastInspector(Cast& cast)
 	{
 		Viewer("ID", cast.castData->id);
 		InputText("Name", const_cast<char*&>(cast.castData->name), GetContext().gocSprite->projectResource);
@@ -214,14 +214,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderNormalCastInspector(Cast& cast)
+	void Inspector::RenderNormalCastInspector(Cast& cast)
 	{
 		ImGui::SeparatorText("Cast");
 
 		RenderBaseCastInspector(cast);
 	}
 
-	void ElementInspector::RenderImageCastInspector(ImageCast& cast)
+	void Inspector::RenderImageCastInspector(ImageCast& cast)
 	{
 		ImGui::SeparatorText("Image cast");
 
@@ -262,7 +262,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderReferenceCastInspector(SurfRide::ReferenceCast& cast)
+	void Inspector::RenderReferenceCastInspector(SurfRide::ReferenceCast& cast)
 	{
 		ImGui::SeparatorText("Reference cast");
 
@@ -273,7 +273,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderSliceCastInspector(SurfRide::SliceCast& cast)
+	void Inspector::RenderSliceCastInspector(SurfRide::SliceCast& cast)
 	{
 		ImGui::SeparatorText("Slice cast");
 
@@ -299,7 +299,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderCameraDataInspector(SRS_CAMERA& camera)
+	void Inspector::RenderCameraDataInspector(SRS_CAMERA& camera)
 	{
 		Viewer("ID", camera.id);
 		Viewer("Name", camera.name);

@@ -214,6 +214,7 @@ void Context::init_modules()
 void Context::deinit_modules()
 {
 	resources::ManagedMemoryRegistry::Deinit();
+	Desktop::instance->~Desktop();
 	Desktop::instance->GetAllocator()->Free(Desktop::instance);
 	GOCVisualDebugDrawRenderer::instance = nullptr;
 	ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);

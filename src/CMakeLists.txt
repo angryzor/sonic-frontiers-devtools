@@ -15,6 +15,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Math.cpp
         io/binary/containers/swif/SWIF.cpp
         io/binary/containers/binary-file/BinaryFile.cpp
+        io/binary/serialization/resource-rfls/ResFxColFile2.cpp
         io/binary/serialization/resource-rfls/ResObjectWorld.cpp
         io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
         resources/ManagedMemoryRegistry.cpp
@@ -111,6 +112,7 @@ target_sources(${DEVTOOLS_TARGET}
         io/binary/containers/binary-file/BinaryFile.h
         io/binary/containers/binary-file/EndianSwaps.h
         io/binary/serialization/Reflection.h
+        io/binary/serialization/resource-rfls/ResFxColFile2.h
         io/binary/serialization/resource-rfls/ResObjectWorld.h
         io/binary/serialization/resource-rfls/ResSurfRideProject.h
         io/binary/serialization/Types.h
@@ -141,6 +143,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/inputs/Basic.h
         ui/common/inputs/Needle.h
         ui/common/icons.h
+        ui/common/NodeEditor.h
         ui/common/StandaloneWindow.h
         ui/common/Textures.h
         ui/common/Theme.h
@@ -252,6 +255,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/core-services/RenderingEngineInspector.cpp
             ui/game-modes/GameModeInspector.cpp
             ui/operation-modes/modes/asm-editor/Context.cpp
+            ui/operation-modes/modes/asm-editor/NodeEditor.cpp
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
             ui/operation-modes/modes/asm-editor/ASMEditor.cpp
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.cpp
@@ -276,6 +280,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.h
             ui/operation-modes/modes/asm-editor/Context.h
+            ui/operation-modes/modes/asm-editor/NodeEditor.h
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
             ui/operation-modes/modes/asm-editor/ASMEditor.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h

@@ -13,25 +13,15 @@ namespace ui::operation_modes::modes::asm_editor {
 		char title[400];
 		snprintf(title, sizeof(title), "Blend tree @ %016zx", focusedRootBlendNode);
 		SetTitle(title);
-
-		ax::NodeEditor::Config config{};
-		context = NodeEd::CreateEditor(&config);
-	}
-
-	BlendTreeEditor::~BlendTreeEditor() {
-		NodeEd::DestroyEditor(context);
 	}
 
 	void BlendTreeEditor::RenderContents()
 	{
 		auto& asmData = *gocAnimator->asmResourceManager->animatorResource->binaryData;
 
-		NodeEd::SetCurrentEditor(context);
-		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowDuration, 0.25f);
-		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowMarkerDistance, 45.0f);
-		NodeEd::PushStyleVar(NodeEd::StyleVar_FlowSpeed, 300.0f);
-		NodeEd::Begin("Editor");
-		autoLayout.Begin();
+		nodeEditor.Begin();
+		for (unsigned short i = 0; i < asmData.variableCount; i++)
+			RenderVariable(i);
 		for (unsigned short i = 0; i < asmData.stateCount; i++) {
 			auto& state = asmData.states[i];
 
@@ -39,201 +29,68 @@ namespace ui::operation_modes::modes::asm_editor {
 				RenderNode(nullptr, state.rootBlendNodeOrClipIndex);
 		}
 		RenderNode(focusedRootBlendNode, focusedRootBlendNodeIndex);
-		autoLayout.End();
-		NodeEd::End();
-		NodeEd::PopStyleVar(3);
-		NodeEd::SetCurrentEditor(nullptr);
+		nodeEditor.End();
 	}
 
-	void BlendTreeEditor::RenderNodeControls(hh::anim::BlendSpaceNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
+	void BlendTreeEditor::RenderVariable(short variableId)
 	{
-		RenderNodeControls(static_cast<hh::anim::BlendNodeBase*>(node), nodeId, nodeData);
-
-		auto& asmData = *gocAnimator->asmResourceManager->animatorResource->binaryData;
-		auto& blendSpace = asmData.blendSpaces[nodeData.blendSpaceIndex];
-
-		if (ImPlot::BeginPlot("BlendSpace", { 300.0f, 300.0f })) {
-			ImPlot::SetupAxes(asmData.variables[blendSpace.xVariableIndex], asmData.variables[blendSpace.yVariableIndex], ImPlotAxisFlags_None, ImPlotAxisFlags_None);
-			ImPlot::SetupAxesLimits(blendSpace.xMin, blendSpace.xMax, blendSpace.yMin, blendSpace.yMax);
-
-			for (unsigned short i = 0; i < blendSpace.nodeCount; i++) {
-				auto& node = blendSpace.nodes[i];
-				double x = node.x();
-				double y = node.y();
-
-				if (ImPlot::DragPoint(i, &x, &y, { 1.0f, 1.0f, 1.0f, 1.0f }))
-					node = { x, y };
-				ImPlot::Annotation(x, y, { 1.0f, 1.0f, 1.0f, 0.0f }, { 0.0f, -5.0f }, true, "%s", asmData.clips[blendSpace.clipIndices[i]].name);
-			}
-
-			for (unsigned short i = 0; i < blendSpace.triangleCount; i++) {
-				char name[100];
-				snprintf(name, sizeof(name), "##%d", i);
-				auto& triangle = blendSpace.triangles[i];
-				double triangleXs[] = { blendSpace.nodes[triangle.nodeIndices[0]].x(), blendSpace.nodes[triangle.nodeIndices[1]].x(), blendSpace.nodes[triangle.nodeIndices[2]].x() };
-				double triangleYs[] = { blendSpace.nodes[triangle.nodeIndices[0]].y(), blendSpace.nodes[triangle.nodeIndices[1]].y(), blendSpace.nodes[triangle.nodeIndices[2]].y() };
-				ImPlot::PlotLine(name, triangleXs, triangleYs, 3, ImPlotLineFlags_Loop);
-			}
-
-			double curX = gocAnimator->animationStateMachine->variables[blendSpace.xVariableIndex].bindables.collectionFloat;
-			double curY = gocAnimator->animationStateMachine->variables[blendSpace.yVariableIndex].bindables.collectionFloat;
-
-			ImPlot::PlotScatter("Current", &curX, &curY, 1, ImPlotScatterFlags_None);
-
-			ImPlot::EndPlot();
-		}
+		nodeEditor.Variable(variableId);
 	}
 
 	void BlendTreeEditor::RenderNode(hh::anim::BlendNodeBase* node, short nodeId)
 	{
 		auto& blendNodeData = gocAnimator->asmResourceManager->animatorResource->binaryData->blendNodes[nodeId];
 
+		for (unsigned short i = 0; i < blendNodeData.childNodeArraySize; i++)
+			RenderNode(node == nullptr ? nullptr : node->children[i], blendNodeData.childNodeArrayOffset + i);
+
 		switch (blendNodeData.type) {
-		case BlendNodeType::LERP: RenderNode(static_cast<LerpBlendNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::ADDITIVE: RenderNode(static_cast<AdditiveBlendNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::CLIP: RenderNode(static_cast<ClipNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::OVERRIDE: RenderNode(static_cast<OverrideBlendNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::LAYER: RenderNode(static_cast<LayerBlendNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::MULTIPLY: RenderNode(static_cast<MulBlendNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::BLEND_SPACE: RenderNode(static_cast<BlendSpaceNode*>(node), nodeId, blendNodeData); break;
-		case BlendNodeType::TWO_POINT_LERP: RenderNode(static_cast<TwoPointLerpBlendNode*>(node), nodeId, blendNodeData); break;
+		case BlendNodeType::LERP: nodeEditor.BlendNode(nodeId, static_cast<LerpBlendNode*>(node)); break;
+		case BlendNodeType::ADDITIVE: nodeEditor.BlendNode(nodeId, static_cast<AdditiveBlendNode*>(node)); break;
+		case BlendNodeType::CLIP: nodeEditor.BlendNode(nodeId, static_cast<ClipNode*>(node)); break;
+		case BlendNodeType::OVERRIDE: nodeEditor.BlendNode(nodeId, static_cast<OverrideBlendNode*>(node)); break;
+		case BlendNodeType::LAYER: nodeEditor.BlendNode(nodeId, static_cast<LayerBlendNode*>(node)); break;
+		case BlendNodeType::MULTIPLY: nodeEditor.BlendNode(nodeId, static_cast<MulBlendNode*>(node)); break;
+		case BlendNodeType::BLEND_SPACE: nodeEditor.BlendNode(nodeId, static_cast<BlendSpaceNode*>(node)); break;
+		case BlendNodeType::TWO_POINT_LERP: nodeEditor.BlendNode(nodeId, static_cast<TwoPointLerpBlendNode*>(node)); break;
 		default: assert(false);
 		}
-	}
 
-	void BlendTreeEditor::RenderNodeChildren(hh::anim::BranchBlendNode* node, short nodeId, BlendNodeData& nodeData)
-	{
-		for (unsigned short i = 0; i < nodeData.childNodeArraySize; i++)
-			RenderNode(node == nullptr ? nullptr : node->children[i], nodeData.childNodeArrayOffset + i);
-	}
+		for (unsigned short i = 0; i < blendNodeData.childNodeArraySize; i++)
+			nodeEditor.BlendNodeChildRelationship(blendNodeData.childNodeArrayOffset + i, nodeId, i);
 
-	void BlendTreeEditor::RenderNodeChildren(hh::anim::ClipNode* node, short nodeId, BlendNodeData& nodeData)
-	{
-	}
+		if (blendNodeData.variableIndex != -1)
+			nodeEditor.BlendNodeVariable(blendNodeData.variableIndex, nodeId, 0);
 
-	void BlendTreeEditor::RenderNodeChildren(hh::anim::LayerBlendNode* node, short nodeId, BlendNodeData& nodeData)
-	{
-		//auto& layer = gocAnimator->animationStateMachine->layers[nodeData.childNodeArrayOffset];
+		if (blendNodeData.type == BlendNodeType::BLEND_SPACE && blendNodeData.blendSpaceIndex != -1) {
+			auto& blendSpace = gocAnimator->asmResourceManager->animatorResource->binaryData->blendSpaces[blendNodeData.blendSpaceIndex];
 
-		//if (AnimationStateMachine::LayerStateBase* layerState = layer.layerState)
-		//if (auto* animationState = layerState->GetNextAnimationState())
-		//	RenderNode(*animationState->implementation.blendTree, animationState->stateData->rootBlendNodeIndex);
-	}
-
-	void BlendTreeEditor::RenderNodeTitle(hh::anim::BlendNodeBase* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		ImGui::Text(nodeNames[static_cast<uint8_t>(nodeData.type)]);
-	}
-
-	void BlendTreeEditor::RenderNodeControls(hh::anim::BlendNodeBase* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		Editor("Blend factor", nodeData.blendFactor);
-	}
-
-	void BlendTreeEditor::RenderNodeControls(hh::anim::ClipNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		RenderNodeControls(static_cast<hh::anim::BlendNodeBase*>(node), nodeId, nodeData);
-
-		auto& clipData = gocAnimator->asmResourceManager->animatorResource->binaryData->clips[nodeData.childNodeArrayOffset];
-		Viewer("Animation resource", clipData.name);
-		CheckboxFlags("Mirror", clipData.animationSettings.flags, ClipData::AnimationSettings::Flag::MIRROR);
-		Editor("Animation start", clipData.animationSettings.start);
-		Editor("Animation end", clipData.animationSettings.end);
-		Editor("Animation speed", clipData.animationSettings.speed);
-		Editor("Looping", clipData.animationSettings.loops);
-	}
-
-	void BlendTreeEditor::RenderNodeInputPins(hh::anim::BlendNodeBase* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-	}
-
-	void BlendTreeEditor::RenderNodeInputPins(hh::anim::LayerBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		NodeEd::BeginPin(GetInputPinId(nodeId, 0), NodeEd::PinKind::Input);
-		ImGui::Text("State blend tree");
-		NodeEd::EndPin();
-	}
-
-	void BlendTreeEditor::RenderNodeInputPins(hh::anim::BranchBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		for (unsigned short i = 0; i < nodeData.childNodeArraySize; i++) {
-			NodeEd::BeginPin(GetInputPinId(nodeId, i), NodeEd::PinKind::Input);
-			ImGui::Text("In");
-			NodeEd::EndPin();
+			if (blendSpace.xVariableIndex != -1)
+				nodeEditor.BlendNodeVariable(blendSpace.xVariableIndex, nodeId, 1);
+			if (blendSpace.yVariableIndex != -1)
+				nodeEditor.BlendNodeVariable(blendSpace.yVariableIndex, nodeId, 2);
 		}
 	}
 
-	void BlendTreeEditor::RenderNodeOutputPins(hh::anim::BlendNodeBase* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		ImGui::SetCursorPosX(ImGui::GetCursorPosX() + 200.0f - ImGui::CalcTextSize("Out").x);
-		NodeEd::BeginPin(GetOutputPinId(nodeId, 0), NodeEd::PinKind::Output);
-		NodeEd::PinPivotAlignment({ 1.0f, 0.5f });
-		NodeEd::PinPivotSize({ 0.0f, 0.0f });
-		ImGui::Text("Out");
-		NodeEd::EndPin();
-	}
+	//void BlendTreeEditor::RenderNodeLinks(hh::anim::LayerBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
+	//{
+	//	auto& layer = gocAnimator->animationStateMachine->layers[nodeData.childNodeArrayOffset];
 
-	void BlendTreeEditor::RenderNodeLinks(hh::anim::BlendNodeBase* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-	}
+	//	if (AnimationStateMachine::LayerStateBase* layerState = layer.layerState) {
+	//		auto* nextAnimationState = layerState->GetNextAnimationState();
+	//		auto* prevAnimationState = layerState->GetPreviousAnimationState();
 
-	void BlendTreeEditor::RenderNodeLinks(hh::anim::BranchBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		for (unsigned short i = 0; i < nodeData.childNodeArraySize; i++) {
-			NodeEd::Link(GetLinkId(nodeData.childNodeArrayOffset + i, 0, nodeId, i), GetOutputPinId(nodeData.childNodeArrayOffset + i, 0), GetInputPinId(nodeId, i));
-			autoLayout.AddLink(GetNodeId(nodeData.childNodeArrayOffset + i), GetNodeId(nodeId));
-		}
-	}
+	//		if (nextAnimationState && nextAnimationState->stateData->type == StateType::BLEND_TREE) {
+	//			nodeEditor.Link(GetLinkId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
+	//			if (prevAnimationState && nextAnimationState != prevAnimationState)
+	//				nodeEditor.Flow(GetLinkId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), NodeEd::FlowDirection::Backward);
+	//		}
 
-	void BlendTreeEditor::RenderNodeLinks(hh::anim::LayerBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)
-	{
-		auto& layer = gocAnimator->animationStateMachine->layers[nodeData.childNodeArrayOffset];
-
-		if (AnimationStateMachine::LayerStateBase* layerState = layer.layerState) {
-			auto* nextAnimationState = layerState->GetNextAnimationState();
-			auto* prevAnimationState = layerState->GetPreviousAnimationState();
-
-			if (nextAnimationState && nextAnimationState->stateData->type == StateType::BLEND_TREE) {
-				NodeEd::Link(GetLinkId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
-				if (prevAnimationState && nextAnimationState != prevAnimationState)
-					NodeEd::Flow(GetLinkId(nextAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), NodeEd::FlowDirection::Backward);
-			}
-
-			if (prevAnimationState && prevAnimationState->stateData->type == StateType::BLEND_TREE) {
-				NodeEd::Link(GetLinkId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
-				if (nextAnimationState && nextAnimationState != prevAnimationState)
-					NodeEd::Flow(GetLinkId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0));
-			}
-		}
-	}
-
-	ax::NodeEditor::NodeId BlendTreeEditor::GetNodeId(short nodeId)
-	{
-		return nodeId;
-	}
-
-	ax::NodeEditor::PinId BlendTreeEditor::GetInputPinId(short nodeId, unsigned short idx)
-	{
-		unsigned long long lNodeId = nodeId;
-		unsigned long long lIdx = idx;
-
-		return (lNodeId << 17) | (0 << 16) | lIdx;
-	}
-
-	ax::NodeEditor::PinId BlendTreeEditor::GetOutputPinId(short nodeId, unsigned short idx)
-	{
-		unsigned long long lNodeId = nodeId;
-		unsigned long long lIdx = idx;
-
-		return (lNodeId << 17) | (1 << 16) | lIdx;
-	}
-	ax::NodeEditor::LinkId BlendTreeEditor::GetLinkId(short fromNodeId, unsigned short fromOutputPinIdx, short toNodeId, unsigned short toOutputPinIdx)
-	{
-		unsigned long long lFromNodeId = fromNodeId;
-		unsigned long long lFromOutputPinIdx = fromOutputPinIdx;
-		unsigned long long lToNodeId = toNodeId;
-		unsigned long long lToOutputPinIdx = toOutputPinIdx;
-
-		return (((lFromNodeId << 16) | lFromOutputPinIdx) << 32) | ((lToNodeId << 16) | lToOutputPinIdx);
-	}
+	//		if (prevAnimationState && prevAnimationState->stateData->type == StateType::BLEND_TREE) {
+	//			nodeEditor.Link(GetLinkId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0), GetOutputPinId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0), GetInputPinId(nodeId, 0));
+	//			if (nextAnimationState && nextAnimationState != prevAnimationState)
+	//				nodeEditor.Flow(GetLinkId(prevAnimationState->stateData->rootBlendNodeOrClipIndex, 0, nodeId, 0));
+	//		}
+	//	}
+	//}
 }

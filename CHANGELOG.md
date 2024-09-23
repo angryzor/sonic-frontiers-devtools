@@ -1,3 +1,11 @@
+# v0.1.43
+* Added WIP ResAnimator editor (no export atm).
+* Added FxCol export.
+* Added very barebones GOCPlayerCollider inspector.
+* Added GOCMoveSphereCollisionQuery and GOCCollisionQuery inspector.
+* Fixed resources not being cleaned up properly on exit.
+
+
 # v0.1.42
 * SWIF user data can now be edited properly.
 * Adding and deleting FxCol shapes updates bounding boxes.

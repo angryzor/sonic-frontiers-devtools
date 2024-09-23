@@ -8,12 +8,21 @@
 
 class NodeEditorAutoLayout : public CompatibleObject {
 private:
-	ogdf::Graph graph{};
-	ogdf::GraphAttributes graphAttrs{ graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics };
-	csl::ut::PointerMap<ax::NodeEditor::NodeId, ogdf::node> autoLayout{ GetAllocator() };
+	struct Node {
+		ax::NodeEditor::NodeId id{};
+		ImVec2 size{};
+	};
+
+	struct Edge {
+		ax::NodeEditor::NodeId from{};
+		ax::NodeEditor::NodeId to{};
+	};
+
+	csl::ut::MoveArray<Node> nodes{ GetAllocator() };
+	csl::ut::MoveArray<Edge> edges{ GetAllocator() };
 	bool recalculateRequested{ true };
 	bool recalculationCompleted{ false };
-	std::optional<std::future<void>> recalculationFuture{};
+	std::optional<std::future<csl::ut::PointerMap<ax::NodeEditor::NodeId, ImVec2>>> recalculationFuture{};
 
 public:
 	ax::NodeEditor::EditorContext* context{};
