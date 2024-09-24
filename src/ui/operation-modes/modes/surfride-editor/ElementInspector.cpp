@@ -125,7 +125,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	void ElementInspector::RenderBaseCastInspector(Cast& cast)
 	{
 		Viewer("ID", cast.castData->id);
-		InputText("Name", const_cast<char*&>(cast.castData->name), GetContext().gocSprite->projectResource);
+		InputText("Name", cast.castData->name, GetContext().gocSprite->projectResource);
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		size_t castIndex = cast.index;

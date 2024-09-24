@@ -1,6 +1,9 @@
 #include "BlendTreeEditor.h"
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
+#include <ui/GlobalSettings.h>
+#include <io/binary/containers/binary-file/BinaryFile.h>
+#include <io/binary/serialization/resource-rfls/ResAnimator.h>
 
 namespace ui::operation_modes::modes::asm_editor {
 	using namespace hh::anim;
@@ -19,16 +22,47 @@ namespace ui::operation_modes::modes::asm_editor {
 	{
 		auto& asmData = *gocAnimator->asmResourceManager->animatorResource->binaryData;
 
+		if (ImGui::BeginMenuBar()) {
+			if (ImGui::MenuItem("Export")) {
+				IGFD::FileDialogConfig cfg{};
+				cfg.path = GlobalSettings::defaultFileDialogDirectory;
+				cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
+				cfg.userDatas = &asmData;
+				ImGuiFileDialog::Instance()->OpenDialog("ResAnimatorExportDialog", "Choose File", ".asm", cfg);
+			}
+			if (ImGui::MenuItem("Toggle collapse blend space nodes"))
+				collapseBlendSpaceNodes = !collapseBlendSpaceNodes;
+			if (ImGui::MenuItem("Run auto-layout"))
+				nodeEditor.RunAutoLayout();
+			ImGui::EndMenuBar();
+		}
+
+		if (ImGuiFileDialog::Instance()->Display("ResAnimatorExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+			if (ImGuiFileDialog::Instance()->IsOk()) {
+				auto* exportData = static_cast<hh::anim::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+
+				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
+				std::wstring wFilePath(filePath.begin(), filePath.end());
+
+				devtools::io::binary::containers::BinaryFile::Serialize(wFilePath.c_str(), exportData, &hh::fnd::RflClassTraits<hh::anim::AsmData>::rflClass);
+			}
+			ImGuiFileDialog::Instance()->Close();
+		}
+
 		nodeEditor.Begin();
 		for (unsigned short i = 0; i < asmData.variableCount; i++)
 			RenderVariable(i);
-		for (unsigned short i = 0; i < asmData.stateCount; i++) {
-			auto& state = asmData.states[i];
-
-			if (state.type == StateType::BLEND_TREE)
-				RenderNode(nullptr, state.rootBlendNodeOrClipIndex);
-		}
+		for (unsigned short i = 0; i < asmData.blendMaskCount; i++)
+			RenderBlendMask(i);
+		for (unsigned short i = 0; i < asmData.clipCount; i++)
+			RenderClip(i);
+		if (!collapseBlendSpaceNodes)
+			for (unsigned short i = 0; i < asmData.blendSpaceCount; i++)
+				RenderBlendSpace(i);
+		for (unsigned short i = 0; i < asmData.stateCount; i++)
+			RenderState(i);
 		RenderNode(focusedRootBlendNode, focusedRootBlendNodeIndex);
+		nodeEditor.LayerBlendTreeOutput(focusedRootBlendNodeIndex);
 		nodeEditor.End();
 	}
 
@@ -37,38 +71,108 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.Variable(variableId);
 	}
 
+	void BlendTreeEditor::RenderBlendMask(short blendMaskId)
+	{
+		nodeEditor.BlendMask(blendMaskId);
+	}
+
+	void BlendTreeEditor::RenderClip(short clipId)
+	{
+		auto& clipData = gocAnimator->asmResourceManager->animatorResource->binaryData->clips[clipId];
+
+		nodeEditor.Clip(clipId);
+
+		if (clipData.blendMaskIndex != -1)
+			nodeEditor.ClipBlendMask(clipData.blendMaskIndex, clipId);
+	}
+
+	void BlendTreeEditor::RenderState(short stateId)
+	{
+		auto& state = gocAnimator->asmResourceManager->animatorResource->binaryData->states[stateId];
+
+		if (state.type == StateType::BLEND_TREE)
+			RenderNode(nullptr, state.rootBlendNodeOrClipIndex);
+
+		nodeEditor.State(stateId, ax::NodeEditor::GetStyle().Colors[ax::NodeEditor::StyleColor_NodeBorder], 0.0f);
+
+		switch (state.type) {
+		case StateType::BLEND_TREE:
+			RenderNode(nullptr, state.rootBlendNodeOrClipIndex);
+			nodeEditor.StateBlendNode(state.rootBlendNodeOrClipIndex, stateId);
+			break;
+		case StateType::CLIP:
+			nodeEditor.StateClip(state.rootBlendNodeOrClipIndex, stateId);
+			break;
+		}
+	}
+
+	void BlendTreeEditor::RenderBlendSpace(short blendSpaceId)
+	{
+		auto& blendSpaceData = gocAnimator->asmResourceManager->animatorResource->binaryData->blendSpaces[blendSpaceId];
+
+		nodeEditor.BlendSpace(blendSpaceId);
+
+		if (blendSpaceData.xVariableIndex != -1)
+			nodeEditor.BlendSpaceVariable(blendSpaceData.xVariableIndex, blendSpaceId, 0);
+
+		if (blendSpaceData.yVariableIndex != -1)
+			nodeEditor.BlendSpaceVariable(blendSpaceData.yVariableIndex, blendSpaceId, 1);
+
+		for (unsigned short i = 0; i < blendSpaceData.nodeCount; i++)
+			nodeEditor.BlendSpaceClip(blendSpaceData.clipIndices[i], blendSpaceId, i);
+	}
+
 	void BlendTreeEditor::RenderNode(hh::anim::BlendNodeBase* node, short nodeId)
 	{
-		auto& blendNodeData = gocAnimator->asmResourceManager->animatorResource->binaryData->blendNodes[nodeId];
+		auto& asmData = *gocAnimator->asmResourceManager->animatorResource->binaryData;
+		auto& blendNodeData = asmData.blendNodes[nodeId];
 
-		for (unsigned short i = 0; i < blendNodeData.childNodeArraySize; i++)
-			RenderNode(node == nullptr ? nullptr : node->children[i], blendNodeData.childNodeArrayOffset + i);
+		if (blendNodeData.type != BlendNodeType::BLEND_SPACE || !collapseBlendSpaceNodes)
+			for (unsigned short i = 0; i < blendNodeData.childNodeArraySize; i++)
+				RenderNode(node == nullptr ? nullptr : node->children[i], blendNodeData.childNodeArrayOffset + i);
 
 		switch (blendNodeData.type) {
-		case BlendNodeType::LERP: nodeEditor.BlendNode(nodeId, static_cast<LerpBlendNode*>(node)); break;
-		case BlendNodeType::ADDITIVE: nodeEditor.BlendNode(nodeId, static_cast<AdditiveBlendNode*>(node)); break;
-		case BlendNodeType::CLIP: nodeEditor.BlendNode(nodeId, static_cast<ClipNode*>(node)); break;
-		case BlendNodeType::OVERRIDE: nodeEditor.BlendNode(nodeId, static_cast<OverrideBlendNode*>(node)); break;
-		case BlendNodeType::LAYER: nodeEditor.BlendNode(nodeId, static_cast<LayerBlendNode*>(node)); break;
-		case BlendNodeType::MULTIPLY: nodeEditor.BlendNode(nodeId, static_cast<MulBlendNode*>(node)); break;
-		case BlendNodeType::BLEND_SPACE: nodeEditor.BlendNode(nodeId, static_cast<BlendSpaceNode*>(node)); break;
-		case BlendNodeType::TWO_POINT_LERP: nodeEditor.BlendNode(nodeId, static_cast<TwoPointLerpBlendNode*>(node)); break;
+		case BlendNodeType::LERP: nodeEditor.LerpBlendNode(nodeId, static_cast<LerpBlendNode*>(node)); break;
+		case BlendNodeType::ADDITIVE: nodeEditor.AdditiveBlendNode(nodeId, static_cast<AdditiveBlendNode*>(node)); break;
+		case BlendNodeType::CLIP: nodeEditor.ClipNode(nodeId, static_cast<ClipNode*>(node)); break;
+		case BlendNodeType::OVERRIDE: nodeEditor.OverrideBlendNode(nodeId, static_cast<OverrideBlendNode*>(node)); break;
+		case BlendNodeType::LAYER: nodeEditor.LayerBlendNode(nodeId, static_cast<LayerBlendNode*>(node)); break;
+		case BlendNodeType::MULTIPLY: nodeEditor.MulBlendNode(nodeId, static_cast<MulBlendNode*>(node)); break;
+		case BlendNodeType::TWO_POINT_LERP: nodeEditor.TwoPointLerpBlendNode(nodeId, static_cast<TwoPointLerpBlendNode*>(node)); break;
+		case BlendNodeType::BLEND_SPACE:
+			if (!collapseBlendSpaceNodes)
+				nodeEditor.BlendSpaceNode(nodeId, static_cast<BlendSpaceNode*>(node));
+			else
+				nodeEditor.CollapsedBlendSpaceNode(nodeId, static_cast<BlendSpaceNode*>(node));
+			break;
 		default: assert(false);
 		}
 
-		for (unsigned short i = 0; i < blendNodeData.childNodeArraySize; i++)
-			nodeEditor.BlendNodeChildRelationship(blendNodeData.childNodeArrayOffset + i, nodeId, i);
+		if (blendNodeData.type != BlendNodeType::BLEND_SPACE || !collapseBlendSpaceNodes)
+			for (unsigned short i = 0; i < blendNodeData.childNodeArraySize; i++)
+				nodeEditor.BlendNodeChildRelationship(blendNodeData.childNodeArrayOffset + i, nodeId, i);
 
-		if (blendNodeData.variableIndex != -1)
-			nodeEditor.BlendNodeVariable(blendNodeData.variableIndex, nodeId, 0);
+		if (blendNodeData.blendFactorVariableIndex != -1)
+			nodeEditor.BlendNodeVariable(blendNodeData.blendFactorVariableIndex, nodeId, 0);
+
+		if (blendNodeData.type == BlendNodeType::CLIP && blendNodeData.childNodeArrayOffset != -1)
+			nodeEditor.BlendNodeClip(blendNodeData.childNodeArrayOffset, nodeId, 0);
 
 		if (blendNodeData.type == BlendNodeType::BLEND_SPACE && blendNodeData.blendSpaceIndex != -1) {
-			auto& blendSpace = gocAnimator->asmResourceManager->animatorResource->binaryData->blendSpaces[blendNodeData.blendSpaceIndex];
+			if (!collapseBlendSpaceNodes)
+				nodeEditor.BlendNodeBlendSpace(blendNodeData.blendSpaceIndex, nodeId);
+			else {
+				auto& blendSpaceData = asmData.blendSpaces[blendNodeData.blendSpaceIndex];
 
-			if (blendSpace.xVariableIndex != -1)
-				nodeEditor.BlendNodeVariable(blendSpace.xVariableIndex, nodeId, 1);
-			if (blendSpace.yVariableIndex != -1)
-				nodeEditor.BlendNodeVariable(blendSpace.yVariableIndex, nodeId, 2);
+				if (blendSpaceData.xVariableIndex != -1)
+					nodeEditor.BlendNodeVariable(blendSpaceData.xVariableIndex, nodeId, 1);
+
+				if (blendSpaceData.yVariableIndex != -1)
+					nodeEditor.BlendNodeVariable(blendSpaceData.yVariableIndex, nodeId, 2);
+
+				for (unsigned short i = 0; i < blendSpaceData.nodeCount; i++)
+					nodeEditor.BlendNodeClip(blendSpaceData.clipIndices[i], nodeId, i);
+			}
 		}
 	}
 

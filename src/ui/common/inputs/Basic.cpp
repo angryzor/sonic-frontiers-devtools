@@ -40,10 +40,10 @@ static int CStringResizeCallback(ImGuiInputTextCallbackData* data)
 	return 0;
 }
 
-bool InputText(const char* label, char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags)
+bool InputText(const char* label, const char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags)
 {
-	ManagedResourceString data{ str, resource };
-	bool result = ImGui::InputText(label, str, strlen(str) + 1, flags | ImGuiInputTextFlags_CallbackResize, CStringResizeCallback, &data);
+	ManagedResourceString data{ const_cast<char*&>(str), resource };
+	bool result = ImGui::InputText(label, const_cast<char*&>(str), strlen(str) + 1, flags | ImGuiInputTextFlags_CallbackResize, CStringResizeCallback, &data);
 	str = data.str;
 	return result;
 }

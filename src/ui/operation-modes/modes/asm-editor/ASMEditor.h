@@ -28,8 +28,8 @@ namespace ui::operation_modes::modes::asm_editor
 
 		auto GetActiveLayers() {
 			return std::views::all(GetContext().gocAnimator->animationStateMachine->layers)
-				| std::views::filter([](auto l) { return l.layerState != nullptr; })
-				| std::views::transform([](auto l) { return ActiveLayerInfo{ l, l.layerState->GetPreviousAnimationState(), l.layerState->GetNextAnimationState() }; });
+				| std::views::filter([](auto& l) { return l.layerState != nullptr; })
+				| std::views::transform([](auto& l) { return ActiveLayerInfo{ l, l.layerState->GetPreviousAnimationState(), l.layerState->GetNextAnimationState() }; });
 		}
 
 

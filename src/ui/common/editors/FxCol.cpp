@@ -134,7 +134,7 @@ bool Editor(const char* label, FxColCollisionShape& shape, ResFxColFile2* resour
 		if (resource == nullptr)
 			Viewer("Name", shape.name);
 		else
-			edited |= InputText("Name", const_cast<char*&>(shape.name), resource);
+			edited |= InputText("Name", shape.name, resource);
 
 		ImGui::SeparatorText("Collision shape");
 		edited |= Editor("Position", shape.position);
@@ -148,7 +148,7 @@ bool Editor(const char* label, FxColCollisionShape& shape, ResFxColFile2* resour
 		if (resource == nullptr)
 			Viewer("Name", shape.unk2);
 		else
-			edited |= InputText("Name", const_cast<char*&>(shape.unk2), resource);
+			edited |= InputText("Name", shape.unk2, resource);
 
 		edited |= ComboEnum("Type", shape.type, collisionShapeTypeNames);
 		edited |= Editor("Parameters", shape.type, shape.parameters);

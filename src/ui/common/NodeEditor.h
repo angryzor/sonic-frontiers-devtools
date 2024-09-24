@@ -23,6 +23,10 @@ public:
 		ax::NodeEditor::DestroyEditor(context);
 	}
 
+	void RunAutoLayout() {
+		autoLayout.Recalculate();
+	}
+
 	void Begin() {
 		ax::NodeEditor::SetCurrentEditor(context);
 		ax::NodeEditor::PushStyleVar(ax::NodeEditor::StyleVar_FlowDuration, 0.25f);

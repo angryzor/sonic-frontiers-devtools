@@ -237,6 +237,7 @@ target_sources(${DEVTOOLS_TARGET}
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
+            io/binary/serialization/resource-rfls/ResAnimator.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/game-services/game-service-inspectors/CameraService.cpp
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
@@ -274,6 +275,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/resources/editors/ResSurfRideProjectEditor.cpp
             ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.cpp
         PRIVATE FILE_SET HEADERS FILES
+            io/binary/serialization/resource-rfls/ResAnimator.h
             ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h

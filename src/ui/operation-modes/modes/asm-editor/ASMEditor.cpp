@@ -10,9 +10,6 @@ namespace ui::operation_modes::modes::asm_editor
 
 	void ASMEditor::RenderScene()
 	{
-		auto& context = GetContext();
-		auto& asmData = *context.gocAnimator->asmResourceManager->animatorResource->binaryData;
-
 		if (!initialized) {
 			CalculateOutputPinWidths();
 			initialized = true;

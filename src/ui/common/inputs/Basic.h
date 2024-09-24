@@ -64,7 +64,7 @@ bool InputText(const char* label, char (&str)[Len], ImGuiInputTextFlags flags = 
 
 bool InputText(const char* label, csl::ut::VariableString& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 bool InputText(const char* label, csl::ut::String& str, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
-bool InputText(const char* label, char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
+bool InputText(const char* label, const char*& str, hh::fnd::ManagedResource* resource, ImGuiInputTextFlags flags = ImGuiInputTextFlags_None);
 
 template<size_t Len>
 bool InputDirectory(const char* label, char(&str)[Len]) {

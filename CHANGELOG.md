@@ -1,3 +1,12 @@
+# v0.1.44
+## Sonic Frontiers
+* Gemeral improvements to ASM node editor.
+* Added ASM nodes for BlendSpace, Clip, Blend Mask.
+* Added ResAnimator/ASM export.
+* Added menu item in ASM editor to toggle between detailed and compact version of BlendSpaceNodes.
+* Added menu item in ASM editor to manually trigger an auto-layout.
+
+
 # v0.1.43
 * Added WIP ResAnimator editor (no export atm).
 * Added FxCol export.

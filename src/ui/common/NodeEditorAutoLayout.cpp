@@ -40,11 +40,13 @@ void NodeEditorAutoLayout::End()
 
 		recalculationFuture = std::async([this]() {
 			csl::ut::PointerMap<ax::NodeEditor::NodeId, ImVec2> positions{ GetAllocator() };
+			positions.reserve(nodes.size());
 
 			{
 				ogdf::Graph graph{};
 				ogdf::GraphAttributes graphAttrs{ graph, ogdf::GraphAttributes::nodeGraphics | ogdf::GraphAttributes::edgeGraphics };
 				csl::ut::PointerMap<ax::NodeEditor::NodeId, ogdf::node> graphNodesByNodeId{ GetAllocator() };
+				graphNodesByNodeId.reserve(nodes.size());
 
 				for (auto node : nodes) {
 					ogdf::node n = graph.newNode();

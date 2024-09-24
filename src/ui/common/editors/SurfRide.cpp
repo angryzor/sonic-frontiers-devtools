@@ -359,7 +359,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& dat
 {
 	bool edited{};
 	if (ImGui::TreeNode(label)) {
-		InputText("Name", const_cast<char*&>(data.name), resource);
+		InputText("Name", data.name, resource);
 
 		auto prevType = data.type;
 		if (ComboEnum("Type", data.type, userDataTypes)) {
@@ -382,7 +382,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& dat
 		case SRS_DATA::Type::INT: edited |= Editor("Value", *static_cast<int*>(data.value)); break;
 		case SRS_DATA::Type::UINT: edited |= Editor("Value", *static_cast<unsigned int*>(data.value)); break;
 		case SRS_DATA::Type::FLOAT: edited |= Editor("Value", *static_cast<float*>(data.value)); break;
-		case SRS_DATA::Type::STRING: edited |= InputText("Value", reinterpret_cast<char*&>(static_cast<void*&>(data.value)), resource); break;
+		case SRS_DATA::Type::STRING: edited |= InputText("Value", const_cast<const char*&>(reinterpret_cast<char*&>(static_cast<void*&>(data.value))), resource); break;
 		default: Viewer("Value", static_cast<void*>(data.value)); break;
 		}
 
