@@ -147,42 +147,51 @@ void RenderingEngineInspector::RenderContents()
 	ImGui::SeparatorText("SupportFX");
 	Editor("World scale", renderingEngine->supportFX.worldScale);
 
-	//ImGui::SeparatorText("SceneContextManager");
+	ImGui::SeparatorText("SceneContextManager");
 
-	//for (auto& ctxMgr : renderingEngine->supportFX.sceneContextManagers) {
-	//	if (ImGui::TreeNode(&ctxMgr, "%s", ctxMgr->nameId)) {
-	//		for (auto& ctx : ctxMgr->sceneContexts) {
-	//			if (ctx->GetNameHash() == *reinterpret_cast<unsigned int*>(0x1440C8B64ull)) {
-	//				auto* sctx = static_cast<hh::needle::SCAtmosphere*>(&*ctx);
+	for (auto& ctxMgr : renderingEngine->supportFX.sceneContextManagers) {
+		if (ImGui::TreeNode(&ctxMgr, "%s", ctxMgr->nameId->name)) {
+			for (auto& ctx : ctxMgr->sceneContexts) {
+				if (ImGui::TreeNode(&ctx, "%s", ctx->GetName())) {
+					if (ctx->GetNameHash() == *reinterpret_cast<unsigned int*>(0x1440D0968ull)) {
+						auto* sctx = static_cast<hh::needle::SCLocalLight*>(&*ctx);
 
-	//				size_t i{};
-	//				for (auto& rt : sctx->implementation->renderTargetViews) {
-	//					if (rt == nullptr)
-	//						continue;
+						Viewer("Number of lights?", sctx->implementation->numLights);
+						Viewer("Max lights?", sctx->implementation->maxLights);
+					}
+					//if (ctx->GetNameHash() == *reinterpret_cast<unsigned int*>(0x1440C8B64ull)) {
+					//	auto* sctx = static_cast<hh::needle::SCAtmosphere*>(&*ctx);
 
-	//					char name[20];
-	//					snprintf(name, sizeof(name), "%zd", i);
+					//	size_t i{};
+					//	for (auto& rt : sctx->implementation->renderTargetViews) {
+					//		if (rt == nullptr)
+					//			continue;
 
-	//					auto opos = ImGui::GetCursorPos();
+					//		char name[20];
+					//		snprintf(name, sizeof(name), "%zd", i);
 
-	//					Editor(name, rt);
+					//		auto opos = ImGui::GetCursorPos();
 
-	//					if (i != 12) {
-	//						ImGui::SameLine();
-	//						if (ImGui::GetContentRegionAvail().x < 256)
-	//							ImGui::Dummy({ 0, 0 });
-	//					}
+					//		Editor(name, rt);
 
-	//					auto npos = ImGui::GetCursorPos();
+					//		if (i != 12) {
+					//			ImGui::SameLine();
+					//			if (ImGui::GetContentRegionAvail().x < 256)
+					//				ImGui::Dummy({ 0, 0 });
+					//		}
 
-	//					ImGui::SetCursorPos(opos);
-	//					ImGui::Text("%zd", i);
-	//					ImGui::SetCursorPos(npos);
-	//					i++;
-	//				}
-	//			}
-	//		}
-	//		ImGui::TreePop();
-	//	}
-	//}
+					//		auto npos = ImGui::GetCursorPos();
+
+					//		ImGui::SetCursorPos(opos);
+					//		ImGui::Text("%zd", i);
+					//		ImGui::SetCursorPos(npos);
+					//		i++;
+					//	}
+					//}
+					ImGui::TreePop();
+				}
+			}
+			ImGui::TreePop();
+		}
+	}
 }

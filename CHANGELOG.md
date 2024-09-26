@@ -1,6 +1,16 @@
+# v0.1.45
+## Sonic Frontiers
+* ASM editor: Clips, Variables and Blend Spaces can now be reassigned by dragging pins. Can't create new ones yet.
+* ASM editor: Flag nodes added.
+* ASM editor: Refactorings.
+* Rendering Engine Inspector: Added SceneContextManager.
+* Rendering Engine Inspector: Added SCLocalLight light count.
+* Rendering Engine Inspector: Added Dynamic Resolution Controller render ratio.
+
+
 # v0.1.44
 ## Sonic Frontiers
-* Gemeral improvements to ASM node editor.
+* General improvements to ASM node editor.
 * Added ASM nodes for BlendSpace, Clip, Blend Mask.
 * Added ResAnimator/ASM export.
 * Added menu item in ASM editor to toggle between detailed and compact version of BlendSpaceNodes.

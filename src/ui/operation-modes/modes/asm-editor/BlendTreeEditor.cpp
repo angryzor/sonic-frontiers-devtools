@@ -56,13 +56,89 @@ namespace ui::operation_modes::modes::asm_editor {
 			RenderBlendMask(i);
 		for (unsigned short i = 0; i < asmData.clipCount; i++)
 			RenderClip(i);
+		for (unsigned short i = 0; i < asmData.flagCount; i++)
+			RenderFlag(i);
 		if (!collapseBlendSpaceNodes)
 			for (unsigned short i = 0; i < asmData.blendSpaceCount; i++)
 				RenderBlendSpace(i);
 		for (unsigned short i = 0; i < asmData.stateCount; i++)
 			RenderState(i);
-		RenderNode(focusedRootBlendNode, focusedRootBlendNodeIndex);
-		nodeEditor.LayerBlendTreeOutput(focusedRootBlendNodeIndex);
+
+		// TODO: Game instead selects node 0 if this happens.
+		if (focusedRootBlendNodeIndex != -1) {
+			RenderNode(focusedRootBlendNode, focusedRootBlendNodeIndex);
+			nodeEditor.LayerBlendTreeOutput(focusedRootBlendNodeIndex);
+		}
+
+		if (nodeEditor.BeginCreate()) {
+			OutputPinId inPin;
+			InputPinId outPin;
+
+			if (nodeEditor.QueryNewLink(inPin, outPin)) {
+				if (ax::NodeEditor::AcceptNewItem()) {
+					if (IsType(inPin, outPin, NodeType::CLIP, NodeType::BLEND_NODE, PinType::CLIP)) {
+						auto& blendNode = asmData.blendNodes[outPin.nodeId.idx];
+
+						if (collapseBlendSpaceNodes && blendNode.type == BlendNodeType::BLEND_SPACE) {
+							auto& childNode = asmData.blendNodes[blendNode.childNodeArrayOffset + outPin.idx];
+
+							if (childNode.type == BlendNodeType::CLIP) {
+								asmData.blendSpaces[blendNode.blendSpaceIndex].clipIndices[outPin.idx] = inPin.nodeId.idx;
+								childNode.childNodeArrayOffset = inPin.nodeId.idx;
+							}
+							else
+								ShowError("The clip in this slot in the blend space does not correspond to a clip node. Toggle collapsing of BlendSpaceNode nodes off to edit it.");
+						}
+						else if (blendNode.type == BlendNodeType::CLIP)
+							blendNode.childNodeArrayOffset = inPin.nodeId.idx;
+					}
+					else if (IsType(inPin, outPin, NodeType::CLIP, NodeType::BLEND_SPACE, PinType::CLIP)) {
+						asmData.blendSpaces[outPin.nodeId.idx].clipIndices[outPin.idx] = inPin.nodeId.idx;
+					}
+					else if (IsType(inPin, outPin, NodeType::CLIP, NodeType::STATE, PinType::CLIP)) {
+						asmData.states[outPin.nodeId.idx].rootBlendNodeOrClipIndex = inPin.nodeId.idx;
+					}
+					else if (IsType(inPin, outPin, NodeType::BLEND_SPACE, NodeType::BLEND_NODE, PinType::BLEND_SPACE)) {
+						asmData.blendNodes[outPin.nodeId.idx].blendSpaceIndex = inPin.nodeId.idx;
+					}
+					else if (IsType(inPin, outPin, NodeType::BLEND_MASK, NodeType::CLIP, PinType::BLEND_MASK)) {
+						asmData.clips[outPin.nodeId.idx].blendMaskIndex = inPin.nodeId.idx;
+					}
+					else if (IsType(inPin, outPin, NodeType::VARIABLE, NodeType::BLEND_NODE, PinType::VARIABLE)) {
+						auto& blendNode = asmData.blendNodes[outPin.nodeId.idx];
+
+						if (outPin.idx == 0)
+							blendNode.blendFactorVariableIndex = inPin.nodeId.idx;
+						else if (collapseBlendSpaceNodes && blendNode.type == BlendNodeType::BLEND_SPACE) {
+							if (outPin.idx == 1)
+								asmData.blendSpaces[blendNode.blendSpaceIndex].xVariableIndex = inPin.nodeId.idx;
+							else if (outPin.idx == 2)
+								asmData.blendSpaces[blendNode.blendSpaceIndex].yVariableIndex = inPin.nodeId.idx;
+						}
+
+					}
+					else if (IsType(inPin, outPin, NodeType::VARIABLE, NodeType::BLEND_SPACE, PinType::VARIABLE)) {
+						if (outPin.idx == 0)
+							asmData.blendSpaces[outPin.nodeId.idx].xVariableIndex = inPin.nodeId.idx;
+						else if (outPin.idx == 1)
+							asmData.blendSpaces[outPin.nodeId.idx].yVariableIndex = inPin.nodeId.idx;
+					}
+				}
+			}
+		}
+
+		ax::NodeEditor::Suspend();
+		if (ImGui::BeginPopupModal("ErrorMsg")) {
+			ImGui::Text("%s", errMsg);
+
+			if (ImGui::Button("OK"))
+				ImGui::CloseCurrentPopup();
+			ImGui::EndPopup();
+		}
+		ax::NodeEditor::Resume();
+
+		nodeEditor.EndCreate();
+
 		nodeEditor.End();
 	}
 
@@ -86,14 +162,20 @@ namespace ui::operation_modes::modes::asm_editor {
 			nodeEditor.ClipBlendMask(clipData.blendMaskIndex, clipId);
 	}
 
+	void BlendTreeEditor::RenderFlag(short flagId)
+	{
+		nodeEditor.Flag(flagId);
+	}
+
 	void BlendTreeEditor::RenderState(short stateId)
 	{
-		auto& state = gocAnimator->asmResourceManager->animatorResource->binaryData->states[stateId];
+		auto& asmData = *gocAnimator->asmResourceManager->animatorResource->binaryData;
+		auto& state = asmData.states[stateId];
 
 		if (state.type == StateType::BLEND_TREE)
 			RenderNode(nullptr, state.rootBlendNodeOrClipIndex);
 
-		nodeEditor.State(stateId, ax::NodeEditor::GetStyle().Colors[ax::NodeEditor::StyleColor_NodeBorder], 0.0f);
+		nodeEditor.State(stateId);
 
 		switch (state.type) {
 		case StateType::BLEND_TREE:
@@ -104,6 +186,9 @@ namespace ui::operation_modes::modes::asm_editor {
 			nodeEditor.StateClip(state.rootBlendNodeOrClipIndex, stateId);
 			break;
 		}
+
+		for (unsigned short i = 0; i < state.flagIndexCount; i++)
+			nodeEditor.StateFlag(asmData.flagIndices[state.flagIndexOffset + i], stateId);
 	}
 
 	void BlendTreeEditor::RenderBlendSpace(short blendSpaceId)
@@ -174,6 +259,22 @@ namespace ui::operation_modes::modes::asm_editor {
 					nodeEditor.BlendNodeClip(blendSpaceData.clipIndices[i], nodeId, i);
 			}
 		}
+	}
+
+	void BlendTreeEditor::ShowError(const char* msg)
+	{
+		errMsg = msg;
+		ImGui::OpenPopup("ErrorMsg");
+	}
+
+	bool BlendTreeEditor::IsType(OutputPinId inPin, InputPinId outPin, NodeType inNodeType, PinType inPinType, NodeType outNodeType, PinType outPinType)
+	{
+		return inPin.type == inPinType && outPin.type == outPinType && inPin.nodeId.type == inNodeType && outPin.nodeId.type == outNodeType;
+	}
+
+	bool BlendTreeEditor::IsType(OutputPinId inPin, InputPinId outPin, NodeType inNodeType, NodeType outNodeType, PinType pinType)
+	{
+		return IsType(inPin, outPin, inNodeType, pinType, outNodeType, pinType);
 	}
 
 	//void BlendTreeEditor::RenderNodeLinks(hh::anim::LayerBlendNode* node, short nodeId, hh::anim::BlendNodeData& nodeData)

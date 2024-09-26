@@ -12,6 +12,7 @@ namespace ui::operation_modes::modes::asm_editor
 		hh::fnd::Reference<NodeEditor> nodeEditor{};
 		csl::ut::MoveArray<float> outputPinTextWidths{ GetAllocator() };
 		bool initialized{};
+		NodeId ctxNodeId{};
 
 	public:
 		using OperationMode<Context>::OperationMode;
@@ -20,26 +21,9 @@ namespace ui::operation_modes::modes::asm_editor
 		void SetGOCAnimator(hh::anim::GOCAnimator* gocAnimator);
 
 	private:
-		struct ActiveLayerInfo {
-			hh::anim::AnimationStateMachine::LayerInfo& layer;
-			hh::anim::AnimationState* prevState;
-			hh::anim::AnimationState* nextState;
-		};
-
-		auto GetActiveLayers() {
-			return std::views::all(GetContext().gocAnimator->animationStateMachine->layers)
-				| std::views::filter([](auto& l) { return l.layerState != nullptr; })
-				| std::views::transform([](auto& l) { return ActiveLayerInfo{ l, l.layerState->GetPreviousAnimationState(), l.layerState->GetNextAnimationState() }; });
-		}
-
-
-		void CalculateOutputPinWidths();
-		ImVec4 CalculateNodeColor(hh::anim::StateData& state);
-		float CalculateProgress(hh::anim::StateData& state);
 
 		void RenderNodes();
 		void RenderTransitions();
 		void RenderFlow();
-		void RenderFlow(short prevStateId, short nextStateId);
 	};
 }

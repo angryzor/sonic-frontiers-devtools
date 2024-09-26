@@ -50,5 +50,10 @@ void RenderManagerInspector::RenderContents()
 		Editor("unk25", renderMgr->implementation->unk25);
 
 		Editor("unk29suppfx", renderMgr->implementation->renderingEngine->GetSupportFX()->unk29);
+
+		if (auto* drc = renderMgr->GetDynamicResolutionController()) {
+			ImGui::SeparatorText("Dynamic Resolution Controller");
+			Viewer("Ratio", drc->GetResolutionRatio());
+		}
 	}
 }

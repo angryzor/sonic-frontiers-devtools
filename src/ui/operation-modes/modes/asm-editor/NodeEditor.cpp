@@ -19,6 +19,9 @@ namespace ui::operation_modes::modes::asm_editor {
 		case PinType::BLEND_MASK: return { 0.886f, 0.682f, 0.165f, 1.0f };
 		case PinType::CLIP: return { 0.58f, 0.788f, 0.0f, 1.0f };
 		case PinType::BLEND_SPACE: return { 0.651f, 0.325f, 0.0f, 1.0f };
+		//case PinType::FLAG: return { 0.545f, 0.0f, 0.1f, 1.0f };
+		//case PinType::FLAG: return { 0.847f, 0.788f, 0.608f, 1.0f };
+		case PinType::FLAG: return { 1.0, 0.49, 0.0, 1.0f };
 		default: assert(false); return { 0.0f, 0.0f, 0.0f, 0.0f }; break;
 		}
 	}
@@ -67,6 +70,10 @@ namespace ui::operation_modes::modes::asm_editor {
 			ImGui::GetWindowDrawList()->AddCircleFilled(itemRectMin + ImVec2{ size / 2, size / 2 }, size / 2, color);
 			break;
 		}
+		case PinType::FLAG: {
+			ImGui::GetWindowDrawList()->AddCircleFilled(itemRectMin + ImVec2{ size / 2, size / 2 }, size / 2, color);
+			break;
+		}
 		default: {
 			assert(false);
 			break;
@@ -77,11 +84,13 @@ namespace ui::operation_modes::modes::asm_editor {
 	NodeEditor::NodeEditor(csl::fnd::IAllocator* allocator, hh::anim::ResAnimator& resource, hh::anim::GOCAnimator* gocAnimator) : CompatibleObject{ allocator }, resource{ resource }, nodeEditor { allocator }, asmData{ *resource.binaryData }, gocAnimator{ gocAnimator } {}
 
 	void NodeEditor::Begin() {
+		ImPlot::PushColormap(ImPlotColormap_Deep);
 		nodeEditor.Begin();
 	}
 
 	void NodeEditor::End() {
 		nodeEditor.End();
+		ImPlot::PopColormap();
 	}
 
 	void NodeEditor::RunAutoLayout()
@@ -89,9 +98,11 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.RunAutoLayout();
 	}
 
-	void NodeEditor::State(short stateId, ImVec4 color, float progress) {
+	void NodeEditor::State(short stateId) {
 		auto& state = asmData.states[stateId];
-		auto nodeId = GetNodeId(NodeType::STATE, stateId);
+		auto color = CalculateActiveStateColor(stateId);
+		auto progress = CalculateActiveStateProgress(stateId);
+		NodeId nodeId{ NodeType::STATE, stateId };
 
 		float maxTextWidth = 0.0f;
 		for (unsigned short j = 0; j < state.eventCount; j++) {
@@ -99,12 +110,14 @@ namespace ui::operation_modes::modes::asm_editor {
 			maxTextWidth = std::fmaxf(maxTextWidth, ImGui::CalcTextSize(event.name).x);
 		}
 
+		ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, color);
+
 		nodeEditor.BeginNode(nodeId, maxTextWidth);
 
 		nodeEditor.BeginInputPins();
-		InputPin(nodeId, PinType::DEFAULT_TRANSITION, 0);
-		InputPin(nodeId, PinType::CLIP, 0);
-		BeginInputPin(nodeId, PinType::VARIABLE, 0);
+		InputPin({ nodeId, PinType::DEFAULT_TRANSITION, 0 });
+		InputPin({ nodeId, PinType::CLIP, 0 });
+		BeginInputPin({ nodeId, PinType::VARIABLE, 0 });
 		Editor("Speed", state.speed);
 		EndInputPin();
 		nodeEditor.EndInputPins();
@@ -117,102 +130,97 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();
-		OutputPin(nodeId, PinType::DEFAULT_TRANSITION, 0);
-		OutputPin(nodeId, PinType::TRANSITION, 0);
+		OutputPin({ nodeId, PinType::DEFAULT_TRANSITION, 0 });
+		OutputPin({ nodeId, PinType::TRANSITION, 0 });
 		for (unsigned short j = 0; j < state.eventCount; j++)
-			OutputPin(nodeId, PinType::EVENT, j, asmData.events[state.eventOffset + j].name);
+			OutputPin({ nodeId, PinType::EVENT, j }, asmData.events[state.eventOffset + j].name);
+		OutputPin({ nodeId, PinType::FLAG, 0 });
 		nodeEditor.EndOutputPins();
 
 		nodeEditor.EndNode();
+
+		ax::NodeEditor::PopStyleColor();
 	}
 
 	void NodeEditor::StateTransition(short prevStateId, short nextStateId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::STATE, prevStateId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, nextStateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::TRANSITION, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::DEFAULT_TRANSITION, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::TRANSITION);
+		Link({ { NodeType::STATE, prevStateId }, PinType::TRANSITION, 0 }, { { NodeType::STATE, nextStateId }, PinType::DEFAULT_TRANSITION, 0 });
 	}
 
 	void NodeEditor::StateDefaultTransition(short prevStateId, short nextStateId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::STATE, prevStateId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, nextStateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::DEFAULT_TRANSITION, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::DEFAULT_TRANSITION, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::DEFAULT_TRANSITION);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::STATE, prevStateId }, PinType::DEFAULT_TRANSITION, 0 }, { { NodeType::STATE, nextStateId }, PinType::DEFAULT_TRANSITION, 0 });
 	}
 
 	void NodeEditor::StateEventTransition(short prevStateId, short nextStateId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::STATE, prevStateId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, nextStateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::EVENT, idx);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::DEFAULT_TRANSITION, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::EVENT);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::STATE, prevStateId }, PinType::EVENT, idx }, { { NodeType::STATE, nextStateId }, PinType::DEFAULT_TRANSITION, 0 });
 	}
 
 	void NodeEditor::StateTransitionFlow(short prevStateId, short nextStateId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::STATE, prevStateId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, nextStateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::TRANSITION, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::DEFAULT_TRANSITION, 0);
-
-		nodeEditor.Flow(GetLinkId(prevPin, nextPin));
+		Flow({ { NodeType::STATE, prevStateId }, PinType::TRANSITION, 0 }, { { NodeType::STATE, nextStateId }, PinType::DEFAULT_TRANSITION, 0 });
 	}
 
 	void NodeEditor::StateDefaultTransitionFlow(short prevStateId, short nextStateId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::STATE, prevStateId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, nextStateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::DEFAULT_TRANSITION, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::DEFAULT_TRANSITION, 0);
-
-		nodeEditor.Flow(GetLinkId(prevPin, nextPin));
+		Flow({ { NodeType::STATE, prevStateId }, PinType::DEFAULT_TRANSITION, 0 }, { { NodeType::STATE, nextStateId }, PinType::DEFAULT_TRANSITION, 0 });
 	}
 
 	void NodeEditor::StateEventTransitionFlow(short prevStateId, short nextStateId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::STATE, prevStateId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, nextStateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::EVENT, idx);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::DEFAULT_TRANSITION, 0);
+		Flow({ { NodeType::STATE, prevStateId }, PinType::EVENT, idx }, { { NodeType::STATE, nextStateId }, PinType::DEFAULT_TRANSITION, 0 });
+	}
 
-		nodeEditor.Flow(GetLinkId(prevPin, nextPin));
+	void NodeEditor::StateTransitionFlowAuto(short prevStateId, short nextStateId)
+	{
+		auto& state = asmData.states[prevStateId];
+
+		if (state.stateEndTransition.transitionInfo.targetStateIndex == nextStateId) {
+			StateDefaultTransitionFlow(prevStateId, nextStateId);
+			return;
+		}
+
+		for (unsigned short j = 0; j < state.eventCount; j++) {
+			auto& event = asmData.events[state.eventOffset + j];
+
+			if (event.transition.transitionInfo.targetStateIndex == nextStateId) {
+				StateEventTransitionFlow(prevStateId, nextStateId, j);
+				return;
+			}
+		}
+
+		if (state.transitionArrayIndex == -1 || !IsStateSelected(prevStateId))
+			StateTransition(prevStateId, nextStateId);
+
+		StateTransitionFlow(prevStateId, nextStateId);
+	}
+
+	void NodeEditor::StateActiveTransitionFlow()
+	{
+		for (auto l : GetActiveLayers()) {
+			if (l.prevState && l.nextState && l.prevState != l.nextState) {
+				short prevId = static_cast<short>(l.prevState->stateData - asmData.states);
+				short nextId = static_cast<short>(l.nextState->stateData - asmData.states);
+
+				StateTransitionFlowAuto(prevId, nextId);
+			}
+		}
 	}
 
 	void NodeEditor::StateClip(short clipId, short stateId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::CLIP, clipId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, stateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::CLIP, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::CLIP, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::CLIP);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::CLIP, clipId }, PinType::CLIP, 0 }, { { NodeType::STATE, stateId }, PinType::CLIP, 0 });
 	}
 
 	void NodeEditor::StateBlendNode(short blendNodeId, short stateId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
-		auto nextNodeId = GetNodeId(NodeType::STATE, stateId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::BLEND_NODE, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::CLIP, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::BLEND_NODE);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::BLEND_NODE, blendNodeId }, PinType::BLEND_NODE, 0 }, { { NodeType::STATE, stateId }, PinType::CLIP, 0 });
 	}
 
 	void NodeEditor::Variable(short variableId)
 	{
-		auto nodeId = GetNodeId(NodeType::VARIABLE, variableId);
+		NodeId nodeId{ NodeType::VARIABLE, variableId };
 
 		nodeEditor.BeginNode(nodeId, 10.0f);
 
@@ -230,7 +238,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();
-		OutputPin(nodeId, PinType::VARIABLE, 0);
+		OutputPin({ nodeId, PinType::VARIABLE, 0 });
 		nodeEditor.EndOutputPins();
 
 		nodeEditor.EndNode();
@@ -238,31 +246,19 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	void NodeEditor::BlendNodeVariable(short variableId, short blendNodeId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::VARIABLE, variableId);
-		auto nextNodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::VARIABLE, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::VARIABLE, idx);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::VARIABLE);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::VARIABLE, variableId }, PinType::VARIABLE, 0 }, { { NodeType::BLEND_NODE, blendNodeId }, PinType::VARIABLE, idx });
 	}
 
 	void NodeEditor::BlendSpaceVariable(short variableId, short blendSpaceId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::VARIABLE, variableId);
-		auto nextNodeId = GetNodeId(NodeType::BLEND_SPACE, blendSpaceId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::VARIABLE, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::VARIABLE, idx);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::VARIABLE);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::VARIABLE, variableId }, PinType::VARIABLE, 0 }, { { NodeType::BLEND_SPACE, blendSpaceId }, PinType::VARIABLE, idx });
 	}
 
 	void NodeEditor::Clip(short clipId)
 	{
 		auto& clipData = asmData.clips[clipId];
 
-		auto nodeId = GetNodeId(NodeType::CLIP, clipId);
+		NodeId nodeId{ NodeType::CLIP, clipId };
 
 		nodeEditor.BeginNode(nodeId, 10.0f);
 
@@ -287,7 +283,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();
-		OutputPin(nodeId, PinType::CLIP, 0);
+		OutputPin({ nodeId, PinType::CLIP, 0 });
 		nodeEditor.EndOutputPins();
 
 		nodeEditor.EndNode();
@@ -295,31 +291,19 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	void NodeEditor::BlendNodeClip(short clipId, short blendNodeId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::CLIP, clipId);
-		auto nextNodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::CLIP, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::CLIP, idx);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::CLIP);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::CLIP, clipId }, PinType::CLIP, 0 }, { { NodeType::BLEND_NODE, blendNodeId }, PinType::CLIP, idx });
 	}
 
 	void NodeEditor::BlendSpaceClip(short clipId, short blendSpaceId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::CLIP, clipId);
-		auto nextNodeId = GetNodeId(NodeType::BLEND_SPACE, blendSpaceId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::CLIP, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::CLIP, idx);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::CLIP);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::CLIP, clipId }, PinType::CLIP, 0 }, { { NodeType::BLEND_SPACE, blendSpaceId }, PinType::CLIP, idx });
 	}
 
 	void NodeEditor::BlendSpace(short blendSpaceId)
 	{
 		auto& blendSpace = asmData.blendSpaces[blendSpaceId];
 
-		auto nodeId = GetNodeId(NodeType::BLEND_SPACE, blendSpaceId);
+		NodeId nodeId{ NodeType::BLEND_SPACE, blendSpaceId };
 
 		nodeEditor.BeginNode(nodeId, 10.0f);
 
@@ -338,7 +322,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();
-		OutputPin(nodeId, PinType::BLEND_SPACE, 0);
+		OutputPin({ nodeId, PinType::BLEND_SPACE, 0 });
 		nodeEditor.EndOutputPins();
 
 		nodeEditor.EndNode();
@@ -346,20 +330,14 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	void NodeEditor::BlendNodeBlendSpace(short blendSpaceId, short blendNodeId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::BLEND_SPACE, blendSpaceId);
-		auto nextNodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::BLEND_SPACE, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::BLEND_SPACE, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::BLEND_SPACE);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::BLEND_SPACE, blendSpaceId }, PinType::BLEND_SPACE, 0 }, { { NodeType::BLEND_NODE, blendNodeId }, PinType::BLEND_SPACE, 0 });
 	}
 
 	void NodeEditor::BlendMask(short blendMaskId)
 	{
 		auto& blendMask = asmData.blendMasks[blendMaskId];
 
-		auto nodeId = GetNodeId(NodeType::BLEND_MASK, blendMaskId);
+		NodeId nodeId{ NodeType::BLEND_MASK, blendMaskId };
 
 		nodeEditor.BeginNode(nodeId, 10.0f);
 
@@ -378,7 +356,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();
-		OutputPin(nodeId, PinType::BLEND_MASK, 0);
+		OutputPin({ nodeId, PinType::BLEND_MASK, 0 });
 		nodeEditor.EndOutputPins();
 
 		nodeEditor.EndNode();
@@ -386,13 +364,7 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	void NodeEditor::ClipBlendMask(short blendMaskId, short clipId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::BLEND_MASK, blendMaskId);
-		auto nextNodeId = GetNodeId(NodeType::CLIP, clipId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::BLEND_MASK, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::BLEND_MASK, 0);
-
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::BLEND_MASK);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+		LinkWithLayout({ { NodeType::BLEND_MASK, blendMaskId }, PinType::BLEND_MASK, 0 }, { { NodeType::CLIP, clipId }, PinType::BLEND_MASK, 0 });
 	}
 
 	void NodeEditor::LerpBlendNode(short blendNodeId, hh::anim::LerpBlendNode* liveNode)
@@ -444,7 +416,7 @@ namespace ui::operation_modes::modes::asm_editor {
 			blendNodeId,
 			"Clip",
 			[=]() {
-				auto nodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
+				NodeId nodeId{ NodeType::BLEND_NODE, blendNodeId };
 				auto& nodeData = asmData.blendNodes[blendNodeId];
 
 				BaseBlendNodeInputs(blendNodeId);
@@ -476,18 +448,18 @@ namespace ui::operation_modes::modes::asm_editor {
 			blendNodeId,
 			"BlendSpace",
 			[=]() {
-				auto nodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
+				NodeId nodeId{ NodeType::BLEND_NODE, blendNodeId };
 				auto& nodeData = asmData.blendNodes[blendNodeId];
 
 				BaseBlendNodeInputs(blendNodeId);
 
-				InputPin(nodeId, PinType::BLEND_SPACE, 0, "Blend space");
+				InputPin({ nodeId, PinType::BLEND_SPACE, 0 }, "Blend space");
 
 				if (nodeData.blendSpaceIndex != -1) {
 					auto& blendSpace = asmData.blendSpaces[nodeData.blendSpaceIndex];
 
 					for (unsigned short i = 0; i < blendSpace.nodeCount; i++)
-						InputPin(nodeId, PinType::BLEND_NODE, i, asmData.clips[blendSpace.clipIndices[i]].name);
+						InputPin({ nodeId, PinType::BLEND_NODE, i }, asmData.clips[blendSpace.clipIndices[i]].name);
 				}
 			},
 			[=]() { BaseBlendNodeControls(blendNodeId); }
@@ -500,7 +472,7 @@ namespace ui::operation_modes::modes::asm_editor {
 			blendNodeId,
 			"BlendSpace",
 			[=]() {
-				auto nodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
+				NodeId nodeId{ NodeType::BLEND_NODE, blendNodeId };
 				auto& nodeData = asmData.blendNodes[blendNodeId];
 
 				BaseBlendNodeInputs(blendNodeId);
@@ -511,7 +483,7 @@ namespace ui::operation_modes::modes::asm_editor {
 					auto& blendSpace = asmData.blendSpaces[nodeData.blendSpaceIndex];
 
 					for (unsigned short i = 0; i < blendSpace.nodeCount; i++)
-						InputPin(nodeId, PinType::CLIP, i, asmData.clips[blendSpace.clipIndices[i]].name);
+						InputPin({ nodeId, PinType::CLIP, i }, asmData.clips[blendSpace.clipIndices[i]].name);
 				}
 			},
 			[=]() {
@@ -547,10 +519,9 @@ namespace ui::operation_modes::modes::asm_editor {
 
 	void NodeEditor::BaseBlendNodeInputs(short blendNodeId)
 	{
-		auto nodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
 		auto& nodeData = asmData.blendNodes[blendNodeId];
 
-		InputVariablePin(nodeId, 0, "Blend factor", nodeData.blendFactorVariableIndex);
+		InputVariablePin({ NodeType::BLEND_NODE, blendNodeId }, 0, "Blend factor", nodeData.blendFactorVariableIndex);
 	}
 
 	void NodeEditor::BaseBlendNodeControls(short blendNodeId)
@@ -560,23 +531,44 @@ namespace ui::operation_modes::modes::asm_editor {
 		Editor("Blend factor target", nodeData.blendFactorTarget);
 	}
 
-	void NodeEditor::BlendNodeChildRelationship(short childNodeId, short parentNodeId, short idx)
+	void NodeEditor::BlendNodeChildRelationship(short childNodeId, short parentNodeId, unsigned short idx)
 	{
-		auto prevNodeId = GetNodeId(NodeType::BLEND_NODE, childNodeId);
-		auto nextNodeId = GetNodeId(NodeType::BLEND_NODE, parentNodeId);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::BLEND_NODE, 0);
-		auto nextPin = GetInputPinId(nextNodeId, PinType::BLEND_NODE, idx);
+		LinkWithLayout({ { NodeType::BLEND_NODE, childNodeId }, PinType::BLEND_NODE, 0 }, { { NodeType::BLEND_NODE, parentNodeId }, PinType::BLEND_NODE, idx });
+	}
 
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::BLEND_NODE);
-		nodeEditor.LayoutLink(prevNodeId, nextNodeId);
+	void NodeEditor::Flag(short flagId)
+	{
+		NodeId nodeId{ NodeType::FLAG, flagId };
+
+		nodeEditor.BeginNode(nodeId, 10.0f);
+
+		nodeEditor.BeginTitle();
+		ImGui::Text("Flag");
+		nodeEditor.EndTitle();
+
+		nodeEditor.BeginInputPins();
+		InputPin({ nodeId, PinType::FLAG, 0 });
+		nodeEditor.EndInputPins();
+
+		nodeEditor.BeginControls();
+		InputText("Name", asmData.flags[flagId], &resource);
+		nodeEditor.EndControls();
+
+		nodeEditor.BeginOutputPins();
+		nodeEditor.EndOutputPins();
+
+		nodeEditor.EndNode();
+	}
+
+	void NodeEditor::StateFlag(short flagId, short stateId)
+	{
+		LinkWithLayout({ { NodeType::STATE, stateId }, PinType::FLAG, 0 }, { { NodeType::FLAG, flagId }, PinType::FLAG, 0 });
 	}
 
 	void NodeEditor::LayerBlendTreeOutput(short blendNodeId)
 	{
-		auto prevNodeId = GetNodeId(NodeType::BLEND_NODE, blendNodeId);
-		auto nodeId = GetNodeId(NodeType::LAYER_BLEND_TREE_OUTPUT, 0);
-		auto prevPin = GetOutputPinId(prevNodeId, PinType::BLEND_NODE, 0);
-		auto nextPin = GetInputPinId(nodeId, PinType::BLEND_NODE, 0);
+		NodeId nodeId{ NodeType::LAYER_BLEND_TREE_OUTPUT, 0 };
+		InputPinId nextPin{ nodeId, PinType::BLEND_NODE, 0 };
 
 		nodeEditor.BeginNode(nodeId, 10.0f);
 
@@ -585,7 +577,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndTitle();
 
 		nodeEditor.BeginInputPins();
-		InputPin(nodeId, PinType::BLEND_NODE, 0, "Blend node");
+		InputPin(nextPin, "Blend node");
 		nodeEditor.EndInputPins();
 
 		nodeEditor.BeginControls();
@@ -596,67 +588,166 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		nodeEditor.EndNode();
 
-		nodeEditor.Link(GetLinkId(prevPin, nextPin), prevPin, nextPin, PinType::BLEND_NODE);
-		nodeEditor.LayoutLink(prevNodeId, nodeId);
+		LinkWithLayout({ { NodeType::BLEND_NODE, blendNodeId }, PinType::BLEND_NODE, 0 }, nextPin);
 	}
 
-	bool NodeEditor::IsStateSelected(unsigned short idx)
+	bool NodeEditor::IsStateSelected(short idx)
 	{
-		return ax::NodeEditor::IsNodeSelected(GetNodeId(NodeType::STATE, idx));
+		return ax::NodeEditor::IsNodeSelected(NodeId{ NodeType::STATE, idx });
 	}
 
-	void NodeEditor::BeginInputPin(ax::NodeEditor::NodeId nodeId, PinType type, unsigned short idx)
+	bool NodeEditor::ShowNodeContextMenu(NodeId& nodeId)
 	{
-		nodeEditor.BeginInputPin(GetInputPinId(nodeId, type, idx), type);
+		ax::NodeEditor::NodeId axNodeId;
+		bool result = ax::NodeEditor::ShowNodeContextMenu(&axNodeId);
+		if (result)
+			nodeId = axNodeId;
+		return result;
+	}
+
+	bool NodeEditor::ShowPinContextMenu(PinId& pinId)
+	{
+		ax::NodeEditor::PinId axPinId;
+		bool result = ax::NodeEditor::ShowPinContextMenu(&axPinId);
+		if (result)
+			pinId = axPinId;
+		return result;
+	}
+
+	bool NodeEditor::BeginCreate()
+	{
+		return ax::NodeEditor::BeginCreate();
+	}
+
+	void NodeEditor::EndCreate()
+	{
+		ax::NodeEditor::EndCreate();
+	}
+
+	bool NodeEditor::QueryNewLink(OutputPinId& startPinId, InputPinId& endPinId)
+	{
+		ax::NodeEditor::PinId startPin, endPin;
+
+		bool result = ax::NodeEditor::QueryNewLink(&startPin, &endPin);
+
+		if (!result || !startPin || !endPin)
+			return false;
+
+		PinId iStartPin = startPin;
+		PinId iEndPin = endPin;
+
+		if (iStartPin.kind == iEndPin.kind)
+			return false;
+
+		startPinId = iStartPin.kind == ax::NodeEditor::PinKind::Output ? OutputPinId{ static_cast<unsigned long long>(iStartPin) } : OutputPinId{ static_cast<unsigned long long>(iEndPin) };
+		endPinId = iStartPin.kind == ax::NodeEditor::PinKind::Input ? InputPinId{ static_cast<unsigned long long>(iStartPin) } : InputPinId{ static_cast<unsigned long long>(iEndPin) };
+
+		return true;
+	}
+
+	ImVec4 NodeEditor::CalculateActiveStateColor(short stateId)
+	{
+		auto& state = asmData.states[stateId];
+
+		for (auto l : GetActiveLayers()) {
+			auto layerColor = ImPlot::GetColormapColor(l.layer.layerId);
+
+			if (l.nextState && l.nextState->stateData == &state)
+				return layerColor;
+			else if (l.prevState && l.prevState->stateData == &state)
+				return { layerColor.x * 0.7f, layerColor.y * 0.7f, layerColor.z * 0.7f, 1.0f };
+		}
+
+		return ax::NodeEditor::GetStyle().Colors[ax::NodeEditor::StyleColor_NodeBorder];
+	}
+
+	float NodeEditor::CalculateActiveStateProgress(short stateId)
+	{
+		auto& state = asmData.states[stateId];
+
+		for (auto l : GetActiveLayers()) {
+			if (l.nextState && l.nextState->stateData == &state)
+				return l.nextState->implementation.currentTime / l.nextState->implementation.duration;
+			else if (l.prevState && l.prevState->stateData == &state)
+				return l.prevState->implementation.currentTime / l.prevState->implementation.duration;
+		}
+
+		return 0.0f;
+	}
+
+	void NodeEditor::BeginInputPin(const InputPinId& pinId)
+	{
+		nodeEditor.BeginInputPin(pinId, pinId.type);
 	}
 
 	void NodeEditor::EndInputPin() {
 		nodeEditor.EndInputPin();
 	}
 
-	void NodeEditor::BeginOutputPin(ax::NodeEditor::NodeId nodeId, PinType type, unsigned short idx, float labelWidth)
+	void NodeEditor::BeginOutputPin(const OutputPinId& pinId, float labelWidth)
 	{
-		nodeEditor.BeginOutputPin(GetOutputPinId(nodeId, type, idx), labelWidth, type);
+		nodeEditor.BeginOutputPin(pinId, labelWidth, pinId.type);
 	}
 
 	void NodeEditor::EndOutputPin() {
 		nodeEditor.EndOutputPin();
 	}
 
-	void NodeEditor::InputPin(ax::NodeEditor::NodeId nodeId, PinType type, unsigned short idx)
+	void NodeEditor::InputPin(const InputPinId& pinId)
 	{
-		BeginInputPin(nodeId, type, idx);
+		BeginInputPin(pinId);
 		EndInputPin();
 	}
 
-	void NodeEditor::OutputPin(ax::NodeEditor::NodeId nodeId, PinType type, unsigned short idx)
+	void NodeEditor::OutputPin(const OutputPinId& pinId)
 	{
-		BeginOutputPin(nodeId, type, idx, 0.0f);
+		BeginOutputPin(pinId, 0.0f);
 		EndOutputPin();
 	}
 
-	void NodeEditor::InputVariablePin(ax::NodeEditor::NodeId nodeId, unsigned short idx, const char* label, short variableId)
+	void NodeEditor::InputVariablePin(const NodeId& nodeId, unsigned short idx, const char* label, short variableId)
 	{
 		if (gocAnimator && variableId != -1)
-			InputPin(nodeId, PinType::VARIABLE, idx, label, "%f", gocAnimator->animationStateMachine->variables[variableId].bindables.collectionFloat);
+			InputPin({ nodeId, PinType::VARIABLE, idx }, label, "%f", gocAnimator->animationStateMachine->variables[variableId].bindables.collectionFloat);
 		else
-			InputPin(nodeId, PinType::VARIABLE, idx, label);
+			InputPin({ nodeId, PinType::VARIABLE, idx }, label);
 	}
 
-	void NodeEditor::InputClipPin(ax::NodeEditor::NodeId nodeId, unsigned short idx, const char* label, short clipId)
+	void NodeEditor::InputClipPin(const NodeId& nodeId, unsigned short idx, const char* label, short clipId)
 	{
 		if (clipId != -1)
-			InputPin(nodeId, PinType::CLIP, idx, label, "%s", asmData.clips[clipId].name);
+			InputPin({ nodeId, PinType::CLIP, idx }, label, "%s", asmData.clips[clipId].name);
 		else
-			InputPin(nodeId, PinType::CLIP, idx, label);
+			InputPin({ nodeId, PinType::CLIP, idx }, label);
 	}
 
-	void NodeEditor::InputBlendMaskPin(ax::NodeEditor::NodeId nodeId, unsigned short idx, const char* label, short blendMaskId)
+	void NodeEditor::InputBlendMaskPin(const NodeId& nodeId, unsigned short idx, const char* label, short blendMaskId)
 	{
 		if (blendMaskId != -1)
-			InputPin(nodeId, PinType::BLEND_MASK, idx, label, "%s", asmData.blendMasks[blendMaskId].name);
+			InputPin({ nodeId, PinType::BLEND_MASK, idx }, label, "%s", asmData.blendMasks[blendMaskId].name);
 		else
-			InputPin(nodeId, PinType::BLEND_MASK, idx, label);
+			InputPin({ nodeId, PinType::BLEND_MASK, idx }, label);
+	}
+
+	void NodeEditor::Link(const OutputPinId& fromPin, const InputPinId& toPin)
+	{
+		nodeEditor.Link(GetLinkId(fromPin, toPin), fromPin, toPin, fromPin.type);
+	}
+
+	void NodeEditor::LayoutLink(const NodeId& fromNode, const NodeId& toNode)
+	{
+		nodeEditor.LayoutLink(fromNode, toNode);
+	}
+
+	void NodeEditor::LinkWithLayout(const OutputPinId& fromPin, const InputPinId& toPin)
+	{
+		Link(fromPin, toPin);
+		LayoutLink(fromPin.nodeId, toPin.nodeId);
+	}
+
+	void NodeEditor::Flow(const OutputPinId& fromPin, const InputPinId& toPin)
+	{
+		nodeEditor.Flow(GetLinkId(fromPin, toPin));
 	}
 
 	void NodeEditor::BlendSpaceVariablePins(ax::NodeEditor::NodeId nodeId, short blendSpaceId, unsigned short startIdx)
@@ -705,7 +796,24 @@ namespace ui::operation_modes::modes::asm_editor {
 		}
 	}
 
-	ax::NodeEditor::NodeId NodeEditor::GetNodeId(NodeType type, unsigned short idx)
+	ax::NodeEditor::LinkId NodeEditor::GetLinkId(ax::NodeEditor::PinId fromPinId, ax::NodeEditor::PinId toPinId) {
+		unsigned long long lFromPinId = fromPinId.Get();
+		unsigned long long lToPinId = toPinId.Get();
+
+		return (lFromPinId << 32) | lToPinId;
+	}
+
+	NodeId::NodeId(NodeType type, short idx) : type{ type }, idx{ idx } {}
+
+	NodeId::NodeId(unsigned long long nodeId)
+	{
+		type = static_cast<NodeType>((nodeId >> 16) & 0xF);
+		idx = nodeId & 0xFFFFFFFF;
+	}
+
+	NodeId::NodeId(ax::NodeEditor::NodeId nodeId) : NodeId(nodeId.Get()) {}
+
+	NodeId::operator unsigned long long() const
 	{
 		unsigned long long lType = static_cast<unsigned long long>(type);
 		unsigned long long lIdx = idx;
@@ -713,9 +821,28 @@ namespace ui::operation_modes::modes::asm_editor {
 		return (lType << 16) | lIdx;
 	}
 
-	ax::NodeEditor::PinId NodeEditor::GetPinId(ax::NodeEditor::NodeId nodeId, ax::NodeEditor::PinKind kind, PinType type, unsigned short idx)
+	NodeId::operator ax::NodeEditor::NodeId() const
 	{
-		unsigned long long lNodeId = nodeId.Get();
+		return static_cast<unsigned long long>(*this);
+	}
+
+	PinId::PinId(const NodeId& nodeId, ax::NodeEditor::PinKind kind, PinType type, unsigned short idx) : nodeId{ nodeId }, kind{ kind }, type{ type }, idx{ idx } {}
+
+	PinId::PinId(unsigned long long pinId)
+	{
+		ax::NodeEditor::NodeId lNodeId = (pinId >> 12) & 0xFFFFF;
+
+		nodeId = lNodeId;
+		kind = static_cast<ax::NodeEditor::PinKind>((pinId >> 11) & 0x1);
+		type = static_cast<PinType>((pinId >> 7) & 0xF);
+		idx = pinId & 0x7F;
+	}
+
+	PinId::PinId(ax::NodeEditor::PinId pinId) : PinId(pinId.Get()) {}
+
+	PinId::operator unsigned long long() const
+	{
+		unsigned long long lNodeId = nodeId;
 		unsigned long long lKind = static_cast<unsigned long long>(kind);
 		unsigned long long lType = static_cast<unsigned long long>(type);
 		unsigned long long lIdx = idx;
@@ -723,20 +850,16 @@ namespace ui::operation_modes::modes::asm_editor {
 		return (lNodeId << 12) | (lKind << 11) | (lType << 7) | lIdx;
 	}
 
-	ax::NodeEditor::PinId NodeEditor::GetInputPinId(ax::NodeEditor::NodeId nodeId, PinType type, unsigned short idx)
+	PinId::operator ax::NodeEditor::PinId() const
 	{
-		return GetPinId(nodeId, ax::NodeEditor::PinKind::Input, type, idx);
+		return static_cast<unsigned long long>(*this);
 	}
 
-	ax::NodeEditor::PinId NodeEditor::GetOutputPinId(ax::NodeEditor::NodeId nodeId, PinType type, unsigned short idx)
-	{
-		return GetPinId(nodeId, ax::NodeEditor::PinKind::Output, type, idx);
-	}
+	InputPinId::InputPinId(const NodeId& nodeId, PinType type, unsigned short idx) : PinId{ nodeId, ax::NodeEditor::PinKind::Input, type, idx } {}
+	InputPinId::InputPinId(unsigned long long nodeId) : PinId{ nodeId } {}
+	InputPinId::InputPinId(ax::NodeEditor::PinId nodeId) : PinId{ nodeId } {}
 
-	ax::NodeEditor::LinkId NodeEditor::GetLinkId(ax::NodeEditor::PinId fromPinId, ax::NodeEditor::PinId toPinId) {
-		unsigned long long lFromPinId = fromPinId.Get();
-		unsigned long long lToPinId = toPinId.Get();
-
-		return (lFromPinId << 32) | lToPinId;
-	}
+	OutputPinId::OutputPinId(const NodeId& nodeId, PinType type, unsigned short idx) : PinId{ nodeId, ax::NodeEditor::PinKind::Output, type, idx } {}
+	OutputPinId::OutputPinId(unsigned long long nodeId) : PinId{ nodeId } {}
+	OutputPinId::OutputPinId(ax::NodeEditor::PinId nodeId) : PinId{ nodeId } {}
 }
