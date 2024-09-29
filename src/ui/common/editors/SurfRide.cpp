@@ -361,7 +361,6 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& dat
 	if (ImGui::TreeNode(label)) {
 		InputText("Name", data.name, resource);
 
-		auto prevType = data.type;
 		if (ComboEnum("Type", data.type, userDataTypes)) {
 			auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
 

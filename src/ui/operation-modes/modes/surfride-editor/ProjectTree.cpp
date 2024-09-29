@@ -43,7 +43,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 			return;
 		}
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 		Viewer("Resource", context.gocSprite->projectResource->GetName());
+#endif
 
 		if (ImGui::Button("Export")) {
 			IGFD::FileDialogConfig cfg{};

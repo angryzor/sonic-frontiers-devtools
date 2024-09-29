@@ -1,3 +1,12 @@
+# v0.1.46
+## Sonic Frontiers
+* Re-enabled the adding and removing of component configurations in the level editor.
+
+## Sonic Forces
+* Fixed a crash in the SWIF editor.
+* Fixed a crash relating to hash maps.
+
+
 # v0.1.45
 ## Sonic Frontiers
 * ASM editor: Clips, Variables and Blend Spaces can now be reassigned by dragging pins. Can't create new ones yet.

@@ -161,7 +161,13 @@ namespace ui::operation_modes::modes::level_editor {
 			transform,
 		};
 
-		objData->componentData.push_back(ComponentData::Create(allocator, "RangeSpawning", GOCActivatorSpawner{ 500, 200 }));
+		auto* rangeSpawning = ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
+		auto* rangeSpawningData = rangeSpawning->GetData<GOCActivatorSpawner>();
+
+		rangeSpawningData->m_range = 500.0f;
+		rangeSpawningData->m_distance = 200.0f;
+
+		objData->componentData.push_back(rangeSpawning);
 
 		return objData;
 	}
@@ -184,7 +190,20 @@ namespace ui::operation_modes::modes::level_editor {
 		};
 
 		auto* otherRangeSpawning = otherObject->GetComponentDataByType("RangeSpawning");
-		objData->componentData.push_back(ComponentData::Create(allocator, "RangeSpawning", otherRangeSpawning ? *otherRangeSpawning->GetData<GOCActivatorSpawner>() : GOCActivatorSpawner{ 500, 200 }));
+		auto* newRangeSpawning = ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
+
+		auto* newRangeSpawningData = newRangeSpawning->GetData<GOCActivatorSpawner>();
+		
+		if (otherRangeSpawning) {
+			auto* otherRangeSpawningData = otherRangeSpawning->GetData<GOCActivatorSpawner>();
+			*newRangeSpawningData = *otherRangeSpawningData;
+		}
+		else {
+			newRangeSpawningData->m_range = 500.0f;
+			newRangeSpawningData->m_distance = 200.0f;
+		}
+
+		objData->componentData.push_back(newRangeSpawning);
 
 		return objData;
 	}

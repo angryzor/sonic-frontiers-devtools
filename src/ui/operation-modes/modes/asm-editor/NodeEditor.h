@@ -203,7 +203,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		auto GetActiveLayers() {
 			return std::views::all(gocAnimator->animationStateMachine->layers)
 				| std::views::filter([](auto& l) { return l.layerState != nullptr; })
-				| std::views::transform([](auto& l) { return ActiveLayerInfo{ l, l.layerState->GetPreviousAnimationState(), l.layerState->GetNextAnimationState() }; });
+				| std::views::transform([](auto& l) { return ActiveLayerInfo{ l, l.layerState->GetPreviousAnimationState(), l.layerState->GetCurrentAnimationState() }; });
 		}
 
 		ImVec4 CalculateActiveStateColor(short stateId);
