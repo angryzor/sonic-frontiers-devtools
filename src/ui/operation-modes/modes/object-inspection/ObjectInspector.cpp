@@ -28,6 +28,7 @@ typedef std::tuple<
 #include "component-inspectors/GOCAnimator.h"
 #include "component-inspectors/GOCActivator.h"
 #include "component-inspectors/GOCVisual.h"
+#include "component-inspectors/PathComponent.h"
 #include "component-inspectors/GOCEvent.h"
 #include "component-inspectors/GOCPlayerBlackboard.h"
 #include "component-inspectors/GOCPlayerKinematicParams.h"
@@ -47,6 +48,7 @@ typedef std::tuple<
 	hh::gfx::GOCVisualTransformed,
 	hh::gfx::GOCVisualModel,
 	hh::anim::GOCAnimator,
+	hh::path::PathComponent,
 	app_cmn::camera::GOCCamera,
 	app::game::GOCEventCollision,
 	app::player::GOCPlayerKinematicParams,

@@ -21,6 +21,7 @@ typedef std::tuple<
 #include "game-service-inspectors/ObjectWorld.h"
 #include "game-service-inspectors/StageInfo.h"
 #include "game-service-inspectors/LevelInfo.h"
+#include "game-service-inspectors/PathManager.h"
 #include "game-service-inspectors/CameraManager.h"
 #include "game-service-inspectors/CameraService.h"
 #include "game-service-inspectors/GameModeResourceManager.h"
@@ -36,6 +37,7 @@ typedef std::tuple<
 	hh::game::ObjectWorld,
 	app::level::StageInfo,
 	app::level::LevelInfo,
+	hh::path::PathManager,
 	hh::game::CameraManager,
 	app::camera::CameraService,
 	app::game::GameModeResourceManager,

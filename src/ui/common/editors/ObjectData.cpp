@@ -96,6 +96,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 				if (obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION))
 					allocator->Free(obj.componentData[i]);
 				obj.componentData.remove(i);
+				edited = true;
 			}
 		}
 		ImGui::PopID();
@@ -128,6 +129,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 				if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION))
 					obj.componentData.change_allocator(allocator);
 				obj.componentData.push_back(CreateComponentData(allocator, gocRegItem));
+				edited = true;
 			}
 		}
 		ImGui::EndPopup();

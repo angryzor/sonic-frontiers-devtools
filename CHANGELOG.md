@@ -1,3 +1,9 @@
+# v0.1.47
+## Sonic Frontiers
+* Added `PathManager` inspector.
+* Added `PathComponent` inspector (to be extended later).
+
+
 # v0.1.46
 ## Sonic Frontiers
 * Re-enabled the adding and removing of component configurations in the level editor.

@@ -1,4 +1,5 @@
 #include "Basic.h"
+#include <ui/Desktop.h>
 
 bool BeginVectorViewerTable (const char* id, bool withWAxis) {
 	bool tableResult = ImGui::BeginTable(id, withWAxis ? 5 : 4);
@@ -84,6 +85,16 @@ void Viewer(const char* label, const csl::math::Transform& transform) {
 		Viewer("Scale", transform.scale);
 		EndVectorViewerTable();
 	}
+}
+
+void Viewer(const char* label, hh::game::GameObject* const& gameObject)
+{
+	ImGui::PushID(label);
+	if (gameObject == nullptr) ImGui::BeginDisabled();
+	if (ImGui::Button("Select"))
+		Desktop::instance->Dispatch(FocusGameObjectAction{ gameObject });
+	if (gameObject == nullptr) ImGui::EndDisabled();
+	ImGui::PopID();
 }
 
 void Viewer(const char* label, const csl::ut::Color8& color)

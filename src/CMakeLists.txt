@@ -243,6 +243,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
             ui/game-services/game-service-inspectors/TerrainManager.cpp
             ui/game-services/game-service-inspectors/SoundDirector.cpp
+            ui/game-services/game-service-inspectors/PathManager.cpp
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.cpp
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.cpp
@@ -265,6 +266,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCCamera.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/PathComponent.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerBlackboard.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerKinematicParams.cpp
@@ -278,6 +280,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             io/binary/serialization/resource-rfls/ResAnimator.h
             ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/SoundDirector.h
+            ui/game-services/game-service-inspectors/PathManager.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.h
             ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.h
@@ -288,6 +291,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h
             ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h
+            ui/operation-modes/modes/object-inspection/component-inspectors/PathComponent.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.h
             ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCColliderQuery.h
             ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerCollider.h
