@@ -9,10 +9,6 @@
 
 namespace io::hson::templates {
 
-	struct Flags {
-		bool flags[8];
-	};
-
 	using BoolType = rfl::Literal<"bool">;
 	using Int8Type = rfl::Literal<"int8">;
 	using Uint8Type = rfl::Literal<"uint8">;
@@ -33,7 +29,6 @@ namespace io::hson::templates {
 	using ColorByteType = rfl::Literal<"color8">;
 	using ColorFloatType = rfl::Literal<"colorf">;
 	using StringType = rfl::Literal<"string">;
-	using FlagsType = rfl::Literal<"flags">;
 	using Float64Type = rfl::Literal<"float64">;
 	using CharType = rfl::Literal<"char">;
 	using ArrayType = rfl::Literal<"array">;
@@ -58,7 +53,6 @@ namespace io::hson::templates {
 	template<> struct hson_type<hh::game::ObjectId> { static constexpr const char* type = "object_reference"; using lit = ObjectIdType; };
 	template<> struct hson_type<csl::ut::Color<uint8_t>> { static constexpr const char* type = "color8"; using lit = ColorByteType; };
 	template<> struct hson_type<csl::ut::Color<float>> { static constexpr const char* type = "colorf"; using lit = ColorFloatType; };
-	template<> struct hson_type<Flags> { static constexpr const char* type = "flags"; using lit = FlagsType; };
 	template<> struct hson_type<csl::ut::VariableString> { static constexpr const char* type = "string"; using lit = StringType; };
 	template<> struct hson_type<double> { static constexpr const char* type = "float64"; using lit = Float64Type; };
 	template<> struct hson_type<char> { static constexpr const char* type = "char"; using lit = CharType; };
@@ -152,7 +146,6 @@ namespace io::hson::templates {
 		MemberDefT<csl::math::Matrix44>,
 		MemberDefT<hh::game::ObjectId>,
 		MemberDefT<csl::ut::VariableString>,
-		MemberDefT<Flags>,
 		MemberDefT<csl::ut::Color<uint8_t>>,
 		MemberDefT<csl::ut::Color<float>>
 	>;
