@@ -1,10 +1,6 @@
 #pragma once
 
 namespace io::hson::templates {
-	enum class TemplateType{
-		HSON,
-		RFL
-	};
-
-	void GenerateTemplate(const std::string& filename, TemplateType type);
+	void GenerateHSONTemplate(const std::string& filename);
+	void GenerateRFLTemplate(const std::string& filename);
 }

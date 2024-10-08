@@ -8,7 +8,6 @@
 
 
 namespace io::hson::templates {
-
 	using BoolType = rfl::Literal<"bool">;
 	using Int8Type = rfl::Literal<"int8">;
 	using Uint8Type = rfl::Literal<"uint8">;
@@ -155,9 +154,13 @@ namespace io::hson::templates {
 		std::vector<MemberDef> fields{};
 	};
 
+	struct TagDef {
+		rfl::Rename<"struct", std::string> rflClassName{};
+	};
+
 	struct ObjectDef {
 		rfl::Rename<"struct", std::string> rflClassName{};
-		std::optional<std::string> category{};
+		std::string category{};
 	};
 
 	struct Template {
@@ -166,7 +169,7 @@ namespace io::hson::templates {
 		std::map<std::string, EnumDef> enums{};
 		std::map<std::string, RflClassDef> structs{};
 		std::map<std::string, ObjectDef> objects{};
-		std::map<std::string, ObjectDef> tags{};
+		std::map<std::string, TagDef> tags{};
 	};
 
 	float RoundFloat(float value) {
@@ -302,6 +305,15 @@ namespace io::hson::templates {
 		};
 	}
 
+	std::optional<rfl::Object<EnumValueDef>> GenerateFlagsOptional(const hh::fnd::RflClassMember* member) {
+		if (auto* enumData = member->GetAttribute("DisplayIndex")) {
+			auto* enumEntries = reinterpret_cast<const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>*>(enumData->GetData());
+			return GenerateFlags(enumEntries, member->GetSubType());
+		}
+		else
+			return std::nullopt;
+	}
+
 	template<typename T>
 	RangeMemberDefT<T> GenerateRangeMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName, bool isflag = false) {
 		auto* caption = member->GetAttribute("Caption");
@@ -316,33 +328,17 @@ namespace io::hson::templates {
 
 		auto* rangeAttr = member->GetAttribute(rangeAttrName);
 		if (isflag) {
-			if (auto* enumData = member->GetAttribute("DisplayIndex")) {
-				auto* enumEntries = reinterpret_cast<const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>*>(enumData->GetData());
-				return {
-					member->GetName(),
-					"flags",
-					hson_type<T>::type,
-					GenerateFlags(enumEntries, member->GetSubType()),
-					std::nullopt,
-					std::nullopt,
-					std::nullopt,
-					arraySize > 1 ? std::make_optional(arraySize) : std::nullopt,
-					std::move(captionOpt),
-				};
-			}
-			else {
-				return {
-					member->GetName(),
-					"flags",
-					hson_type<T>::type,
-					std::nullopt,
-					std::nullopt,
-					std::nullopt,
-					std::nullopt,
-					arraySize > 1 ? std::make_optional(arraySize) : std::nullopt,
-					std::move(captionOpt),
-				};
-			}
+			return {
+				member->GetName(),
+				"flags",
+				hson_type<T>::type,
+				GenerateFlagsOptional(member),
+				std::nullopt,
+				std::nullopt,
+				std::nullopt,
+				arraySize > 1 ? std::make_optional(arraySize) : std::nullopt,
+				std::move(captionOpt),
+			};
 		}
 		else
 		{
@@ -598,7 +594,7 @@ namespace io::hson::templates {
 				continue;
 
 			GenerateRflClass(templateDef, rflClass);
-			templateDef.tags[tagClass->name] = { rflClass->GetName(), std::nullopt };
+			templateDef.tags[tagClass->name] = { rflClass->GetName() };
 		}
 
 		std::ofstream ofs{ filename, std::ios::trunc };
@@ -632,14 +628,11 @@ namespace io::hson::templates {
 		rfl::json::write(templateDef, ofs, YYJSON_WRITE_PRETTY_TWO_SPACES);
 	}
 
-	void GenerateTemplate(const std::string& filename, TemplateType type) {
-		switch (type) {
-		case TemplateType::HSON:
-			GenerateHSONTemplate(filename, hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses(), hh::game::GameObjectSystem::GetInstance()->goComponentRegistry->GetComponents());
-			break;
-		case TemplateType::RFL:
-			GenerateRFLTemplate(filename, hh::fnd::RflClassNameRegistry::GetInstance()->GetItems(), false);
-			break;
-		}
+	void GenerateHSONTemplate(const std::string& filename) {
+		GenerateHSONTemplate(filename, hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClasses(), hh::game::GameObjectSystem::GetInstance()->goComponentRegistry->GetComponents());
+	}
+
+	void GenerateRFLTemplate(const std::string& filename) {
+		GenerateRFLTemplate(filename, hh::fnd::RflClassNameRegistry::GetInstance()->GetItems(), false);
 	}
 }
