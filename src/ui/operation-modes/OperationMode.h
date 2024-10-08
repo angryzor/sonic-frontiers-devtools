@@ -102,7 +102,7 @@ public:
 	template<typename T>
 	void RemoveBehavior() {
 		for (size_t i = 0; i < behaviors.size(); i++)
-			if (behaviors[i]->behavior->GetId() == T::id) {
+			if (behaviors[i]->GetId() == T::id) {
 				behaviors.remove(i);
 				break;
 			}

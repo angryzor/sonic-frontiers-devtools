@@ -114,7 +114,6 @@ namespace rflops {
 
 			typename V::result_type ProcessFlags(RflObj<S>... objs, const hh::fnd::RflClassMember* member) {
 				auto* enumEntries = reinterpret_cast<const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>*>(member->GetAttribute("DisplayIndex")->GetData());
-
 				return v.VisitFlags(objs..., member->GetSubType(), enumEntries, [=](RflObj<S>... objs) { return ProcessSingle(objs..., member, member->GetSubType()); });
 			}
 

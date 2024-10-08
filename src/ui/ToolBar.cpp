@@ -78,6 +78,12 @@ void ToolBar::Render() {
 				cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 				ImGuiFileDialog::Instance()->OpenDialog("HSONExportDialog", "Choose File", ".template.hson.json", cfg);
 			}
+			if (ImGui::MenuItem("Export RFL templates")) {
+				IGFD::FileDialogConfig cfg{};
+				cfg.path = ".";
+				cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
+				ImGuiFileDialog::Instance()->OpenDialog("RFLExportDialog", "Choose File", ".template.rfl.json", cfg);
+			}
 			ImGui::EndMenu();
 		}
 
@@ -180,7 +186,13 @@ void ToolBar::Render() {
 
 	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk())
-			io::hson::templates::GenerateTemplate(ImGuiFileDialog::Instance()->GetFilePathName());
+			io::hson::templates::GenerateHSONTemplate(ImGuiFileDialog::Instance()->GetFilePathName());
+		ImGuiFileDialog::Instance()->Close();
+	}
+
+	if (ImGuiFileDialog::Instance()->Display("RFLExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk())
+			io::hson::templates::GenerateRFLTemplate(ImGuiFileDialog::Instance()->GetFilePathName());
 		ImGuiFileDialog::Instance()->Close();
 	}
 
