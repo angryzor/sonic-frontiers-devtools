@@ -185,13 +185,13 @@ void ToolBar::Render() {
 
 	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk())
-			io::hson::templates::GenerateTemplate(ImGuiFileDialog::Instance()->GetFilePathName(), io::hson::templates::HSON);
+			io::hson::templates::GenerateTemplate(ImGuiFileDialog::Instance()->GetFilePathName(), io::hson::templates::TemplateType::HSON);
 		ImGuiFileDialog::Instance()->Close();
 	}
 
 	if (ImGuiFileDialog::Instance()->Display("RFLExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk())
-			io::hson::templates::GenerateTemplate(ImGuiFileDialog::Instance()->GetFilePathName(), io::hson::templates::RFL);
+			io::hson::templates::GenerateTemplate(ImGuiFileDialog::Instance()->GetFilePathName(), io::hson::templates::TemplateType::RFL);
 		ImGuiFileDialog::Instance()->Close();
 	}
 

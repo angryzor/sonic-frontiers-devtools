@@ -1,8 +1,8 @@
 #pragma once
 
 namespace io::hson::templates {
-	enum TemplateType {
-		HSON = 0,
+	enum class TemplateType{
+		HSON,
 		RFL
 	};
 
