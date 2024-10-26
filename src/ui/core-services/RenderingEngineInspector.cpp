@@ -159,6 +159,15 @@ void RenderingEngineInspector::RenderContents()
 						Viewer("Number of lights?", sctx->implementation->numLights);
 						Viewer("Max lights?", sctx->implementation->maxLights);
 					}
+					if (ctx->GetNameHash() == *reinterpret_cast<unsigned int*>(0x1440C8B64ull)) {
+						auto* sctx = static_cast<hh::needle::SCAtmosphere*>(&*ctx);
+
+						Editor("renderTargetViews[0]", sctx->implementation->renderTargetViews[0]);
+						Editor("renderTargetViews[1]", sctx->implementation->renderTargetViews[1]);
+						Editor("unk12", sctx->implementation->unk12);
+						Editor("unk25", sctx->implementation->unk25);
+						Editor("unk26", sctx->implementation->unk26);
+					}
 					//if (ctx->GetNameHash() == *reinterpret_cast<unsigned int*>(0x1440C8B64ull)) {
 					//	auto* sctx = static_cast<hh::needle::SCAtmosphere*>(&*ctx);
 

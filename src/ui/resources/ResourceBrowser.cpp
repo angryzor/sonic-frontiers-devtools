@@ -14,6 +14,7 @@
 using namespace hh::fnd;
 
 AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
+#ifndef DEVTOOLS_TARGET_SDK_miller
 	if (typeInfo == hh::snd::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;
 	if (typeInfo == hh::snd::ResAtomCueSheet::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
 	if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo()) return AssetIconId::LIGHTING;
@@ -28,6 +29,7 @@ AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
 	if (typeInfo == hh::fnd::ResReflection::GetTypeInfo()) return AssetIconId::REFLECTION;
 	if (typeInfo == hh::fnd::Packfile::GetTypeInfo()) return AssetIconId::PACKFILE;
 	if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) return AssetIconId::PARTICLESYSTEM;
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 	if (typeInfo == hh::gfnd::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
 	if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;

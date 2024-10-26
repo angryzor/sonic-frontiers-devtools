@@ -21,8 +21,8 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		strcpy(filename, textureResource->GetName());
 
 		SRS_TEXTURE srsTexture{};
-		srsTexture.width = static_cast<unsigned short>(textureResource->GetTexture()->width);
-		srsTexture.height = static_cast<unsigned short>(textureResource->GetTexture()->height);
+		srsTexture.width = static_cast<unsigned short>(textureResource->GetTexture()->format.width);
+		srsTexture.height = static_cast<unsigned short>(textureResource->GetTexture()->format.height);
 		srsTexture.id = mt();
 #ifndef DEVTOOLS_TARGET_SDK_wars
 		srsTexture.name = name;
@@ -50,8 +50,8 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 		strcpy(filename, textureResource->GetName());
 
 		texture.filename = filename;
-		texture.width = static_cast<unsigned short>(textureResource->GetTexture()->width);
-		texture.height = static_cast<unsigned short>(textureResource->GetTexture()->height);
+		texture.width = static_cast<unsigned short>(textureResource->GetTexture()->format.width);
+		texture.height = static_cast<unsigned short>(textureResource->GetTexture()->format.height);
 		resourceTextureData->textures[textureRef.textureIndex] = textureResource->GetTexture();
 		instanceTextureData->textures[textureRef.textureIndex] = textureResource->GetTexture();
 	}

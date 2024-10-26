@@ -22,7 +22,7 @@ namespace ui::operation_modes::modes::level_editor {
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		return { mt() };
 #endif
-#ifdef DEVTOOLS_TARGET_SDK_rangers
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		return { mt(), mt() };
 #endif
 	}
@@ -255,7 +255,11 @@ namespace ui::operation_modes::modes::level_editor {
 		}
 
 		resource->AddObject(objData);
+#ifdef DEVTOOLS_TARGET_SDK_miller
+		focusedChunk->AddWorldObjectStatus(placementTargetLayer, objData, true);
+#else	
 		focusedChunk->AddWorldObjectStatus(objData, true);
+#endif
 	}
 
 	hh::game::ObjectWorldChunk* Context::GetFocusedChunk() const

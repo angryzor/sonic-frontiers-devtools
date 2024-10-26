@@ -21,7 +21,12 @@ bool Desktop::selectionColliderFilters[32][32]{ true };
 Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }
 {
 	resourceLoader = hh::fnd::ResourceLoader::Create(allocator);
+
+#ifdef DEVTOOLS_TARGET_SDK_miller
+	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac");
+#else
 	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac", 0);
+#endif
 
 	Translations::Init(allocator);
 }

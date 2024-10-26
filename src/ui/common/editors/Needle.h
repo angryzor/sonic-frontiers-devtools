@@ -17,3 +17,4 @@ bool Editor(const char* label, hh::needle::RenderTextureHandle& renderTexture);
 bool Editor(const char* label, hh::needle::MeshResource& meshResource);
 bool Editor(const char* label, hh::needle::InstanceParameterContainerData& ipcd);
 bool Editor(const char* label, hh::needle::ParameterValueObjectContainer& pvo);
+bool Editor(const char* label, hh::needle::ShaderObject& shaderObj);

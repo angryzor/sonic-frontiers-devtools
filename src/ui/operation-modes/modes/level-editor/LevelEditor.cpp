@@ -95,14 +95,14 @@ namespace ui::operation_modes::modes::level_editor {
 	}
 
 	void LevelEditor::GameServiceAddedCallback(GameService* service) {
-		if (service->pStaticClass == ObjectWorld::GetClass()) {
+		if (service->staticClass == ObjectWorld::GetClass()) {
 			auto* objWorld = static_cast<ObjectWorld*>(service);
 			objWorld->AddWorldListener(this);
 		}
 	}
 
 	void LevelEditor::GameServiceRemovedCallback(GameService* service) {
-		if (service->pStaticClass == ObjectWorld::GetClass()) {
+		if (service->staticClass == ObjectWorld::GetClass()) {
 			auto* objWorld = static_cast<ObjectWorld*>(service);
 			objWorld->RemoveWorldListener(this);
 		}

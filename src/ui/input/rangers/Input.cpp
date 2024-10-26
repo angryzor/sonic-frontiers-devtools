@@ -1,9 +1,9 @@
 #include <ui/input/Input.h>
 
-HOOK(void, __fastcall, KeyboardUpdate, 0x140F22430, hh::hid::Keyboard* self)
+HOOK(void, __fastcall, KeyboardUpdate, 0x140F22430, hh::hid::Keyboard* self, float unkParam)
 {
 	if (!ShouldCaptureKeyboardInputs()) {
-		originalKeyboardUpdate(self);
+		originalKeyboardUpdate(self, unkParam);
 	}
 }
 

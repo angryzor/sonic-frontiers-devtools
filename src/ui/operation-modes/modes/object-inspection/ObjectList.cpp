@@ -17,7 +17,7 @@ namespace ui::operation_modes::modes::object_inspection {
 
 		auto* transform = obj->GetComponent<GOCTransform>();
 
-		if ((transform && transform->GetChildren().size() > 0) || obj->GetChildren().size() > 0) {
+		if (transform && transform->GetChildren().size() > 0) {// || obj->GetChildren().size() > 0) {
 			bool isOpen = ImGui::TreeNodeEx(obj, nodeflags, "%s", obj->name.c_str());
 
 			if (ImGui::IsItemClicked())

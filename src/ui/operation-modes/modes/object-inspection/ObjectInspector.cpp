@@ -59,6 +59,11 @@ typedef std::tuple<
 > InspectableComponents;
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+typedef std::tuple<
+> InspectableComponents;
+#endif
+
 #ifdef DEVTOOLS_TARGET_SDK_wars
 typedef std::tuple<> InspectableGameObjects;
 #endif
@@ -70,6 +75,11 @@ typedef std::tuple<> InspectableGameObjects;
 typedef std::tuple<
 	app_cmn::camera::CameraFrame,
 	app::ObjCameraVolume
+> InspectableGameObjects;
+#endif
+
+#ifdef DEVTOOLS_TARGET_SDK_miller
+typedef std::tuple<
 > InspectableGameObjects;
 #endif
 

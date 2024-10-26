@@ -23,9 +23,9 @@ public:
 	static bool renderOcclusionCapsules;
 	static uint8_t gocVisualDebugDrawOpacity;
 #ifndef DEVTOOLS_TARGET_SDK_wars
-	hh::needle::CScratchMemoryContext memCtx;
-	hh::gfnd::DrawContext::Unk2 unk2;
-	hh::gfnd::DrawContext::Unk3 unk3;
+	//hh::needle::CScratchMemoryContext memCtx;
+	//hh::gfnd::DrawContext::Unk2 unk2;
+	//hh::gfnd::DrawContext::Unk3 unk3;
 #endif
 	hh::gfnd::DrawContext* drawContext;
 	csl::ut::MoveArray<DebugRenderable*> additionalRenderables{ GetAllocator() };

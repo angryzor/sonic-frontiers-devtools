@@ -18,7 +18,7 @@ public:
 	csl::fnd::HeapBase* target;
 	HeapInspector(csl::fnd::IAllocator* allocator, MemoryInspector* memoryInspector, csl::fnd::HeapBase* target);
 	void Tick();
-	void RenderHeapInformation();
+	//void RenderHeapInformation();
 	void RenderStatistics();
 	void RenderAllocationMaps();
 	void RenderDetails();

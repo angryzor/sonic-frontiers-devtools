@@ -21,7 +21,7 @@ bool Context::visible = false;
 bool Context::passThroughMouse = false;
 bool Context::inited = false;
 bool Context::imguiInited = false;
-bool Context::enableViewports = true;
+bool Context::enableViewports = false;
 bool Context::reinitImGuiNextFrame = false;
 
 using namespace hh::game;
@@ -40,6 +40,13 @@ constexpr size_t appShutdownAddr = 0x150192E80;
 constexpr size_t wndProcAddr = 0x140D68F80;
 constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x1410FB090;
 constexpr size_t displaySwapDevicePresentAddr = 0x1410FAEE0;
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+constexpr size_t appResetAddr = 0x1467BAE20;
+constexpr size_t appShutdownAddr = 0x1522F3600;
+constexpr size_t wndProcAddr = 0x140A27340;
+constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x140ED9E00;
+constexpr size_t displaySwapDevicePresentAddr = 0x140ED9C30;
 #endif
 
 HOOK(uint64_t, __fastcall, GameApplication_Reset, appResetAddr, hh::game::GameApplication* self) {
@@ -159,7 +166,7 @@ void Context::install_hooks()
 //	INSTALL_HOOK(GOCCamera_PushController);
 //#endif
 	//INSTALL_HOOK(CreateRenderingDeviceDX11);
-	GOCVisualDebugDrawRenderer::InstallHooks();
+	//GOCVisualDebugDrawRenderer::InstallHooks();
 }
 
 void Context::init() {
@@ -200,8 +207,11 @@ void Context::init_modules()
 	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
 	auto* allocator = &devtoolsAllocator;
 #endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+	auto* allocator = RESOLVE_STATIC_VARIABLE(hh::cri::CriSystem::instance)->hedgehogAllocator;
+#endif
 
-	ReloadManager::instance = new (allocator) ReloadManager(allocator);
+	//ReloadManager::instance = new (allocator) ReloadManager(allocator);
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	RESOLVE_STATIC_VARIABLE(hh::game::DebugCameraManager::instance) = hh::game::DebugCameraManager::Create();
 #endif
@@ -217,7 +227,7 @@ void Context::deinit_modules()
 	Desktop::instance->~Desktop();
 	Desktop::instance->GetAllocator()->Free(Desktop::instance);
 	GOCVisualDebugDrawRenderer::instance = nullptr;
-	ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
+	//ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
 }
 
 void Context::init_imgui()

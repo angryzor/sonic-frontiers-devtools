@@ -61,9 +61,10 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 				trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
 		}
 #endif
-
+#ifndef DEVTOOLS_TARGET_SDK_miller
 		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
 			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 		else if (&request->resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo())
 			ReloadByLoad(buffer, fileSize, request->resource);
@@ -113,52 +114,52 @@ void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::Managed
 	resource->GetResourceAllocator()->Free(buffer);
 }
 
-void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWorld* resource)
-{
-	bool success{ false };
-
-	if (auto* gameManager = hh::game::GameManager::GetInstance()) {
-		if (auto* objWorld = gameManager->GetService<hh::game::ObjectWorld>()) {
-			for (auto* chunk : objWorld->GetWorldChunks()) {
-				if (auto* layer = chunk->GetLayerByName(resource->GetName())) {
-					hh::ut::BinaryFile bfile{ buffer };
-
-					if (bfile.IsValid()) {
-						auto* allocator = layer->GetAllocator();
-						bool wasEnabled = layer->IsEnable();
-
-						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-						//	levelEditor->Deselect();
-
-						{
-							Reference<hh::game::ObjectWorldChunkLayer> l{ layer };
-							chunk->RemoveLayer(layer);
-							chunk->ShutdownPendingObjects();
-						}
-
-						resource->GetResourceAllocator()->Free(resource->originalBinaryData);
-						resource->originalBinaryData = buffer;
-						resource->unpackedBinaryData = bfile.GetDataAddress(-1);
-						resource->size = fileSize;
-						resource->Load(resource->unpackedBinaryData, resource->size);
-
-						chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, resource));
-						chunk->SetLayerEnabled(resource->GetName(), wasEnabled);
-
-						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
-						//	levelEditor->ReloadObjectWorldData();
-
-						success = true;
-						break;
-					}
-				}
-			}
-		}
-	}
-
-	if (!success)
-		resource->GetResourceAllocator()->Free(buffer);
-}
+//void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWorld* resource)
+//{
+//	bool success{ false };
+//
+//	if (auto* gameManager = hh::game::GameManager::GetInstance()) {
+//		if (auto* objWorld = gameManager->GetService<hh::game::ObjectWorld>()) {
+//			for (auto* chunk : objWorld->GetWorldChunks()) {
+//				if (auto* layer = chunk->GetLayerByName(resource->GetName())) {
+//					hh::ut::BinaryFile bfile{ buffer };
+//
+//					if (bfile.IsValid()) {
+//						auto* allocator = layer->GetAllocator();
+//						bool wasEnabled = layer->IsEnable();
+//
+//						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+//						//	levelEditor->Deselect();
+//
+//						{
+//							Reference<hh::game::ObjectWorldChunkLayer> l{ layer };
+//							chunk->RemoveLayer(layer);
+//							chunk->ShutdownPendingObjects();
+//						}
+//
+//						resource->GetResourceAllocator()->Free(resource->originalBinaryData);
+//						resource->originalBinaryData = buffer;
+//						resource->unpackedBinaryData = bfile.GetDataAddress(-1);
+//						resource->size = fileSize;
+//						resource->Load(resource->unpackedBinaryData, resource->size);
+//
+//						chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, resource));
+//						chunk->SetLayerEnabled(resource->GetName(), wasEnabled);
+//
+//						//if (auto* levelEditor = dynamic_cast<LevelEditor*>(&*Desktop::instance->operationMode))
+//						//	levelEditor->ReloadObjectWorldData();
+//
+//						success = true;
+//						break;
+//					}
+//				}
+//			}
+//		}
+//	}
+//
+//	if (!success)
+//		resource->GetResourceAllocator()->Free(buffer);
+//}
 
 void ReloadManager::WatchDirectory(const std::string& path) {
 	if (fileWatcher != nullptr) {

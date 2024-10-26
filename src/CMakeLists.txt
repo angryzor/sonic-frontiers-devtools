@@ -31,7 +31,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
         ui/common/editors/SurfRide.cpp
         ui/common/editors/Resources.cpp
-        ui/common/editors/FxCol.cpp
+        # ui/common/editors/FxCol.cpp
         ui/common/viewers/Basic.cpp
         ui/common/viewers/ObjectData.cpp
         ui/common/viewers/RflDiff.cpp
@@ -48,11 +48,11 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Component.cpp
         ui/Desktop.cpp
         ui/GlobalSettings.cpp
-        ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
-        ui/game-services/game-service-inspectors/FxColManager.cpp
-        ui/game-services/game-service-inspectors/ObjectWorld.cpp
-        ui/game-services/game-service-inspectors/StageInfo.cpp
-        ui/game-services/game-service-inspectors/CameraManager.cpp
+        # ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
+        # ui/game-services/game-service-inspectors/FxColManager.cpp
+        # ui/game-services/game-service-inspectors/ObjectWorld.cpp
+        # ui/game-services/game-service-inspectors/StageInfo.cpp
+        # ui/game-services/game-service-inspectors/CameraManager.cpp
         ui/game-services/GameServiceInspector.cpp
         ui/operation-modes/modes/level-editor/Context.cpp
         ui/operation-modes/modes/level-editor/LevelEditor.cpp
@@ -66,32 +66,32 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/object-inspection/ObjectInspection.cpp
         ui/operation-modes/modes/object-inspection/ObjectInspector.cpp
         ui/operation-modes/modes/object-inspection/ObjectList.cpp
-        ui/operation-modes/modes/fxcol-editor/Context.cpp
-        ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
-        ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
-        ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
-        ui/operation-modes/modes/surfride-editor/Context.cpp
-        ui/operation-modes/modes/surfride-editor/Timeline.cpp
-        ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
-        ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
-        ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
-        ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
-        ui/operation-modes/modes/surfride-editor/texture-editor/References.cpp
-        ui/operation-modes/modes/surfride-editor/texture-editor/Context.cpp
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.cpp
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.cpp
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.cpp
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.cpp
+        # ui/operation-modes/modes/fxcol-editor/Context.cpp
+        # ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
+        # ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
+        # ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
+        # ui/operation-modes/modes/surfride-editor/Context.cpp
+        # ui/operation-modes/modes/surfride-editor/Timeline.cpp
+        # ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
+        # ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
+        # ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
+        # ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
+        # ui/operation-modes/modes/surfride-editor/texture-editor/References.cpp
+        # ui/operation-modes/modes/surfride-editor/texture-editor/Context.cpp
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.cpp
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.cpp
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.cpp
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.cpp
         ui/operation-modes/OperationModeBehavior.cpp
         ui/operation-modes/OperationMode.cpp
         ui/resources/editors/ResObjectWorldEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
-        ui/resources/editors/ResFxColFile2Editor.cpp
+        # ui/resources/editors/ResFxColFile2Editor.cpp
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
-        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
+        # ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
@@ -136,7 +136,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/Needle.h
         ui/common/editors/SurfRide.h
         ui/common/editors/Resources.h
-        ui/common/editors/FxCol.h
+        # ui/common/editors/FxCol.h
         ui/common/viewers/Basic.h
         ui/common/viewers/ObjectData.h
         ui/common/viewers/RflDiff.h
@@ -162,11 +162,11 @@ target_sources(${DEVTOOLS_TARGET}
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
         ui/game-modes/GameModeInspector.h
-        ui/game-services/game-service-inspectors/FxParamManager.h
-        ui/game-services/game-service-inspectors/FxColManager.h
-        ui/game-services/game-service-inspectors/ObjectWorld.h
-        ui/game-services/game-service-inspectors/StageInfo.h
-        ui/game-services/game-service-inspectors/CameraManager.h
+        # ui/game-services/game-service-inspectors/FxParamManager.h
+        # ui/game-services/game-service-inspectors/FxColManager.h
+        # ui/game-services/game-service-inspectors/ObjectWorld.h
+        # ui/game-services/game-service-inspectors/StageInfo.h
+        # ui/game-services/game-service-inspectors/CameraManager.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/behaviors/Clipboard.h
         ui/operation-modes/behaviors/DebugCommentsVisual.h
@@ -190,23 +190,23 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/modes/object-inspection/ObjectInspection.h
         ui/operation-modes/modes/object-inspection/ObjectInspector.h
         ui/operation-modes/modes/object-inspection/ObjectList.h
-        ui/operation-modes/modes/fxcol-editor/Context.h
-        ui/operation-modes/modes/fxcol-editor/FxColEditor.h
-        ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
-        ui/operation-modes/modes/fxcol-editor/ShapeList.h
-        ui/operation-modes/modes/surfride-editor/Context.h
-        ui/operation-modes/modes/surfride-editor/Timeline.h
-        ui/operation-modes/modes/surfride-editor/ProjectTree.h
-        ui/operation-modes/modes/surfride-editor/ElementInspector.h
-        ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
-        ui/operation-modes/modes/surfride-editor/SurfRideElement.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/Behaviors.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/Context.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/References.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.h
-        ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.h
+        # ui/operation-modes/modes/fxcol-editor/Context.h
+        # ui/operation-modes/modes/fxcol-editor/FxColEditor.h
+        # ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
+        # ui/operation-modes/modes/fxcol-editor/ShapeList.h
+        # ui/operation-modes/modes/surfride-editor/Context.h
+        # ui/operation-modes/modes/surfride-editor/Timeline.h
+        # ui/operation-modes/modes/surfride-editor/ProjectTree.h
+        # ui/operation-modes/modes/surfride-editor/ElementInspector.h
+        # ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
+        # ui/operation-modes/modes/surfride-editor/SurfRideElement.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/Behaviors.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/Context.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/References.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.h
+        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.h
         ui/operation-modes/OperationModeHost.h
         ui/operation-modes/OperationModeBehavior.h
         ui/operation-modes/OperationMode.h
@@ -215,12 +215,12 @@ target_sources(${DEVTOOLS_TARGET}
         ui/resources/editors/ResMaterialEditor.h
         ui/resources/editors/ResReflectionEditor.h
         ui/resources/editors/ResSurfRideProjectEditor.h
-        ui/resources/editors/ResFxColFile2Editor.h
+        # ui/resources/editors/ResFxColFile2Editor.h
         ui/resources/ResourceBrowser.h
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
-        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
+        # ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
         ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h

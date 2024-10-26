@@ -24,6 +24,11 @@
 #define he2sdk rangerssdk
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+#include <miller-sdk.h>
+#define he2sdk millersdk
+#endif
+
 #include <imgui.h>
 #include <backends/imgui_impl_win32.h>
 #include <backends/imgui_impl_dx11.h>

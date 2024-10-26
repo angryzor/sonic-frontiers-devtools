@@ -312,6 +312,16 @@ bool Editor(const char* label, hh::needle::RenderJob& job)
 
 			edited |= Editor("Viewport ID", defaultModelRenderJob.viewportId);
 		}
+		if (job.GetNameHash() == *reinterpret_cast<unsigned int*>(0x1440C9CB0)) {
+			auto& sebastienSky = static_cast<hh::needle::SebastienSky&>(job);
+
+			edited |= Editor("Viewport ID", sebastienSky.viewportId);
+			edited |= Editor("parameterValueObject1", *sebastienSky.parameterValueObject1);
+			edited |= Editor("daySkyParameters", *sebastienSky.daySkyParameters);
+			edited |= Editor("nightSkyParameters", *sebastienSky.nightSkyParameters);
+			edited |= Editor("heightFogParameters", *sebastienSky.heightFogParameters);
+			edited |= Editor("parameterValueObject5", *sebastienSky.parameterValueObject5);
+		}
 		ImGui::TreePop();
 	}
 	return edited;

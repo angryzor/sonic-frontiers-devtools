@@ -8,4 +8,4 @@ void Editor(const char* label, hh::fnd::ResReflectionT<T>& obj) {
 	ImGui::Text("%s: ResReflection - %s", label, obj->GetName());
 }
 
-void Editor(const char* label, app::gfx::ResFxColFile2& obj);
+//void Editor(const char* label, app::gfx::ResFxColFile2& obj);

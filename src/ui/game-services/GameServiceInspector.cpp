@@ -51,10 +51,14 @@ typedef std::tuple<
 
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+typedef std::tuple<
+> InspectableServices;
+#endif
 
 template<typename T>
 bool RenderServiceInspector(hh::game::GameService& service) {
-	bool result{ service.pStaticClass == T::GetClass() };
+	bool result{ service.staticClass == T::GetClass() };
 	
 	if (result) {
 		ImGui::PushID(&service);
@@ -86,7 +90,7 @@ void GameServiceInspector::RenderContents() {
 
 	for (auto* service : gameManager->GetServices()) {
 		ImGui::PushID(service);
-		if (ImGui::CollapsingHeader(service->pStaticClass->pName))
+		if (ImGui::CollapsingHeader(service->staticClass->name))
 			ServiceIterator<>::Render(*service);
 		ImGui::PopID();
 	}
