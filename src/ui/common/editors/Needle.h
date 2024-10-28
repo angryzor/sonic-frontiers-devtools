@@ -11,7 +11,7 @@ bool Editor(const char* label, hh::needle::SupportFX::FxRenderParam& renderParam
 bool Editor(const char* label, hh::needle::PipelineInfo& pipelineInfo);
 bool Editor(const char* label, hh::needle::RenderingPipeline& pipeline);
 bool Editor(const char* label, hh::needle::WorldRenderingPipeline& pipeline);
-bool Editor(const char* label, hh::needle::RenderingPipelineRangers& pipeline);
+bool Editor(const char* label, hh::needle::RenderingPipelineMiller& pipeline);
 bool Editor(const char* label, hh::needle::RenderUnit& renderUnit);
 bool Editor(const char* label, hh::needle::RenderTextureHandle& renderTexture);
 bool Editor(const char* label, hh::needle::MeshResource& meshResource);

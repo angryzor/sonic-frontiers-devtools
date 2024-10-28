@@ -61,9 +61,11 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 				trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
 		}
 #endif
-#ifndef DEVTOOLS_TARGET_SDK_miller
 		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
+#ifndef DEVTOOLS_TARGET_SDK_miller
 			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
+#else
+			;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 		else if (&request->resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo())

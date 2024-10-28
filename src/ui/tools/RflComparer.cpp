@@ -68,7 +68,7 @@ void RflComparer::RenderContents()
 
 				if (ImGui::Selectable(rflc->GetName(), is_selected)) {
 					rflClass = rflc;
-					diffResult = RflDiffStruct(GetAllocator(), resource1->reflectionData, resource2->reflectionData, rflc);
+					diffResult = RflDiffStruct(GetAllocator(), resource1->GetData(), resource2->GetData(), rflc);
 				}
 
 				if (is_selected)

@@ -9,13 +9,13 @@ using namespace hh::fnd;
 
 ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource, const RflClass* rflClass) : StandaloneWindow{ allocator }, forcedRflClass{ true }, resource{ resource }, rflClass{ rflClass }, diffResult{ allocator } {
 	char namebuf[500];
-	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx) - using RflClass %s", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)&resource->reflectionData, rflClass->GetName());
+	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx) - using RflClass %s", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)resource->GetData(), rflClass->GetName());
 	SetTitle(namebuf);
 }
 
 ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource) : StandaloneWindow{ allocator }, forcedRflClass{ false }, resource{ resource }, rflClass{ nullptr }, diffResult{ allocator } {
 	char namebuf[500];
-	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx)", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)&resource->reflectionData);
+	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx)", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)resource->GetData());
 	SetTitle(namebuf);
 }
 
@@ -32,7 +32,7 @@ void ResReflectionEditor::MakeOriginalCopy()
 {
 	origData = new (std::align_val_t(16), GetAllocator()) char[rflClass->GetSizeInBytes()];
 	hh::fnd::RflTypeInfoRegistry::GetInstance()->ConstructObject(GetAllocator(), origData, rflClass->GetName());
-	rflops::Copy::Apply(origData, resource->reflectionData, rflClass);
+	rflops::Copy::Apply(origData, resource->GetData(), rflClass);
 }
 
 void ResReflectionEditor::FreeOriginalCopy()
@@ -66,7 +66,7 @@ void ResReflectionEditor::RenderContents() {
 
 		ImGui::InputText("Search", searchStr, 200);
 		for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
-			auto resSize = resource->GetSize();
+			auto resSize = resource->GetSize() - 0x10;
 			auto rflSize = rflc->GetSizeInBytes();
 
 			if ((resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF)) && (strlen(searchStr) == 0 || strstr(rflc->GetName(), searchStr)))
@@ -112,8 +112,8 @@ void ResReflectionEditor::RenderContents() {
 	if (rflClass != nullptr) {
 		if (showdiff) {
 			if (ImGui::BeginChild("Properties", ImVec2(ImGui::GetWindowSize().x / 2, 0))) {
-				if (ResettableReflectionEditor("Properties", resource->reflectionData, origData, rflClass))
-					diffResult = std::move(RflDiffStruct(GetAllocator(), origData, resource->reflectionData, rflClass));
+				if (ResettableReflectionEditor("Properties", resource->GetData(), origData, rflClass))
+					diffResult = std::move(RflDiffStruct(GetAllocator(), origData, resource->GetData(), rflClass));
 			}
 			ImGui::EndChild();
 			ImGui::SameLine();
@@ -134,7 +134,7 @@ void ResReflectionEditor::RenderContents() {
 		}
 		else {
 			if (ImGui::BeginChild("Properties")) {
-				ResettableReflectionEditor("Properties", resource->reflectionData, origData, rflClass);
+				ResettableReflectionEditor("Properties", resource->GetData(), origData, rflClass);
 			}
 			ImGui::EndChild();
 		}
@@ -160,7 +160,7 @@ void ResReflectionEditor::RenderExportDialog()
 			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
 			std::wstring wFilePath(filePath.begin(), filePath.end());
 
-			devtools::io::binary::containers::BinaryFile::Serialize(wFilePath.c_str(), self->resource->reflectionData, self->rflClass);
+			devtools::io::binary::containers::BinaryFile::SerializeRef2(wFilePath.c_str(), self->resource->GetData(), self->rflClass);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}

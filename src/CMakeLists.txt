@@ -18,6 +18,7 @@ target_sources(${DEVTOOLS_TARGET}
         io/binary/serialization/resource-rfls/ResFxColFile2.cpp
         io/binary/serialization/resource-rfls/ResObjectWorld.cpp
         io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
+        io/binary/serialization/resource-rfls/ResReflection.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
         reflection/HSONTemplateGeneration.cpp
@@ -115,6 +116,7 @@ target_sources(${DEVTOOLS_TARGET}
         io/binary/serialization/resource-rfls/ResFxColFile2.h
         io/binary/serialization/resource-rfls/ResObjectWorld.h
         io/binary/serialization/resource-rfls/ResSurfRideProject.h
+        io/binary/serialization/resource-rfls/ResReflection.h
         io/binary/serialization/Types.h
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h
@@ -296,5 +298,14 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
             ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCColliderQuery.h
             ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerCollider.h
             ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.h
+    )
+endif()
+
+if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/core-services/GraphicsContextInspector.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/core-services/GraphicsContextInspector.h
     )
 endif()

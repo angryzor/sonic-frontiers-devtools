@@ -26,6 +26,10 @@
 #include "tools/rangers/NeedleFxSceneDataTesterV2.h"
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+	#include "core-services/GraphicsContextInspector.h"
+#endif
+
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include "operation-modes/modes/level-editor/LevelEditor.h"
 #include "operation-modes/modes/fxcol-editor/FxColEditor.h"
@@ -59,6 +63,10 @@ void ToolBar::Render() {
 				new (Desktop::instance->GetAllocator()) RenderingEngineInspector(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("GameMode"))
 				new (Desktop::instance->GetAllocator()) GameModeInspector(Desktop::instance->GetAllocator());
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+			if (ImGui::MenuItem("GraphicsContext"))
+				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
 #endif
 			ImGui::EndMenu();
 		}

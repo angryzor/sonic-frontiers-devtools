@@ -60,7 +60,17 @@ typedef std::tuple<
 #endif
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
+#include "component-inspectors/GOCTransform.h"
+#include "component-inspectors/GOCCollider.h"
+#include "component-inspectors/miller/GOCPlayerParameter.h"
+
 typedef std::tuple<
+	hh::game::GOCTransform,
+	hh::physics::GOCSphereCollider,
+	hh::physics::GOCBoxCollider,
+	hh::physics::GOCCapsuleCollider,
+	hh::physics::GOCCylinderCollider,
+	app::player::GOCPlayerParameter
 > InspectableComponents;
 #endif
 

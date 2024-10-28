@@ -208,7 +208,7 @@ void Context::init_modules()
 	auto* allocator = &devtoolsAllocator;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
-	auto* allocator = RESOLVE_STATIC_VARIABLE(hh::cri::CriSystem::instance)->hedgehogAllocator;
+	auto* allocator = moduleAllocator;
 #endif
 
 	//ReloadManager::instance = new (allocator) ReloadManager(allocator);

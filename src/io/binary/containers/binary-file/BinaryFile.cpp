@@ -4,6 +4,7 @@
 #include <hedgelib/csl/hl_csl_move_array.h>
 #include <hedgelib/io/hl_file.h>
 #include <io/binary/serialization/Reflection.h>
+#include <io/binary/serialization/resource-rfls/ResReflection.h>
 #include <ui/Desktop.h>
 #include "BinaryFile.h"
 #include "Types.h"
@@ -62,6 +63,24 @@ namespace devtools::io::binary::containers {
 		Backend backend{ writer };
 		serialization::ReflectionSerializer<Backend> serializer{ Desktop::instance->GetAllocator(), backend, writer.tell() };
 
+		serializer.Serialize(obj, rflClass);
+
+		writer.finish_data_block();
+		writer.finish();
+	}
+
+	void BinaryFile::SerializeRef2(const wchar_t* filename, void* obj, const hh::fnd::RflClass* rflClass) {
+		hl::file_stream stream{ filename, hl::file::mode::write };
+		hl::bina::v2::writer64 writer{ stream };
+
+		writer.start(hl::bina::endian_flag::little, hl::bina::v2::ver_210);
+		writer.start_data_block();
+
+		Backend backend{ writer };
+		serialization::ReflectionSerializer<Backend> serializer{ Desktop::instance->GetAllocator(), backend, writer.tell() };
+
+		ResReflectionHeader header{ rflClass->nameHash };
+		serializer.Serialize(&header, &hh::fnd::RflClassTraits<ResReflectionHeader>::rflClass);
 		serializer.Serialize(obj, rflClass);
 
 		writer.finish_data_block();

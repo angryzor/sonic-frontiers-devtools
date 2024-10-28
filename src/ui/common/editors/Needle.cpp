@@ -377,7 +377,7 @@ bool Editor(const char* label, hh::needle::WorldRenderingPipeline& pipeline)
 	return edited;
 }
 
-bool Editor(const char* label, hh::needle::RenderingPipelineRangers& pipeline)
+bool Editor(const char* label, hh::needle::RenderingPipelineMiller& pipeline)
 {
 	bool edited{};
 	if (ImGui::TreeNode(label)) {

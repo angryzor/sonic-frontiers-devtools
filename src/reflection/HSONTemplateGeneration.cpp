@@ -28,24 +28,24 @@ namespace io::hson::templates {
 	using ArrayType = rfl::Literal<"array">;
 
 	template<typename T> struct hson_type {};
-	template<> struct hson_type<bool> { static constexpr const char* type = "bool"; using lit = BoolType; };
-	template<> struct hson_type<int8_t> { static constexpr const char* type = "int8"; using lit = Int8Type; };
-	template<> struct hson_type<uint8_t> { static constexpr const char* type = "uint8"; using lit = Uint8Type; };
-	template<> struct hson_type<int16_t> { static constexpr const char* type = "int16"; using lit = Int16Type; };
-	template<> struct hson_type<uint16_t> { static constexpr const char* type = "uint16"; using lit = Uint16Type; };
-	template<> struct hson_type<int32_t> { static constexpr const char* type = "int32"; using lit = Int32Type; };
-	template<> struct hson_type<uint32_t> { static constexpr const char* type = "uint32"; using lit = Uint32Type; };
-	template<> struct hson_type<int64_t> { static constexpr const char* type = "int64"; using lit = Int64Type; };
-	template<> struct hson_type<uint64_t> { static constexpr const char* type = "uint64"; using lit = Uint64Type; };
-	template<> struct hson_type<float> { static constexpr const char* type = "float32"; using lit = Float32Type; };
-	template<> struct hson_type<csl::math::Vector2> { static constexpr const char* type = "vector2"; using lit = Vector2Type; };
-	template<> struct hson_type<csl::math::Vector3> { static constexpr const char* type = "vector3"; using lit = Vector3Type; };
-	template<> struct hson_type<csl::math::Vector4> { static constexpr const char* type = "vector4"; using lit = Vector4Type; };
-	template<> struct hson_type<csl::math::Quaternion> { static constexpr const char* type = "quaternion"; using lit = QuaternionType; };
-	template<> struct hson_type<hh::game::ObjectId> { static constexpr const char* type = "object_reference"; using lit = ObjectIdType; };
-	template<> struct hson_type<csl::ut::VariableString> { static constexpr const char* type = "string"; using lit = StringType; };
-	template<> struct hson_type<double> { static constexpr const char* type = "float64"; using lit = Float64Type; };
-	template<> struct hson_type<char> { static constexpr const char* type = "char"; using lit = CharType; };
+	template<> struct hson_type<bool> { static constexpr const char* type = "bool"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = BoolType; };
+	template<> struct hson_type<int8_t> { static constexpr const char* type = "int8"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Int8Type; };
+	template<> struct hson_type<uint8_t> { static constexpr const char* type = "uint8"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Uint8Type; };
+	template<> struct hson_type<int16_t> { static constexpr const char* type = "int16"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Int16Type; };
+	template<> struct hson_type<uint16_t> { static constexpr const char* type = "uint16"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Uint16Type; };
+	template<> struct hson_type<int32_t> { static constexpr const char* type = "int32"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Int32Type; };
+	template<> struct hson_type<uint32_t> { static constexpr const char* type = "uint32"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Uint32Type; };
+	template<> struct hson_type<int64_t> { static constexpr const char* type = "int64"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Int64Type; };
+	template<> struct hson_type<uint64_t> { static constexpr const char* type = "uint64"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Uint64Type; };
+	template<> struct hson_type<float> { static constexpr const char* type = "float32"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Float32Type; };
+	template<> struct hson_type<csl::math::Vector2> { static constexpr const char* type = "vector2"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Vector2Type; };
+	template<> struct hson_type<csl::math::Vector3> { static constexpr const char* type = "vector3"; static constexpr std::optional<unsigned int> alignment = std::make_optional(16); using lit = Vector3Type; };
+	template<> struct hson_type<csl::math::Vector4> { static constexpr const char* type = "vector4"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Vector4Type; };
+	template<> struct hson_type<csl::math::Quaternion> { static constexpr const char* type = "quaternion"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = QuaternionType; };
+	template<> struct hson_type<hh::game::ObjectId> { static constexpr const char* type = "object_reference"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = ObjectIdType; };
+	template<> struct hson_type<csl::ut::VariableString> { static constexpr const char* type = "string"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = StringType; };
+	template<> struct hson_type<double> { static constexpr const char* type = "float64"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = Float64Type; };
+	template<> struct hson_type<char> { static constexpr const char* type = "char"; static constexpr std::optional<unsigned int> alignment = std::nullopt; using lit = CharType; };
 
 
 	template<typename T>
@@ -90,6 +90,7 @@ namespace io::hson::templates {
 		std::string type{};
 		std::optional<std::string> subtype{};
 		std::optional<unsigned int> array_size{};
+		std::optional<unsigned int> alignment{};
 		std::optional<rfl::Object<std::string>> descriptions{};
 	};
 
@@ -102,6 +103,7 @@ namespace io::hson::templates {
 		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> max_range{};
 		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> step{};
 		std::optional<unsigned int> array_size{};
+		std::optional<unsigned int> alignment{};
 		std::optional<rfl::Object<std::string>> descriptions{};
 	};
 
@@ -224,7 +226,6 @@ namespace io::hson::templates {
 	template<typename T>
 	MemberDefT<T> GenerateMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
 		auto* caption = member->GetAttribute("Caption");
-		auto arraySize = member->GetCstyleArraySize();
 		std::optional<rfl::Object<std::string>> captionOpt{ std::nullopt };
 
 		if (caption) {
@@ -237,7 +238,8 @@ namespace io::hson::templates {
 			member->GetName(),
 			typeName ? typeName : hson_type<T>::type,
 			std::nullopt,
-			arraySize > 1 ? std::make_optional(arraySize) : std::nullopt,
+			std::nullopt,
+			hson_type<T>::alignment,
 			std::move(captionOpt),
 		};
 	}
@@ -245,7 +247,6 @@ namespace io::hson::templates {
 	template<typename T>
 	RangeMemberDefT<T> GenerateRangeMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
 		auto* caption = member->GetAttribute("Caption");
-		auto arraySize = member->GetCstyleArraySize();
 		std::optional<rfl::Object<std::string>> captionOpt{ std::nullopt };
 
 		if (caption) {
@@ -263,7 +264,8 @@ namespace io::hson::templates {
 				std::nullopt,
 				std::nullopt,
 				std::nullopt,
-				arraySize > 1 ? std::make_optional(arraySize) : std::nullopt,
+				std::nullopt,
+				hson_type<T>::alignment,
 				std::move(captionOpt),
 			};
 		}
@@ -277,7 +279,8 @@ namespace io::hson::templates {
 				std::move(TidyRange<rfl_range_type_t<T>>(ranges[0])),
 				std::move(TidyRange<rfl_range_type_t<T>>(ranges[1])),
 				std::move(TidyRange<rfl_range_type_t<T>>(ranges[2])),
-				arraySize > 1 ? std::make_optional(arraySize) : std::nullopt,
+				std::nullopt,
+				hson_type<T>::alignment,
 				std::move(captionOpt),
 			};
 		}
@@ -286,13 +289,25 @@ namespace io::hson::templates {
 	template<typename T>
 	MemberDefT<T> GenerateArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
 		MemberDefT<T> def = GenerateMemberT<T>(member, typeName);
-		return { def.name, "array", def.type, def.array_size, def.descriptions };
+		return { def.name, "array", def.type, std::nullopt, def.alignment, def.descriptions };
 	}
 
 	template<typename T>
 	RangeMemberDefT<T> GenerateRangeArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
 		RangeMemberDefT<T> def = GenerateRangeMemberT<T>(member, typeName, rangeAttrName);
-		return { def.name, "array", def.type, def.min_range, def.max_range, def.step, def.array_size, def.descriptions };
+		return { def.name, "array", def.type, def.min_range, def.max_range, def.step, std::nullopt, def.alignment, def.descriptions };
+	}
+
+	template<typename T>
+	MemberDefT<T> GenerateCArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, unsigned int size) {
+		MemberDefT<T> def = GenerateMemberT<T>(member, typeName);
+		return { def.name, "array", def.type, size, def.alignment, def.descriptions };
+	}
+
+	template<typename T>
+	RangeMemberDefT<T> GenerateRangeCArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName, unsigned int size) {
+		RangeMemberDefT<T> def = GenerateRangeMemberT<T>(member, typeName, rangeAttrName);
+		return { def.name, "array", def.type, def.min_range, def.max_range, def.step, size, def.alignment, def.descriptions };
 	}
 
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass);
@@ -376,14 +391,53 @@ namespace io::hson::templates {
 		}
 	}
 
+	MemberDef GenerateCArrayPrimitiveMember(const hh::fnd::RflClassMember* member, hh::fnd::RflClassMember::Type type, unsigned int size, const char* typeName = nullptr) {
+		switch (type) {
+		case hh::fnd::RflClassMember::TYPE_BOOL:
+			return GenerateCArrayMemberT<bool>(member, typeName, size);
+		case hh::fnd::RflClassMember::TYPE_SINT8:
+			return GenerateRangeCArrayMemberT<int8_t>(member, typeName, "RangeSint32", size);
+		case hh::fnd::RflClassMember::TYPE_UINT8:
+			return GenerateRangeCArrayMemberT<uint8_t>(member, typeName, "RangeUint32", size);
+		case hh::fnd::RflClassMember::TYPE_SINT16:
+			return GenerateRangeCArrayMemberT<int16_t>(member, typeName, "RangeSint32", size);
+		case hh::fnd::RflClassMember::TYPE_UINT16:
+			return GenerateRangeCArrayMemberT<uint16_t>(member, typeName, "RangeUint32", size);
+		case hh::fnd::RflClassMember::TYPE_SINT32:
+			return GenerateRangeCArrayMemberT<int32_t>(member, typeName, "RangeSint32", size);
+		case hh::fnd::RflClassMember::TYPE_UINT32:
+			return GenerateRangeCArrayMemberT<uint32_t>(member, typeName, "RangeUint32", size);
+		case hh::fnd::RflClassMember::TYPE_SINT64:
+			return GenerateRangeCArrayMemberT<int64_t>(member, typeName, "RangeSint64", size);
+		case hh::fnd::RflClassMember::TYPE_UINT64:
+			return GenerateRangeCArrayMemberT<uint64_t>(member, typeName, "RangeUint64", size);
+		case hh::fnd::RflClassMember::TYPE_FLOAT:
+			return GenerateRangeCArrayMemberT<float>(member, typeName, "RangeFloat", size);
+		case hh::fnd::RflClassMember::TYPE_VECTOR2:
+			return GenerateRangeCArrayMemberT<csl::math::Vector2>(member, typeName, "RangeVector2", size);
+		case hh::fnd::RflClassMember::TYPE_VECTOR3:
+			return GenerateRangeCArrayMemberT<csl::math::Vector3>(member, typeName, "RangeVector2", size);
+		case hh::fnd::RflClassMember::TYPE_VECTOR4:
+			return GenerateRangeCArrayMemberT<csl::math::Vector4>(member, typeName, "RangeVector2", size);
+		case hh::fnd::RflClassMember::TYPE_QUATERNION:
+			return GenerateCArrayMemberT<csl::math::Quaternion>(member, typeName, size);
+		case hh::fnd::RflClassMember::TYPE_OBJECT_ID:
+			return GenerateCArrayMemberT<hh::game::ObjectId>(member, typeName, size);
+		case hh::fnd::RflClassMember::TYPE_STRING:
+			return GenerateCArrayMemberT<csl::ut::VariableString>(member, typeName, size);
+		default:
+			assert(false);
+			return {};
+		}
+	}
+
 	MemberDef GenerateSingleMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
 		switch (member->GetType()) {
 		case hh::fnd::RflClassMember::TYPE_STRUCT: {
 			auto* rflClass = member->GetStructClass();
-			auto namespacedName = curNamespace + rflClass->GetName();
 
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
-			return GenerateMemberT<bool>(member, namespacedName.c_str());
+			templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
+			return GenerateMemberT<bool>(member, rflClass->GetName());
 		}
 		case hh::fnd::RflClassMember::TYPE_ENUM: {
 			auto* enumClass = member->GetEnumClass();
@@ -401,17 +455,32 @@ namespace io::hson::templates {
 		switch (member->GetSubType()) {
 		case hh::fnd::RflClassMember::TYPE_STRUCT: {
 			auto* rflClass = member->GetStructClass();
-			auto namespacedName = curNamespace + rflClass->GetName();
 
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
-			return GenerateArrayMemberT<bool>(member, namespacedName.c_str());
+			templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
+			return GenerateArrayMemberT<bool>(member, rflClass->GetName());
 		}
 		default:
 			return GenerateArrayPrimitiveMember(member, member->GetSubType());
 		}
 	}
 
+	MemberDef GenerateCArrayMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
+		switch (member->GetType()) {
+		case hh::fnd::RflClassMember::TYPE_STRUCT: {
+			auto* rflClass = member->GetStructClass();
+
+			templateDef.structs[rflClass->GetName()] = GenerateRflClass(templateDef, curNamespace, member->GetStructClass());
+			return GenerateCArrayMemberT<bool>(member, rflClass->GetName(), member->GetCstyleArraySize());
+		}
+		default:
+			return GenerateCArrayPrimitiveMember(member, member->GetType(), member->GetCstyleArraySize());
+	}
+	}
+
 	MemberDef GenerateMember(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClassMember* member) {
+		if (member->GetCstyleArraySize() > 0)
+			return GenerateCArrayMember(templateDef, curNamespace, member);
+
 		switch (member->GetType()) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		case hh::fnd::RflClassMember::TYPE_OLD_ARRAY:
@@ -430,13 +499,12 @@ namespace io::hson::templates {
 		auto* parent = rflClass->m_pParent;
 
 		if (parent) {
-			std::string namespacedName = curNamespace + parent->GetName();
-			templateDef.structs[namespacedName] = GenerateRflClass(templateDef, curNamespace, parent);
-			rflClassDef.parent = std::move(namespacedName);
+			templateDef.structs[parent->GetName()] = GenerateRflClass(templateDef, curNamespace, parent);
+			rflClassDef.parent = parent->GetName();
 		}
 
 		for (size_t i = 0; i < rflClass->m_pMembers.count; i++)
-			rflClassDef.fields.push_back(GenerateMember(templateDef, curNamespace + rflClass->GetName() + std::string{ "::" }, &rflClass->m_pMembers.items[i]));
+			rflClassDef.fields.push_back(GenerateMember(templateDef, rflClass->GetName() + std::string{ "::" }, &rflClass->m_pMembers.items[i]));
 
 		return rflClassDef;
 	}

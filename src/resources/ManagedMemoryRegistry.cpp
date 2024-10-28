@@ -50,8 +50,9 @@ namespace resources {
 
 	void ManagedMemoryRegistry::Deinit()
 	{
+		auto* allocator = instance->GetAllocator();
 		instance->~ManagedMemoryRegistry();
-		instance->GetAllocator()->Free(instance);
+		allocator->Free(instance);
 	}
 
 	ManagedAllocator ManagedMemoryRegistry::GetManagedAllocator(hh::fnd::ManagedResource* resource)

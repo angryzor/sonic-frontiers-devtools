@@ -102,15 +102,15 @@ GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* all
 #else
 GOCVisualDebugDrawRenderer::GOCVisualDebugDrawRenderer(csl::fnd::IAllocator* allocator)
 	: CompatibleObject{ allocator }
-	//, memCtx{ true }
-	//, unk2{ &memCtx }
-	//, unk3{ &unk2 }
-	//, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator, &unk3) }
-	//, renderable{ new (allocator) Renderable(allocator, this) }
+	, memCtx{ true }
+	, unk2{ &memCtx }
+	, unk3{ &unk2 }
+	, drawContext{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateDrawContext)(allocator, &unk3) }
+	, renderable{ new (allocator) Renderable(allocator, this) }
 #endif
 {
-	//renderable->name = "DevTools Debug Overlay";
-	//hh::gfnd::GraphicsContext::GetInstance()->AddRenderableToViewport(renderable, 7);// 5);
+	renderable->name = "DevTools Debug Overlay";
+	hh::gfnd::GraphicsContext::GetInstance()->AddRenderableToViewport(renderable, 7);// 5);
 }
 
 void GOCVisualDebugDrawRenderer::AddGOC(GOCMyVisualDebugDraw* goc) {
