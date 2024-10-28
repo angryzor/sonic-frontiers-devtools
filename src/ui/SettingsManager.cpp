@@ -110,7 +110,7 @@ void SettingsManager::Render() {
 						}
 						ImGui::EndCombo();
 					}
-					ImGui::Checkbox("Enable multiple viewports", &tempSettings.enableViewports);
+					//ImGui::Checkbox("Enable multiple viewports", &tempSettings.enableViewports);
 					ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
 					ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
 					ImGui::SeparatorText("Reflection editor");
@@ -294,7 +294,7 @@ void SettingsManager::ApplySettings() {
 	defaultFloatStep = settings.rflDefaultFloatStep;
 	rflMinFloatStep = settings.rflMinFloatStep;
 	rflSliderCutOff = settings.rflSliderCutOffRange;
-	Context::set_enable_viewports(settings.enableViewports);
+	Context::set_enable_viewports(false);// settings.enableViewports);
 	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
 	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
 	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;

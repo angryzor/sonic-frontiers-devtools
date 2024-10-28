@@ -52,7 +52,10 @@ typedef std::tuple<
 #endif
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
+#include "game-service-inspectors/FxParamManager.h"
+
 typedef std::tuple<
+	app::gfx::FxParamManager
 > InspectableServices;
 #endif
 

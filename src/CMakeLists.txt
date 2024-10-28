@@ -49,7 +49,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Component.cpp
         ui/Desktop.cpp
         ui/GlobalSettings.cpp
-        # ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
+        ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
         # ui/game-services/game-service-inspectors/FxColManager.cpp
         # ui/game-services/game-service-inspectors/ObjectWorld.cpp
         # ui/game-services/game-service-inspectors/StageInfo.cpp
@@ -92,7 +92,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
-        # ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
+        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
@@ -164,7 +164,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
         ui/game-modes/GameModeInspector.h
-        # ui/game-services/game-service-inspectors/FxParamManager.h
+        ui/game-services/game-service-inspectors/FxParamManager.h
         # ui/game-services/game-service-inspectors/FxColManager.h
         # ui/game-services/game-service-inspectors/ObjectWorld.h
         # ui/game-services/game-service-inspectors/StageInfo.h
@@ -222,7 +222,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
-        # ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
+        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
         ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h

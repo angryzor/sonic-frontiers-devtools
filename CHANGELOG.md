@@ -1,3 +1,14 @@
+# v0.1.48
+## Shadow Generations
+* Ported NeedleFXSceneData Testing Tool.
+* Ported FxParamManager inspector.
+
+
+# v0.1.48
+## Shadow Generations
+* First experimental Shadow Generations release.
+
+
 # v0.1.47
 ## Sonic Frontiers
 * Added `PathManager` inspector.
