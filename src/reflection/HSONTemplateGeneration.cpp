@@ -5,6 +5,7 @@
 #include <fstream>
 #include <codecvt>
 #include <cmath>
+#include <ranges>
 
 namespace io::hson::templates {
 	using BoolType = rfl::Literal<"bool">;
@@ -84,47 +85,36 @@ namespace io::hson::templates {
 	template<typename T>
 	using rfl_range_rep_t = typename rfl_range_rep<T>::type;
 
-	template<typename T>
-	struct MemberDefT {
-		std::string name{};
-		std::string type{};
-		std::optional<std::string> subtype{};
-		std::optional<unsigned int> array_size{};
-		std::optional<unsigned int> alignment{};
-		std::optional<rfl::Object<std::string>> descriptions{};
-	};
-
-	template<typename T>
-	struct RangeMemberDefT {
-		std::string name{};
-		std::string type{};
-		std::optional<std::string> subtype{};
-		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> min_range{};
-		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> max_range{};
-		std::optional<rfl_range_rep_t<rfl_range_type_t<T>>> step{};
-		std::optional<unsigned int> array_size{};
-		std::optional<unsigned int> alignment{};
-		std::optional<rfl::Object<std::string>> descriptions{};
-	};
-
-	using MemberDef = rfl::Variant<
-		MemberDefT<bool>,
-		RangeMemberDefT<int8_t>,
-		RangeMemberDefT<uint8_t>,
-		RangeMemberDefT<int16_t>,
-		RangeMemberDefT<uint16_t>,
-		RangeMemberDefT<int32_t>,
-		RangeMemberDefT<uint32_t>,
-		RangeMemberDefT<int64_t>,
-		RangeMemberDefT<uint64_t>,
-		RangeMemberDefT<float>,
-		RangeMemberDefT<csl::math::Vector2>,
-		RangeMemberDefT<csl::math::Vector3>,
-		RangeMemberDefT<csl::math::Vector4>,
-		MemberDefT<csl::math::Quaternion>,
-		MemberDefT<hh::game::ObjectId>,
-		MemberDefT<csl::ut::VariableString>
+	using Ranges = rfl::Variant<
+		rfl_range_rep_t<rfl_range_type_t<int8_t>>,
+		rfl_range_rep_t<rfl_range_type_t<uint8_t>>,
+		rfl_range_rep_t<rfl_range_type_t<int16_t>>,
+		rfl_range_rep_t<rfl_range_type_t<uint16_t>>,
+		rfl_range_rep_t<rfl_range_type_t<int32_t>>,
+		rfl_range_rep_t<rfl_range_type_t<uint32_t>>,
+		rfl_range_rep_t<rfl_range_type_t<int64_t>>,
+		rfl_range_rep_t<rfl_range_type_t<uint64_t>>,
+		rfl_range_rep_t<rfl_range_type_t<float>>,
+		rfl_range_rep_t<rfl_range_type_t<csl::math::Vector2>>,
+		rfl_range_rep_t<rfl_range_type_t<csl::math::Vector3>>,
+		rfl_range_rep_t<rfl_range_type_t<csl::math::Vector4>>
 	>;
+
+	struct RangeProps {
+		std::optional<Ranges> min_range{};
+		std::optional<Ranges> max_range{};
+		std::optional<Ranges> step{};
+	};
+
+	struct MemberDef {
+		std::string name{};
+		std::string type{};
+		std::optional<std::string> subtype{};
+		std::optional<unsigned int> array_size{};
+		std::optional<unsigned int> alignment{};
+		std::optional<rfl::Object<std::string>> descriptions{};
+		rfl::Flatten<RangeProps> ranges;
+	};
 
 	struct RflClassDef {
 		std::optional<std::string> parent{};
@@ -224,7 +214,7 @@ namespace io::hson::templates {
 	}
 
 	template<typename T>
-	MemberDefT<T> GenerateMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
+	MemberDef GenerateMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
 		auto* caption = member->GetAttribute("Caption");
 		std::optional<rfl::Object<std::string>> captionOpt{ std::nullopt };
 
@@ -241,11 +231,12 @@ namespace io::hson::templates {
 			std::nullopt,
 			hson_type<T>::alignment,
 			std::move(captionOpt),
+			RangeProps{},
 		};
 	}
 
 	template<typename T>
-	RangeMemberDefT<T> GenerateRangeMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
+	MemberDef GenerateRangeMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
 		auto* caption = member->GetAttribute("Caption");
 		std::optional<rfl::Object<std::string>> captionOpt{ std::nullopt };
 
@@ -262,11 +253,9 @@ namespace io::hson::templates {
 				typeName ? typeName : hson_type<T>::type,
 				std::nullopt,
 				std::nullopt,
-				std::nullopt,
-				std::nullopt,
-				std::nullopt,
 				hson_type<T>::alignment,
 				std::move(captionOpt),
+				RangeProps{},
 			};
 		}
 		else {
@@ -276,38 +265,40 @@ namespace io::hson::templates {
 				member->GetName(),
 				typeName ? typeName : hson_type<T>::type,
 				std::nullopt,
-				std::move(TidyRange<rfl_range_type_t<T>>(ranges[0])),
-				std::move(TidyRange<rfl_range_type_t<T>>(ranges[1])),
-				std::move(TidyRange<rfl_range_type_t<T>>(ranges[2])),
 				std::nullopt,
 				hson_type<T>::alignment,
 				std::move(captionOpt),
+				RangeProps{
+					std::move(TidyRange<rfl_range_type_t<T>>(ranges[0])),
+					std::move(TidyRange<rfl_range_type_t<T>>(ranges[1])),
+					std::move(TidyRange<rfl_range_type_t<T>>(ranges[2])),
+				},
 			};
 		}
 	}
 
 	template<typename T>
-	MemberDefT<T> GenerateArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
-		MemberDefT<T> def = GenerateMemberT<T>(member, typeName);
-		return { def.name, "array", def.type, std::nullopt, def.alignment, def.descriptions };
+	MemberDef GenerateArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName) {
+		MemberDef def = GenerateMemberT<T>(member, typeName);
+		return { def.name, "array", def.type, std::nullopt, def.alignment, def.descriptions, def.ranges };
 	}
 
 	template<typename T>
-	RangeMemberDefT<T> GenerateRangeArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
-		RangeMemberDefT<T> def = GenerateRangeMemberT<T>(member, typeName, rangeAttrName);
-		return { def.name, "array", def.type, def.min_range, def.max_range, def.step, std::nullopt, def.alignment, def.descriptions };
+	MemberDef GenerateRangeArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName) {
+		MemberDef def = GenerateRangeMemberT<T>(member, typeName, rangeAttrName);
+		return { def.name, "array", def.type, std::nullopt, def.alignment, def.descriptions, def.ranges };
 	}
 
 	template<typename T>
-	MemberDefT<T> GenerateCArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, unsigned int size) {
-		MemberDefT<T> def = GenerateMemberT<T>(member, typeName);
-		return { def.name, "array", def.type, size, def.alignment, def.descriptions };
+	MemberDef GenerateCArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, unsigned int size) {
+		MemberDef def = GenerateMemberT<T>(member, typeName);
+		return { def.name, "array", def.type, size, def.alignment, def.descriptions, def.ranges };
 	}
 
 	template<typename T>
-	RangeMemberDefT<T> GenerateRangeCArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName, unsigned int size) {
-		RangeMemberDefT<T> def = GenerateRangeMemberT<T>(member, typeName, rangeAttrName);
-		return { def.name, "array", def.type, def.min_range, def.max_range, def.step, size, def.alignment, def.descriptions };
+	MemberDef GenerateRangeCArrayMemberT(const hh::fnd::RflClassMember* member, const char* typeName, const char* rangeAttrName, unsigned int size) {
+		MemberDef def = GenerateRangeMemberT<T>(member, typeName, rangeAttrName);
+		return { def.name, "array", def.type, size, def.alignment, def.descriptions, def.ranges };
 	}
 
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass);
@@ -347,7 +338,7 @@ namespace io::hson::templates {
 			return GenerateMemberT<csl::ut::VariableString>(member, typeName);
 		default:
 			assert(false);
-			return {};
+			return { "", "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, RangeProps{ } };
 		}
 	}
 
@@ -387,7 +378,7 @@ namespace io::hson::templates {
 			return GenerateArrayMemberT<csl::ut::VariableString>(member, typeName);
 		default:
 			assert(false);
-			return {};
+			return { "", "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, RangeProps{ } };
 		}
 	}
 
@@ -427,7 +418,7 @@ namespace io::hson::templates {
 			return GenerateCArrayMemberT<csl::ut::VariableString>(member, typeName, size);
 		default:
 			assert(false);
-			return {};
+			return { "", "", std::nullopt, std::nullopt, std::nullopt, std::nullopt, RangeProps{ } };
 		}
 	}
 
@@ -493,6 +484,17 @@ namespace io::hson::templates {
 		}
 	}
 
+	bool HasMember(const std::string& memberName, const hh::fnd::RflClass* rflClass) {
+		for (size_t i = 0; i < rflClass->m_pMembers.count; i++)
+			if (memberName == rflClass->m_pMembers.items[i].m_pName)
+				return true;
+
+		if (rflClass->m_pParent)
+			return HasMember(memberName, rflClass->m_pParent);
+
+		return false;
+	}
+
 	RflClassDef GenerateRflClass(Template& templateDef, const std::string& curNamespace, const hh::fnd::RflClass* rflClass) {
 		RflClassDef rflClassDef{};
 
@@ -503,8 +505,14 @@ namespace io::hson::templates {
 			rflClassDef.parent = parent->GetName();
 		}
 
-		for (size_t i = 0; i < rflClass->m_pMembers.count; i++)
-			rflClassDef.fields.push_back(GenerateMember(templateDef, rflClass->GetName() + std::string{ "::" }, &rflClass->m_pMembers.items[i]));
+		for (size_t i = 0; i < rflClass->m_pMembers.count; i++) {
+			auto field = GenerateMember(templateDef, rflClass->GetName() + std::string{ "::" }, &rflClass->m_pMembers.items[i]);
+
+			if (parent && HasMember(field.name, parent))
+				field.name = rflClass->GetName() + std::string{ "::" } + field.name;
+
+			rflClassDef.fields.push_back(std::move(field));
+		}
 
 		return rflClassDef;
 	}

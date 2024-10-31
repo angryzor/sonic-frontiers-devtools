@@ -53,9 +53,13 @@ typedef std::tuple<
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
 #include "game-service-inspectors/FxParamManager.h"
+#include "game-service-inspectors/StageInfo.h"
+#include "game-service-inspectors/LevelInfo.h"
 
 typedef std::tuple<
-	app::gfx::FxParamManager
+	app::gfx::FxParamManager,
+	app::level::StageInfo,
+	app::level::LevelInfo
 > InspectableServices;
 #endif
 

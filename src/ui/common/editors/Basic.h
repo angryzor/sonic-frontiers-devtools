@@ -106,6 +106,29 @@ static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
 	return edited;
 }
 
+template<typename T>
+bool Editor(const char* label, std::optional<T>& data) {
+	bool edited{};
+	ImGui::PushID(label);
+
+	char checkboxLabel[100];
+	snprintf(checkboxLabel, sizeof(checkboxLabel), "%s###%s", data.has_value() ? "" : label, "Is Set");
+
+	bool hasValue = data.has_value();
+	if (Editor(checkboxLabel, hasValue)) {
+		data = hasValue ? std::make_optional(T{}) : std::nullopt;
+		edited = true;
+	}
+
+	if (data.has_value()) {
+		ImGui::SameLine();
+		edited |= Editor(label, data.value());
+	}
+
+	ImGui::PopID();
+	return edited;
+}
+
 template<typename T, size_t Len>
 static bool Editor(const char* label, T(&arr)[Len]) {
 	bool edited{};

@@ -2,6 +2,6 @@
 
 bool Editor(const char* label, app::level::StageData& obj);
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
+#ifndef DEVTOOLS_TARGET_SDK_wars
 bool Editor(const char* label, app::level::PlayerInformation& playerInfo);
 #endif

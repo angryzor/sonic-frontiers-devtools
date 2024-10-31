@@ -92,7 +92,8 @@ namespace reflection::serialization::resource_rfls::animator {
 		short,
 		TransitionData,
 		unsigned short,
-		short
+		short,
+		float
 	>(
 		"name",
 		"type",
@@ -108,7 +109,8 @@ namespace reflection::serialization::resource_rfls::animator {
 		"transitionArrayIndex",
 		"stateEndTransition",
 		"flagIndexCount",
-		"flagIndexOffset"
+		"flagIndexOffset",
+		"pbaBlendMaskOpacity"
 	);
 
 	auto blendNodeDataMembers = CreateRflClassMembers<void,

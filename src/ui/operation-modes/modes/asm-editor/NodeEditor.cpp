@@ -127,6 +127,12 @@ namespace ui::operation_modes::modes::asm_editor {
 		Editor("Loop count", state.maxCycles);
 		CheckboxFlags("Loop", state.flags, StateData::Flag::LOOPS);
 		CheckboxFlags("Unknown 1", state.flags, StateData::Flag::UNK1);
+		CheckboxFlags("Disable PBA", state.flags, StateData::Flag::DISABLE_PBA);
+		CheckboxFlags("Apply PBA blend mask opacity", state.flags, StateData::Flag::APPLY_PBA_BLEND_MASK_OPACITY);
+
+		float zero = 0.0f;
+		float one = 1.0f;
+		SliderScalar("PBA blend mask opacity", state.pbaBlendMaskOpacity, &zero, &one);
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();

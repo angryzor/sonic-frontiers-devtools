@@ -52,7 +52,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
         # ui/game-services/game-service-inspectors/FxColManager.cpp
         # ui/game-services/game-service-inspectors/ObjectWorld.cpp
-        # ui/game-services/game-service-inspectors/StageInfo.cpp
+        ui/game-services/game-service-inspectors/StageInfo.cpp
         # ui/game-services/game-service-inspectors/CameraManager.cpp
         ui/game-services/GameServiceInspector.cpp
         ui/operation-modes/modes/level-editor/Context.cpp
@@ -167,7 +167,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/game-services/game-service-inspectors/FxParamManager.h
         # ui/game-services/game-service-inspectors/FxColManager.h
         # ui/game-services/game-service-inspectors/ObjectWorld.h
-        # ui/game-services/game-service-inspectors/StageInfo.h
+        ui/game-services/game-service-inspectors/StageInfo.h
         # ui/game-services/game-service-inspectors/CameraManager.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/behaviors/Clipboard.h
@@ -304,8 +304,22 @@ endif()
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
+            io/binary/serialization/resource-rfls/ResAnimator.cpp
+            ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/core-services/GraphicsContextInspector.cpp
+            ui/operation-modes/modes/asm-editor/Context.cpp
+            ui/operation-modes/modes/asm-editor/NodeEditor.cpp
+            ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
+            ui/operation-modes/modes/asm-editor/ASMEditor.cpp
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
         PRIVATE FILE_SET HEADERS FILES
+            io/binary/serialization/resource-rfls/ResAnimator.h
+            ui/game-services/game-service-inspectors/LevelInfo.h
             ui/core-services/GraphicsContextInspector.h
+            ui/operation-modes/modes/asm-editor/Context.h
+            ui/operation-modes/modes/asm-editor/NodeEditor.h
+            ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
+            ui/operation-modes/modes/asm-editor/ASMEditor.h
+            ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.h
     )
 endif()

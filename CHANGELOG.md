@@ -1,4 +1,12 @@
-# v0.1.48
+# v0.1.50
+## Shadow Generations
+* Ported ASM editor.
+* Ported StageInfo inspector.
+* Ported LevelInfo inspector.
+* Fixed an issue with generated HSON templates.
+
+
+# v0.1.49
 ## Shadow Generations
 * Ported NeedleFXSceneData Testing Tool.
 * Ported FxParamManager inspector.
