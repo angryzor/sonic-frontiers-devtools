@@ -97,6 +97,11 @@ namespace ui::operation_modes::modes::asm_editor {
 					}
 					else if (IsType(inPin, outPin, NodeType::CLIP, NodeType::STATE, PinType::CLIP)) {
 						asmData.states[outPin.nodeId.idx].rootBlendNodeOrClipIndex = inPin.nodeId.idx;
+						asmData.states[outPin.nodeId.idx].type = StateType::CLIP;
+					}
+					else if (IsType(inPin, outPin, NodeType::BLEND_NODE, PinType::BLEND_NODE, NodeType::STATE, PinType::CLIP)) {
+						asmData.states[outPin.nodeId.idx].rootBlendNodeOrClipIndex = inPin.nodeId.idx;
+						asmData.states[outPin.nodeId.idx].type = StateType::BLEND_TREE;
 					}
 					else if (IsType(inPin, outPin, NodeType::BLEND_SPACE, NodeType::BLEND_NODE, PinType::BLEND_SPACE)) {
 						asmData.blendNodes[outPin.nodeId.idx].blendSpaceIndex = inPin.nodeId.idx;
