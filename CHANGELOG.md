@@ -1,3 +1,9 @@
+# v0.1.51
+## Shadow Generations
+* ASM editor: You can now assign a blend node to a state.
+* ASM editor: Fixed a bug where assigning clips to states would not set the state to be a clip state.
+
+
 # v0.1.50
 ## Shadow Generations
 * Ported ASM editor.
