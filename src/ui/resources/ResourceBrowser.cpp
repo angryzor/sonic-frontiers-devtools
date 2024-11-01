@@ -152,7 +152,7 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			else if (typeInfo == ResReflection::GetTypeInfo()) {
 				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection*>(resource));
 			}
-#ifdef DEVTOOLS_TARGET_SDK_rangers
+#ifndef DEVTOOLS_TARGET_SDK_wars
 			else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
 				ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
 			}

@@ -33,9 +33,9 @@ void ResMaterialEditor::RenderContents()
 		case hh::needle::ParameterType::SAMPLER:
 			RenderSamplerParameterEditor(i, static_cast<ParameterSamplerValue*>(data));
 			break;
-		case hh::needle::ParameterType::RS_FLAG_MASK:
-			RenderRsFlagMaskParameterEditor(i, static_cast<ParameterRsFlagMaskValue*>(data));
-			break;
+		//case hh::needle::ParameterType::RS_FLAG_MASK:
+		//	RenderRsFlagMaskParameterEditor(i, static_cast<ParameterRsFlagMaskValue*>(data));
+		//	break;
 		case hh::needle::ParameterType::SHADER_NAME:
 			RenderShaderNameParameterEditor(i, static_cast<ParameterShaderNameValue*>(data));
 			break;
@@ -66,7 +66,7 @@ ResMaterialEditor* ResMaterialEditor::Create(csl::fnd::IAllocator* allocator, hh
 
 void ResMaterialEditor::RenderFloatParameterEditor(size_t idx, ParameterFloatValue* data)
 {
-	auto& info = reinterpret_cast<MaterialChunkBuilder::ParameterInfo*>(reinterpret_cast<size_t>(resource->resource->data) + 0x28)[idx];
+	auto& info = reinterpret_cast<MaterialChunkBuilder::ParameterInfo*>(reinterpret_cast<size_t>(resource->resource->GetMaterialData()) + 0x8)[idx];
 
 	size_t itemCount = (info.sizeInDwords - 2) / 4;
 
@@ -89,7 +89,7 @@ void ResMaterialEditor::RenderBoolParameterEditor(size_t idx, hh::needle::Parame
 
 void ResMaterialEditor::RenderIntParameterEditor(size_t idx, hh::needle::ParameterIntValue* data)
 {
-	auto& info = reinterpret_cast<MaterialChunkBuilder::ParameterInfo*>(reinterpret_cast<size_t>(resource->resource->data) + 0x28)[idx];
+	auto& info = reinterpret_cast<MaterialChunkBuilder::ParameterInfo*>(reinterpret_cast<size_t>(resource->resource->GetMaterialData()) + 0x8)[idx];
 
 	for (size_t i = 0; i < (info.sizeInDwords - 2) / 4; i++) {
 		char buf[256];
@@ -113,10 +113,10 @@ void ResMaterialEditor::RenderSamplerParameterEditor(size_t idx, hh::needle::Par
 	}
 }
 
-void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)
-{
-	Editor("Render options", data->rsFlagMask);
-}
+//void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)
+//{
+//	Editor("Render options", data->rsFlagMask);
+//}
 
 void ResMaterialEditor::RenderShaderNameParameterEditor(size_t idx, hh::needle::ParameterShaderNameValue* data)
 {

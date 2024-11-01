@@ -1,3 +1,8 @@
+# v0.1.52
+## Shadow Generations
+* Ported material editor.
+
+
 # v0.1.51
 ## Shadow Generations
 * ASM editor: You can now assign a blend node to a state.

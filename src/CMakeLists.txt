@@ -305,6 +305,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
             io/binary/serialization/resource-rfls/ResAnimator.cpp
+            ui/common/inputs/Needle.cpp
             ui/game-services/game-service-inspectors/LevelInfo.cpp
             ui/core-services/GraphicsContextInspector.cpp
             ui/operation-modes/modes/asm-editor/Context.cpp
@@ -312,8 +313,10 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
             ui/operation-modes/modes/asm-editor/ASMEditor.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
+            ui/resources/editors/ResMaterialEditor.cpp
         PRIVATE FILE_SET HEADERS FILES
             io/binary/serialization/resource-rfls/ResAnimator.h
+            ui/common/inputs/Needle.h
             ui/game-services/game-service-inspectors/LevelInfo.h
             ui/core-services/GraphicsContextInspector.h
             ui/operation-modes/modes/asm-editor/Context.h
@@ -321,5 +324,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
             ui/operation-modes/modes/asm-editor/ASMEditor.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.h
+            ui/resources/editors/ResMaterialEditor.h
     )
 endif()
