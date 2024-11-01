@@ -10,7 +10,7 @@
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
-#include "component-inspectors/wars/GOCPlayerParameter.h"
+#include "component-inspectors/GOCPlayerParameter.h"
 
 typedef std::tuple<
 	hh::game::GOCTransform,
@@ -33,9 +33,9 @@ typedef std::tuple<
 #include "component-inspectors/GOCPlayerBlackboard.h"
 #include "component-inspectors/GOCPlayerKinematicParams.h"
 #include "component-inspectors/GOCCamera.h"
-#include "component-inspectors/rangers/GOCPlayerParameter.h"
-#include "component-inspectors/rangers/GOCPlayerCollider.h"
-#include "component-inspectors/rangers/GOCColliderQuery.h"
+#include "component-inspectors/GOCPlayerParameter.h"
+#include "component-inspectors/GOCPlayerCollider.h"
+#include "component-inspectors/GOCColliderQuery.h"
 
 typedef std::tuple<
 	hh::game::GOCTransform,
@@ -63,7 +63,7 @@ typedef std::tuple<
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
 #include "component-inspectors/GOCAnimator.h"
-#include "component-inspectors/miller/GOCPlayerParameter.h"
+#include "component-inspectors/GOCPlayerParameter.h"
 
 typedef std::tuple<
 	hh::game::GOCTransform,

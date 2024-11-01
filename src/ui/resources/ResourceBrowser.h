@@ -22,5 +22,6 @@ public:
     static void RenderLoadDialog();
     static void RenderExportDialog();
     static void RenderDialogs();
+    static void RenderDetails(const hh::fnd::ManagedResource* resource);
 };
 

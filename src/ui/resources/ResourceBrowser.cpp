@@ -7,6 +7,7 @@
 #include <ui/common/Textures.h>
 #include <ui/common/Icons.h>
 #include <ui/GlobalSettings.h>
+#include <ui/common/viewers/Basic.h>
 #include <utilities/ResourceTypes.h>
 #include <io/binary/containers/binary-file/BinaryFile.h>
 #include <io/binary/serialization/resource-rfls/ResObjectWorld.h>
@@ -180,6 +181,7 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 		ImGui::PushTextWrapPos(300);
 		ImGui::Text("Name: %s", resource->name2.c_str());
 		ImGui::Text("Type: %s", resource->GetClass().pName);
+		RenderDetails(resource);
 		ImGui::PopTextWrapPos();
 		ImGui::Separator();
 		RenderPreview(resource, 300);
@@ -287,5 +289,18 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
 		devtools::io::binary::containers::BinaryFile::Serialize(filePath, static_cast<hh::game::ResObjectWorld*>(resource)->binaryData, &ResourceRfls::resObjectWorld);
+	}
+}
+
+void ResourceBrowser::RenderDetails(const hh::fnd::ManagedResource* resource) {
+	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
+		if (auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource)->GetTexture()) {
+			ImGui::Text("Resolution: %d x %d x %d", texture->format.width, texture->format.height, texture->format.depth);
+			Viewer("Array size", texture->format.arraySize);
+			Viewer("Mip levels", texture->format.mipLevels);
+			Viewer("Sample description index", texture->format.sampleDescIndex);
+			Viewer("Type", static_cast<unsigned int>(texture->format.type));
+			Viewer("Format", static_cast<unsigned int>(texture->format.format));
+		}
 	}
 }

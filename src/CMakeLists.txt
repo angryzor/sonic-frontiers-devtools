@@ -11,13 +11,8 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/AabbTree.cpp
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
-        debug-rendering/visuals/FxColCollisionShape.cpp
         debug-rendering/visuals/Math.cpp
-        io/binary/containers/swif/SWIF.cpp
         io/binary/containers/binary-file/BinaryFile.cpp
-        io/binary/serialization/resource-rfls/ResFxColFile2.cpp
-        io/binary/serialization/resource-rfls/ResObjectWorld.cpp
-        io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
         io/binary/serialization/resource-rfls/ResReflection.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
@@ -26,15 +21,11 @@ target_sources(${DEVTOOLS_TARGET}
         reflection/RflDiff.cpp
         ui/common/NodeEditorAutoLayout.cpp
         ui/common/editors/Basic.cpp
-        ui/common/editors/ObjectData.cpp
         ui/common/editors/Reflection.cpp
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
-        ui/common/editors/SurfRide.cpp
         ui/common/editors/Resources.cpp
-        # ui/common/editors/FxCol.cpp
         ui/common/viewers/Basic.cpp
-        ui/common/viewers/ObjectData.cpp
         ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
         ui/common/StandaloneWindow.cpp
@@ -44,55 +35,18 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Context.cpp
         ui/input/Input.cpp
         ui/input/${DEVTOOLS_TARGET_SDK}/Input.cpp
-        ui/core-services/MemoryInspector.cpp
         ui/Action.cpp
         ui/Component.cpp
         ui/Desktop.cpp
         ui/GlobalSettings.cpp
-        ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/FxParamManager.cpp
-        # ui/game-services/game-service-inspectors/FxColManager.cpp
-        # ui/game-services/game-service-inspectors/ObjectWorld.cpp
-        ui/game-services/game-service-inspectors/StageInfo.cpp
-        # ui/game-services/game-service-inspectors/CameraManager.cpp
         ui/game-services/GameServiceInspector.cpp
-        ui/operation-modes/modes/level-editor/Context.cpp
-        ui/operation-modes/modes/level-editor/LevelEditor.cpp
-        ui/operation-modes/modes/level-editor/ObjectDataInspector.cpp
-        ui/operation-modes/modes/level-editor/ObjectLibrary.cpp
-        ui/operation-modes/modes/level-editor/SetObjectList.cpp
-        ui/operation-modes/modes/object-inspection/component-inspectors/GOCTransform.cpp
-        ui/operation-modes/modes/object-inspection/component-inspectors/GOCCollider.cpp
-        ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.cpp
-        ui/operation-modes/modes/object-inspection/Context.cpp
-        ui/operation-modes/modes/object-inspection/ObjectInspection.cpp
-        ui/operation-modes/modes/object-inspection/ObjectInspector.cpp
-        ui/operation-modes/modes/object-inspection/ObjectList.cpp
-        # ui/operation-modes/modes/fxcol-editor/Context.cpp
-        # ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
-        # ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
-        # ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
-        # ui/operation-modes/modes/surfride-editor/Context.cpp
-        # ui/operation-modes/modes/surfride-editor/Timeline.cpp
-        # ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
-        # ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
-        # ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
-        # ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
-        # ui/operation-modes/modes/surfride-editor/texture-editor/References.cpp
-        # ui/operation-modes/modes/surfride-editor/texture-editor/Context.cpp
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.cpp
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.cpp
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.cpp
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.cpp
         ui/operation-modes/OperationModeBehavior.cpp
         ui/operation-modes/OperationMode.cpp
-        ui/resources/editors/ResObjectWorldEditor.cpp
         ui/resources/editors/ResReflectionEditor.cpp
-        # ui/resources/editors/ResFxColFile2Editor.cpp
         ui/resources/ResourceBrowser.cpp
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
-        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
         ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
@@ -107,15 +61,10 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/AabbTree.h
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
-        debug-rendering/visuals/FxColCollisionShape.h
         debug-rendering/visuals/Math.h
-        io/binary/containers/swif/SWIF.h
         io/binary/containers/binary-file/BinaryFile.h
         io/binary/containers/binary-file/EndianSwaps.h
         io/binary/serialization/Reflection.h
-        io/binary/serialization/resource-rfls/ResFxColFile2.h
-        io/binary/serialization/resource-rfls/ResObjectWorld.h
-        io/binary/serialization/resource-rfls/ResSurfRideProject.h
         io/binary/serialization/resource-rfls/ResReflection.h
         io/binary/serialization/Types.h
         resources/managed-memory/ManagedCArray.h
@@ -131,16 +80,12 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/NodeEditorAutoLayout.h
         ui/common/editors/Basic.h
         ui/common/editors/Camera.h
-        ui/common/editors/ObjectData.h
         ui/common/editors/Reflection.h
         ui/common/editors/GraphicsContext.h
         ui/common/editors/LevelInfo.h
         ui/common/editors/Needle.h
-        ui/common/editors/SurfRide.h
         ui/common/editors/Resources.h
-        # ui/common/editors/FxCol.h
         ui/common/viewers/Basic.h
-        ui/common/viewers/ObjectData.h
         ui/common/viewers/RflDiff.h
         ui/common/inputs/Basic.h
         ui/common/inputs/Needle.h
@@ -153,22 +98,12 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/TreeView.h
         ui/Context.h
         ui/input/Input.h
-        ui/core-services/GameUpdaterInspector.h
-        ui/core-services/GraphicsContextInspector.h
-        ui/core-services/RenderManagerInspector.h
-        ui/core-services/RenderingEngineInspector.h
-        ui/core-services/MemoryInspector.h
         ui/Action.h
         ui/Component.h
         ui/Desktop.h
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
         ui/game-modes/GameModeInspector.h
-        ui/game-services/game-service-inspectors/FxParamManager.h
-        # ui/game-services/game-service-inspectors/FxColManager.h
-        # ui/game-services/game-service-inspectors/ObjectWorld.h
-        ui/game-services/game-service-inspectors/StageInfo.h
-        # ui/game-services/game-service-inspectors/CameraManager.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/behaviors/Clipboard.h
         ui/operation-modes/behaviors/DebugCommentsVisual.h
@@ -181,48 +116,14 @@ target_sources(${DEVTOOLS_TARGET}
         ui/operation-modes/behaviors/SelectionTransformation.h
         ui/operation-modes/behaviors/SelectionVisual.h
         ui/operation-modes/behaviors/Zoom.h
-        ui/operation-modes/modes/level-editor/Context.h
-        ui/operation-modes/modes/level-editor/LevelEditor.h
-        ui/operation-modes/modes/level-editor/ObjectDataInspector.h
-        ui/operation-modes/modes/level-editor/ObjectLibrary.h
-        ui/operation-modes/modes/level-editor/SetObjectList.h
-        ui/operation-modes/modes/object-inspection/component-inspectors/GOCTransform.h
-        ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerParameter.h
-        ui/operation-modes/modes/object-inspection/Context.h
-        ui/operation-modes/modes/object-inspection/ObjectInspection.h
-        ui/operation-modes/modes/object-inspection/ObjectInspector.h
-        ui/operation-modes/modes/object-inspection/ObjectList.h
-        # ui/operation-modes/modes/fxcol-editor/Context.h
-        # ui/operation-modes/modes/fxcol-editor/FxColEditor.h
-        # ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
-        # ui/operation-modes/modes/fxcol-editor/ShapeList.h
-        # ui/operation-modes/modes/surfride-editor/Context.h
-        # ui/operation-modes/modes/surfride-editor/Timeline.h
-        # ui/operation-modes/modes/surfride-editor/ProjectTree.h
-        # ui/operation-modes/modes/surfride-editor/ElementInspector.h
-        # ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
-        # ui/operation-modes/modes/surfride-editor/SurfRideElement.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/Behaviors.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/Context.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/References.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.h
-        # ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.h
         ui/operation-modes/OperationModeHost.h
         ui/operation-modes/OperationModeBehavior.h
         ui/operation-modes/OperationMode.h
-        ui/resources/editors/ResEffectEditor.h
-        ui/resources/editors/ResObjectWorldEditor.h
-        ui/resources/editors/ResMaterialEditor.h
         ui/resources/editors/ResReflectionEditor.h
-        ui/resources/editors/ResSurfRideProjectEditor.h
-        # ui/resources/editors/ResFxColFile2Editor.h
         ui/resources/ResourceBrowser.h
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
-        ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
         ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h
@@ -236,94 +137,336 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/NameHash.h
 )
 
+
+if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
+    set(DEVTOOLS_FEATURE_OBJECT_INSPECTION ON)
+    set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
+    set(DEVTOOLS_FEATURE_ASM_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
+    set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
+    set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
+    
+    set(DEVTOOLS_FEATURE_COMMON_INPUT_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_COMMON_EDITOR_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_COMMON_VIEWER_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_GAME_OBJECT_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
+        GOCTransform
+        GOCCollider
+        GOCPlayerParameter
+    )
+    set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
+        ResObjectWorldEditor
+        ResReflectionEditor
+    )
+    set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
+        MemoryInspector
+    )
+    set(DEVTOOLS_FEATURE_GAME_SERVICE_INSPECTORS
+        FxParamManager
+        FxColManager
+        ObjectWorld
+        StageInfo
+        CameraManager
+    )
+endif()
+
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
-    target_sources(${DEVTOOLS_TARGET}
-        PRIVATE
-            io/binary/serialization/resource-rfls/ResAnimator.cpp
-            ui/game-services/game-service-inspectors/LevelInfo.cpp
-            ui/game-services/game-service-inspectors/CameraService.cpp
-            ui/game-services/game-service-inspectors/GameModeResourceManager.cpp
-            ui/game-services/game-service-inspectors/TerrainManager.cpp
-            ui/game-services/game-service-inspectors/SoundDirector.cpp
-            ui/game-services/game-service-inspectors/PathManager.cpp
-            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
-            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.cpp
-            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.cpp
-            ui/common/editors/Camera.cpp
-            ui/common/editors/Needle.cpp
-            ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.cpp
-            ui/common/inputs/Needle.cpp
-            ui/core-services/GameUpdaterInspector.cpp
-            ui/core-services/GraphicsContextInspector.cpp
-            ui/core-services/RenderManagerInspector.cpp
-            ui/core-services/RenderingEngineInspector.cpp
-            ui/game-modes/GameModeInspector.cpp
-            ui/operation-modes/modes/asm-editor/Context.cpp
-            ui/operation-modes/modes/asm-editor/NodeEditor.cpp
-            ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
-            ui/operation-modes/modes/asm-editor/ASMEditor.cpp
-            ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.cpp
-            ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCEvent.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCCamera.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/PathComponent.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerBlackboard.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerKinematicParams.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCColliderQuery.cpp
-            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerCollider.cpp
-            ui/resources/editors/ResEffectEditor.cpp
-            ui/resources/editors/ResMaterialEditor.cpp
-            ui/resources/editors/ResSurfRideProjectEditor.cpp
-            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.cpp
-        PRIVATE FILE_SET HEADERS FILES
-            io/binary/serialization/resource-rfls/ResAnimator.h
-            ui/common/editors/${DEVTOOLS_TARGET_SDK}/TimeService.h
-            ui/game-services/game-service-inspectors/SoundDirector.h
-            ui/game-services/game-service-inspectors/PathManager.h
-            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/TimeService.h
-            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/RespawnTimeManager.h
-            ui/game-services/game-service-inspectors/${DEVTOOLS_TARGET_SDK}/MonologueService.h
-            ui/operation-modes/modes/asm-editor/Context.h
-            ui/operation-modes/modes/asm-editor/NodeEditor.h
-            ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
-            ui/operation-modes/modes/asm-editor/ASMEditor.h
-            ui/operation-modes/modes/object-inspection/gameobject-inspectors/CameraFrame.h
-            ui/operation-modes/modes/object-inspection/gameobject-inspectors/ObjCameraVolume.h
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCVisual.h
-            ui/operation-modes/modes/object-inspection/component-inspectors/PathComponent.h
-            ui/operation-modes/modes/object-inspection/component-inspectors/GOCActivator.h
-            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCColliderQuery.h
-            ui/operation-modes/modes/object-inspection/component-inspectors/${DEVTOOLS_TARGET_SDK}/GOCPlayerCollider.h
-            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.h
+    set(DEVTOOLS_FEATURE_OBJECT_INSPECTION ON)
+    set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
+    set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
+    set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
+    set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
+    set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS ON)
+    
+    set(DEVTOOLS_FEATURE_COMMON_INPUT_INSPECTORS
+        Needle
+    )
+    set(DEVTOOLS_FEATURE_COMMON_EDITOR_INSPECTORS
+        TimeService
+        Camera
+        Needle
+    )
+    set(DEVTOOLS_FEATURE_COMMON_VIEWER_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_GAME_OBJECT_INSPECTORS
+        CameraFrame
+        ObjCameraVolume
+    )
+    set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
+        GOCTransform
+        GOCCollider
+        GOCPlayerParameter
+        GOCEvent
+        GOCCamera
+        GOCAnimator
+        GOCVisual
+        PathComponent
+        GOCActivator
+        GOCPlayerBlackboard
+        GOCPlayerKinematicParams
+        GOCColliderQuery
+        GOCPlayerCollider
+    )
+    set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
+        ResObjectWorldEditor
+        ResReflectionEditor
+        ResMaterialEditor
+    )
+    set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
+        MemoryInspector
+        GameUpdaterInspector
+        GraphicsContextInspector
+        RenderManagerInspector
+        RenderingEngineInspector
+    )
+    set(DEVTOOLS_FEATURE_GAME_SERVICE_INSPECTORS
+        FxParamManager
+        FxColManager
+        ObjectWorld
+        StageInfo
+        CameraManager
+        LevelInfo
+        CameraService
+        GameModeResourceManager
+        TerrainManager
+        SoundDirector
+        PathManager
+        TimeService
+        RespawnTimeManager
+        MonologueService
     )
 endif()
 
 if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
+    set(DEVTOOLS_FEATURE_OBJECT_INSPECTION ON)
+    set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_FXCOL_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
+    set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
+    set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
+    set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
+    
+    set(DEVTOOLS_FEATURE_COMMON_INPUT_INSPECTORS
+        Needle
+    )
+    set(DEVTOOLS_FEATURE_COMMON_EDITOR_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_COMMON_VIEWER_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_GAME_OBJECT_INSPECTORS
+    )
+    set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
+        GOCTransform
+        GOCCollider
+        GOCPlayerParameter
+        GOCAnimator
+    )
+    set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
+        ResObjectWorldEditor
+        ResReflectionEditor
+        ResMaterialEditor
+    )
+    set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
+        MemoryInspector
+        GraphicsContextInspector
+    )
+    set(DEVTOOLS_FEATURE_GAME_SERVICE_INSPECTORS
+        FxParamManager
+        ObjectWorld
+        StageInfo
+        LevelInfo
+    )
+endif()
+
+function(inspector_collection BASE_PATH ITEM_CLASS)
+    foreach(ITEM ${DEVTOOLS_FEATURE_${ITEM_CLASS}_INSPECTORS})
+        if(${ITEM} IN_LIST DEVTOOLS_FEATURE_${ITEM_CLASS}_CUSTOMIZED_INSPECTORS)
+            target_sources(${DEVTOOLS_TARGET}
+                PRIVATE
+                    ${BASE_PATH}/${DEVTOOLS_TARGET_SDK}/${ITEM}.cpp
+                PRIVATE FILE_SET HEADERS FILES
+                    ${BASE_PATH}/${ITEM}.h
+            )
+        else()
+            target_sources(${DEVTOOLS_TARGET}
+                PRIVATE
+                    ${BASE_PATH}/${ITEM}.cpp
+                PRIVATE FILE_SET HEADERS FILES
+                    ${BASE_PATH}/${ITEM}.h
+            )
+        endif()
+
+    endforeach()
+endfunction()
+
+set(DEVTOOLS_FEATURE_COMMON_EDITOR_CUSTOMIZED_INSPECTORS
+    TimeService
+)
+set(DEVTOOLS_FEATURE_GAME_SERVICE_CUSTOMIZED_INSPECTORS
+    FxParamManager
+    TimeService
+    RespawnTimeManager
+    MonologueService
+)
+
+inspector_collection(ui/common/inputs COMMON_INPUT)
+inspector_collection(ui/common/editors COMMON_EDITOR)
+inspector_collection(ui/common/viewers COMMON_VIEWER)
+inspector_collection(ui/core-services CORE_SERVICE)
+inspector_collection(ui/game-services/game-service-inspectors GAME_SERVICE)
+inspector_collection(ui/resources/editors RESOURCE)
+
+if(${DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTester.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_NEEDLEFX_TESTER})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/tools/${DEVTOOLS_TARGET_SDK}/NeedleFxSceneDataTesterV2.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_OBJECT_INSPECTION})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/operation-modes/modes/object-inspection/Context.cpp
+            ui/operation-modes/modes/object-inspection/ObjectInspection.cpp
+            ui/operation-modes/modes/object-inspection/ObjectInspector.cpp
+            ui/operation-modes/modes/object-inspection/ObjectList.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/operation-modes/modes/object-inspection/Context.h
+            ui/operation-modes/modes/object-inspection/ObjectInspection.h
+            ui/operation-modes/modes/object-inspection/ObjectInspector.h
+            ui/operation-modes/modes/object-inspection/ObjectList.h
+    )
+
+    set(DEVTOOLS_FEATURE_COMPONENT_CUSTOMIZED_INSPECTORS
+        GOCPlayerParameter
+        GOCColliderQuery
+        GOCPlayerCollider
+    )
+
+    inspector_collection(ui/operation-modes/modes/object-inspection/gameobject-inspectors GAME_OBJECT)
+    inspector_collection(ui/operation-modes/modes/object-inspection/component-inspectors COMPONENT)
+endif()
+
+if(${DEVTOOLS_FEATURE_LEVEL_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            io/binary/serialization/resource-rfls/ResObjectWorld.cpp
+            ui/common/editors/ObjectData.cpp
+            ui/common/viewers/ObjectData.cpp
+            ui/operation-modes/modes/level-editor/Context.cpp
+            ui/operation-modes/modes/level-editor/LevelEditor.cpp
+            ui/operation-modes/modes/level-editor/ObjectDataInspector.cpp
+            ui/operation-modes/modes/level-editor/ObjectLibrary.cpp
+            ui/operation-modes/modes/level-editor/SetObjectList.cpp
+            ui/resources/editors/ResObjectWorldEditor.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            io/binary/serialization/resource-rfls/ResObjectWorld.h
+            ui/common/editors/ObjectData.h
+            ui/common/viewers/ObjectData.h
+            ui/operation-modes/modes/level-editor/Context.h
+            ui/operation-modes/modes/level-editor/LevelEditor.h
+            ui/operation-modes/modes/level-editor/ObjectDataInspector.h
+            ui/operation-modes/modes/level-editor/ObjectLibrary.h
+            ui/operation-modes/modes/level-editor/SetObjectList.h
+            ui/resources/editors/ResObjectWorldEditor.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_FXCOL_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            debug-rendering/visuals/FxColCollisionShape.cpp
+            io/binary/serialization/resource-rfls/ResFxColFile2.cpp
+            ui/common/editors/FxCol.cpp
+            ui/operation-modes/modes/fxcol-editor/Context.cpp
+            ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
+            ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
+            ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            debug-rendering/visuals/FxColCollisionShape.h
+            io/binary/serialization/resource-rfls/ResFxColFile2.h
+            ui/common/editors/FxCol.h
+            ui/operation-modes/modes/fxcol-editor/Context.h
+            ui/operation-modes/modes/fxcol-editor/FxColEditor.h
+            ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
+            ui/operation-modes/modes/fxcol-editor/ShapeList.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_SURFRIDE_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            io/binary/containers/swif/SWIF.cpp
+            io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
+            ui/common/editors/SurfRide.cpp
+            ui/operation-modes/modes/surfride-editor/Context.cpp
+            ui/operation-modes/modes/surfride-editor/Timeline.cpp
+            ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
+            ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
+            ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
+            ui/operation-modes/modes/surfride-editor/SurfRideElement.cpp
+            ui/operation-modes/modes/surfride-editor/texture-editor/References.cpp
+            ui/operation-modes/modes/surfride-editor/texture-editor/Context.cpp
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.cpp
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.cpp
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.cpp
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            io/binary/containers/swif/SWIF.h
+            io/binary/serialization/resource-rfls/ResSurfRideProject.h
+            ui/common/editors/SurfRide.h
+            ui/operation-modes/modes/surfride-editor/Context.h
+            ui/operation-modes/modes/surfride-editor/Timeline.h
+            ui/operation-modes/modes/surfride-editor/ProjectTree.h
+            ui/operation-modes/modes/surfride-editor/ElementInspector.h
+            ui/operation-modes/modes/surfride-editor/SurfRideEditor.h
+            ui/operation-modes/modes/surfride-editor/SurfRideElement.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/Behaviors.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/Context.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/References.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureElement.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureElementInspector.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.h
+            ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_ASM_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
             io/binary/serialization/resource-rfls/ResAnimator.cpp
-            ui/common/inputs/Needle.cpp
-            ui/game-services/game-service-inspectors/LevelInfo.cpp
-            ui/core-services/GraphicsContextInspector.cpp
             ui/operation-modes/modes/asm-editor/Context.cpp
             ui/operation-modes/modes/asm-editor/NodeEditor.cpp
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
             ui/operation-modes/modes/asm-editor/ASMEditor.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
-            ui/resources/editors/ResMaterialEditor.cpp
         PRIVATE FILE_SET HEADERS FILES
             io/binary/serialization/resource-rfls/ResAnimator.h
-            ui/common/inputs/Needle.h
-            ui/game-services/game-service-inspectors/LevelInfo.h
-            ui/core-services/GraphicsContextInspector.h
             ui/operation-modes/modes/asm-editor/Context.h
             ui/operation-modes/modes/asm-editor/NodeEditor.h
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
             ui/operation-modes/modes/asm-editor/ASMEditor.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.h
-            ui/resources/editors/ResMaterialEditor.h
     )
 endif()
