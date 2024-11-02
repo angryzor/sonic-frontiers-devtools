@@ -270,6 +270,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
         GOCCollider
         GOCPlayerParameter
         GOCAnimator
+        GOCPlayerKinematicParams
     )
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
         ResObjectWorldEditor

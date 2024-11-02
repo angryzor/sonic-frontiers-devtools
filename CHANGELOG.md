@@ -1,3 +1,9 @@
+# v0.1.53
+## Shadow Generations
+* Ported "teleport player".
+* Added `GOCPlayerKinematicParams` inspector.
+
+
 # v0.1.52
 ## Shadow Generations
 * Ported material editor.

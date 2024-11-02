@@ -64,6 +64,7 @@ typedef std::tuple<
 #include "component-inspectors/GOCCollider.h"
 #include "component-inspectors/GOCAnimator.h"
 #include "component-inspectors/GOCPlayerParameter.h"
+#include "component-inspectors/GOCPlayerKinematicParams.h"
 
 typedef std::tuple<
 	hh::game::GOCTransform,
@@ -72,6 +73,7 @@ typedef std::tuple<
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
 	app::player::GOCPlayerParameter,
+	app::player::GOCPlayerKinematicParams,
 	hh::anim::GOCAnimator
 > InspectableComponents;
 #endif

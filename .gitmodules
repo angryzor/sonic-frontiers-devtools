@@ -37,3 +37,6 @@
 [submodule "vendor/ogdf/ogdf"]
 	path = vendor/ogdf/ogdf
 	url = https://github.com/ogdf/ogdf.git
+[submodule "vendor/imgui_club/imgui_club"]
+	path = vendor/imgui_club/imgui_club
+	url = https://github.com/ocornut/imgui_club.git
