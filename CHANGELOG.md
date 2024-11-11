@@ -1,3 +1,8 @@
+# v0.1.54
+## Shadow Generations
+* Update for Shadow Generations v1.1.0.1.
+
+
 # v0.1.53
 ## Shadow Generations
 * Ported "teleport player".
