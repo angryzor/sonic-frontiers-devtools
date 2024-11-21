@@ -1,5 +1,5 @@
 # v0.1.55
-* Added RFL HedgeSet template export.
+* Added RFL HedgeSet template export. Thanks to Ashrindy for this contribution!
 
 
 # v0.1.54
