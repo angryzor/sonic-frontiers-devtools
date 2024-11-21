@@ -1,3 +1,7 @@
+# v0.1.55
+* Added RFL HedgeSet template export.
+
+
 # v0.1.54
 ## Shadow Generations
 * Update for Shadow Generations v1.1.0.1.
