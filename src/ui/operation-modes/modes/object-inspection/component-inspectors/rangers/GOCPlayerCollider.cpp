@@ -1,4 +1,4 @@
-#include "GOCPlayerCollider.h"
+#include <ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerCollider.h>
 #include <ui/common/editors/Basic.h>
 
 void RenderComponentInspector(app::player::GOCPlayerCollider& component) {

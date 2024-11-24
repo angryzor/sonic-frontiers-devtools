@@ -1,4 +1,4 @@
-#include "GOCColliderQuery.h"
+#include <ui/operation-modes/modes/object-inspection/component-inspectors/GOCColliderQuery.h>
 #include <ui/common/editors/Basic.h>
 
 void RenderComponentInspector(app::physics::GOCColliderQuery& component)

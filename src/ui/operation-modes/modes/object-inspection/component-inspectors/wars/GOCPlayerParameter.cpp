@@ -1,4 +1,4 @@
-#include "GOCPlayerParameter.h"
+#include <ui/operation-modes/modes/object-inspection/component-inspectors/GOCPlayerParameter.h>
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/editors/Reflection.h>

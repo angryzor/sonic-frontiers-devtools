@@ -1,8 +1,8 @@
-#include "TimeService.h"
+#include <ui/game-services/game-service-inspectors/TimeService.h>
 
 bool Editor(const char* label, app::game::TimeService::TimeProgressSpeed& speed);
 
-#include <ui/common/editors/rangers/TimeService.h>
+#include <ui/common/editors/TimeService.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
 

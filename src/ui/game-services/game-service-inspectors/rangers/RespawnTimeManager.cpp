@@ -1,8 +1,8 @@
-#include "RespawnTimeManager.h"
+#include <ui/game-services/game-service-inspectors/RespawnTimeManager.h>
 
 bool Editor(const char* label, app::game::RespawnTimeManager::ObjectRespawnInfo& objectRespawnInfo);
 
-#include <ui/common/editors/rangers/TimeService.h>
+#include <ui/common/editors/TimeService.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
 

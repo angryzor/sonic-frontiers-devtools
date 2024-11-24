@@ -28,9 +28,9 @@ typedef std::tuple<
 #include "game-service-inspectors/TerrainManager.h"
 #include "game-service-inspectors/SoundDirector.h"
 #include "game-service-inspectors/FxColManager.h"
-#include "game-service-inspectors/rangers/TimeService.h"
-#include "game-service-inspectors/rangers/RespawnTimeManager.h"
-#include "game-service-inspectors/rangers/MonologueService.h"
+#include "game-service-inspectors/TimeService.h"
+#include "game-service-inspectors/RespawnTimeManager.h"
+#include "game-service-inspectors/MonologueService.h"
 
 typedef std::tuple<
 	app::gfx::FxParamManager,

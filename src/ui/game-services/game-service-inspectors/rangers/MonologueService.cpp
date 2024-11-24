@@ -1,4 +1,4 @@
-#include "RespawnTimeManager.h"
+#include <ui/game-services/game-service-inspectors/MonologueService.h>
 #include <ui/resources/editors/ResReflectionEditor.h>
 #include <ui/Desktop.h>
 
