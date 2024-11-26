@@ -53,30 +53,31 @@ bool InputText(const char* label, const char*& str, hh::fnd::ManagedResource* re
 class ResizeableVariableString : public csl::ut::VariableString {
 public:
 	void resize(size_t newSize) {
-		size_t allocatorAddr = reinterpret_cast<size_t>(m_pAllocator);
-		csl::fnd::IAllocator* allocator = m_pAllocator == nullptr ? hh::fnd::MemoryRouter::GetModuleAllocator() : reinterpret_cast<csl::fnd::IAllocator*>(allocatorAddr & ~1);
+		size_t allocatorAddr = reinterpret_cast<size_t>(allocatorAndFlags);
+		csl::fnd::IAllocator* allocator = allocatorAndFlags == nullptr ? hh::fnd::MemoryRouter::GetModuleAllocator() : reinterpret_cast<csl::fnd::IAllocator*>(allocatorAddr & ~1);
 
-		char* oldStr = m_pStr;
-		m_pStr = (char*)allocator->Alloc(newSize, 1);
-		m_pAllocator = reinterpret_cast<csl::fnd::IAllocator*>(reinterpret_cast<size_t>(allocator) | 1);
+		const char* oldStr = buffer;
+		char* newBuffer = (char*)allocator->Alloc(newSize, 1);
+		buffer = newBuffer;
+		allocatorAndFlags = reinterpret_cast<csl::fnd::IAllocator*>(reinterpret_cast<size_t>(allocator) | 1);
 
 		if (oldStr) {
-			strcpy_s(m_pStr, newSize, oldStr);
+			strcpy_s(newBuffer, newSize, oldStr);
 
 			if (allocatorAddr & 1)
-				allocator->Free(oldStr);
+				allocator->Free((void*)oldStr);
 		}
 		else {
-			m_pStr[0] = '\0';
+			newBuffer[0] = '\0';
 		}
 	}
 
 	size_t size() {
-		return m_pStr == nullptr ? 0 : strlen(m_pStr);
+		return buffer == nullptr ? 0 : strlen(buffer);
 	}
 
 	char* c_str() {
-		return m_pStr == nullptr ? dummy : m_pStr;
+		return const_cast<char*>(buffer == nullptr ? dummy : buffer);
 	}
 };
 

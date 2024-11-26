@@ -6,11 +6,11 @@
 namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
 
-	FxColBoundingVolume* Context::GetBoundingVolumeOfShape(FxColCollisionShape* collisionShape) {
+	FxColBoundingVolumeData* Context::GetBoundingVolumeOfShape(FxColCollisionShapeData* collisionShape) {
 		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolume, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
 
 		auto shapeIdx = collisionShape - fxColData->collisionShapes;
 
@@ -25,9 +25,9 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolume, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
 
-		boundingVolumes.push_back(FxColBoundingVolume{
+		boundingVolumes.push_back(FxColBoundingVolumeData{
 			0,
 			static_cast<int>(fxColData->boundingVolumeCount),
 			{ -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity() },
@@ -35,12 +35,12 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		});
 	}
 
-	void Context::RemoveBoundingVolume(FxColBoundingVolume* boundingVolume) {
+	void Context::RemoveBoundingVolume(FxColBoundingVolumeData* boundingVolume) {
 		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolume, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
-		resources::ManagedCArray<FxColCollisionShape, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
+		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<FxColCollisionShapeData, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
 
 		for (unsigned int i = 0; i < boundingVolume->shapeCount; i++)
 			collisionShapes.remove(boundingVolume->shapeStartIdx);
@@ -55,12 +55,12 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		boundingVolumes.remove(volumeIdx);
 	}
 
-	FxColCollisionShape* Context::AddCollisionShape(FxColBoundingVolume* boundingVolume, const Eigen::Vector3f& position) {
+	FxColCollisionShapeData* Context::AddCollisionShape(FxColBoundingVolumeData* boundingVolume, const Eigen::Vector3f& position) {
 		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolume, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
-		resources::ManagedCArray<FxColCollisionShape, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
+		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<FxColCollisionShapeData, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
 
 		auto shapeIdx = static_cast<unsigned int>(boundingVolume->shapeStartIdx) + boundingVolume->shapeCount;
 
@@ -69,8 +69,8 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 		auto& shape = collisionShapes[shapeIdx];
 		shape.name = "Shape";
-		shape.shape = FxColCollisionShape::Shape::SPHERE;
-		shape.type = FxColCollisionShape::Type::SCENE_PARAMETER_INDEX;
+		shape.shape = FxColCollisionShapeData::Shape::SPHERE;
+		shape.type = FxColCollisionShapeData::Type::SCENE_PARAMETER_INDEX;
 		shape.unk1 = 0;
 		shape.priority = 0;
 		shape.extents.sphere.radius = 10.0f;
@@ -92,12 +92,12 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		return &shape;
 	}
 
-	void Context::RemoveCollisionShape(FxColCollisionShape* collisionShape) {
+	void Context::RemoveCollisionShape(FxColCollisionShapeData* collisionShape) {
 		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolume, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
-		resources::ManagedCArray<FxColCollisionShape, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
+		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<FxColCollisionShapeData, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
 
 		auto shapeIdx = collisionShape - fxColData->collisionShapes;
 
@@ -116,7 +116,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		RecalculateBoundingVolume(boundingVolume);
 	}
 
-	void Context::RecalculateBoundingVolume(app::gfx::FxColBoundingVolume* boundingVolume) {
+	void Context::RecalculateBoundingVolume(app::gfx::FxColBoundingVolumeData* boundingVolume) {
 		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
@@ -169,25 +169,25 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		return aabb;
 	}
 
-	csl::geom::Aabb Context::CalculateAabb(const app::gfx::FxColCollisionShape* shape) {
+	csl::geom::Aabb Context::CalculateAabb(const app::gfx::FxColCollisionShapeData* shape) {
 		switch (shape->shape) {
-		case FxColCollisionShape::Shape::SPHERE: {
+		case FxColCollisionShapeData::Shape::SPHERE: {
 			csl::geom::Aabb aabb{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
 			auto& extents = shape->extents.sphere;
 			aabb.AddPoint(shape->position + csl::math::Vector3{ extents.radius, extents.radius, extents.radius });
 			aabb.AddPoint(shape->position - csl::math::Vector3{ extents.radius, extents.radius, extents.radius });
 			return aabb;
 		}
-		case FxColCollisionShape::Shape::CYLINDER: {
+		case FxColCollisionShapeData::Shape::CYLINDER: {
 			auto& extents = shape->extents.cylinder;
 			return CalculateAabbForObb(shape->position, shape->rotation, { extents.radius, extents.halfHeight, extents.radius });
 		}
-		case FxColCollisionShape::Shape::ANISOTROPIC_OBB: {
+		case FxColCollisionShapeData::Shape::ANISOTROPIC_OBB: {
 			auto& extents = shape->extents.anisotropicObb;
 			return CalculateAabbForObb(shape->position, shape->rotation, { extents.width / 2, extents.height / 2, extents.depth / 2 });
 			break;
 		}
-		case FxColCollisionShape::Shape::ISOTROPIC_OBB: {
+		case FxColCollisionShapeData::Shape::ISOTROPIC_OBB: {
 			auto& extents = shape->extents.isotropicObb;
 			return CalculateAabbForObb(shape->position, shape->rotation, { extents.width / 2, extents.height / 2, extents.depth / 2 });
 		}

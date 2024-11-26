@@ -3,7 +3,7 @@
 #include <utilities/math/MathUtils.h>
 
 const hh::fnd::RflClassMember GOCVisualModelSpawner::rflClassMembers[1]{
-	{ "resModel", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_STRING, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCVisualModelSpawner, resModel), nullptr },
+	{ "resModel", nullptr, nullptr, hh::fnd::RflClassMember::Type::STRING, hh::fnd::RflClassMember::Type::VOID, 0, 0, offsetof(GOCVisualModelSpawner, resModel), nullptr },
 };
 
 const hh::fnd::RflClass GOCVisualModelSpawner::rflClass{ "GOCVisualModelSpawner", nullptr, sizeof(GOCVisualModelSpawner), nullptr, 0, GOCVisualModelSpawner::rflClassMembers, 1, nullptr };
@@ -24,8 +24,8 @@ const hh::fnd::RflTypeInfo GOCVisualModelSpawner::rflTypeInfo{
 };
 
 const hh::fnd::RflClassMember GOCSimpleAnimationSpawner::rflClassMembers[2]{
-	{ "resAnimation", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_STRING, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCSimpleAnimationSpawner, resAnimation), nullptr },
-	{ "resSkeleton", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_STRING, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCSimpleAnimationSpawner, resSkeleton), nullptr },
+	{ "resAnimation", nullptr, nullptr, hh::fnd::RflClassMember::Type::STRING, hh::fnd::RflClassMember::Type::VOID, 0, 0, offsetof(GOCSimpleAnimationSpawner, resAnimation), nullptr },
+	{ "resSkeleton", nullptr, nullptr, hh::fnd::RflClassMember::Type::STRING, hh::fnd::RflClassMember::Type::VOID, 0, 0, offsetof(GOCSimpleAnimationSpawner, resSkeleton), nullptr },
 };
 
 const hh::fnd::RflClass GOCSimpleAnimationSpawner::rflClass{ "GOCSimpleAnimationSpawner", nullptr, sizeof(GOCSimpleAnimationSpawner), nullptr, 0, GOCSimpleAnimationSpawner::rflClassMembers, 2, nullptr };
@@ -48,8 +48,8 @@ const hh::fnd::RflTypeInfo GOCSimpleAnimationSpawner::rflTypeInfo{
 };
 
 const hh::fnd::RflClassMember GOCActivatorSpawner::rflClassMembers[2]{
-	{ "m_range", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_range), nullptr },
-	{ "m_distance", nullptr, nullptr, hh::fnd::RflClassMember::TYPE_FLOAT, hh::fnd::RflClassMember::TYPE_VOID, 0, 0, offsetof(GOCActivatorSpawner, m_distance), nullptr },
+	{ "m_range", nullptr, nullptr, hh::fnd::RflClassMember::Type::FLOAT, hh::fnd::RflClassMember::Type::VOID, 0, 0, offsetof(GOCActivatorSpawner, m_range), nullptr },
+	{ "m_distance", nullptr, nullptr, hh::fnd::RflClassMember::Type::FLOAT, hh::fnd::RflClassMember::Type::VOID, 0, 0, offsetof(GOCActivatorSpawner, m_distance), nullptr },
 };
 
 const hh::fnd::RflClass GOCActivatorSpawner::rflClass{ "GOCActivatorSpawner", nullptr, sizeof(GOCActivatorSpawner), nullptr, 0, GOCActivatorSpawner::rflClassMembers, 2, nullptr };

@@ -4,7 +4,6 @@
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/viewers/ObjectData.h>
-#include <reflection/ReflectiveOperations.h>
 #include <utilities/ObjectDataUtils.h>
 #include "ObjectData.h"
 

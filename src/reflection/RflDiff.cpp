@@ -76,40 +76,40 @@ bool Matches(const void* obj1, const void* obj2) {
 
 size_t RflMaxScoreStruct(const void* obj1, const RflClass* rflClass);
 
-size_t RflMaxScoreSingle(const void* obj1, const RflClassMember* member, const RflClassMember::Type type) {
+size_t RflMaxScoreSingle(const void* obj1, const RflClassMember& member, const RflClassMember::Type type) {
 	switch (type) {
-	case RflClassMember::TYPE_STRUCT: return RflMaxScoreStruct(obj1, member->m_pClass);
+	case RflClassMember::Type::STRUCT: return RflMaxScoreStruct(obj1, member.GetClass());
 	default: return 1;
 	}
 }
 
-size_t RflMaxScoreArray(const void* obj1, const RflClassMember* member)
+size_t RflMaxScoreArray(const void* obj1, const RflClassMember& member)
 {
 	size_t score{ 0 };
 
 	auto* arr1 = static_cast<const csl::ut::MoveArray<void*>*>(obj1);
 
 	for (auto& item : *arr1)
-		score += RflMaxScoreSingle(item, member, member->GetSubType());
+		score += RflMaxScoreSingle(item, member, member.GetSubType());
 
 	return score;
 }
 
-size_t RflMaxScoreClassMember(const void* obj1, const RflClassMember* member) {
-	switch (member->GetType()) {
-	case RflClassMember::TYPE_ARRAY: return RflMaxScoreArray(obj1, member);
-	case RflClassMember::TYPE_POINTER: return RflMaxScoreSingle(*static_cast<const void* const*>(obj1), member, member->GetSubType());
-	case RflClassMember::TYPE_ENUM: return RflMaxScoreSingle(obj1, member, member->GetSubType());
-	case RflClassMember::TYPE_FLAGS: return RflMaxScoreSingle(obj1, member, member->GetSubType());
-	case RflClassMember::TYPE_SIMPLE_ARRAY:
+size_t RflMaxScoreClassMember(const void* obj1, const RflClassMember& member) {
+	switch (member.GetType()) {
+	case RflClassMember::Type::ARRAY: return RflMaxScoreArray(obj1, member);
+	case RflClassMember::Type::POINTER: return RflMaxScoreSingle(*static_cast<const void* const*>(obj1), member, member.GetSubType());
+	case RflClassMember::Type::ENUM: return RflMaxScoreSingle(obj1, member, member.GetSubType());
+	case RflClassMember::Type::FLAGS: return RflMaxScoreSingle(obj1, member, member.GetSubType());
+	case RflClassMember::Type::SIMPLE_ARRAY:
 		assert(!"This RflClass member type (SIMPLE_ARRAY) is not implemented yet because it is unused.");
 		return 0;
-	default: return RflMaxScoreSingle(obj1, member, member->GetSubType());
+	default: return RflMaxScoreSingle(obj1, member, member.GetSubType());
 	}
 }
 
 size_t RflMaxScoreStruct(const void* obj1, const RflClass* rflClass) {
-	const RflClass* parent = rflClass->GetBaseType();
+	const RflClass* parent = rflClass->GetParent();
 
 	size_t result{ 0 };
 
@@ -117,14 +117,13 @@ size_t RflMaxScoreStruct(const void* obj1, const RflClass* rflClass) {
 		result += RflMaxScoreStruct(obj1, parent);
 	}
 
-	for (size_t i = 0; i < rflClass->m_pMembers.count; i++) {
-		const RflClassMember* member = &rflClass->m_pMembers.items[i];
-		size_t constArrSizeOrZero = member->GetCstyleArraySize();
+	for (auto& member : rflClass->GetMembers()) {
+		size_t constArrSizeOrZero = member.GetArrayLength();
 		size_t constArrSize = constArrSizeOrZero == 0 ? 1 : constArrSizeOrZero;
-		size_t baseAddr1 = reinterpret_cast<size_t>(obj1) + member->m_Offset;
+		size_t baseAddr1 = reinterpret_cast<size_t>(obj1) + member.GetOffset();
 
 		for (size_t j = 0; j < constArrSize; j++) {
-			auto* obj1Member = reinterpret_cast<void*>(baseAddr1 + j * member->GetSingleSizeInBytes());
+			auto* obj1Member = reinterpret_cast<void*>(baseAddr1 + j * member.GetSingleSize());
 			result += RflMaxScoreClassMember(obj1Member, member);
 		}
 	}
@@ -134,48 +133,48 @@ size_t RflMaxScoreStruct(const void* obj1, const RflClass* rflClass) {
 
 RflDiffResult RflDiffStruct(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClass* rflClass);
 
-bool PrimitiveMatches(const void* obj1, const void* obj2, const RflClassMember* member, const RflClassMember::Type type) {
+bool PrimitiveMatches(const void* obj1, const void* obj2, const RflClassMember::Type type) {
 	switch (type) {
-	case RflClassMember::TYPE_BOOL: return Matches<bool>(obj1, obj2);
-	case RflClassMember::TYPE_SINT8: return Matches<int8_t>(obj1, obj2);
-	case RflClassMember::TYPE_UINT8: return Matches<uint8_t>(obj1, obj2);
-	case RflClassMember::TYPE_SINT16: return Matches<int16_t>(obj1, obj2);
-	case RflClassMember::TYPE_UINT16: return Matches<uint16_t>(obj1, obj2);
-	case RflClassMember::TYPE_SINT32: return Matches<int32_t>(obj1, obj2);
-	case RflClassMember::TYPE_UINT32: return Matches<uint32_t>(obj1, obj2);
-	case RflClassMember::TYPE_SINT64: return Matches<int64_t>(obj1, obj2);
-	case RflClassMember::TYPE_UINT64: return Matches<uint64_t>(obj1, obj2);
-	case RflClassMember::TYPE_FLOAT: return Matches<float>(obj1, obj2);
-	case RflClassMember::TYPE_VECTOR2: return Matches<csl::math::Vector2>(obj1, obj2);
-	case RflClassMember::TYPE_VECTOR3: return Matches<csl::math::Vector3>(obj1, obj2);
-	case RflClassMember::TYPE_VECTOR4: return Matches<csl::math::Vector4>(obj1, obj2);
-	case RflClassMember::TYPE_QUATERNION: return Matches<csl::math::Quaternion>(obj1, obj2);
-	case RflClassMember::TYPE_MATRIX34: return Matches<csl::math::Matrix34>(obj1, obj2);
-	case RflClassMember::TYPE_MATRIX44: return Matches<csl::math::Matrix44>(obj1, obj2);
-	case RflClassMember::TYPE_CSTRING: return strcmp(static_cast<const char*>(obj1), static_cast<const char*>(obj2)) == 0;
-	case RflClassMember::TYPE_STRING: return strcmp(static_cast<const csl::ut::VariableString*>(obj1)->c_str(), static_cast<const csl::ut::VariableString*>(obj2)->c_str()) == 0;
-	case RflClassMember::TYPE_OBJECT_ID: return Matches<hh::game::ObjectId>(obj1, obj2);
-	case RflClassMember::TYPE_COLOR_BYTE: return Matches<csl::ut::Color8>(obj1, obj2);
-	case RflClassMember::TYPE_COLOR_FLOAT: return Matches<csl::ut::Color<float>>(obj1, obj2);
-	case RflClassMember::TYPE_POSITION: return Matches<csl::math::Vector3>(obj1, obj2);
+	case RflClassMember::Type::BOOL: return Matches<bool>(obj1, obj2);
+	case RflClassMember::Type::SINT8: return Matches<int8_t>(obj1, obj2);
+	case RflClassMember::Type::UINT8: return Matches<uint8_t>(obj1, obj2);
+	case RflClassMember::Type::SINT16: return Matches<int16_t>(obj1, obj2);
+	case RflClassMember::Type::UINT16: return Matches<uint16_t>(obj1, obj2);
+	case RflClassMember::Type::SINT32: return Matches<int32_t>(obj1, obj2);
+	case RflClassMember::Type::UINT32: return Matches<uint32_t>(obj1, obj2);
+	case RflClassMember::Type::SINT64: return Matches<int64_t>(obj1, obj2);
+	case RflClassMember::Type::UINT64: return Matches<uint64_t>(obj1, obj2);
+	case RflClassMember::Type::FLOAT: return Matches<float>(obj1, obj2);
+	case RflClassMember::Type::VECTOR2: return Matches<csl::math::Vector2>(obj1, obj2);
+	case RflClassMember::Type::VECTOR3: return Matches<csl::math::Vector3>(obj1, obj2);
+	case RflClassMember::Type::VECTOR4: return Matches<csl::math::Vector4>(obj1, obj2);
+	case RflClassMember::Type::QUATERNION: return Matches<csl::math::Quaternion>(obj1, obj2);
+	case RflClassMember::Type::MATRIX34: return Matches<csl::math::Matrix34>(obj1, obj2);
+	case RflClassMember::Type::MATRIX44: return Matches<csl::math::Matrix44>(obj1, obj2);
+	case RflClassMember::Type::CSTRING: return strcmp(static_cast<const char*>(obj1), static_cast<const char*>(obj2)) == 0;
+	case RflClassMember::Type::STRING: return strcmp(static_cast<const csl::ut::VariableString*>(obj1)->c_str(), static_cast<const csl::ut::VariableString*>(obj2)->c_str()) == 0;
+	case RflClassMember::Type::OBJECT_ID: return Matches<hh::game::ObjectId>(obj1, obj2);
+	case RflClassMember::Type::COLOR_BYTE: return Matches<csl::ut::Color8>(obj1, obj2);
+	case RflClassMember::Type::COLOR_FLOAT: return Matches<csl::ut::Color<float>>(obj1, obj2);
+	case RflClassMember::Type::POSITION: return Matches<csl::math::Vector3>(obj1, obj2);
 	default:
 		assert(!"rfl editor assertion failed: unknown primitive type");
 		return false;
 	}
 }
 
-RflDiffResult RflDiffSingle(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember* member, const RflClassMember::Type type)
+RflDiffResult RflDiffSingle(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember& member, const RflClassMember::Type type)
 {
 	switch (type) {
-	case RflClassMember::TYPE_STRUCT: return RflDiffStruct(allocator, obj1, obj2, member->m_pClass);
+	case RflClassMember::Type::STRUCT: return RflDiffStruct(allocator, obj1, obj2, member.GetClass());
 	default:
 		{
-			return PrimitiveMatches(obj1, obj2, member, type) ? RflDiffResult{ allocator } : RflDiffResult{ allocator, 1, { allocator, RflDiffChange::Type::UPDATE, obj2 } };
+			return PrimitiveMatches(obj1, obj2, type) ? RflDiffResult{ allocator } : RflDiffResult{ allocator, 1, { allocator, RflDiffChange::Type::UPDATE, obj2 } };
 		}
 	}
 }
 
-RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember* member)
+RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember& member)
 {
 	std::priority_queue<DiffScore> pq;
 	RflDiffResult result{ allocator };
@@ -187,9 +186,9 @@ RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, co
 	csl::ut::MoveArray<size_t> maxes2;
 
 	for (size_t i = 0; i < arr1->size(); i++)
-		maxes1.push_back(RflMaxScoreSingle(reinterpret_cast<void*>(reinterpret_cast<size_t>(arr1->begin()) + i * member->GetSubTypeSizeInBytes()), member, member->GetSubType()));
+		maxes1.push_back(RflMaxScoreSingle(reinterpret_cast<void*>(reinterpret_cast<size_t>(arr1->begin()) + i * member.GetSubTypeSize()), member, member.GetSubType()));
 	for (size_t i = 0; i < arr2->size(); i++)
-		maxes2.push_back(RflMaxScoreSingle(reinterpret_cast<void*>(reinterpret_cast<size_t>(arr2->begin()) + i * member->GetSubTypeSizeInBytes()), member, member->GetSubType()));
+		maxes2.push_back(RflMaxScoreSingle(reinterpret_cast<void*>(reinterpret_cast<size_t>(arr2->begin()) + i * member.GetSubTypeSize()), member, member.GetSubType()));
 
 	while (!pq.empty()) {
 		DiffScore ds{ std::move(pq.top()) };
@@ -213,7 +212,7 @@ RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, co
 		if (ds.node.y + 1 < arr2->size()) {
 			DiffScore addScore{ ds };
 
-			RflDiffResult addResult{ allocator, maxes2[ds.node.y], { allocator, RflDiffChange::Type::ADD, reinterpret_cast<void*>(reinterpret_cast<size_t>(arr2->begin()) + ds.node.y * member->GetSubTypeSizeInBytes()) } };
+			RflDiffResult addResult{ allocator, maxes2[ds.node.y], { allocator, RflDiffChange::Type::ADD, reinterpret_cast<void*>(reinterpret_cast<size_t>(arr2->begin()) + ds.node.y * member.GetSubTypeSize()) } };
 			addResult += RflDiffChange::Index{ RflDiffChange::Index::Type::INDEX, ds.node.x };
 
 			addScore.result += std::move(addResult);
@@ -227,10 +226,10 @@ RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, co
 		RflDiffResult updateResult{
 			RflDiffSingle(
 				allocator,
-				reinterpret_cast<void*>(reinterpret_cast<size_t>(arr1->begin()) + ds.node.x * member->GetSubTypeSizeInBytes()),
-				reinterpret_cast<void*>(reinterpret_cast<size_t>(arr2->begin()) + ds.node.y * member->GetSubTypeSizeInBytes()),
+				reinterpret_cast<void*>(reinterpret_cast<size_t>(arr1->begin()) + ds.node.x * member.GetSubTypeSize()),
+				reinterpret_cast<void*>(reinterpret_cast<size_t>(arr2->begin()) + ds.node.y * member.GetSubTypeSize()),
 				member,
-				member->GetSubType()
+				member.GetSubType()
 			)
 		};
 		updateResult += RflDiffChange::Index{ RflDiffChange::Index::Type::INDEX, ds.node.x };
@@ -245,21 +244,21 @@ RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, co
 	return result;
 }
 
-RflDiffResult RflDiffClassMember(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember* member) {
+RflDiffResult RflDiffClassMember(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember& member) {
 	switch (member->GetType()) {
-	case RflClassMember::TYPE_ARRAY: return RflDiffArray(allocator, obj1, obj2, member);
-	case RflClassMember::TYPE_POINTER: return RflDiffSingle(allocator, *static_cast<const void* const*>(obj1), *static_cast<const void* const*>(obj2), member, member->GetSubType());
-	case RflClassMember::TYPE_ENUM: return RflDiffSingle(allocator, obj1, obj2, member, member->GetSubType());
-	case RflClassMember::TYPE_FLAGS: return RflDiffSingle(allocator, obj1, obj2, member, member->GetSubType());
-	case RflClassMember::TYPE_SIMPLE_ARRAY:
+	case RflClassMember::Type::ARRAY: return RflDiffArray(allocator, obj1, obj2, member);
+	case RflClassMember::Type::POINTER: return RflDiffSingle(allocator, *static_cast<const void* const*>(obj1), *static_cast<const void* const*>(obj2), member, member.GetSubType());
+	case RflClassMember::Type::ENUM: return RflDiffSingle(allocator, obj1, obj2, member, member.GetSubType());
+	case RflClassMember::Type::FLAGS: return RflDiffSingle(allocator, obj1, obj2, member, member.GetSubType());
+	case RflClassMember::Type::SIMPLE_ARRAY:
 		assert(!"This RflClass member type (SIMPLE_ARRAY) is not implemented yet because it is unused.");
 		return RflDiffResult{ allocator };
-	default: return RflDiffSingle(allocator, obj1, obj2, member, member->GetType());
+	default: return RflDiffSingle(allocator, obj1, obj2, member, member.GetType());
 	}
 }
 
 RflDiffResult RflDiffStruct(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClass* rflClass) {
-	const RflClass* parent = rflClass->GetBaseType();
+	const RflClass* parent = rflClass->GetParent();
 
 	RflDiffResult result{ allocator };
 
@@ -267,28 +266,27 @@ RflDiffResult RflDiffStruct(csl::fnd::IAllocator* allocator, const void* obj1, c
 		result += RflDiffStruct(allocator, obj1, obj2, parent);
 	}
 
-	for (size_t i = 0; i < rflClass->m_pMembers.count; i++) {
-		const RflClassMember* member = &rflClass->m_pMembers.items[i];
-		size_t constArrSizeOrZero = member->GetCstyleArraySize();
-		size_t baseAddr1 = reinterpret_cast<size_t>(obj1) + member->m_Offset;
-		size_t baseAddr2 = reinterpret_cast<size_t>(obj2) + member->m_Offset;
+	for (auto& member : rflClass->GetMembers()) {
+		size_t constArrSizeOrZero = member.GetArrayLength();
+		size_t baseAddr1 = reinterpret_cast<size_t>(obj1) + member.GetOffset();
+		size_t baseAddr2 = reinterpret_cast<size_t>(obj2) + member.GetOffset();
 
 		if (constArrSizeOrZero == 0) {
 			auto* obj1Member = reinterpret_cast<void*>(baseAddr1);
 			auto* obj2Member = reinterpret_cast<void*>(baseAddr2);
 
 			RflDiffResult memberResult{ RflDiffClassMember(allocator, obj1Member, obj2Member, member) };
-			memberResult += RflDiffChange::Index{ RflDiffChange::Index::Type::PROPERTY, member->GetName() };
+			memberResult += RflDiffChange::Index{ RflDiffChange::Index::Type::PROPERTY, member.GetName() };
 			result += std::move(memberResult);
 		}
 		else {
 			for (size_t j = 0; j < constArrSizeOrZero; j++) {
-				auto* obj1Member = reinterpret_cast<void*>(baseAddr1 + j * member->GetSingleSizeInBytes());
-				auto* obj2Member = reinterpret_cast<void*>(baseAddr2 + j * member->GetSingleSizeInBytes());
+				auto* obj1Member = reinterpret_cast<void*>(baseAddr1 + j * member.GetSingleSize());
+				auto* obj2Member = reinterpret_cast<void*>(baseAddr2 + j * member.GetSingleSize());
 
 				RflDiffResult memberResult{ RflDiffClassMember(allocator, obj1Member, obj2Member, member) };
 				memberResult += RflDiffChange::Index{ RflDiffChange::Index::Type::INDEX, j };
-				memberResult += RflDiffChange::Index{ RflDiffChange::Index::Type::PROPERTY, member->GetName() };
+				memberResult += RflDiffChange::Index{ RflDiffChange::Index::Type::PROPERTY, member.GetName() };
 				result += std::move(memberResult);
 			}
 		}

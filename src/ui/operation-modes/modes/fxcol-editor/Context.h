@@ -7,18 +7,18 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		using CompatibleObject::CompatibleObject;
 
 		//hh::fnd::Reference<app::gfx::ResFxCol2File> fxColFile;
-		app::gfx::FxColBoundingVolume* placementVolume{};
+		app::gfx::FxColBoundingVolumeData* placementVolume{};
 
-		static app::gfx::FxColBoundingVolume* GetBoundingVolumeOfShape(app::gfx::FxColCollisionShape* collisionShape);
+		static app::gfx::FxColBoundingVolumeData* GetBoundingVolumeOfShape(app::gfx::FxColCollisionShapeData* collisionShape);
 		void AddBoundingVolume();
-		void RemoveBoundingVolume(app::gfx::FxColBoundingVolume* boundingVolume);
-		app::gfx::FxColCollisionShape* AddCollisionShape(app::gfx::FxColBoundingVolume* boundingVolume, const Eigen::Vector3f& position);
-		void RemoveCollisionShape(app::gfx::FxColCollisionShape* collisionShape);
+		void RemoveBoundingVolume(app::gfx::FxColBoundingVolumeData* boundingVolume);
+		app::gfx::FxColCollisionShapeData* AddCollisionShape(app::gfx::FxColBoundingVolumeData* boundingVolume, const Eigen::Vector3f& position);
+		void RemoveCollisionShape(app::gfx::FxColCollisionShapeData* collisionShape);
 
-		void RecalculateBoundingVolume(app::gfx::FxColBoundingVolume* boundingVolume);
+		void RecalculateBoundingVolume(app::gfx::FxColBoundingVolumeData* boundingVolume);
 		void RecalculateKdTree();
 
-		static csl::geom::Aabb CalculateAabb(const app::gfx::FxColCollisionShape* collisionShape);
+		static csl::geom::Aabb CalculateAabb(const app::gfx::FxColCollisionShapeData* collisionShape);
 		static csl::geom::Aabb CalculateAabbForObb(const csl::math::Position& position, const csl::math::Rotation& rotation, const csl::math::Vector3& halfExtents);
 	};
 }

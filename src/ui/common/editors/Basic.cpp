@@ -26,7 +26,7 @@ bool Editor(const char* label, csl::math::Transform& transform) {
     return edited;
 }
 
-bool Editor(const char* label, csl::ut::Color<float>& color) {
+bool Editor(const char* label, ucsl::colors::Colorf& color) {
 	float editableColor[4]{ color.r, color.g, color.b , color.a };
 
 	bool edited = ImGui::ColorEdit4(label, editableColor, ImGuiColorEditFlags_Float);
@@ -41,7 +41,7 @@ bool Editor(const char* label, csl::ut::Color<float>& color) {
 	return edited;
 }
 
-bool Editor(const char* label, csl::ut::Color8& color) {
+bool Editor(const char* label, ucsl::colors::Color8& color) {
 	float colorAsFloat[]{
 		static_cast<float>(color.r) / 255,
 		static_cast<float>(color.g) / 255,
@@ -126,6 +126,14 @@ bool Editor(const char* label, hh::game::ObjectId& id) {
 	}
     
     return edited;
+}
+
+bool Editor(const char* label, ucsl::objectids::ObjectIdV1& id) {
+	return Editor(label, (hh::game::ObjectId&)id);
+}
+
+bool Editor(const char* label, ucsl::objectids::ObjectIdV2& id) {
+	return Editor(label, (hh::game::ObjectId&)id);
 }
 
 bool Editor(const char* label, hh::game::GameObject*& gameObject)

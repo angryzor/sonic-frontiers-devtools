@@ -25,7 +25,7 @@ class GOCMyVisualDebugDraw : public GOCVisualDebugDraw {
 public:
 	//hh::fnd::Reference<hh::gfnd::GraphicsGeometry> geometry;
 	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> fillGeometry;
-	csl::ut::Color<uint8_t> color{ 0, 0, 0, 0 };
+	csl::ut::Color8 color{ 0, 0, 0, 0 };
 	bool hasGeometry{};
 
 	GOCMyVisualDebugDraw(csl::fnd::IAllocator* allocator);

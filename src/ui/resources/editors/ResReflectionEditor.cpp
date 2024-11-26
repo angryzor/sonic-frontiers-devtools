@@ -1,19 +1,21 @@
 #include "ResReflectionEditor.h"
-#include <io/binary/containers/binary-file/BinaryFile.h>
-#include <reflection/ReflectiveOperations.h>
+#include <ucsl-reflection/reflections/resources/rfl/v2.h>
+#include <ucsl-reflection/game-interfaces/ingame/miller.h>
+#include <rip/binary/containers/binary-file/BinaryFile.h>
+//#include <reflection/ReflectiveOperations.h>
 #include <ui/common/editors/Reflection.h>
-#include <ui/common/viewers/RflDiff.h>
+//#include <ui/common/viewers/RflDiff.h>
 #include <ui/GlobalSettings.h>
 
 using namespace hh::fnd;
 
-ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource, const RflClass* rflClass) : StandaloneWindow{ allocator }, forcedRflClass{ true }, resource{ resource }, rflClass{ rflClass }, diffResult{ allocator } {
+ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource, const RflClass* rflClass) : StandaloneWindow{ allocator }, forcedRflClass{ true }, resource{ resource }, rflClass{ rflClass } {//, diffResult{allocator} {
 	char namebuf[500];
 	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx) - using RflClass %s", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)resource->GetData(), rflClass->GetName());
 	SetTitle(namebuf);
 }
 
-ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource) : StandaloneWindow{ allocator }, forcedRflClass{ false }, resource{ resource }, rflClass{ nullptr }, diffResult{ allocator } {
+ResReflectionEditor::ResReflectionEditor(csl::fnd::IAllocator* allocator, ResReflection* resource) : StandaloneWindow{ allocator }, forcedRflClass{ false }, resource{ resource }, rflClass{ nullptr } {//, diffResult{allocator} {
 	char namebuf[500];
 	snprintf(namebuf, sizeof(namebuf), "%s - %s @ 0x%zx (file mapped @ 0x%zx)", resource->GetName(), resource->GetClass().pName, (size_t)resource, (size_t)resource->GetData());
 	SetTitle(namebuf);
@@ -30,9 +32,9 @@ ResReflectionEditor* ResReflectionEditor::Create(csl::fnd::IAllocator* allocator
 
 void ResReflectionEditor::MakeOriginalCopy()
 {
-	origData = new (std::align_val_t(16), GetAllocator()) char[rflClass->GetSizeInBytes()];
+	origData = new (std::align_val_t(16), GetAllocator()) char[rflClass->GetSize()];
 	hh::fnd::RflTypeInfoRegistry::GetInstance()->ConstructObject(GetAllocator(), origData, rflClass->GetName());
-	rflops::Copy::Apply(origData, resource->GetData(), rflClass);
+	//rflops::Copy::Apply(origData, resource->GetData(), rflClass);
 }
 
 void ResReflectionEditor::FreeOriginalCopy()
@@ -67,7 +69,7 @@ void ResReflectionEditor::RenderContents() {
 		ImGui::InputText("Search", searchStr, 200);
 		for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
 			auto resSize = resource->GetSize() - 0x10;
-			auto rflSize = rflc->GetSizeInBytes();
+			auto rflSize = rflc->GetSize();
 
 			if ((resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF)) && (strlen(searchStr) == 0 || strstr(rflc->GetName(), searchStr)))
 				matchingRflClasses.push_back(rflc);
@@ -110,34 +112,34 @@ void ResReflectionEditor::RenderContents() {
 	}
 
 	if (rflClass != nullptr) {
-		if (showdiff) {
-			if (ImGui::BeginChild("Properties", ImVec2(ImGui::GetWindowSize().x / 2, 0))) {
-				if (ResettableReflectionEditor("Properties", resource->GetData(), origData, rflClass))
-					diffResult = std::move(RflDiffStruct(GetAllocator(), origData, resource->GetData(), rflClass));
-			}
-			ImGui::EndChild();
-			ImGui::SameLine();
-			if (ImGui::BeginChild("Diff", ImVec2(ImGui::GetWindowSize().x / 2, 0))) {
-				if (ImGui::BeginTabBar("Diff Views")) {
-					if (ImGui::BeginTabItem("Tree view")) {
-						Viewer("Diff", diffResult, origData, rflClass);
-						ImGui::EndTabItem();
-					}
-					//if (ImGui::BeginTabItem("RFL2HMM")) {
-					//	Rfl2HmmViewer("Diff", diffResult, origData, rflClass);
-					//	ImGui::EndTabItem();
-					//}
-					ImGui::EndTabBar();
-				}
-			}
-			ImGui::EndChild();
-		}
-		else {
+		//if (showdiff) {
+		//	if (ImGui::BeginChild("Properties", ImVec2(ImGui::GetWindowSize().x / 2, 0))) {
+		//		if (ResettableReflectionEditor("Properties", resource->GetData(), origData, rflClass))
+		//			diffResult = std::move(RflDiffStruct(GetAllocator(), origData, resource->GetData(), rflClass));
+		//	}
+		//	ImGui::EndChild();
+		//	ImGui::SameLine();
+		//	if (ImGui::BeginChild("Diff", ImVec2(ImGui::GetWindowSize().x / 2, 0))) {
+		//		if (ImGui::BeginTabBar("Diff Views")) {
+		//			if (ImGui::BeginTabItem("Tree view")) {
+		//				Viewer("Diff", diffResult, origData, rflClass);
+		//				ImGui::EndTabItem();
+		//			}
+		//			//if (ImGui::BeginTabItem("RFL2HMM")) {
+		//			//	Rfl2HmmViewer("Diff", diffResult, origData, rflClass);
+		//			//	ImGui::EndTabItem();
+		//			//}
+		//			ImGui::EndTabBar();
+		//		}
+		//	}
+		//	ImGui::EndChild();
+		//}
+		//else {
 			if (ImGui::BeginChild("Properties")) {
 				ResettableReflectionEditor("Properties", resource->GetData(), origData, rflClass);
 			}
 			ImGui::EndChild();
-		}
+		//}
 
 		if (clicked_export) {
 			IGFD::FileDialogConfig cfg{};
@@ -157,10 +159,17 @@ void ResReflectionEditor::RenderExportDialog()
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			auto* self = static_cast<ResReflectionEditor*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-			std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-			std::wstring wFilePath(filePath.begin(), filePath.end());
+			std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+			rip::binary::binary_ostream bofs{ ofs };
+			rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
 
-			devtools::io::binary::containers::BinaryFile::SerializeRef2(wFilePath.c_str(), self->resource->GetData(), self->rflClass);
+			using namespace ucsl::resources::rfl::v2;
+
+			thread_local const RflClass* gRflClass = self->rflClass;
+
+			auto refl = ucsl::reflection::providers::simplerfl<he2sdk::ucsl::GameInterface>::template reflect<reflections::Ref2Data<Ref2RflData, [](const Ref2Data<Ref2RflData>& d) -> const char* { return gRflClass->GetName(); }>>();
+
+			serializer.serialize(*(Ref2RflData*)self->resource->GetData(), refl);
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}

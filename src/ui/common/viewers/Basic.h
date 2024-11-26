@@ -48,8 +48,8 @@ void Viewer(const char* label, const Eigen::Quaternionf& quat);
 void Viewer(const char* label, const hh::fnd::WorldPosition& worldPos);
 void Viewer(const char* label, const csl::math::Transform& transform);
 void Viewer(const char* label, hh::game::GameObject* const& gameObject);
-void Viewer(const char* label, const csl::ut::Color8& color);
-void Viewer(const char* label, const csl::ut::Color<float>& color);
+void Viewer(const char* label, const ucsl::colors::Color8& color);
+void Viewer(const char* label, const ucsl::colors::Colorf& color);
 
 bool BeginVectorViewerTable(const char* id, bool withWAxis);
 void EndVectorViewerTable();

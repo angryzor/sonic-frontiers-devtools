@@ -2,8 +2,9 @@
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/GlobalSettings.h>
-#include <io/binary/containers/binary-file/BinaryFile.h>
-#include <io/binary/serialization/resource-rfls/ResAnimator.h>
+#include <ucsl-reflection/reflections/resources/asm/v103.h>
+#include <ucsl-reflection/game-interfaces/ingame/miller.h>
+#include <rip/binary/containers/binary-file/BinaryFile.h>
 
 namespace ui::operation_modes::modes::asm_editor {
 	using namespace hh::anim;
@@ -39,12 +40,12 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		if (ImGuiFileDialog::Instance()->Display("ResAnimatorExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
-				auto* exportData = static_cast<hh::anim::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+				auto* exportData = static_cast<ucsl::resources::animation_state_machine::v103::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-				std::wstring wFilePath(filePath.begin(), filePath.end());
-
-				devtools::io::binary::containers::BinaryFile::Serialize(wFilePath.c_str(), exportData, &hh::fnd::RflClassTraits<hh::anim::AsmData>::rflClass);
+				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+				rip::binary::binary_ostream bofs{ ofs };
+				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportData);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}

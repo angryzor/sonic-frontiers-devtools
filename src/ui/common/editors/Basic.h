@@ -37,11 +37,13 @@ static bool Editor(const char* label, char (&str)[Len]) {
 }
 
 bool Editor(const char* label, bool& obj);
-bool Editor(const char* label, csl::ut::VariableString& str);
+bool Editor(const char* label, ucsl::strings::VariableString& str);
 bool Editor(const char* label, csl::ut::String& str);
-bool Editor(const char* label, csl::ut::Color<float>& color);
-bool Editor(const char* label, csl::ut::Color8& color);
+bool Editor(const char* label, ucsl::colors::Colorf& color);
+bool Editor(const char* label, ucsl::colors::Color8& color);
 bool Editor(const char* label, hh::game::ObjectId& id);
+bool Editor(const char* label, ucsl::objectids::ObjectIdV1& id);
+bool Editor(const char* label, ucsl::objectids::ObjectIdV2& id);
 bool Editor(const char* label, hh::game::GameObject*& gameObject);
 bool Editor(const char* label, hh::fnd::WorldPosition& worldPos);
 bool Editor(const char* label, csl::math::Transform& transform);

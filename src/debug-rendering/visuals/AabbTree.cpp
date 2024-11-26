@@ -3,7 +3,7 @@
 void RenderTreeNode(hh::gfnd::DrawContext& ctx, hh::ut::AabbTree& tree, unsigned int depth, unsigned int offset) {
 	auto& node = tree.nodes[offset];
 
-	ctx.DrawAABB(node.aabb.min, node.aabb.max, node.IsLeaf() ? hh::fnd::Color8{ 0, 255, 0, 255 } : hh::fnd::Color8{ 0, 0, 255, 255 });
+	ctx.DrawAABB(node.aabb.min, node.aabb.max, node.IsLeaf() ? csl::ut::Color8{ 0, 255, 0, 255 } : csl::ut::Color8{ 0, 0, 255, 255 });
 
 	if (!node.IsLeaf()) {
 		RenderTreeNode(ctx, tree, depth + 1, 2 * offset);

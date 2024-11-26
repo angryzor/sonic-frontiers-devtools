@@ -9,8 +9,9 @@
 #include <ui/GlobalSettings.h>
 #include <ui/common/viewers/Basic.h>
 #include <utilities/ResourceTypes.h>
-#include <io/binary/containers/binary-file/BinaryFile.h>
-#include <io/binary/serialization/resource-rfls/ResObjectWorld.h>
+#include <ucsl-reflection/reflections/resources/object-world/v3.h>
+#include <ucsl-reflection/game-interfaces/ingame/miller.h>
+#include <rip/binary/containers/binary-file/BinaryFile.h>
 
 using namespace hh::fnd;
 
@@ -288,7 +289,10 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 
 void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
-		devtools::io::binary::containers::BinaryFile::Serialize(filePath, static_cast<hh::game::ResObjectWorld*>(resource)->binaryData, &ResourceRfls::resObjectWorld);
+		std::ofstream ofs{ filePath, std::ios::binary };
+		rip::binary::binary_ostream bofs{ ofs };
+		rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+		serializer.serialize<he2sdk::ucsl::GameInterface>(*(ucsl::resources::object_world::v3::ObjectWorldData<he2sdk::ucsl::GameInterface::AllocatorSystem>*)static_cast<hh::game::ResObjectWorld*>(resource)->binaryData);
 	}
 }
 

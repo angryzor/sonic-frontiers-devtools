@@ -12,13 +12,9 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/Math.cpp
-        io/binary/containers/binary-file/BinaryFile.cpp
-        io/binary/serialization/resource-rfls/ResReflection.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
-        reflection/HSONTemplateGeneration.cpp
-        reflection/ReflectiveOperations.cpp
-        reflection/RflDiff.cpp
+        # reflection/RflDiff.cpp
         ui/common/NodeEditorAutoLayout.cpp
         ui/common/editors/Basic.cpp
         ui/common/editors/Reflection.cpp
@@ -26,7 +22,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
         ui/common/editors/Resources.cpp
         ui/common/viewers/Basic.cpp
-        ui/common/viewers/RflDiff.cpp
+        # ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/Textures.cpp
@@ -47,7 +43,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
-        ui/tools/RflComparer.cpp
+        # ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
         utilities/math/Frustum.cpp
@@ -62,20 +58,10 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/Math.h
-        io/binary/containers/binary-file/BinaryFile.h
-        io/binary/containers/binary-file/EndianSwaps.h
-        io/binary/serialization/Reflection.h
-        io/binary/serialization/resource-rfls/ResReflection.h
-        io/binary/serialization/Types.h
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
-        reflection/HSONTemplateGeneration.h
-        reflection/ReflectiveOperations.h
-        reflection/RflArrayAccessor.h
-        reflection/RflDiff.h
-        reflection/RflClassGen.h
-        reflection/RflClassGenFwd.h
+        # reflection/RflDiff.h
         ui/GlobalSettings.h
         ui/common/NodeEditorAutoLayout.h
         ui/common/editors/Basic.h
@@ -86,7 +72,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/Needle.h
         ui/common/editors/Resources.h
         ui/common/viewers/Basic.h
-        ui/common/viewers/RflDiff.h
+        # ui/common/viewers/RflDiff.h
         ui/common/inputs/Basic.h
         ui/common/inputs/Needle.h
         ui/common/icons.h
@@ -124,7 +110,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
-        ui/tools/RflComparer.h
+        # ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h
         utilities/math/EulerTransform.h
@@ -372,7 +358,6 @@ endif()
 if(${DEVTOOLS_FEATURE_LEVEL_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            io/binary/serialization/resource-rfls/ResObjectWorld.cpp
             ui/common/editors/ObjectData.cpp
             ui/common/viewers/ObjectData.cpp
             ui/operation-modes/modes/level-editor/Context.cpp
@@ -382,7 +367,6 @@ if(${DEVTOOLS_FEATURE_LEVEL_EDITOR})
             ui/operation-modes/modes/level-editor/SetObjectList.cpp
             ui/resources/editors/ResObjectWorldEditor.cpp
         PRIVATE FILE_SET HEADERS FILES
-            io/binary/serialization/resource-rfls/ResObjectWorld.h
             ui/common/editors/ObjectData.h
             ui/common/viewers/ObjectData.h
             ui/operation-modes/modes/level-editor/Context.h
@@ -398,7 +382,6 @@ if(${DEVTOOLS_FEATURE_FXCOL_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
             debug-rendering/visuals/FxColCollisionShape.cpp
-            io/binary/serialization/resource-rfls/ResFxColFile2.cpp
             ui/common/editors/FxCol.cpp
             ui/operation-modes/modes/fxcol-editor/Context.cpp
             ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
@@ -406,7 +389,6 @@ if(${DEVTOOLS_FEATURE_FXCOL_EDITOR})
             ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
         PRIVATE FILE_SET HEADERS FILES
             debug-rendering/visuals/FxColCollisionShape.h
-            io/binary/serialization/resource-rfls/ResFxColFile2.h
             ui/common/editors/FxCol.h
             ui/operation-modes/modes/fxcol-editor/Context.h
             ui/operation-modes/modes/fxcol-editor/FxColEditor.h
@@ -418,8 +400,6 @@ endif()
 if(${DEVTOOLS_FEATURE_SURFRIDE_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            io/binary/containers/swif/SWIF.cpp
-            io/binary/serialization/resource-rfls/ResSurfRideProject.cpp
             ui/common/editors/SurfRide.cpp
             ui/operation-modes/modes/surfride-editor/Context.cpp
             ui/operation-modes/modes/surfride-editor/Timeline.cpp
@@ -434,8 +414,6 @@ if(${DEVTOOLS_FEATURE_SURFRIDE_EDITOR})
             ui/operation-modes/modes/surfride-editor/texture-editor/TextureTree.cpp
             ui/operation-modes/modes/surfride-editor/texture-editor/TextureEditor.cpp
         PRIVATE FILE_SET HEADERS FILES
-            io/binary/containers/swif/SWIF.h
-            io/binary/serialization/resource-rfls/ResSurfRideProject.h
             ui/common/editors/SurfRide.h
             ui/operation-modes/modes/surfride-editor/Context.h
             ui/operation-modes/modes/surfride-editor/Timeline.h
@@ -456,14 +434,12 @@ endif()
 if(${DEVTOOLS_FEATURE_ASM_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            io/binary/serialization/resource-rfls/ResAnimator.cpp
             ui/operation-modes/modes/asm-editor/Context.cpp
             ui/operation-modes/modes/asm-editor/NodeEditor.cpp
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.cpp
             ui/operation-modes/modes/asm-editor/ASMEditor.cpp
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.cpp
         PRIVATE FILE_SET HEADERS FILES
-            io/binary/serialization/resource-rfls/ResAnimator.h
             ui/operation-modes/modes/asm-editor/Context.h
             ui/operation-modes/modes/asm-editor/NodeEditor.h
             ui/operation-modes/modes/asm-editor/BlendTreeEditor.h
