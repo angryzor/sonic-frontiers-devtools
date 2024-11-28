@@ -14,7 +14,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Math.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
-        # reflection/RflDiff.cpp
+        reflection/RflDiff.cpp
         ui/common/NodeEditorAutoLayout.cpp
         ui/common/editors/Basic.cpp
         ui/common/editors/Reflection.cpp
@@ -22,7 +22,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
         ui/common/editors/Resources.cpp
         ui/common/viewers/Basic.cpp
-        # ui/common/viewers/RflDiff.cpp
+        ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/Textures.cpp
@@ -43,7 +43,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
-        # ui/tools/RflComparer.cpp
+        ui/tools/RflComparer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
         utilities/math/Frustum.cpp
@@ -61,7 +61,7 @@ target_sources(${DEVTOOLS_TARGET}
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
-        # reflection/RflDiff.h
+        reflection/RflDiff.h
         ui/GlobalSettings.h
         ui/common/NodeEditorAutoLayout.h
         ui/common/editors/Basic.h
@@ -72,7 +72,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/Needle.h
         ui/common/editors/Resources.h
         ui/common/viewers/Basic.h
-        # ui/common/viewers/RflDiff.h
+        ui/common/viewers/RflDiff.h
         ui/common/inputs/Basic.h
         ui/common/inputs/Needle.h
         ui/common/icons.h
@@ -110,7 +110,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
-        # ui/tools/RflComparer.h
+        ui/tools/RflComparer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h
         utilities/math/EulerTransform.h

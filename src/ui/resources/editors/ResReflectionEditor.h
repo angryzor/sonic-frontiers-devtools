@@ -4,7 +4,7 @@
 
 class ResReflectionEditor : public StandaloneWindow {
 	hh::fnd::Reference<hh::fnd::ResReflection> resource;
-	//RflDiffResult diffResult;
+	RflDiffResult diffResult;
 	const hh::fnd::RflClass* rflClass;
 	char namebuf[500];
 	bool forcedRflClass{ false };

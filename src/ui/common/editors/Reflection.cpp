@@ -1,10 +1,10 @@
 #include "Reflection.h"
 #include <imgui_internal.h>
 #include <ucsl/rfl/ranges.h>
-#include <ucsl-reflection/opaque.h>
 #include <ucsl-reflection/providers/rflclass.h>
 #include <ucsl-reflection/traversals/types.h>
 #include <ucsl-reflection/traversals/traversal.h>
+#include <ucsl-reflection/algorithms/copy.h>
 #include <ui/common/Translations.h>
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
@@ -16,7 +16,7 @@ using namespace ucsl::reflection::traversals;
 using namespace ucsl::rfl::ranges;
 
 struct RflDragDropData {
-	const RflClass* rflClass;
+	const he2sdk::ucsl::GameInterface::RflSystem::RflClass* rflClass;
 	opaque_obj& obj;
 };
 
@@ -57,34 +57,6 @@ public:
 		}
 		else
 			return DragScalar(currentMemberName, obj);
-	}
-
-	static int64_t ReadPrimitiveInt(opaque_obj& obj, const RflClassMember::Type type) {
-		switch (type) {
-		case RflClassMember::Type::SINT8: return reinterpret_cast<int8_t&>(obj);
-		case RflClassMember::Type::UINT8: return reinterpret_cast<uint8_t&>(obj);
-		case RflClassMember::Type::SINT16: return reinterpret_cast<int16_t&>(obj);
-		case RflClassMember::Type::UINT16: return reinterpret_cast<uint16_t&>(obj);
-		case RflClassMember::Type::SINT32: return reinterpret_cast<int32_t&>(obj);
-		case RflClassMember::Type::UINT32: return reinterpret_cast<uint32_t&>(obj);
-		case RflClassMember::Type::SINT64: return reinterpret_cast<int64_t&>(obj);
-		case RflClassMember::Type::UINT64: return reinterpret_cast<uint64_t&>(obj);
-		default: assert("Unknown primitive int"); return 0;
-		}
-	}
-
-	static void WritePrimitiveInt(opaque_obj& obj, int64_t value, const RflClassMember::Type type) {
-		switch (type) {
-		case RflClassMember::Type::SINT8: reinterpret_cast<int8_t&>(obj) = static_cast<int8_t>(value); break;
-		case RflClassMember::Type::UINT8: reinterpret_cast<uint8_t&>(obj) = static_cast<uint8_t>(value); break;
-		case RflClassMember::Type::SINT16: reinterpret_cast<int16_t&>(obj) = static_cast<int16_t>(value); break;
-		case RflClassMember::Type::UINT16: reinterpret_cast<uint16_t&>(obj) = static_cast<uint16_t>(value); break;
-		case RflClassMember::Type::SINT32: reinterpret_cast<int32_t&>(obj) = static_cast<int32_t>(value); break;
-		case RflClassMember::Type::UINT32: reinterpret_cast<uint32_t&>(obj) = static_cast<uint32_t>(value); break;
-		case RflClassMember::Type::SINT64: reinterpret_cast<int64_t&>(obj) = static_cast<int64_t>(value); break;
-		case RflClassMember::Type::UINT64: reinterpret_cast<uint64_t&>(obj) = static_cast<uint64_t>(value); break;
-		default: assert("Unknown primitive int"); break;
-		}
 	}
 
 	static const char* GetRflMemberName(const RflClassMember* member) {
@@ -144,52 +116,52 @@ public:
 	template<typename F, typename A, typename C, typename D> static bool visit_array(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array(arr, c, d, f); }
 	template<typename F, typename A, typename C, typename D> static bool visit_tarray(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array(arr, c, d, f); }
 
-	template<typename F, typename O>
-	static bool visit_enum(opaque_obj& obj, const EnumInfo<O>& info, F f) {
+	template<typename T, typename O>
+	static bool visit_enum(T& obj, const EnumInfo<O>& info) {
 		bool edited{};
-		//const char* previewValue = "<INVALID VALUE>";
-		//int64_t currentValue = ReadPrimitiveInt(obj, type);
+		const char* previewValue = "<INVALID VALUE>";
+		int currentValue = static_cast<int>(obj);
 
-		//for (auto& option : info.options)
-		//	if (currentValue == option.GetIndex())
-		//		previewValue = option.GetEnglishName();
+		for (auto& option : info.options)
+			if (currentValue == option.GetIndex())
+				previewValue = option.GetEnglishName();
 
-		//if (ImGui::BeginCombo(currentMemberName, previewValue)) {
-		//	for (auto option : info.options) {
-		//		int64_t index = option.GetIndex();
-		//		bool is_selected = currentValue == index;
+		if (ImGui::BeginCombo(currentMemberName, previewValue)) {
+			for (auto option : info.options) {
+				int index = option.GetIndex();
+				bool is_selected = currentValue == index;
 
-		//		if (ImGui::Selectable(option.GetEnglishName(), is_selected)) {
-		//			WritePrimitiveInt(obj, index, type);
-		//			edited = true;
-		//		}
+				if (ImGui::Selectable(option.GetEnglishName(), is_selected)) {
+					obj = static_cast<T>(index);
+					edited = true;
+				}
 
-		//		if (is_selected)
-		//			ImGui::SetItemDefaultFocus();
-		//	}
+				if (is_selected)
+					ImGui::SetItemDefaultFocus();
+			}
 
-		//	ImGui::EndCombo();
-		//}
+			ImGui::EndCombo();
+		}
 
 		return edited;
 	}
 
-	template<typename F, typename O>
-	static bool visit_flags(opaque_obj& obj, const FlagsInfo<O>& info, F f) {
+	template<typename T, typename O>
+	static bool visit_flags(T& obj, const FlagsInfo<O>& info) {
 		if (!info.flags)
-			return f(obj);
+			return visit_primitive(obj, PrimitiveInfo<T>{});
 
 		bool edited{};
-		//int64_t currentValue = ReadPrimitiveInt(obj, type);
+		int currentValue = static_cast<int>(obj);
 
-		//if (ImGui::TreeNode(currentMemberName)) {
-		//	for (auto& flag : info.flags)
-		//		edited |= ImGui::CheckboxFlags(flag.GetEnglishName(), &currentValue, static_cast<size_t>(1) << flag.GetIndex());
-		//	ImGui::TreePop();
-		//}
+		if (ImGui::TreeNode(currentMemberName)) {
+			for (auto& flag : *info.flags)
+				edited |= ImGui::CheckboxFlags(flag.GetEnglishName(), &currentValue, static_cast<size_t>(1) << flag.GetIndex());
+			ImGui::TreePop();
+		}
 
-		//if (edited)
-		//	WritePrimitiveInt(obj, currentValue, type);
+		if (edited)
+			obj = static_cast<T>(currentValue);
 
 		return edited;
 	}
@@ -240,34 +212,35 @@ public:
 		ImGui::PushID(&obj);
 		bool edited{};
 		bool isOpen{ ImGui::TreeNodeEx(currentMemberName, RenderStaticReflectionEditor::defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None) };
+		const auto* rflClass = (const he2sdk::ucsl::GameInterface::RflSystem::RflClass*)info.rflClass;
 
-		//if (ImGui::BeginDragDropSource()) {
-		//	RflDragDropData dndData{ rflClass, obj };
-		//	ImGui::SetDragDropPayload("RflData", &dndData, sizeof(dndData));
-		//	ImGui::EndDragDropSource();
-		//}
+		if (ImGui::BeginDragDropSource()) {
+			RflDragDropData dndData{ rflClass, obj };
+			ImGui::SetDragDropPayload("RflData", &dndData, sizeof(dndData));
+			ImGui::EndDragDropSource();
+		}
 
-		//if (ImGui::BeginDragDropTarget()) {
-		//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RflData")) {
-		//		RflDragDropData& dndData = *static_cast<RflDragDropData*>(payload->Data);
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RflData")) {
+				RflDragDropData& dndData = *static_cast<RflDragDropData*>(payload->Data);
 
-		//		if (dndData.rflClass == rflClass && dndData.obj != obj) {
-		//			rflops::Copy::Apply(obj, dndData.obj, rflClass);
-		//			edited = true;
-		//		}
-		//	}
-		//	ImGui::EndDragDropTarget();
-		//}
+				if (dndData.rflClass == rflClass && &dndData.obj != &obj) {
+					ucsl::reflection::traversals::traversal<ucsl::reflection::algorithms::Copy<he2sdk::ucsl::GameInterface>>{}(obj, dndData.obj, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass));
+					edited = true;
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 
-		//if (ImGui::BeginPopupContextItem("RFL Operations")) {
-		//	if (ImGui::Selectable("Reset to default values")) {
-		//		const hh::fnd::RflTypeInfo* typeInfo = hh::fnd::RflTypeInfoRegistry::GetInstance()->GetTypeInfo(rflClass->GetName());
-		//		typeInfo->CleanupLoadedObject(obj);
-		//		typeInfo->ConstructObject(obj, hh::fnd::MemoryRouter::GetModuleAllocator());
-		//		edited = true;
-		//	}
-		//	ImGui::EndPopup();
-		//}
+		if (ImGui::BeginPopupContextItem("RFL Operations")) {
+			if (ImGui::Selectable("Reset to default values")) {
+				const hh::fnd::RflTypeInfo* typeInfo = hh::fnd::RflTypeInfoRegistry::GetInstance()->GetTypeInfo(rflClass->GetName());
+				typeInfo->CleanupLoadedObject(&obj);
+				typeInfo->ConstructObject(&obj, hh::fnd::MemoryRouter::GetModuleAllocator());
+				edited = true;
+			}
+			ImGui::EndPopup();
+		}
 		
 		if (isOpen) {
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
@@ -324,14 +297,14 @@ public:
 		return _visit_array(arr, orig, c, d, f);
 	}
 
-	template<typename F, typename O>
-	static bool visit_enum(opaque_obj& obj, opaque_obj& orig, const EnumInfo<O>& info, F f) {
-		return RenderStaticReflectionEditor::visit_enum(obj, info, [&](opaque_obj& obj) { return f(obj, orig); });
+	template<typename T, typename O>
+	static bool visit_enum(T& obj, T& orig, const EnumInfo<O>& info) {
+		return RenderStaticReflectionEditor::visit_enum(obj, info);
 	}
 
-	template<typename F, typename O>
-	static bool visit_flags(opaque_obj& obj, opaque_obj& orig, const FlagsInfo<O>& info, F f) {
-		return RenderStaticReflectionEditor::visit_flags(obj, info, [&](opaque_obj& obj) { return f(obj, orig); });
+	template<typename T, typename O>
+	static bool visit_flags(T& obj, T& orig, const FlagsInfo<O>& info) {
+		return RenderStaticReflectionEditor::visit_flags(obj, info);
 	}
 
 	template<typename F>
@@ -364,42 +337,41 @@ public:
 		ImGui::PushID(&obj);
 		bool edited{};
 		bool isOpen{ ImGui::TreeNodeEx(RenderStaticReflectionEditor::currentMemberName, RenderStaticReflectionEditor::defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None) };
+		const auto* rflClass = (const he2sdk::ucsl::GameInterface::RflSystem::RflClass*)info.rflClass;
 
-		// TODO: REMOVE THIS IT's BROKEN FOR TESTING
+		if (ImGui::BeginDragDropSource()) {
+			RflDragDropData dndData{ rflClass, obj };
+			ImGui::SetDragDropPayload("RflData", &dndData, sizeof(dndData));
+			ImGui::EndDragDropSource();
+		}
 
-		//if (ImGui::BeginDragDropSource()) {
-		//	RflDragDropData dndData{ rflClass, &obj };
-		//	ImGui::SetDragDropPayload("RflData", &dndData, sizeof(dndData));
-		//	ImGui::EndDragDropSource();
-		//}
+		if (ImGui::BeginDragDropTarget()) {
+			if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RflData")) {
+				RflDragDropData& dndData = *static_cast<RflDragDropData*>(payload->Data);
 
-		//if (ImGui::BeginDragDropTarget()) {
-		//	if (const ImGuiPayload* payload = ImGui::AcceptDragDropPayload("RflData")) {
-		//		RflDragDropData& dndData = *static_cast<RflDragDropData*>(payload->Data);
+				if (dndData.rflClass == rflClass && &dndData.obj != &obj) {
+					ucsl::reflection::traversals::traversal<ucsl::reflection::algorithms::Copy<he2sdk::ucsl::GameInterface>>{}(obj, dndData.obj, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass));
+					edited = true;
+				}
+			}
+			ImGui::EndDragDropTarget();
+		}
 
-		//		if (dndData.rflClass == rflClass && dndData.obj != obj) {
-		//			rflops::Copy::Apply(obj, dndData.obj, rflClass);
-		//			edited = true;
-		//		}
-		//	}
-		//	ImGui::EndDragDropTarget();
-		//}
+		if (ImGui::BeginPopupContextItem("RFL Operations")) {
+			if (ImGui::Selectable("Reset to cached values")) {
+				ucsl::reflection::traversals::traversal<ucsl::reflection::algorithms::Copy<he2sdk::ucsl::GameInterface>>{}(obj, orig, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass));
+				edited = true;
+			}
 
-		//if (ImGui::BeginPopupContextItem("RFL Operations")) {
-		//	if (ImGui::Selectable("Reset to cached values")) {
-		//		rflops::Copy::Apply(obj, orig, rflClass);
-		//		edited = true;
-		//	}
+			if (ImGui::Selectable("Reset to default values")) {
+				const hh::fnd::RflTypeInfo* typeInfo = hh::fnd::RflTypeInfoRegistry::GetInstance()->GetTypeInfo(rflClass->GetName());
+				typeInfo->CleanupLoadedObject(&obj);
+				typeInfo->ConstructObject(&obj, hh::fnd::MemoryRouter::GetModuleAllocator());
+				edited = true;
+			}
 
-		//	if (ImGui::Selectable("Reset to default values")) {
-		//		const hh::fnd::RflTypeInfo* typeInfo = hh::fnd::RflTypeInfoRegistry::GetInstance()->GetTypeInfo(rflClass->GetName());
-		//		typeInfo->CleanupLoadedObject(obj);
-		//		typeInfo->ConstructObject(obj, hh::fnd::MemoryRouter::GetModuleAllocator());
-		//		edited = true;
-		//	}
-
-		//	ImGui::EndPopup();
-		//}
+			ImGui::EndPopup();
+		}
 		
 		if (isOpen) {
 			ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x * 0.5f);
@@ -419,7 +391,7 @@ public:
 bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::RflClass* rflClass, bool defaultOpen) {
 	ImGui::BeginGroup();
 	RenderStaticReflectionEditor::defaultOpen = defaultOpen;
-	bool edited = RenderStaticReflectionEditor::NameScope(label, [&]() { return ucsl::reflection::traversals::traversal<RenderStaticReflectionEditor>{}(*(opaque_obj*)reflectionData, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass)); });
+	bool edited = RenderStaticReflectionEditor::NameScope(label, [&]() { return ucsl::reflection::traversals::traversal<RenderStaticReflectionEditor>{}(reflectionData, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass)); });
 	ImGui::EndGroup();
 	return edited;
 }
@@ -427,7 +399,7 @@ bool ReflectionEditor(const char* label, void* reflectionData, const hh::fnd::Rf
 bool ResettableReflectionEditor(const char* label, void* reflectionData, void* originalReflectionData, const hh::fnd::RflClass* rflClass) {
 	ImGui::BeginGroup();
 	RenderStaticReflectionEditor::defaultOpen = false;
-	bool edited = RenderStaticReflectionEditor::NameScope(label, [&]() { return ucsl::reflection::traversals::traversal<RenderResettableReflectionEditor>{}(*(opaque_obj*)reflectionData, *(opaque_obj*)originalReflectionData, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass)); });
+	bool edited = RenderStaticReflectionEditor::NameScope(label, [&]() { return ucsl::reflection::traversals::traversal<RenderResettableReflectionEditor>{}(reflectionData, originalReflectionData, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass)); });
 	ImGui::EndGroup();
 	return edited;
 }

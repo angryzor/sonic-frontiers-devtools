@@ -10,7 +10,6 @@
 #include <ui/common/viewers/Basic.h>
 #include <utilities/ResourceTypes.h>
 #include <ucsl-reflection/reflections/resources/object-world/v3.h>
-#include <ucsl-reflection/game-interfaces/ingame/miller.h>
 #include <rip/binary/containers/binary-file/BinaryFile.h>
 
 using namespace hh::fnd;

@@ -78,7 +78,7 @@ size_t RflMaxScoreStruct(const void* obj1, const RflClass* rflClass);
 
 size_t RflMaxScoreSingle(const void* obj1, const RflClassMember& member, const RflClassMember::Type type) {
 	switch (type) {
-	case RflClassMember::Type::STRUCT: return RflMaxScoreStruct(obj1, member.GetClass());
+	case RflClassMember::Type::STRUCT: return RflMaxScoreStruct(obj1, (const RflClass*)member.GetClass());
 	default: return 1;
 	}
 }
@@ -109,7 +109,7 @@ size_t RflMaxScoreClassMember(const void* obj1, const RflClassMember& member) {
 }
 
 size_t RflMaxScoreStruct(const void* obj1, const RflClass* rflClass) {
-	const RflClass* parent = rflClass->GetParent();
+	const RflClass* parent = (const RflClass*)rflClass->GetParent();
 
 	size_t result{ 0 };
 
@@ -155,7 +155,7 @@ bool PrimitiveMatches(const void* obj1, const void* obj2, const RflClassMember::
 	case RflClassMember::Type::STRING: return strcmp(static_cast<const csl::ut::VariableString*>(obj1)->c_str(), static_cast<const csl::ut::VariableString*>(obj2)->c_str()) == 0;
 	case RflClassMember::Type::OBJECT_ID: return Matches<hh::game::ObjectId>(obj1, obj2);
 	case RflClassMember::Type::COLOR_BYTE: return Matches<csl::ut::Color8>(obj1, obj2);
-	case RflClassMember::Type::COLOR_FLOAT: return Matches<csl::ut::Color<float>>(obj1, obj2);
+	case RflClassMember::Type::COLOR_FLOAT: return Matches<csl::ut::Colorf>(obj1, obj2);
 	case RflClassMember::Type::POSITION: return Matches<csl::math::Vector3>(obj1, obj2);
 	default:
 		assert(!"rfl editor assertion failed: unknown primitive type");
@@ -166,7 +166,7 @@ bool PrimitiveMatches(const void* obj1, const void* obj2, const RflClassMember::
 RflDiffResult RflDiffSingle(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember& member, const RflClassMember::Type type)
 {
 	switch (type) {
-	case RflClassMember::Type::STRUCT: return RflDiffStruct(allocator, obj1, obj2, member.GetClass());
+	case RflClassMember::Type::STRUCT: return RflDiffStruct(allocator, obj1, obj2, (const RflClass*)member.GetClass());
 	default:
 		{
 			return PrimitiveMatches(obj1, obj2, type) ? RflDiffResult{ allocator } : RflDiffResult{ allocator, 1, { allocator, RflDiffChange::Type::UPDATE, obj2 } };
@@ -245,7 +245,7 @@ RflDiffResult RflDiffArray(csl::fnd::IAllocator* allocator, const void* obj1, co
 }
 
 RflDiffResult RflDiffClassMember(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClassMember& member) {
-	switch (member->GetType()) {
+	switch (member.GetType()) {
 	case RflClassMember::Type::ARRAY: return RflDiffArray(allocator, obj1, obj2, member);
 	case RflClassMember::Type::POINTER: return RflDiffSingle(allocator, *static_cast<const void* const*>(obj1), *static_cast<const void* const*>(obj2), member, member.GetSubType());
 	case RflClassMember::Type::ENUM: return RflDiffSingle(allocator, obj1, obj2, member, member.GetSubType());
@@ -258,7 +258,7 @@ RflDiffResult RflDiffClassMember(csl::fnd::IAllocator* allocator, const void* ob
 }
 
 RflDiffResult RflDiffStruct(csl::fnd::IAllocator* allocator, const void* obj1, const void* obj2, const RflClass* rflClass) {
-	const RflClass* parent = rflClass->GetParent();
+	const RflClass* parent = (const RflClass*)rflClass->GetParent();
 
 	RflDiffResult result{ allocator };
 

@@ -1,7 +1,13 @@
 #include "RflDiff.h"
+#include <ucsl-reflection/opaque.h>
+#include <ucsl-reflection/providers/rflclass.h>
+#include <ucsl-reflection/traversals/traversal.h>
 #include <ui/common/viewers/Basic.h>
 #include <sstream>
 #include <regex>
+
+using namespace ucsl::reflection;
+using namespace ucsl::reflection::traversals;
 
 class RenderRflDiffChange {
 public:
@@ -11,18 +17,64 @@ public:
 	inline static int64_t pathIdx;
 
 	template<typename T>
-	static bool VisitPrimitive(T* obj) {
+	static bool visit_primitive(T& obj, const PrimitiveInfo<T>& info) {
 		if (pathIdx >= 0)
 			ImGui::Text("An error occurred.");
 
-		Viewer("Old value", *obj);
+		Viewer("Old value", obj);
 		Viewer("New value", *static_cast<const T*>(change->value));
 		return false;
 	}
 
-	template<typename F, template<typename> typename A, typename C, typename D>
-	static bool VisitArray(RflArrayAccessor<A>& arr, C c, D d, F f) {
-		void* obj = arr[change->path[pathIdx].arrayIdx];
+	template<typename F, typename A, typename C, typename D>
+	static bool _visit_array(A& arr, const ArrayInfo& info, C c, D d, F f) {
+		pathIdx--;
+		f(arr[change->path[pathIdx].arrayIdx]);
+		pathIdx++;
+		return false;
+	}
+
+	template<typename F, typename A, typename C, typename D> static bool visit_array(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array(arr, info, c, d, f); }
+	template<typename F, typename A, typename C, typename D> static bool visit_tarray(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array(arr, info, c, d, f); }
+
+	template<typename T, typename O>
+	static bool visit_enum(T& obj, const EnumInfo<O>& info) {
+		visit_primitive(obj, PrimitiveInfo<T>{});
+		return false;
+	}
+
+	template<typename T, typename O>
+	static bool visit_flags(T& obj, const FlagsInfo<O>& info) {
+		visit_primitive(obj, PrimitiveInfo<T>{});
+		return false;
+	}
+
+	template<typename F>
+	static bool visit_pointer(opaque_obj*& obj, const PointerInfo& info, F f) {
+		if (obj != nullptr)
+			f(*obj);
+		return false;
+	}
+
+	template<typename F>
+	static bool visit_carray(opaque_obj* obj, const CArrayInfo& info, F f) {
+		pathIdx--;
+		f(*reinterpret_cast<opaque_obj*>(reinterpret_cast<size_t>(obj) + change->path[pathIdx].arrayIdx * info.stride));
+		pathIdx++;
+		return false;
+	}
+
+	template<typename F>
+	static bool visit_type(opaque_obj& obj, const TypeInfo& info, F f) {
+		f(obj);
+		return false;
+	}
+
+	template<typename F>
+	static bool visit_field(opaque_obj& obj, const FieldInfo& info, F f) {
+		if (strcmp(info.name, change->path[pathIdx].propertyName))
+			return false;
+
 		pathIdx--;
 		f(obj);
 		pathIdx++;
@@ -30,66 +82,22 @@ public:
 	}
 
 	template<typename F>
-	static bool VisitEnum(void* obj, hh::fnd::RflClassMember::Type type, const hh::fnd::RflClassEnum* enumClass, F f) {
+	static bool visit_base_struct(opaque_obj& obj, const StructureInfo& info, F f) {
 		f(obj);
 		return false;
 	}
 
 	template<typename F>
-	static bool VisitFlags(void* obj, hh::fnd::RflClassMember::Type type, const hh::fnd::RflArray<const hh::fnd::RflClassEnumMember>* enumEntries, F f) {
+	static bool visit_struct(opaque_obj& obj, const StructureInfo& info, F f) {
 		f(obj);
 		return false;
 	}
 
 	template<typename F>
-	static bool VisitPointer(void** obj, F f) {
-		if (obj != nullptr)
-			f(*obj);
-		return false;
-	}
-
-	template<typename F>
-	static bool VisitClassMember(void* obj, const hh::fnd::RflClassMember* member, F f) {
-		if (strcmp(member->GetName(), change->path[pathIdx].propertyName) == 0) {
-			pathIdx--;
-			f(obj);
-			pathIdx++;
-		}
-		return false;
-	}
-
-	template<typename F>
-	static bool VisitArrayClassMember(void* obj, const hh::fnd::RflClassMember* member, size_t size, F f) {
-		if (strcmp(member->GetName(), change->path[pathIdx].propertyName) == 0) {
-			pathIdx--;
-			f(obj);
-			pathIdx++;
-		}
-		return false;
-	}
-
-	template<typename F>
-	static bool VisitArrayClassMemberItem(void* obj, const hh::fnd::RflClassMember* member, size_t idx, F f) {
-		if (idx == change->path[pathIdx].arrayIdx) {
-			pathIdx--;
-			f(obj);
-			pathIdx++;
-		}
-		return false;
-	}
-
-	template<typename F>
-	static bool VisitBaseStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
+	static bool visit_root(opaque_obj& obj, const RootInfo& info, F f) {
 		f(obj);
 		return false;
 	}
-
-	template<typename F>
-	static bool VisitStruct(void* obj, const hh::fnd::RflClass* rflClass, F f) {
-		f(obj);
-		return false;
-	}
-
 };
 
 
@@ -115,7 +123,7 @@ void Viewer(const char* label, const RflDiffResult& diff, void* obj, const hh::f
 			if (ImGui::TreeNode(pathBuf, "UPDATED: %s", pathBuf)) {
 				RenderRflDiffChange::change = &change;
 				RenderRflDiffChange::pathIdx = change.path.size() - 1;
-				rflops::traversals::rflop<RenderRflDiffChange>::Apply(obj, rflClass);
+				ucsl::reflection::traversals::traversal<RenderRflDiffChange>{}(*(opaque_obj*)obj, ucsl::reflection::providers::rflclass<he2sdk::ucsl::GameInterface>::reflect(rflClass));
 				ImGui::TreePop();
 			}
 		}

@@ -40,13 +40,14 @@ void Viewer(const char* label, const csl::ut::String& str)
 	ImGui::Text("%s: %s", label, const_cast<csl::ut::String&>(str).c_str());
 }
 
-void Viewer(const char* label, const hh::game::ObjectId& id)
+void Viewer(const char* label, const ucsl::objectids::ObjectIdV1& id)
 {
-#ifdef DEVTOOLS_TARGET_SDK_wars
 	ImGui::Text("%s: %08x", label, id.id);
-#else
+}
+
+void Viewer(const char* label, const ucsl::objectids::ObjectIdV2& id)
+{
 	ImGui::Text("%s: %016zx%016zx", label, id.groupId, id.objectId);
-#endif
 }
 
 void Viewer(const char* label, void* const& obj) {

@@ -1,6 +1,6 @@
 #include "ToolBar.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
-//#include <rip/schemas/hedgeset.h>
+#include <rip/schemas/hedgeset.h>
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include "GlobalSettings.h"
@@ -79,8 +79,8 @@ void ToolBar::Render() {
 #endif
 			if (ImGui::MenuItem("NeedleFxSceneData Tester V2") && ImGui::FindWindowByName("NeedleFxSceneData testing tool V2") == nullptr)
 				new (Desktop::instance->GetAllocator()) NeedleFxSceneDataTesterV2(Desktop::instance->GetAllocator());
-			//if (ImGui::MenuItem("RFL Comparer"))
-			//	new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RFL Comparer"))
+				new (Desktop::instance->GetAllocator()) RflComparer(Desktop::instance->GetAllocator());
 			if (ImGui::MenuItem("Export HSON template")) {
 				IGFD::FileDialogConfig cfg{};
 				cfg.path = GlobalSettings::defaultFileDialogDirectory;
@@ -193,26 +193,27 @@ void ToolBar::Render() {
 
 	ImGui::Checkbox("Render debug visuals", &GOCVisualDebugDrawRenderer::instance->enabled);
 
-//	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
-//		if (ImGuiFileDialog::Instance()->IsOk()) {
-//#ifdef DEVTOOLS_TARGET_SDK_WARS
-//			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V2> b{};
-//#else
-//			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V3> b{};
-//#endif
-//			b.add_all();
-//			rip::schemas::hedgeset::write(ImGuiFileDialog::Instance()->GetFilePathName(), b.get_template());
-//		ImGuiFileDialog::Instance()->Close();
-//	}
-//
-//	if (ImGuiFileDialog::Instance()->Display("RFLExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
-//		if (ImGuiFileDialog::Instance()->IsOk()) {
-//			rip::schemas::hedgeset::rfl_template_builder<he2sdk::ucsl::GameInterface> b{};
-//			b.add_all();
-//			rip::schemas::hedgeset::write(ImGuiFileDialog::Instance()->GetFilePathName(), b.get_template());
-//		}
-//		ImGuiFileDialog::Instance()->Close();
-//	}
+	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+#ifdef DEVTOOLS_TARGET_SDK_WARS
+			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V2> b{};
+#else
+			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V3> b{};
+#endif
+			b.add_all();
+			rip::schemas::hedgeset::write(ImGuiFileDialog::Instance()->GetFilePathName(), b.get_template());
+		}
+		ImGuiFileDialog::Instance()->Close();
+	}
+
+	if (ImGuiFileDialog::Instance()->Display("RFLExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (ImGuiFileDialog::Instance()->IsOk()) {
+			rip::schemas::hedgeset::rfl_template_builder<he2sdk::ucsl::GameInterface> b{};
+			b.add_all();
+			rip::schemas::hedgeset::write(ImGuiFileDialog::Instance()->GetFilePathName(), b.get_template());
+		}
+		ImGuiFileDialog::Instance()->Close();
+	}
 
 	ImGui::End();
 }

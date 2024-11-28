@@ -3,7 +3,6 @@
 #include <ui/common/viewers/Basic.h>
 #include <ui/GlobalSettings.h>
 #include <ucsl-reflection/reflections/resources/asm/v103.h>
-#include <ucsl-reflection/game-interfaces/ingame/miller.h>
 #include <rip/binary/containers/binary-file/BinaryFile.h>
 
 namespace ui::operation_modes::modes::asm_editor {
