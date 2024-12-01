@@ -1,3 +1,13 @@
+# v0.1.56
+* Integrated DevTools with `rip`.
+* Fixed a bug where selecting parented objects didn't work properly in the level editor.
+
+## Sonic Forces / Sonic Frontiers
+* ASM editor: You can now assign a blend node to a state.
+* ASM editor: Fixed a bug where assigning clips to states would not set the state to be a clip state.
+* Added RFL HedgeSet template export. Thanks to Ashrindy for this contribution!
+
+
 # v0.1.55
 * Added RFL HedgeSet template export. Thanks to Ashrindy for this contribution!
 
