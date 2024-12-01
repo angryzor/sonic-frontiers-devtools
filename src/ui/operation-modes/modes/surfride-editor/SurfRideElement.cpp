@@ -1,13 +1,13 @@
 #include "SurfRideElement.h"
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace SurfRide;
+	using namespace ucsl::resources::swif::v6;
 
-	SurfRideElement::SurfRideElement(Type type, Scene* scene) : type{ type }, scene{ scene } {}
+	SurfRideElement::SurfRideElement(Type type, SurfRide::Scene* scene) : type{ type }, scene{ scene } {}
 	SurfRideElement::SurfRideElement(Type type, SRS_CAMERA* cameraData) : type{ type }, cameraData{ cameraData } {}
-	SurfRideElement::SurfRideElement(Type type, Layer* layer) : type{ type }, layer{ layer } {}
-	SurfRideElement::SurfRideElement(Type type, Cast* cast) : type{ type }, cast{ cast } {}
-	SurfRideElement::SurfRideElement(Type type, SurfRide::SRS_TEXTURE* texture) : type{ type }, texture{ texture } {}
+	SurfRideElement::SurfRideElement(Type type, SurfRide::Layer* layer) : type{ type }, layer{ layer } {}
+	SurfRideElement::SurfRideElement(Type type, SurfRide::Cast* cast) : type{ type }, cast{ cast } {}
+	SurfRideElement::SurfRideElement(Type type, SRS_TEXTURE* texture) : type{ type }, texture{ texture } {}
 
 	bool SurfRideElement::operator==(const SurfRideElement& other) const
 	{

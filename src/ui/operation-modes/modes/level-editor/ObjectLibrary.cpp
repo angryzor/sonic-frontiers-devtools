@@ -37,7 +37,7 @@ namespace ui::operation_modes::modes::level_editor {
 			if (placement->IsInPlaceMode()) {
 				bool clickedStop = ImGui::Button("Stop placing");
 				ImGui::SameLine();
-				ImGui::Text("Placing %s", context.objectClassToPlace->name);
+				ImGui::Text("Placing %s", context.objectClassToPlace->GetName());
 				if (clickedStop)
 					placement->SetPlaceMode(false);
 			}
@@ -120,7 +120,7 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		switch (type) {
 		case Type::OBJECT_CLASS:
-			return objectClass->name;
+			return objectClass->GetName();
 		case Type::GROUP:
 			return groupLabel.c_str();
 		default:

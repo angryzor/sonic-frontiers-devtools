@@ -7,7 +7,7 @@
 #include <ui/common/viewers/Basic.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace SurfRide;
+	using namespace ucsl::resources::swif::v6;
 
 	void ElementInspector::RenderPanel()
 	{
@@ -44,7 +44,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return { "Element inspector", ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImVec2(1, 0) };
 	}
 
-	void ElementInspector::RenderSceneInspector(Scene& scene)
+	void ElementInspector::RenderSceneInspector(SurfRide::Scene& scene)
 	{
 		ImGui::SeparatorText("Scene");
 		ImGui::Text("ID: %d", scene.sceneData->id);
@@ -67,7 +67,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderLayerInspector(Layer& layer)
+	void ElementInspector::RenderLayerInspector(SurfRide::Layer& layer)
 	{
 		ImGui::SeparatorText("Layer");
 		ImGui::Text("ID: %d", layer.layerData->id);
@@ -111,18 +111,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 #endif
 	}
 
-	void ElementInspector::RenderCastInspector(Cast& cast)
+	void ElementInspector::RenderCastInspector(SurfRide::Cast& cast)
 	{
-		switch (static_cast<SurfRide::SRS_CASTNODE::Type>(cast.flags & 0xF)) {
-		case SurfRide::SRS_CASTNODE::Type::NORMAL: RenderNormalCastInspector(static_cast<ImageCast&>(cast)); break;
-		case SurfRide::SRS_CASTNODE::Type::IMAGE: RenderImageCastInspector(static_cast<ImageCast&>(cast)); break;
-		case SurfRide::SRS_CASTNODE::Type::REFERENCE: RenderReferenceCastInspector(static_cast<ReferenceCast&>(cast)); break;
-		case SurfRide::SRS_CASTNODE::Type::SLICE: RenderSliceCastInspector(static_cast<SliceCast&>(cast)); break;
+		switch (static_cast<SRS_CASTNODE::Type>(cast.flags & 0xF)) {
+		case SRS_CASTNODE::Type::NORMAL: RenderNormalCastInspector(static_cast<SurfRide::ImageCast&>(cast)); break;
+		case SRS_CASTNODE::Type::IMAGE: RenderImageCastInspector(static_cast<SurfRide::ImageCast&>(cast)); break;
+		case SRS_CASTNODE::Type::REFERENCE: RenderReferenceCastInspector(static_cast<SurfRide::ReferenceCast&>(cast)); break;
+		case SRS_CASTNODE::Type::SLICE: RenderSliceCastInspector(static_cast<SurfRide::SliceCast&>(cast)); break;
 		default: break;
 		}
 	}
 
-	void ElementInspector::RenderBaseCastInspector(Cast& cast)
+	void ElementInspector::RenderBaseCastInspector(SurfRide::Cast& cast)
 	{
 		Viewer("ID", cast.castData->id);
 		InputText("Name", cast.castData->name, GetContext().gocSprite->projectResource);
@@ -158,11 +158,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			if (transformEdited) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
-				auto* castTransform = static_cast<SRS_TRS3D*>(cast.transformData);
+				auto* castTransform = reinterpret_cast<SRS_TRS3D*>(cast.transformData);
 				castTransform->position = transform.position;
 				castTransform->rotation = transform.rotation;
 				castTransform->scale = transform.scale;
-				static_cast<Cast3D&>(cast).position = transform.position;
+				static_cast<SurfRide::Cast3D&>(cast).position = transform.position;
 #else
 				cast.transform->position = transform.position;
 				cast.transform->rotation = transform.rotation;
@@ -186,11 +186,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			if (transformEdited) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
-				auto* castTransform = static_cast<SRS_TRS3D*>(cast.transformData);
+				auto* castTransform = reinterpret_cast<SRS_TRS3D*>(cast.transformData);
 				castTransform->position = { transform.position.x(), transform.position.y(), 0.0f };
 				castTransform->rotation = { 0, 0, transform.rotation };
 				castTransform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
-				static_cast<Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
+				static_cast<SurfRide::Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
 				cast.flags = cast.castData->flags;
 #else
 				cast.transform->position = { transform.position.x(), transform.position.y(), 0.0f };
@@ -214,14 +214,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void ElementInspector::RenderNormalCastInspector(Cast& cast)
+	void ElementInspector::RenderNormalCastInspector(SurfRide::Cast& cast)
 	{
 		ImGui::SeparatorText("Cast");
 
 		RenderBaseCastInspector(cast);
 	}
 
-	void ElementInspector::RenderImageCastInspector(ImageCast& cast)
+	void ElementInspector::RenderImageCastInspector(SurfRide::ImageCast& cast)
 	{
 		ImGui::SeparatorText("Image cast");
 
@@ -243,7 +243,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 #ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.blurEffect = nullptr;
 			cast.reflectEffect = nullptr;
-			cast.CreateEffectCast(cast.imageCastData->effectData);
+			cast.CreateEffectCast(cast.imageCastData->effectData.blur);
 #endif
 
 			cast.transform->dirtyFlag.SetCellAll();
@@ -290,7 +290,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 #ifndef DEVTOOLS_TARGET_SDK_wars
 			cast.blurEffect = nullptr;
 			cast.reflectEffect = nullptr;
-			cast.CreateEffectCast(cast.sliceCastData->effectData);
+			cast.CreateEffectCast(cast.sliceCastData->effectData.blur);
 #endif
 			cast.transform->dirtyFlag.SetCellAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars

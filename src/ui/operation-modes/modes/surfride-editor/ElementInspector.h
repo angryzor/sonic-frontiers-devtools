@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::surfride_editor {
         virtual void RenderPanel() override;
         virtual PanelTraits GetPanelTraits() const override;
         void RenderSceneInspector(SurfRide::Scene& scene);
-        void RenderCameraDataInspector(SurfRide::SRS_CAMERA& cameraData);
+        void RenderCameraDataInspector(ucsl::resources::swif::v6::SRS_CAMERA& cameraData);
         void RenderLayerInspector(SurfRide::Layer& layer);
         void RenderCastInspector(SurfRide::Cast& cast);
         void RenderNormalCastInspector(SurfRide::Cast& cast);

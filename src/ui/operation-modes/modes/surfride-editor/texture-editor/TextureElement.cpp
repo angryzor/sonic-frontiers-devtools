@@ -1,8 +1,6 @@
 #include "TextureElement.h"
 
 namespace ui::operation_modes::modes::surfride_editor::texture_editor {
-	using namespace SurfRide;
-
 	TextureElement::TextureElement(const TextureListRef& textureList) : type{ Type::TEXTURELIST }, textureList{ textureList } {}
 	TextureElement::TextureElement(const TextureRef& texture) : type{ Type::TEXTURE }, texture{ texture } {}
 	TextureElement::TextureElement(const CropRef& crop) : type{ Type::CROP }, crop{ crop } {}

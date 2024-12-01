@@ -11,9 +11,9 @@ using namespace hh::game;
 
 #ifndef DEVTOOLS_TARGET_SDK_wars
 ComponentData* CreateComponentData(csl::fnd::IAllocator* allocator, const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
-	if (!strcmp(gocRegItem->name, "Model")) return hh::game::ComponentData::Create<GOCVisualModelSpawner>(allocator, "Model");
-	else if (!strcmp(gocRegItem->name, "SimpleAnimation")) hh::game::ComponentData::Create<GOCSimpleAnimationSpawner>(allocator, "SimpleAnimation");
-	else if (!strcmp(gocRegItem->name, "RangeSpawning")) hh::game::ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
+	if (!strcmp(gocRegItem->GetName(), "Model")) return hh::game::ComponentData::Create<hh::gfx::GOCVisualModelSpawner>(allocator, "Model");
+	else if (!strcmp(gocRegItem->GetName(), "SimpleAnimation")) hh::game::ComponentData::Create<hh::anim::GOCSimpleAnimationSpawner>(allocator, "SimpleAnimation");
+	else if (!strcmp(gocRegItem->GetName(), "RangeSpawning")) hh::game::ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
 	else hh::game::ComponentData::Create(allocator, gocRegItem);
 }
 #endif
@@ -70,10 +70,10 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 	for (size_t i = 0; i < obj.componentData.size(); i++) {
 		ImGui::PushID(obj.componentData[i]);
 		auto* gocInfo = objSystem->goComponentRegistry->GetComponentInformationByName(obj.componentData[i]->type);
-		if (ImGui::CollapsingHeader(gocInfo->name)) {
-			ImGui::Text("Component type: %s", gocInfo->componentClass->category);
+		if (ImGui::CollapsingHeader(gocInfo->GetName())) {
+			ImGui::Text("Component type: %s", gocInfo->GetComponentClass()->category);
 			ImGui::Text("Configuration:");
-			edited |= ReflectionEditor("Component properties", obj.componentData[i]->data, gocInfo->rflClass, true);
+			edited |= ReflectionEditor("Component properties", obj.componentData[i]->data, gocInfo->GetSpawnerDataClass(), true);
 
 			if (ImGui::Button("Remove component")) {
 				auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
@@ -107,7 +107,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 
 	if (ImGui::BeginPopup("ComponentConfigSelection")) {
 		for (auto* gocRegItem : objSystem->goComponentRegistry->GetComponents()) {
-			if (ImGui::Selectable(gocRegItem->name)) {
+			if (ImGui::Selectable(gocRegItem->GetName())) {
 				auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 
 				//if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
@@ -139,7 +139,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 		auto* objClass = objSystem->gameObjectRegistry->GetGameObjectClassByName(obj.gameObjectClass);
 
 		ImGui::SeparatorText("Object properties");
-		edited |= ReflectionEditor("Object properties", obj.spawnerData, objClass->spawnerDataRflClass, true);
+		edited |= ReflectionEditor("Object properties", obj.spawnerData, objClass->GetSpawnerDataClass(), true);
 	}
 
 	return edited;

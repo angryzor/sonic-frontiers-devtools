@@ -2,7 +2,8 @@
 #include "SurfRideElement.h"
 #include "Behaviors.h"
 #include "texture-editor/TextureEditor.h"
-#include <io/binary/containers/swif/SWIF.h>
+#include <ucsl-reflection/reflections/resources/swif/v6.h>
+#include <rip/binary/containers/binary-file/BinaryFile.h>
 #include <ui/common/StandaloneOperationModeHost.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/GlobalSettings.h>
@@ -63,12 +64,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (ImGuiFileDialog::Instance()->Display("ResSurfRideProjectExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
-				auto* exportProjectData = static_cast<SurfRide::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
+				auto* exportProjectData = static_cast<ucsl::resources::swif::v6::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-				std::wstring wFilePath(filePath.begin(), filePath.end());
-
-				devtools::io::binary::containers::swif::Serialize(wFilePath.c_str(), exportProjectData);
+				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+				rip::binary::binary_ostream bofs{ ofs };
+				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportProjectData);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}

@@ -377,7 +377,11 @@ bool Editor(const char* label, hh::needle::WorldRenderingPipeline& pipeline)
 	return edited;
 }
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
 bool Editor(const char* label, hh::needle::RenderingPipelineMiller& pipeline)
+#else
+bool Editor(const char* label, hh::needle::RenderingPipelineRangers& pipeline)
+#endif
 {
 	bool edited{};
 	if (ImGui::TreeNode(label)) {

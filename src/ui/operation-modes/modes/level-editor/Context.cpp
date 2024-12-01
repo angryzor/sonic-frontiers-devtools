@@ -146,10 +146,10 @@ namespace ui::operation_modes::modes::level_editor {
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		// FIXME: We're leaking memory here because the string does not get freed.
 		auto name = new char[100];
-		snprintf(name, 100, "%s_%d", gameObjectClass->name, mt() % 0x1000000);
+		snprintf(name, 100, "%s_%d", gameObjectClass->GetSpawnerDataClass(), mt() % 0x1000000);
 #else
 		char name[100];
-		snprintf(name, 100, "%s_%zd", gameObjectClass->name, mt() % 0x1000000);
+		snprintf(name, 100, "%s_%zd", gameObjectClass->GetSpawnerDataClass(), mt() % 0x1000000);
 #endif
 
 		auto* objData = new (allocator) ObjectData{
@@ -257,7 +257,7 @@ namespace ui::operation_modes::modes::level_editor {
 		resource->AddObject(objData);
 #ifdef DEVTOOLS_TARGET_SDK_miller
 		focusedChunk->AddWorldObjectStatus(placementTargetLayer, objData, true);
-#else	
+#else
 		focusedChunk->AddWorldObjectStatus(objData, true);
 #endif
 	}

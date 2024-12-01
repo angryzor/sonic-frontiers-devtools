@@ -2,7 +2,7 @@
 #include <resources/ManagedMemoryRegistry.h>
 #include <resources/managed-memory/ManagedCArray.h>
 
-using namespace SurfRide;
+using namespace ucsl::resources::swif::v6;
 
 namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 	void Context::AddTexture(const TextureListRef& textureListRef, hh::gfnd::ResTexture* textureResource) {
@@ -118,11 +118,11 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 			RefreshCastAfterTextureUpdate(textureRef, child);
 	}
 
-	bool Context::IsAffectedByTextureUpdate(const TextureRef& textureRef, SurfRide::SRS_CASTNODE& cast)
+	bool Context::IsAffectedByTextureUpdate(const TextureRef& textureRef, SRS_CASTNODE& cast)
 	{
 		switch (cast.GetType()) {
 		case SurfRide::SRS_CASTNODE::Type::IMAGE: {
-			auto* data = static_cast<SurfRide::SRS_IMAGECAST*>(cast.data);
+			auto* data = cast.data.image;
 
 			for (size_t i = 0; i < data->cropRef0Count; i++)
 				if (data->cropRefs0[i].textureListIndex == textureRef.textureListIndex && data->cropRefs0[i].textureIndex == textureRef.textureIndex)
@@ -161,11 +161,11 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 			RefreshCastAfterCropUpdate(cropRef, child);
 	}
 
-	bool Context::IsAffectedByCropUpdate(const CropRef& cropRef, SurfRide::SRS_CASTNODE& cast)
+	bool Context::IsAffectedByCropUpdate(const CropRef& cropRef, SRS_CASTNODE& cast)
 	{
 		switch (cast.GetType()) {
 		case SurfRide::SRS_CASTNODE::Type::IMAGE: {
-			auto* data = static_cast<SurfRide::SRS_IMAGECAST*>(cast.data);
+			auto* data = cast.data.image;
 
 			for (size_t i = 0; i < data->cropRef0Count; i++)
 				if (data->cropRefs0[i].textureListIndex == cropRef.textureListIndex && data->cropRefs0[i].textureIndex == cropRef.textureIndex && data->cropRefs0[i].cropIndex == cropRef.cropIndex)

@@ -15,6 +15,12 @@ set(DEVTOOLS_UPDATE_SERVER_PATH "" CACHE PATH "Path to update server")
 
 set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
 
+set(UCSL_EIGEN_MATH ON)
+set(OGDF_DEBUG_MODE NONE)
+include(FetchContent)
+FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 7d2a71816f2c12ad858ecc805cbe421b45935c42 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
+FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.10 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0)
+FetchContent_MakeAvailable(ogdf rip)
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
 # Settings for target sdks
@@ -49,7 +55,7 @@ if(DEVTOOLS_INSTALL_TO_UPDATE_SERVER)
 endif()
 
 # The main target
-foreach(DEVTOOLS_TARGET_SDK miller) # rangers wars)
+foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
     set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
     set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
@@ -75,6 +81,7 @@ foreach(DEVTOOLS_TARGET_SDK miller) # rangers wars)
     add_subdirectory(${SDK_PATH} ${DEVTOOLS_TARGET_SDK}-sdk EXCLUDE_FROM_ALL)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
+    target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${DEVTOOLS_TARGET_SDK}-sdk filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imguizmo implot reflectcpp OGDF rip-hl)
     target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_20)
     target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive- /W4 /wd4100 /wd4458 /wd4324)
     target_compile_definitions(${DEVTOOLS_TARGET}
@@ -104,10 +111,6 @@ foreach(DEVTOOLS_TARGET_SDK miller) # rangers wars)
     if(DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW)
 		target_compile_definitions(${DEVTOOLS_TARGET} PRIVATE DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW=1)
     endif()
-
-    foreach(LIB ${DEVTOOLS_TARGET_SDK}-sdk HedgeLib filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imguizmo implot reflectcpp OGDF rip-hl)
-        target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${LIB})
-    endforeach()
 
     add_subdirectory(src ${DEVTOOLS_TARGET}/src)
     add_subdirectory(natvis ${DEVTOOLS_TARGET}/natvis)

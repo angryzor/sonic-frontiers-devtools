@@ -5,16 +5,16 @@
 #include "implot_internal.h"
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace SurfRide;
+	using namespace ucsl::resources::swif::v6;
 
 	void Timeline::RenderPanel()
 	{
-		Layer* focusedLayer{};
+		SurfRide::Layer* focusedLayer{};
 
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		for (auto& element : selection) {
-			Layer* newLayer{};
+			SurfRide::Layer* newLayer{};
 			if (element.type == SurfRideElement::Type::LAYER) {
 				newLayer = element.layer;
 			}
@@ -78,7 +78,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return { "Timeline", ImVec2(0, ImGui::GetMainViewport()->WorkSize.y - 575), ImVec2(1200, 550), ImVec2(1, 0) };
 	}
 
-	void Timeline::RenderMotion(Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion)
+	void Timeline::RenderMotion(SurfRide::Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion)
 	{
 		ImGui::TableNextColumn();
 
@@ -106,7 +106,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(cellScreenPos.x + playHeadFrame * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + playHeadFrame * zoom, ImGui::GetCursorScreenPos().y), 0xFFFFFFFF);
 	}
 
-	void Timeline::RenderTrack(Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
+	void Timeline::RenderTrack(SurfRide::Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
 	{
 		auto width = (track.lastFrame - track.firstFrame) * zoom;
 		auto posBefore = ImGui::GetCursorPos();
@@ -176,32 +176,32 @@ namespace ui::operation_modes::modes::surfride_editor {
 			return;
 
 		switch (track.GetDataType()) {
-		case SRE_TRACK_DATA_TYPE::FLOAT:
+		case ETrackDataType::FLOAT:
 			switch (track.trackType) {
-			case SRE_CURVE_TYPE::MaterialColorR:
-			case SRE_CURVE_TYPE::MaterialColorG:
-			case SRE_CURVE_TYPE::MaterialColorB:
-			case SRE_CURVE_TYPE::MaterialColorA:
-			case SRE_CURVE_TYPE::VertexColorTopLeftR:
-			case SRE_CURVE_TYPE::VertexColorTopLeftG:
-			case SRE_CURVE_TYPE::VertexColorTopLeftB:
-			case SRE_CURVE_TYPE::VertexColorTopLeftA:
-			case SRE_CURVE_TYPE::VertexColorTopRightR:
-			case SRE_CURVE_TYPE::VertexColorTopRightG:
-			case SRE_CURVE_TYPE::VertexColorTopRightB:
-			case SRE_CURVE_TYPE::VertexColorTopRightA:
-			case SRE_CURVE_TYPE::VertexColorBottomLeftR:
-			case SRE_CURVE_TYPE::VertexColorBottomLeftG:
-			case SRE_CURVE_TYPE::VertexColorBottomLeftB:
-			case SRE_CURVE_TYPE::VertexColorBottomLeftA:
-			case SRE_CURVE_TYPE::VertexColorBottomRightR:
-			case SRE_CURVE_TYPE::VertexColorBottomRightG:
-			case SRE_CURVE_TYPE::VertexColorBottomRightB:
-			case SRE_CURVE_TYPE::VertexColorBottomRightA:
-			case SRE_CURVE_TYPE::IlluminationColorR:
-			case SRE_CURVE_TYPE::IlluminationColorG:
-			case SRE_CURVE_TYPE::IlluminationColorB:
-			case SRE_CURVE_TYPE::IlluminationColorA:
+			case ECurveType::MaterialColorR:
+			case ECurveType::MaterialColorG:
+			case ECurveType::MaterialColorB:
+			case ECurveType::MaterialColorA:
+			case ECurveType::VertexColorTopLeftR:
+			case ECurveType::VertexColorTopLeftG:
+			case ECurveType::VertexColorTopLeftB:
+			case ECurveType::VertexColorTopLeftA:
+			case ECurveType::VertexColorTopRightR:
+			case ECurveType::VertexColorTopRightG:
+			case ECurveType::VertexColorTopRightB:
+			case ECurveType::VertexColorTopRightA:
+			case ECurveType::VertexColorBottomLeftR:
+			case ECurveType::VertexColorBottomLeftG:
+			case ECurveType::VertexColorBottomLeftB:
+			case ECurveType::VertexColorBottomLeftA:
+			case ECurveType::VertexColorBottomRightR:
+			case ECurveType::VertexColorBottomRightG:
+			case ECurveType::VertexColorBottomRightB:
+			case ECurveType::VertexColorBottomRightA:
+			case ECurveType::IlluminationColorR:
+			case ECurveType::IlluminationColorG:
+			case ECurveType::IlluminationColorB:
+			case ECurveType::IlluminationColorA:
 				SetupYAxis(0, 1);
 				RenderDragPoints<float>(track, 0.0f, 1.0f);
 				break;
@@ -213,22 +213,22 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			RenderPlotLine<float>(track);
 			break;
-		case SRE_TRACK_DATA_TYPE::BOOL:
+		case ETrackDataType::BOOL:
 			SetupYAxis(false, true);
 			RenderDragPoints<bool>(track, false, true);
 			RenderPlotLine<bool>(track);
 			break;
-		case SRE_TRACK_DATA_TYPE::INT:
+		case ETrackDataType::INT:
 			SetupFloatingYAxis<int>(track);
 			RenderDragPoints<int>(track);
 			RenderPlotLine<int>(track);
 			break;
-		case SRE_TRACK_DATA_TYPE::INDEX:
+		case ETrackDataType::INDEX:
 			SetupFloatingYAxis<int>(track);
 			RenderDragPoints<int>(track);
 			RenderPlotLine<int>(track);
 			break;
-		case SRE_TRACK_DATA_TYPE::COLOR:
+		case ETrackDataType::COLOR:
 			SetupYAxis(0, 255);
 
 			RenderDragPoints<Color, GetR, SetR>(track, 0, 255, "R", ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -247,51 +247,51 @@ namespace ui::operation_modes::modes::surfride_editor {
 	const char* Timeline::TrackName(SRS_TRACK& track)
 	{
 		switch (track.trackType) {
-		case SRE_CURVE_TYPE::TranslationX: return "Translation X";
-		case SRE_CURVE_TYPE::TranslationY: return "Translation Y";
-		case SRE_CURVE_TYPE::TranslationZ: return "Translation Z";
-		case SRE_CURVE_TYPE::RotationX: return "Rotation X";
-		case SRE_CURVE_TYPE::RotationY: return "Rotation Y";
-		case SRE_CURVE_TYPE::RotationZ: return "Rotation Z";
-		case SRE_CURVE_TYPE::ScaleX: return "Scale X";
-		case SRE_CURVE_TYPE::ScaleY: return "Scale Y";
-		case SRE_CURVE_TYPE::ScaleZ: return "Scale Z";
-		case SRE_CURVE_TYPE::MaterialColorR: return "Material Color - Red";
-		case SRE_CURVE_TYPE::MaterialColorG: return "Material Color - Green";
-		case SRE_CURVE_TYPE::MaterialColorB: return "Material Color - Blue";
-		case SRE_CURVE_TYPE::MaterialColorA: return "Material Color - Alpha";
-		case SRE_CURVE_TYPE::VertexColorTopLeftR: return "Vertex Color Top Left - Red";
-		case SRE_CURVE_TYPE::VertexColorTopLeftG: return "Vertex Color Top Left - Green";
-		case SRE_CURVE_TYPE::VertexColorTopLeftB: return "Vertex Color Top Left - Blue";
-		case SRE_CURVE_TYPE::VertexColorTopLeftA: return "Vertex Color Top Left - Alpha";
-		case SRE_CURVE_TYPE::VertexColorTopRightR: return "Vertex Color Top Right - Red";
-		case SRE_CURVE_TYPE::VertexColorTopRightG: return "Vertex Color Top Right - Green";
-		case SRE_CURVE_TYPE::VertexColorTopRightB: return "Vertex Color Top Right - Blue";
-		case SRE_CURVE_TYPE::VertexColorTopRightA: return "Vertex Color Top Right - Alpha";
-		case SRE_CURVE_TYPE::VertexColorBottomLeftR: return "Vertex Color Bottom Left - Red";
-		case SRE_CURVE_TYPE::VertexColorBottomLeftG: return "Vertex Color Bottom Left - Green";
-		case SRE_CURVE_TYPE::VertexColorBottomLeftB: return "Vertex Color Bottom Left - Blue";
-		case SRE_CURVE_TYPE::VertexColorBottomLeftA: return "Vertex Color Bottom Left - Alpha";
-		case SRE_CURVE_TYPE::VertexColorBottomRightR: return "Vertex Color Bottom Right - Red";
-		case SRE_CURVE_TYPE::VertexColorBottomRightG: return "Vertex Color Bottom Right - Green";
-		case SRE_CURVE_TYPE::VertexColorBottomRightB: return "Vertex Color Bottom Right - Blue";
-		case SRE_CURVE_TYPE::VertexColorBottomRightA: return "Vertex Color Bottom Right - Alpha";
-		case SRE_CURVE_TYPE::IlluminationColorR: return "Illumination Color - Red";
-		case SRE_CURVE_TYPE::IlluminationColorG: return "Illumination Color - Green";
-		case SRE_CURVE_TYPE::IlluminationColorB: return "Illumination Color - Blue";
-		case SRE_CURVE_TYPE::IlluminationColorA: return "Illumination Color - Alpha";
-		case SRE_CURVE_TYPE::Display: return "Display";
-		case SRE_CURVE_TYPE::Width: return "Width";
-		case SRE_CURVE_TYPE::Height: return "Height";
-		case SRE_CURVE_TYPE::CropIndex0: return "Crop Index 0";
-		case SRE_CURVE_TYPE::CropIndex1: return "Crop Index 1";
-		case SRE_CURVE_TYPE::VertexColorTopLeft: return "Vertex Color Top Left";
-		case SRE_CURVE_TYPE::VertexColorTopRight: return "Vertex Color Top Right";
-		case SRE_CURVE_TYPE::VertexColorBottomLeft: return "Vertex Color Bottom Left";
-		case SRE_CURVE_TYPE::VertexColorBottomRight: return "Vertex Color Bottom Right";
-		case SRE_CURVE_TYPE::MaterialColor: return "Material Color";
-		case SRE_CURVE_TYPE::IlluminationColor: return "Illumination Color";
-		case SRE_CURVE_TYPE::Unknown: return "Unknown";
+		case ECurveType::TranslationX: return "Translation X";
+		case ECurveType::TranslationY: return "Translation Y";
+		case ECurveType::TranslationZ: return "Translation Z";
+		case ECurveType::RotationX: return "Rotation X";
+		case ECurveType::RotationY: return "Rotation Y";
+		case ECurveType::RotationZ: return "Rotation Z";
+		case ECurveType::ScaleX: return "Scale X";
+		case ECurveType::ScaleY: return "Scale Y";
+		case ECurveType::ScaleZ: return "Scale Z";
+		case ECurveType::MaterialColorR: return "Material Color - Red";
+		case ECurveType::MaterialColorG: return "Material Color - Green";
+		case ECurveType::MaterialColorB: return "Material Color - Blue";
+		case ECurveType::MaterialColorA: return "Material Color - Alpha";
+		case ECurveType::VertexColorTopLeftR: return "Vertex Color Top Left - Red";
+		case ECurveType::VertexColorTopLeftG: return "Vertex Color Top Left - Green";
+		case ECurveType::VertexColorTopLeftB: return "Vertex Color Top Left - Blue";
+		case ECurveType::VertexColorTopLeftA: return "Vertex Color Top Left - Alpha";
+		case ECurveType::VertexColorTopRightR: return "Vertex Color Top Right - Red";
+		case ECurveType::VertexColorTopRightG: return "Vertex Color Top Right - Green";
+		case ECurveType::VertexColorTopRightB: return "Vertex Color Top Right - Blue";
+		case ECurveType::VertexColorTopRightA: return "Vertex Color Top Right - Alpha";
+		case ECurveType::VertexColorBottomLeftR: return "Vertex Color Bottom Left - Red";
+		case ECurveType::VertexColorBottomLeftG: return "Vertex Color Bottom Left - Green";
+		case ECurveType::VertexColorBottomLeftB: return "Vertex Color Bottom Left - Blue";
+		case ECurveType::VertexColorBottomLeftA: return "Vertex Color Bottom Left - Alpha";
+		case ECurveType::VertexColorBottomRightR: return "Vertex Color Bottom Right - Red";
+		case ECurveType::VertexColorBottomRightG: return "Vertex Color Bottom Right - Green";
+		case ECurveType::VertexColorBottomRightB: return "Vertex Color Bottom Right - Blue";
+		case ECurveType::VertexColorBottomRightA: return "Vertex Color Bottom Right - Alpha";
+		case ECurveType::IlluminationColorR: return "Illumination Color - Red";
+		case ECurveType::IlluminationColorG: return "Illumination Color - Green";
+		case ECurveType::IlluminationColorB: return "Illumination Color - Blue";
+		case ECurveType::IlluminationColorA: return "Illumination Color - Alpha";
+		case ECurveType::Display: return "Display";
+		case ECurveType::Width: return "Width";
+		case ECurveType::Height: return "Height";
+		case ECurveType::CropIndex0: return "Crop Index 0";
+		case ECurveType::CropIndex1: return "Crop Index 1";
+		case ECurveType::VertexColorTopLeft: return "Vertex Color Top Left";
+		case ECurveType::VertexColorTopRight: return "Vertex Color Top Right";
+		case ECurveType::VertexColorBottomLeft: return "Vertex Color Bottom Left";
+		case ECurveType::VertexColorBottomRight: return "Vertex Color Bottom Right";
+		case ECurveType::MaterialColor: return "Material Color";
+		case ECurveType::IlluminationColor: return "Illumination Color";
+		case ECurveType::Unknown: return "Unknown";
 		default: return "Unknown";
 		}
 	}

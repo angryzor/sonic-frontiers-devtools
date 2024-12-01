@@ -7,23 +7,23 @@
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/operation-modes/behaviors/ForwardDeclarations.h>
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
-#include <debug-rendering/visuals/FxColCollisionShape.h>
+#include <debug-rendering/visuals/FxColCollisionShapeData.h>
 #include <debug-rendering/visuals/KdTree.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
 
 	template<> struct MousePicking3DRecursiveRaycastBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
-		using ObjectType = FxColCollisionShape*;
+		using ObjectType = FxColCollisionShapeData*;
 		using LocationType = csl::math::Vector3;
 
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		const char* GetObjectName(FxColCollisionShape* object) { return object->name; }
-		bool IsSelectable(FxColCollisionShape* object) { return true; }
-		bool Intersects(FxColCollisionShape* object, const Ray3f& ray) { return false; }
-		void GetRootObjects(csl::ut::MoveArray<FxColCollisionShape*>& rootObjects) {}
-		void GetChildren(FxColCollisionShape* object, csl::ut::MoveArray<FxColCollisionShape*>& children) {}
-		void GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<FxColCollisionShape*>& results) {
+		const char* GetObjectName(FxColCollisionShapeData* object) { return object->name; }
+		bool IsSelectable(FxColCollisionShapeData* object) { return true; }
+		bool Intersects(FxColCollisionShapeData* object, const Ray3f& ray) { return false; }
+		void GetRootObjects(csl::ut::MoveArray<FxColCollisionShapeData*>& rootObjects) {}
+		void GetChildren(FxColCollisionShapeData* object, csl::ut::MoveArray<FxColCollisionShapeData*>& children) {}
+		void GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<FxColCollisionShapeData*>& results) {
 			if (auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>())
 				if (fxColManager->resource != nullptr)
 					for (size_t i = 0; i < fxColManager->resource->fxColData->collisionShapeCount; i++) {
@@ -63,17 +63,17 @@ namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
 
 	template<> struct SelectionBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
-		using ObjectType = FxColCollisionShape*;
+		using ObjectType = FxColCollisionShapeData*;
 	};
 
 	template<> struct SelectionTransformationBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
 		static constexpr bool Projective = false;
-		bool HasTransform(FxColCollisionShape* obj) { return true; }
-		bool IsRoot(FxColCollisionShape* obj) { return true; }
-		FxColCollisionShape* GetParent(FxColCollisionShape* obj) { return nullptr; }
-		Eigen::Affine3f GetSelectionSpaceTransform(FxColCollisionShape* obj) const { return Eigen::Affine3f{ Eigen::Translation3f{ obj->position } *obj->rotation }; }
-		void SetSelectionSpaceTransform(FxColCollisionShape* obj, const Eigen::Affine3f& transform) {
+		bool HasTransform(FxColCollisionShapeData* obj) { return true; }
+		bool IsRoot(FxColCollisionShapeData* obj) { return true; }
+		FxColCollisionShapeData* GetParent(FxColCollisionShapeData* obj) { return nullptr; }
+		Eigen::Affine3f GetSelectionSpaceTransform(FxColCollisionShapeData* obj) const { return Eigen::Affine3f{ Eigen::Translation3f{ obj->position } *obj->rotation }; }
+		void SetSelectionSpaceTransform(FxColCollisionShapeData* obj, const Eigen::Affine3f& transform) {
 			obj->position = csl::math::Position{ transform.translation() };
 			obj->rotation = csl::math::Rotation{ transform.rotation() };
 
@@ -83,7 +83,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 	template<> struct SelectionAabbBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		bool CalculateAabb(const csl::ut::MoveArray<FxColCollisionShape*>& objects, csl::geom::Aabb& aabb) {
+		bool CalculateAabb(const csl::ut::MoveArray<FxColCollisionShapeData*>& objects, csl::geom::Aabb& aabb) {
 			aabb = csl::geom::Aabb{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
 
 			if (objects.size() == 0)
@@ -107,14 +107,14 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
 		constexpr static bool is3D = true;
 		bool CanPlace() const { return context.placementVolume; }
-		app::gfx::FxColCollisionShape* PlaceObject(const csl::math::Vector3& location) {
+		app::gfx::FxColCollisionShapeData* PlaceObject(const csl::math::Vector3& location) {
 			return context.AddCollisionShape(context.placementVolume, location);
 		}
 	};
 
 	template<> struct DeleteBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		void DeleteObjects(const csl::ut::MoveArray<app::gfx::FxColCollisionShape*>& objects) {
+		void DeleteObjects(const csl::ut::MoveArray<app::gfx::FxColCollisionShapeData*>& objects) {
 			for (auto* obj : objects)
 				context.RemoveCollisionShape(obj);
 		}

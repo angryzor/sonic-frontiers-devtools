@@ -33,9 +33,11 @@ void ResMaterialEditor::RenderContents()
 		case hh::needle::ParameterType::SAMPLER:
 			RenderSamplerParameterEditor(i, static_cast<ParameterSamplerValue*>(data));
 			break;
-		//case hh::needle::ParameterType::RS_FLAG_MASK:
-		//	RenderRsFlagMaskParameterEditor(i, static_cast<ParameterRsFlagMaskValue*>(data));
-		//	break;
+#ifndef DEVTOOLS_TARGET_SDK_miller
+		case hh::needle::ParameterType::RS_FLAG_MASK:
+			RenderRsFlagMaskParameterEditor(i, static_cast<ParameterRsFlagMaskValue*>(data));
+			break;
+#endif
 		case hh::needle::ParameterType::SHADER_NAME:
 			RenderShaderNameParameterEditor(i, static_cast<ParameterShaderNameValue*>(data));
 			break;
@@ -113,10 +115,12 @@ void ResMaterialEditor::RenderSamplerParameterEditor(size_t idx, hh::needle::Par
 	}
 }
 
-//void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)
-//{
-//	Editor("Render options", data->rsFlagMask);
-//}
+#ifndef DEVTOOLS_TARGET_SDK_miller
+void ResMaterialEditor::RenderRsFlagMaskParameterEditor(size_t idx, hh::needle::ParameterRsFlagMaskValue* data)
+{
+	Editor("Render options", data->rsFlagMask);
+}
+#endif
 
 void ResMaterialEditor::RenderShaderNameParameterEditor(size_t idx, hh::needle::ParameterShaderNameValue* data)
 {

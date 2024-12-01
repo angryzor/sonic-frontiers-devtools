@@ -16,7 +16,7 @@
 #endif
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-#include "game-modes/GameModeInspector.h"
+#include "core-services/GameModeInspector.h"
 #include "core-services/GameUpdaterInspector.h"
 #include "core-services/GraphicsContextInspector.h"
 #include "core-services/RenderManagerInspector.h"
@@ -51,8 +51,10 @@ void ToolBar::Render() {
 		if (ImGui::BeginMenu("Inspectors")) {
 			if (ImGui::MenuItem("GameService"))
 				new (Desktop::instance->GetAllocator()) GameServiceInspector(Desktop::instance->GetAllocator());
-			//if (ImGui::MenuItem("Memory"))
-			//	new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
+#ifndef DEVTOOLS_TARGET_SDK_miller
+			if (ImGui::MenuItem("Memory"))
+				new (Desktop::instance->GetAllocator()) MemoryInspector(Desktop::instance->GetAllocator());
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("GameUpdater"))
 				new (Desktop::instance->GetAllocator()) GameUpdaterInspector(Desktop::instance->GetAllocator());
@@ -101,10 +103,12 @@ void ToolBar::Render() {
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::object_inspection::ObjectInspection>();
 			if (ImGui::MenuItem("Level Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::level_editor::LevelEditor>();
-			//if (ImGui::MenuItem("FxCol Editor"))
-			//	Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::fxcol_editor::FxColEditor>();
-			//if (ImGui::MenuItem("SurfRide Editor"))
-			//	Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
+#ifndef DEVTOOLS_TARGET_SDK_miller
+			if (ImGui::MenuItem("FxCol Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::fxcol_editor::FxColEditor>();
+			if (ImGui::MenuItem("SurfRide Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
+#endif
 			ImGui::EndMenu();
 		}
 
@@ -195,7 +199,7 @@ void ToolBar::Render() {
 
 	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
-#ifdef DEVTOOLS_TARGET_SDK_WARS
+#ifdef DEVTOOLS_TARGET_SDK_wars
 			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V2> b{};
 #else
 			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V3> b{};

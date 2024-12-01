@@ -89,7 +89,6 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Desktop.h
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
-        ui/game-modes/GameModeInspector.h
         ui/game-services/GameServiceInspector.h
         ui/operation-modes/behaviors/Clipboard.h
         ui/operation-modes/behaviors/DebugCommentsVisual.h
@@ -133,7 +132,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
-    
+
     set(DEVTOOLS_FEATURE_COMMON_INPUT_INSPECTORS
     )
     set(DEVTOOLS_FEATURE_COMMON_EDITOR_INSPECTORS
@@ -150,6 +149,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
         ResObjectWorldEditor
         ResReflectionEditor
+        ResFxColFile2Editor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         MemoryInspector
@@ -172,7 +172,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS ON)
-    
+
     set(DEVTOOLS_FEATURE_COMMON_INPUT_INSPECTORS
         Needle
     )
@@ -206,6 +206,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         ResObjectWorldEditor
         ResReflectionEditor
         ResMaterialEditor
+        ResFxColFile2Editor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         MemoryInspector
@@ -213,6 +214,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         GraphicsContextInspector
         RenderManagerInspector
         RenderingEngineInspector
+        GameModeInspector
     )
     set(DEVTOOLS_FEATURE_GAME_SERVICE_INSPECTORS
         FxParamManager
@@ -241,7 +243,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
-    
+
     set(DEVTOOLS_FEATURE_COMMON_INPUT_INSPECTORS
         Needle
     )
@@ -264,7 +266,6 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
         ResMaterialEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
-        MemoryInspector
         GraphicsContextInspector
     )
     set(DEVTOOLS_FEATURE_GAME_SERVICE_INSPECTORS
@@ -381,14 +382,14 @@ endif()
 if(${DEVTOOLS_FEATURE_FXCOL_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            debug-rendering/visuals/FxColCollisionShape.cpp
+            debug-rendering/visuals/FxColCollisionShapeData.cpp
             ui/common/editors/FxCol.cpp
             ui/operation-modes/modes/fxcol-editor/Context.cpp
             ui/operation-modes/modes/fxcol-editor/FxColEditor.cpp
             ui/operation-modes/modes/fxcol-editor/ShapeInspector.cpp
             ui/operation-modes/modes/fxcol-editor/ShapeList.cpp
         PRIVATE FILE_SET HEADERS FILES
-            debug-rendering/visuals/FxColCollisionShape.h
+            debug-rendering/visuals/FxColCollisionShapeData.h
             ui/common/editors/FxCol.h
             ui/operation-modes/modes/fxcol-editor/Context.h
             ui/operation-modes/modes/fxcol-editor/FxColEditor.h

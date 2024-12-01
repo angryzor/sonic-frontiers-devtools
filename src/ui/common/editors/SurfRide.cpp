@@ -1,5 +1,5 @@
-bool Editor(const char* label, SurfRide::SRS_CROPREF& cropRef);
-bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS_DATA& data);
+bool Editor(const char* label, ucsl::resources::swif::v6::SRS_CROPREF& cropRef);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_DATA& data);
 
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
@@ -8,7 +8,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SurfRide::SRS
 #include <ui/operation-modes/modes/surfride-editor/texture-editor/References.h>
 #include "SurfRide.h"
 
-using namespace SurfRide;
+using namespace ucsl::resources::swif::v6;
 
 bool Editor(const char* label, Color& color) {
 	float colorAsFloat[]{
@@ -129,7 +129,7 @@ bool Editor(const char* label, SRS_TEXTDATA& textData) {
 		textData.SetVerticalAlignment(verticalAlignment);
 		edited = true;
 	}
-	Viewer("Text", textData.str);
+	Viewer("Text", textData.text);
 	edited |= Editor("Font index", textData.fontIndex);
 	edited |= Editor("Scale", textData.scale);
 	edited |= Editor("Padding left", textData.paddingLeft);
@@ -191,7 +191,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST
 		edited = true;
 	}
 
-	if (pivotType == SurfRide::EPivotType::CUSTOM)
+	if (pivotType == EPivotType::CUSTOM)
 		edited |= Editor("Pivot", imageCastData.pivot);
 
 	ImGui::Separator();
@@ -232,20 +232,20 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST
 
 		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
 
-		if (imageCastData.effectData)
-			allocator.Free(imageCastData.effectData);
+		if (imageCastData.effectData.blur)
+			allocator.Free(imageCastData.effectData.blur);
 	
 		switch (effectType) {
-		case SRE_EFFECT_TYPE::BLUR: imageCastData.effectData = new (&allocator) SRS_BLUR3D{}; break;
-		case SRE_EFFECT_TYPE::REFLECT: imageCastData.effectData = new (&allocator) SRS_REFLECT3D{}; break;
-		default: imageCastData.effectData = nullptr; break;
+		case EEffectType::BLUR: imageCastData.effectData.blur = new (&allocator) SRS_BLUR3D{}; break;
+		case EEffectType::REFLECT: imageCastData.effectData.reflect = new (&allocator) SRS_REFLECT3D{}; break;
+		default: imageCastData.effectData.blur = nullptr; break;
 		}
 	}
 
-	if (imageCastData.effectData) {
+	if (imageCastData.effectData.blur) {
 		switch (effectType) {
-		case SRE_EFFECT_TYPE::BLUR: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_BLUR3D*>(imageCastData.effectData)); break;
-		case SRE_EFFECT_TYPE::REFLECT: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_REFLECT3D*>(imageCastData.effectData)); break;
+		case EEffectType::BLUR: edited |= Editor("Effect parameters", *imageCastData.effectData.blur); break;
+		case EEffectType::REFLECT: edited |= Editor("Effect parameters", *imageCastData.effectData.reflect); break;
 		}
 	}
 #endif
@@ -332,20 +332,20 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_SLICECAST
 
 		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
 
-		if (sliceCastData.effectData)
-			allocator.Free(sliceCastData.effectData);
+		if (sliceCastData.effectData.blur)
+			allocator.Free(sliceCastData.effectData.blur);
 
 		switch (effectType) {
-		case SRE_EFFECT_TYPE::BLUR: sliceCastData.effectData = new (&allocator) SRS_BLUR3D{}; break;
-		case SRE_EFFECT_TYPE::REFLECT: sliceCastData.effectData = new (&allocator) SRS_REFLECT3D{}; break;
-		default: sliceCastData.effectData = nullptr; break;
+		case EEffectType::BLUR: sliceCastData.effectData.blur = new (&allocator) SRS_BLUR3D{}; break;
+		case EEffectType::REFLECT: sliceCastData.effectData.reflect = new (&allocator) SRS_REFLECT3D{}; break;
+		default: sliceCastData.effectData.blur = nullptr; break;
 		}
 	}
 
-	if (sliceCastData.effectData) {
+	if (sliceCastData.effectData.blur) {
 		switch (effectType) {
-		case SRE_EFFECT_TYPE::BLUR: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_BLUR3D*>(sliceCastData.effectData)); break;
-		case SRE_EFFECT_TYPE::REFLECT: edited |= Editor("Effect parameters", *reinterpret_cast<SRS_REFLECT3D*>(sliceCastData.effectData)); break;
+		case EEffectType::BLUR: edited |= Editor("Effect parameters", *sliceCastData.effectData.blur); break;
+		case EEffectType::REFLECT: edited |= Editor("Effect parameters", *sliceCastData.effectData.reflect); break;
 		}
 	}
 #endif
@@ -364,25 +364,25 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& dat
 		if (ComboEnum("Type", data.type, userDataTypes)) {
 			auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
 
-			managedAllocator.Free(data.value);
+			managedAllocator.Free(data.value.b);
 
 			switch (data.type) {
-			case SRS_DATA::Type::BOOL: data.value = new (&managedAllocator) bool{}; break;
-			case SRS_DATA::Type::INT: data.value = new (&managedAllocator) int{}; break;
-			case SRS_DATA::Type::UINT: data.value = new (&managedAllocator) unsigned int{}; break;
-			case SRS_DATA::Type::FLOAT: data.value = new (&managedAllocator) float{}; break;
-			case SRS_DATA::Type::STRING: data.value = const_cast<char*>(""); break;
+			case SRS_DATA::Type::BOOL: data.value.b = new (&managedAllocator) bool{}; break;
+			case SRS_DATA::Type::INT: data.value.i32 = new (&managedAllocator) int{}; break;
+			case SRS_DATA::Type::UINT: data.value.u32 = new (&managedAllocator) unsigned int{}; break;
+			case SRS_DATA::Type::FLOAT: data.value.f32 = new (&managedAllocator) float{}; break;
+			case SRS_DATA::Type::STRING: data.value.str = ""; break;
 			default: break;
 			}
 		}
 
 		switch (data.type) {
-		case SRS_DATA::Type::BOOL: edited |= Editor("Value", *static_cast<bool*>(data.value)); break;
-		case SRS_DATA::Type::INT: edited |= Editor("Value", *static_cast<int*>(data.value)); break;
-		case SRS_DATA::Type::UINT: edited |= Editor("Value", *static_cast<unsigned int*>(data.value)); break;
-		case SRS_DATA::Type::FLOAT: edited |= Editor("Value", *static_cast<float*>(data.value)); break;
-		case SRS_DATA::Type::STRING: edited |= InputText("Value", const_cast<const char*&>(reinterpret_cast<char*&>(static_cast<void*&>(data.value))), resource); break;
-		default: Viewer("Value", static_cast<void*>(data.value)); break;
+		case SRS_DATA::Type::BOOL: edited |= Editor("Value", *data.value.b); break;
+		case SRS_DATA::Type::INT: edited |= Editor("Value", *data.value.i32); break;
+		case SRS_DATA::Type::UINT: edited |= Editor("Value", *data.value.u32); break;
+		case SRS_DATA::Type::FLOAT: edited |= Editor("Value", *data.value.f32); break;
+		case SRS_DATA::Type::STRING: edited |= InputText("Value", data.value.str, resource); break;
+		default: Viewer("Value", data.value.i32); break;
 		}
 
 		ImGui::TreePop();
@@ -393,14 +393,14 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& dat
 void InitData(hh::fnd::ManagedResource* resource, SRS_DATA& data) {
 	data.name = "New data";
 	data.type = SRS_DATA::Type::STRING;
-	data.value = const_cast<char*>("");
+	data.value.str = "";
 }
 
 void DeinitData(hh::fnd::ManagedResource* resource, SRS_DATA& data) {
 	auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
 
 	managedAllocator.Free(const_cast<char*>(data.name));
-	managedAllocator.Free(data.value);
+	managedAllocator.Free(data.value.i32);
 }
 
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA& userData)

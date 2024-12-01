@@ -6,9 +6,7 @@
 #include <ui/common/editors/SurfRide.h>
 
 namespace ui::operation_modes::modes::surfride_editor::texture_editor {
-	using namespace SurfRide;
-
-    void TextureElementInspector::RenderPanel() {
+	void TextureElementInspector::RenderPanel() {
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		if (selection.size() == 0) {

@@ -11,7 +11,11 @@ bool Editor(const char* label, hh::needle::SupportFX::FxRenderParam& renderParam
 bool Editor(const char* label, hh::needle::PipelineInfo& pipelineInfo);
 bool Editor(const char* label, hh::needle::RenderingPipeline& pipeline);
 bool Editor(const char* label, hh::needle::WorldRenderingPipeline& pipeline);
+#ifdef DEVTOOLS_TARGET_SDK_miller
 bool Editor(const char* label, hh::needle::RenderingPipelineMiller& pipeline);
+#else
+bool Editor(const char* label, hh::needle::RenderingPipelineRangers& pipeline);
+#endif
 bool Editor(const char* label, hh::needle::RenderUnit& renderUnit);
 bool Editor(const char* label, hh::needle::RenderTextureHandle& renderTexture);
 bool Editor(const char* label, hh::needle::MeshResource& meshResource);

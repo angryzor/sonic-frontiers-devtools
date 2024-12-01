@@ -8,8 +8,6 @@
 #include "Context.h"
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace SurfRide;
-
 	template<> struct MousePicking3DRecursiveRaycastBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
 		using ObjectType = SurfRideElement;
@@ -36,7 +34,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 						GetFrustumResultsForCast(cast, frustum, results);
 		}
 
-		void GetFrustumResultsForCast(Cast* cast, const Frustum& frustum, csl::ut::MoveArray<SurfRideElement>& results) {
+		void GetFrustumResultsForCast(SurfRide::Cast* cast, const Frustum& frustum, csl::ut::MoveArray<SurfRideElement>& results) {
 			if (cast->transform->display && frustum.Test(cast->transform->transformationMatrix * Eigen::Vector3f::Zero()))
 				results.push_back({ SurfRideElement::Type::CAST, cast });
 
@@ -44,14 +42,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 				GetFrustumResultsForCast(child, frustum, results);
 		}
 
-		bool Intersects(const Cast* cast, const Ray3f& ray) {
-			switch (static_cast<SRS_CASTNODE::Type>(cast->flags & 0xF)) {
-			case SRS_CASTNODE::Type::IMAGE:
-				if (Intersects(*cast->transform, static_cast<const ImageCast*>(cast)->size, ray))
+		bool Intersects(const SurfRide::Cast* cast, const Ray3f& ray) {
+			switch (static_cast<ucsl::resources::swif::v6::SRS_CASTNODE::Type>(cast->flags & 0xF)) {
+			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::IMAGE:
+				if (Intersects(*cast->transform, static_cast<const SurfRide::ImageCast*>(cast)->size, ray))
 					return cast;
 				break;
-			case SRS_CASTNODE::Type::SLICE:
-				if (Intersects(*cast->transform, static_cast<const SliceCast*>(cast)->size, ray))
+			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::SLICE:
+				if (Intersects(*cast->transform, static_cast<const SurfRide::SliceCast*>(cast)->size, ray))
 					return cast;
 				break;
 			}
@@ -59,9 +57,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-		bool Intersects(const Transform3D& transform, const Vector2& size, const Ray3f& ray) {
+		bool Intersects(const SurfRide::Transform3D& transform, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
 #else
-		bool Intersects(const Transform& transform, const Vector2& size, const Ray3f& ray) {
+		bool Intersects(const SurfRide::Transform& transform, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
 #endif
 			auto halfSize = size / 2.0f;
 
@@ -110,8 +108,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 namespace ui::operation_modes::modes::surfride_editor
 {
-	using namespace SurfRide;
-
 	template<> struct SelectionBehaviorTraits<Context> {
 		using ObjectType = SurfRideElement;
 	};
@@ -135,7 +131,7 @@ namespace ui::operation_modes::modes::surfride_editor
 			return updated;
 		}
 
-		void UpdateAabb(const Eigen::Transform<float, 3, Eigen::Projective>& transform, const SurfRide::Vector2& size, csl::geom::Aabb& aabb)
+		void UpdateAabb(const Eigen::Transform<float, 3, Eigen::Projective>& transform, const ucsl::resources::swif::v6::Vector2& size, csl::geom::Aabb& aabb)
 		{
 			aabb.AddPoint((transform * Eigen::Vector3f{ -size.x() / 2.0f, size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
 			aabb.AddPoint((transform * Eigen::Vector3f{ size.x() / 2.0f, size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
@@ -150,9 +146,9 @@ namespace ui::operation_modes::modes::surfride_editor
 			for (auto* child : cast->GetChildren())
 				updated |= UpdateAabb(child, aabb);
 
-			switch (static_cast<SRS_CASTNODE::Type>(cast->flags & 0xF)) {
-			case SRS_CASTNODE::Type::IMAGE: UpdateAabb(context.GetFullCastTransform(cast), static_cast<const ImageCast*>(cast)->size, aabb); updated |= true; break;
-			case SRS_CASTNODE::Type::SLICE: UpdateAabb(context.GetFullCastTransform(cast), static_cast<const SliceCast*>(cast)->size, aabb); updated |= true; break;
+			switch (static_cast<ucsl::resources::swif::v6::SRS_CASTNODE::Type>(cast->flags & 0xF)) {
+			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::IMAGE: UpdateAabb(context.GetFullCastTransform(cast), static_cast<const SurfRide::ImageCast*>(cast)->size, aabb); updated |= true; break;
+			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::SLICE: UpdateAabb(context.GetFullCastTransform(cast), static_cast<const SurfRide::SliceCast*>(cast)->size, aabb); updated |= true; break;
 			}
 
 			return updated;
@@ -168,7 +164,7 @@ namespace ui::operation_modes::modes::surfride_editor
 		Eigen::Projective3f GetSelectionSpaceTransform(SurfRideElement element) const { return context.GetFullCastTransform(element.cast); }
 		void SetSelectionSpaceTransform(SurfRideElement element, const Eigen::Projective3f& transform) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			auto* cast = static_cast<Cast3D*>(element.cast);
+			auto* cast = static_cast<SurfRide::Cast3D*>(element.cast);
 #else
 			auto* cast = element.cast;
 #endif
@@ -180,7 +176,7 @@ namespace ui::operation_modes::modes::surfride_editor
 #ifdef DEVTOOLS_TARGET_SDK_wars
 			size_t castIndex = cast->index;
 #else
-			size_t castIndex = (reinterpret_cast<size_t>(cast->castData) - reinterpret_cast<size_t>(cast->layer->layerData->casts)) / sizeof(SRS_CASTNODE);
+			size_t castIndex = (reinterpret_cast<size_t>(cast->castData) - reinterpret_cast<size_t>(cast->layer->layerData->casts)) / sizeof(ucsl::resources::swif::v6::SRS_CASTNODE);
 #endif
 			if (cast->layer->flags.test(SurfRide::Layer::Flag::IS_3D))
 				cast->layer->layerData->transforms.transforms3d[castIndex].position = newPos;
@@ -188,8 +184,8 @@ namespace ui::operation_modes::modes::surfride_editor
 				cast->layer->layerData->transforms.transforms2d[castIndex].position = { newPos.x(), newPos.y() };
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			static_cast<SRS_TRS3D*>(cast->transformData)->position = newPos;
-			static_cast<Cast3D*>(cast)->position = newPos;
+			reinterpret_cast<ucsl::resources::swif::v6::SRS_TRS3D*>(cast->transformData)->position = newPos;
+			static_cast<SurfRide::Cast3D*>(cast)->position = newPos;
 #else
 			cast->transform->position = newPos;
 #endif

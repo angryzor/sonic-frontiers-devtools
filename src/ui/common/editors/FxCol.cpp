@@ -8,7 +8,7 @@ using namespace app::gfx;
 const char* collisionShapeShapeNames[] = { "Sphere", "Cylinder", "Anisotropic OBB", "Isotropic OBB" };
 const char* collisionShapeTypeNames[] = { "Scene parameter index" };
 
-bool Editor(const char* label, FxColCollisionShape::SphereExtents& extents) {
+bool Editor(const char* label, FxColCollisionShapeData::SphereExtents& extents) {
 	bool edited{};
 	
 	ImGui::PushID(label);
@@ -18,7 +18,7 @@ bool Editor(const char* label, FxColCollisionShape::SphereExtents& extents) {
 	return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::CylinderExtents& extents) {
+bool Editor(const char* label, FxColCollisionShapeData::CylinderExtents& extents) {
 	bool edited{};
 
 	ImGui::PushID(label);
@@ -30,7 +30,7 @@ bool Editor(const char* label, FxColCollisionShape::CylinderExtents& extents) {
 	return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::AnisotropicObbExtents& extents) {
+bool Editor(const char* label, FxColCollisionShapeData::AnisotropicObbExtents& extents) {
 	bool edited{};
 
 	ImGui::PushID(label);
@@ -45,7 +45,7 @@ bool Editor(const char* label, FxColCollisionShape::AnisotropicObbExtents& exten
 	return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::IsotropicObbExtents& extents) {
+bool Editor(const char* label, FxColCollisionShapeData::IsotropicObbExtents& extents) {
 	bool edited{};
 
 	ImGui::PushID(label);
@@ -58,17 +58,17 @@ bool Editor(const char* label, FxColCollisionShape::IsotropicObbExtents& extents
 	return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::Shape shape, FxColCollisionShape::Extents& extents) {
+bool Editor(const char* label, FxColCollisionShapeData::Shape shape, FxColCollisionShapeData::Extents& extents) {
 	switch (shape) {
-	case FxColCollisionShape::Shape::SPHERE: return Editor(label, extents.sphere);
-	case FxColCollisionShape::Shape::CYLINDER: return Editor(label, extents.cylinder);
-	case FxColCollisionShape::Shape::ANISOTROPIC_OBB: return Editor(label, extents.anisotropicObb);
-	case FxColCollisionShape::Shape::ISOTROPIC_OBB: return Editor(label, extents.isotropicObb);
+	case FxColCollisionShapeData::Shape::SPHERE: return Editor(label, extents.sphere);
+	case FxColCollisionShapeData::Shape::CYLINDER: return Editor(label, extents.cylinder);
+	case FxColCollisionShapeData::Shape::ANISOTROPIC_OBB: return Editor(label, extents.anisotropicObb);
+	case FxColCollisionShapeData::Shape::ISOTROPIC_OBB: return Editor(label, extents.isotropicObb);
 	default: assert(false);  return false;
 	}
 }
 
-bool Editor(const char* label, FxColCollisionShape::SceneParameterIndexParameters& parameters) {
+bool Editor(const char* label, FxColCollisionShapeData::SceneParameterIndexParameters& parameters) {
 	bool edited{};
 
 	ImGui::PushID(label);
@@ -79,7 +79,7 @@ bool Editor(const char* label, FxColCollisionShape::SceneParameterIndexParameter
 	return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::LightParameterIndexParameters& parameters) {
+bool Editor(const char* label, FxColCollisionShapeData::LightParameterIndexParameters& parameters) {
 	bool edited{};
 
 	ImGui::PushID(label);
@@ -89,7 +89,7 @@ bool Editor(const char* label, FxColCollisionShape::LightParameterIndexParameter
 	return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::CameraParameters& parameters) {
+bool Editor(const char* label, FxColCollisionShapeData::CameraParameters& parameters) {
     bool edited{};
 
     ImGui::PushID(label);
@@ -106,7 +106,7 @@ bool Editor(const char* label, FxColCollisionShape::CameraParameters& parameters
     return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::HeatHazeParameters& parameters) {
+bool Editor(const char* label, FxColCollisionShapeData::HeatHazeParameters& parameters) {
     bool edited{};
 
     ImGui::PushID(label);
@@ -117,17 +117,17 @@ bool Editor(const char* label, FxColCollisionShape::HeatHazeParameters& paramete
     return edited;
 }
 
-bool Editor(const char* label, FxColCollisionShape::Type type, FxColCollisionShape::Parameters& parameters) {
+bool Editor(const char* label, FxColCollisionShapeData::Type type, FxColCollisionShapeData::Parameters& parameters) {
 	switch (type) {
-	case FxColCollisionShape::Type::SCENE_PARAMETER_INDEX: return Editor(label, parameters.sceneParameterIndex.sceneParameterIndex);
-	case FxColCollisionShape::Type::LIGHT_PARAMETER_INDEX: return Editor(label, parameters.lightParameterIndex.lightParameterIndex);
-	case FxColCollisionShape::Type::CAMERA: return Editor(label, parameters.camera);
-	case FxColCollisionShape::Type::HEAT_HAZE: return Editor(label, parameters.heatHaze);
+	case FxColCollisionShapeData::Type::SCENE_PARAMETER_INDEX: return Editor(label, parameters.sceneParameterIndex.sceneParameterIndex);
+	case FxColCollisionShapeData::Type::LIGHT_PARAMETER_INDEX: return Editor(label, parameters.lightParameterIndex.lightParameterIndex);
+	case FxColCollisionShapeData::Type::CAMERA: return Editor(label, parameters.camera);
+	case FxColCollisionShapeData::Type::HEAT_HAZE: return Editor(label, parameters.heatHaze);
 	default: assert(false); return false;
 	}
 }
 
-bool Editor(const char* label, FxColCollisionShape& shape, ResFxColFile2* resource) {
+bool Editor(const char* label, FxColCollisionShapeData& shape, ResFxColFile2* resource) {
 	bool edited{};
 
 	if (ImGui::TreeNode(label)) {

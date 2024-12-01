@@ -361,32 +361,32 @@ void MemoryInspector::RenderContents()
 		}
 #endif
 
-		//if (ImGui::BeginTabItem("Free memory")) {
-		//	char totalHeader[20]{};
-		//	char freeHeader[20]{};
-		//	char maxFreeHeader[20]{};
+		if (ImGui::BeginTabItem("Free memory")) {
+			char totalHeader[20]{};
+			char freeHeader[20]{};
+			char maxFreeHeader[20]{};
 
-		//	snprintf(totalHeader, sizeof(totalHeader), "Total (%s)", unitNames[units]);
-		//	snprintf(freeHeader, sizeof(freeHeader), "Free (%s)", unitNames[units]);
-		//	snprintf(maxFreeHeader, sizeof(maxFreeHeader), "Max free (%s)", unitNames[units]);
+			snprintf(totalHeader, sizeof(totalHeader), "Total (%s)", unitNames[units]);
+			snprintf(freeHeader, sizeof(freeHeader), "Free (%s)", unitNames[units]);
+			snprintf(maxFreeHeader, sizeof(maxFreeHeader), "Max free (%s)", unitNames[units]);
 
-		//	if (ImGui::BeginTable("Free memory", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
-		//		ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
-		//		ImGui::TableSetupColumn(totalHeader);
-		//		ImGui::TableSetupColumn(freeHeader);
-		//		ImGui::TableSetupColumn(maxFreeHeader);
-		//		ImGui::TableSetupColumn("Live allocations");
-		//		ImGui::TableSetupColumn("Usage plot (teal = allocated unused memory, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
-		//		ImGui::TableSetupColumn("Activity plot (teal = live allocations, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
-		//		ImGui::TableHeadersRow();
+			if (ImGui::BeginTable("Free memory", 8, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {
+				ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide | ImGuiTableColumnFlags_WidthFixed, 200.0f);
+				ImGui::TableSetupColumn(totalHeader);
+				ImGui::TableSetupColumn(freeHeader);
+				ImGui::TableSetupColumn(maxFreeHeader);
+				ImGui::TableSetupColumn("Live allocations");
+				ImGui::TableSetupColumn("Usage plot (teal = allocated unused memory, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
+				ImGui::TableSetupColumn("Activity plot (teal = live allocations, yellow = used memory)", ImGuiTableColumnFlags_WidthFixed, 400.0f);
+				ImGui::TableHeadersRow();
 
-		//		for (auto& inspector : heapInspectors)
-		//			inspector->RenderHeapInformation();
+				for (auto& inspector : heapInspectors)
+					inspector->RenderHeapInformation();
 
-		//		ImGui::EndTable();
-		//	}
-		//	ImGui::EndTabItem();
-		//}
+				ImGui::EndTable();
+			}
+			ImGui::EndTabItem();
+		}
 
 		if (ImGui::BeginTabItem("Allocation maps")) {
 			if (ImGui::BeginTable("Heap inspectors", 2, ImGuiTableFlags_BordersV | ImGuiTableFlags_BordersOuterH | ImGuiTableFlags_NoBordersInBody | ImGuiTableFlags_Resizable | ImGuiTableFlags_RowBg | ImGuiTableFlags_ScrollX)) {

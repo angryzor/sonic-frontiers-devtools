@@ -3,12 +3,12 @@
 #include <resources/managed-memory/ManagedCArray.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace SurfRide;
+	using namespace ucsl::resources::swif::v6;
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-	csl::math::Matrix44 Context::GetSceneCameraMatrix(const Scene* scene)
+	csl::math::Matrix44 Context::GetSceneCameraMatrix(const SurfRide::Scene* scene)
 	{
-		auto resolution = GetScreenResolution();
+		auto resolution = SurfRide::GetScreenResolution();
 		auto projectionMatrix = csl::math::CreatePerspectiveProjectionMatrix(
 			static_cast<float>(scene->camera.camera.cameraData.fov) * 0.000095873802f,
 			static_cast<float>(resolution.width) / static_cast<float>(resolution.height),
@@ -18,7 +18,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return projectionMatrix * scene->camera.viewMatrix;
 	}
 #else
-	csl::math::Matrix44 Context::GetSceneCameraMatrix(const Scene* scene)
+	csl::math::Matrix44 Context::GetSceneCameraMatrix(const SurfRide::Scene* scene)
 	{
 		return scene->camera.projectionMatrix * scene->camera.viewMatrix;
 	}
@@ -29,11 +29,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return GetSceneCameraMatrix(focusedScene);
 	}
 
-	csl::math::Matrix44 Context::GetFullCastTransform(const Cast* cast) {
+	csl::math::Matrix44 Context::GetFullCastTransform(const SurfRide::Cast* cast) {
 		return GetSceneCameraMatrix(cast->layer->scene) * cast->transform->transformationMatrix;
 	}
 
-	void Context::CreateImageCast(Cast* sibling)
+	void Context::CreateImageCast(SurfRide::Cast* sibling)
 	{
 		auto* layer = sibling->layer;
 		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(gocSprite->projectResource);
@@ -55,18 +55,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 		newNode.name = "img_newcast";
 		newNode.id = static_cast<int>(mt());
 		newNode.flags = 0x750;
-		newNode.data = imageCast;
+		newNode.data.image = imageCast;
 		newNode.SetType(SRS_CASTNODE::Type::IMAGE);
 
 		casts.push_back(std::move(newNode));
 
 		for (int i = 0; i < prevSize; i++)
-			layer->casts[i]->castData = &layer->layerData->casts[i];
+			layer->casts[i]->castData = (SurfRide::SRS_CASTNODE*)&layer->layerData->casts[i];
 
 		auto* p{ sibling->castData };
 
 		while (p->siblingIndex != -1)
-			p = &layer->layerData->casts[p->siblingIndex];
+			p = (SurfRide::SRS_CASTNODE*)&layer->layerData->casts[p->siblingIndex];
 
 		p->siblingIndex = static_cast<short>(prevSize);
 
@@ -76,12 +76,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 		transforms[transforms.size() - 1].display = true;
 	}
 
-	void Context::AddImageCast(Layer* layer)
+	void Context::AddImageCast(SurfRide::Layer* layer)
 	{
 		CreateImageCast(*layer->GetCasts().begin());
 	}
 
-	void Context::AddImageCast(Cast* parent) {
+	void Context::AddImageCast(SurfRide::Cast* parent) {
 		CreateImageCast(*parent->GetChildren().begin());
 	}
 }

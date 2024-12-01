@@ -102,7 +102,7 @@ namespace ui::operation_modes::modes::level_editor {
 		static constexpr bool Projective = false;
 		bool HasTransform(ObjectData* obj) { return true; }
 		bool IsRoot(ObjectData* obj) { return !obj->parentID.IsNonNull(); }
-		ObjectData* GetParent(ObjectData* obj) { return context.GetFocusedChunk()->GetWorldObjectStatusByIndex(context.GetFocusedChunk()->GetObjectIndexByObjectData(obj)).objectData; }
+		ObjectData* GetParent(ObjectData* obj) { return context.GetFocusedChunk()->GetWorldObjectStatusByObjectId(obj->parentID).objectData; }
 		Eigen::Affine3f GetSelectionSpaceTransform(ObjectData* obj) const { return ObjectTransformDataToAffine3f(obj->transform); }
 		void SetSelectionSpaceTransform(ObjectData* obj, const Eigen::Affine3f& transform) {
 			UpdateAbsoluteTransform(transform, *obj);

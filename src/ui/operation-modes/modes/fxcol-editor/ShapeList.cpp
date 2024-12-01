@@ -1,8 +1,8 @@
 #include "ShapeList.h"
 #include "Behaviors.h"
 #include <ui/GlobalSettings.h>
-#include <io/binary/containers/binary-file/BinaryFile.h>
-#include <io/binary/serialization/resource-rfls/ResFxColFile2.h>
+#include <ucsl-reflection/reflections/resources/fxcol/v1.h>
+#include <rip/binary/containers/binary-file/BinaryFile.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
 	using namespace app::gfx;
@@ -32,12 +32,12 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 		if (ImGuiFileDialog::Instance()->Display("ResFxColFile2ExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
-				auto* exportData = static_cast<app::gfx::FxColData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+				auto* exportData = static_cast<ucsl::resources::fxcol::v1::FxColData*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-				std::string filePath = ImGuiFileDialog::Instance()->GetFilePathName();
-				std::wstring wFilePath(filePath.begin(), filePath.end());
-
-				devtools::io::binary::containers::BinaryFile::Serialize(wFilePath.c_str(), exportData, &hh::fnd::RflClassTraits<app::gfx::FxColData>::rflClass);
+				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+				rip::binary::binary_ostream bofs{ ofs };
+				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportData);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
@@ -122,7 +122,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		return PanelTraits{ "Shape List", ImVec2(0, 0), ImVec2(250, ImGui::GetMainViewport()->WorkSize.y - 100) };
 	}
 
-	void ShapeList::RenderShapeItem(FxColCollisionShape& shape)
+	void ShapeList::RenderShapeItem(FxColCollisionShapeData& shape)
 	{
 		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 

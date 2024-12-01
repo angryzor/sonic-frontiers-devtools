@@ -69,7 +69,11 @@ void ResReflectionEditor::RenderContents() {
 
 		ImGui::InputText("Search", searchStr, 200);
 		for (auto* rflc : RflClassNameRegistry::GetInstance()->GetItems()) {
+#ifdef DEVTOOLS_TARGET_SDK_miller
 			auto resSize = resource->GetSize() - 0x10;
+#else
+			auto resSize = resource->GetSize();
+#endif
 			auto rflSize = rflc->GetSize();
 
 			if ((resSize == rflSize || resSize == ((rflSize + 0xFF) & ~0xFF)) && (strlen(searchStr) == 0 || strstr(rflc->GetName(), searchStr)))

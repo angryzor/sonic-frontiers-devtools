@@ -7,9 +7,6 @@
 [submodule "rangers-sdk"]
 	path = sdks/rangers-sdk
 	url = https://github.com/angryzor/rangers-sdk.git
-[submodule "vendor/hedgelib/HedgeLib"]
-	path = vendor/hedgelib/HedgeLib
-	url = https://github.com/Radfordhound/HedgeLib.git
 [submodule "vendor/imgui/imgui"]
 	path = vendor/imgui/imgui
 	url = https://github.com/ocornut/imgui.git
@@ -25,18 +22,9 @@
 [submodule "sdks/wars-sdk"]
 	path = sdks/wars-sdk
 	url = https://github.com/angryzor/wars-sdk.git
-[submodule "vendor/eigen/eigen"]
-	path = vendor/eigen/eigen
-	url = https://gitlab.com/libeigen/eigen.git
 [submodule "vendor/imgui-node-editor/imgui-node-editor"]
 	path = vendor/imgui-node-editor/imgui-node-editor
 	url = https://github.com/thedmd/imgui-node-editor.git
-[submodule "vendor/ogdf/ogdf"]
-	path = vendor/ogdf/ogdf
-	url = https://github.com/ogdf/ogdf.git
 [submodule "vendor/imgui_club/imgui_club"]
 	path = vendor/imgui_club/imgui_club
 	url = https://github.com/ocornut/imgui_club.git
-[submodule "vendor/rip/rip"]
-	path = vendor/rip/rip
-	url = https://github.com/angryzor/rip.git

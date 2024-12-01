@@ -9,6 +9,6 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
-		void RenderShapeItem(app::gfx::FxColCollisionShape& shape);
+		void RenderShapeItem(app::gfx::FxColCollisionShapeData& shape);
 	};
 }

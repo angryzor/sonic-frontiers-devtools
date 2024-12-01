@@ -93,7 +93,7 @@ void ResourceBrowser::RenderContents() {
 
 	for (size_t i = 0; i < currentPath.size(); i++) {
 		ImGui::SameLine();
-		if (ImGui::Button(currentPath[i]->name2.c_str()))
+		if (ImGui::Button(currentPath[i]->GetName()))
 			for (size_t j = currentPath.size() - 1; i < j; j--)
 				currentPath.remove(j);
 	}
@@ -107,7 +107,13 @@ void ResourceBrowser::RenderMainArea() {
 	if (currentPath.size() == 0) {
 		auto* resourceManager = ResourceManager::GetInstance();
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
 		RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
+#else
+		for (auto* container : resourceManager->GetResourceContainers()) {
+			RenderContainerContents(container);
+		}
+#endif
 	}
 	else {
 		for (auto* container : currentPath[currentPath.size() - 1]->GetResourceContainers()) {
@@ -142,7 +148,7 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 1.0f));
 
-	if (ImGui::Selectable(resource->name2.c_str(), selectedResource == resource, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 100 + ImGui::GetFontSize()))) {
+	if (ImGui::Selectable(resource->GetName(), selectedResource == resource, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 100 + ImGui::GetFontSize()))) {
 		if (ImGui::IsMouseDoubleClicked(0)) {
 			const ResourceTypeInfo* typeInfo = &resource->GetClass();
 
@@ -179,7 +185,7 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 
 	if (ImGui::BeginItemTooltip()) {
 		ImGui::PushTextWrapPos(300);
-		ImGui::Text("Name: %s", resource->name2.c_str());
+		ImGui::Text("Name: %s", resource->GetName());
 		ImGui::Text("Type: %s", resource->GetClass().pName);
 		RenderDetails(resource);
 		ImGui::PopTextWrapPos();

@@ -163,7 +163,7 @@ namespace ui::operation_modes::modes::object_inspection {
 			auto focusedObject = selection[0];
 			ImGui::Text("Object name: %s", focusedObject->name.c_str());
 			ImGui::Text("Layer: %d", focusedObject->layer);
-			ImGui::Text("Class: %s", focusedObject->objectClass ? focusedObject->objectClass->name : "<none>");
+			ImGui::Text("Class: %s", focusedObject->objectClass ? focusedObject->objectClass->GetName() : "<none>");
 			ImGui::Separator();
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Properties")) {
