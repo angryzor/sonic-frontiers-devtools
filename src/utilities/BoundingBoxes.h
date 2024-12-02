@@ -9,3 +9,7 @@ csl::geom::Aabb Union(const csl::geom::Aabb& one, const csl::geom::Aabb& other);
 csl::geom::Aabb CalcAabb(const csl::geom::Sphere& sphere);
 csl::geom::Aabb CalcAabb(const csl::geom::Cylinder& sphere);
 csl::geom::Aabb CalcAabb(const csl::geom::Obb& sphere);
+csl::geom::Aabb CalcAabb(const hh::physics::GOCSphereCollider& coll);
+csl::geom::Aabb CalcAabb(const hh::physics::GOCBoxCollider& coll);
+csl::geom::Aabb CalcAabb(const hh::physics::GOCCylinderCollider& coll);
+csl::geom::Aabb CalcAabb(const hh::physics::GOCCapsuleCollider& coll);

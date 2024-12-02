@@ -1,6 +1,7 @@
 #include "ToolBar.h"
 #include <debug-rendering/GOCVisualDebugDrawRenderer.h>
 #include <rip/schemas/hedgeset.h>
+#include <ui/common/Editors/Basic.h>
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include "GlobalSettings.h"
@@ -188,11 +189,38 @@ void ToolBar::Render() {
 		bool tempDebugCameraLocked{ debugCameraLocked };
 
 		ImGui::Checkbox("Lock debug camera position", &tempDebugCameraLocked);
+		ImGui::SameLine();
 
 		if (debugCameraLocked != tempDebugCameraLocked)
 			debugCameraMgr->GetCamera()->SetLocked(tempDebugCameraLocked);
 
+		static bool showCameraInfo{};
+		ImGui::Checkbox("Show camera information", &showCameraInfo);
 		ImGui::SameLine();
+
+		if (showCameraInfo) {
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			auto& camCtrl = *((hh::game::FreeCameraController*)&*debugCameraMgr->GetCamera()->controller);
+#else
+			auto& camCtrl = *((hh::game::DefaultFreeCameraController*)&*debugCameraMgr->GetCamera()->controller)->padController;
+#endif
+			if (ImGui::Begin("Debug camera options")) {
+				Editor("Origin / reset position", camCtrl.unk3.camera.origin);
+				Editor("Position offset", camCtrl.unk3.camera.position);
+				Editor("Yaw", camCtrl.unk3.camera.yaw);
+				Editor("Pitch", camCtrl.unk3.camera.pitch);
+				Editor("Roll", camCtrl.unk3.camera.roll);
+				Editor("Zoom", camCtrl.unk3.camera.zoom);
+				Editor("Near clip", camCtrl.unk3.viewport.nearClip);
+				Editor("Far clip", camCtrl.unk3.viewport.farClip);
+				Editor("Field of view", camCtrl.unk3.viewport.fov);
+				ImGui::Separator();
+				Editor("Current speed", camCtrl.currentSpeed);
+				Editor("Speed options", camCtrl.speedOptions);
+				Editor("Current speed option index", camCtrl.currentSpeedOptionIdx);
+			}
+			ImGui::End();
+		}
 	}
 
 	ImGui::Checkbox("Render debug visuals", &GOCVisualDebugDrawRenderer::instance->enabled);

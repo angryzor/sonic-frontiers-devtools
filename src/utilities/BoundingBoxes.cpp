@@ -2,12 +2,7 @@
 
 bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 	if (auto* visual = object->GetComponent<hh::gfx::GOCVisualTransformed>()) {
-		aabb.min.x() = std::fminf(aabb.min.x(), visual->transformedAabb.min.x());
-		aabb.min.y() = std::fminf(aabb.min.y(), visual->transformedAabb.min.y());
-		aabb.min.z() = std::fminf(aabb.min.z(), visual->transformedAabb.min.z());
-		aabb.max.x() = std::fmaxf(aabb.max.x(), visual->transformedAabb.max.x());
-		aabb.max.y() = std::fmaxf(aabb.max.y(), visual->transformedAabb.max.y());
-		aabb.max.z() = std::fmaxf(aabb.max.z(), visual->transformedAabb.max.z());
+		AddAabb(aabb, visual->transformedAabb);
 		return true;
 	}
 
@@ -16,9 +11,25 @@ bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 
 	for (auto* component : object->components) {
 		if (component->pStaticClass == hh::physics::GOCSphereCollider::GetClass()) {
-			auto* coll = static_cast<hh::physics::GOCSphereCollider*>(component);
-			tempAabb.min = coll->GetWorldTransform() * Eigen::Vector3f{ -coll->radius, -coll->radius, -coll->radius };
-			tempAabb.max = coll->GetWorldTransform() * Eigen::Vector3f{ coll->radius, coll->radius, coll->radius };
+			tempAabb = CalcAabb(*static_cast<hh::physics::GOCSphereCollider*>(component));
+			colliderCount++;
+			if (colliderCount > 1)
+				break;
+		}
+		if (component->pStaticClass == hh::physics::GOCBoxCollider::GetClass()) {
+			tempAabb = CalcAabb(*static_cast<hh::physics::GOCBoxCollider*>(component));
+			colliderCount++;
+			if (colliderCount > 1)
+				break;
+		}
+		if (component->pStaticClass == hh::physics::GOCCylinderCollider::GetClass()) {
+			tempAabb = CalcAabb(*static_cast<hh::physics::GOCCylinderCollider*>(component));
+			colliderCount++;
+			if (colliderCount > 1)
+				break;
+		}
+		if (component->pStaticClass == hh::physics::GOCCapsuleCollider::GetClass()) {
+			tempAabb = CalcAabb(*static_cast<hh::physics::GOCCapsuleCollider*>(component));
 			colliderCount++;
 			if (colliderCount > 1)
 				break;
@@ -26,22 +37,12 @@ bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 	}
 
 	if (colliderCount == 1) {
-		aabb.min.x() = std::fminf(aabb.min.x(), tempAabb.min.x());
-		aabb.min.y() = std::fminf(aabb.min.y(), tempAabb.min.y());
-		aabb.min.z() = std::fminf(aabb.min.z(), tempAabb.min.z());
-		aabb.max.x() = std::fmaxf(aabb.max.x(), tempAabb.max.x());
-		aabb.max.y() = std::fmaxf(aabb.max.y(), tempAabb.max.y());
-		aabb.max.z() = std::fmaxf(aabb.max.z(), tempAabb.max.z());
+		AddAabb(aabb, tempAabb);
 		return true;
 	}
 		
 	if (auto* gocTransform = object->GetComponent<hh::game::GOCTransform>()) {
-		aabb.min.x() = std::fminf(aabb.min.x(), gocTransform->GetFrame().fullTransform.position.x());
-		aabb.min.y() = std::fminf(aabb.min.y(), gocTransform->GetFrame().fullTransform.position.y());
-		aabb.min.z() = std::fminf(aabb.min.z(), gocTransform->GetFrame().fullTransform.position.z());
-		aabb.max.x() = std::fmaxf(aabb.max.x(), gocTransform->GetFrame().fullTransform.position.x());
-		aabb.max.y() = std::fmaxf(aabb.max.y(), gocTransform->GetFrame().fullTransform.position.y());
-		aabb.max.z() = std::fmaxf(aabb.max.z(), gocTransform->GetFrame().fullTransform.position.z());
+		aabb.AddPoint(gocTransform->GetFrame().fullTransform.position);
 		return true;
 	}
 
@@ -49,12 +50,7 @@ bool AddToAabb(hh::game::GameObject* object, csl::geom::Aabb& aabb) {
 }
 
 bool AddToAabb(hh::game::ObjectData* objectData, csl::geom::Aabb& aabb) {
-	aabb.min.x() = std::fminf(aabb.min.x(), objectData->transform.position.x());
-	aabb.min.y() = std::fminf(aabb.min.y(), objectData->transform.position.y());
-	aabb.min.z() = std::fminf(aabb.min.z(), objectData->transform.position.z());
-	aabb.max.x() = std::fmaxf(aabb.max.x(), objectData->transform.position.x());
-	aabb.max.y() = std::fmaxf(aabb.max.y(), objectData->transform.position.y());
-	aabb.max.z() = std::fmaxf(aabb.max.z(), objectData->transform.position.z());
+	aabb.AddPoint(objectData->transform.position);
 	return true;
 }
 
@@ -130,6 +126,89 @@ csl::geom::Aabb CalcAabb(const csl::geom::Obb& obb)
 		obb.min + obb.extentX + obb.extentZ,
 		obb.min + obb.extentY + obb.extentZ,
 		obb.min + obb.extentX + obb.extentY + obb.extentZ,
+	};
+
+	csl::geom::Aabb res{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
+
+	for (size_t i = 0; i < 8; i++)
+		res.AddPoint(corners[i]);
+
+	return res;
+}
+
+csl::geom::Aabb CalcAabb(const hh::physics::GOCSphereCollider& coll) {
+	auto tf = coll.GetWorldTransform();
+
+	Eigen::Matrix3f rot;
+	Eigen::Matrix3f scale;
+
+	tf.computeRotationScaling(&rot, &scale);
+
+	Eigen::Affine3f transform{};
+	transform.fromPositionOrientationScale(tf.translation(), Eigen::Quaternionf::Identity(), scale.diagonal());
+
+	return {
+		transform * Eigen::Vector3f{ -coll.radius, -coll.radius, -coll.radius },
+		transform * Eigen::Vector3f{ coll.radius, coll.radius, coll.radius },
+	};
+}
+
+csl::geom::Aabb CalcAabb(const hh::physics::GOCBoxCollider& coll) {
+	auto tf = coll.GetWorldTransform();
+
+	csl::math::Vector3 corners[8]{
+		tf * csl::math::Vector3{ -coll.dimensions.x(), -coll.dimensions.y(), -coll.dimensions.z() },
+		tf * csl::math::Vector3{ -coll.dimensions.x(), -coll.dimensions.y(), coll.dimensions.z() },
+		tf * csl::math::Vector3{ -coll.dimensions.x(), coll.dimensions.y(), -coll.dimensions.z() },
+		tf * csl::math::Vector3{ coll.dimensions.x(), -coll.dimensions.y(), -coll.dimensions.z() },
+		tf * csl::math::Vector3{ coll.dimensions.x(), coll.dimensions.y(), -coll.dimensions.z() },
+		tf * csl::math::Vector3{ coll.dimensions.x(), -coll.dimensions.y(), coll.dimensions.z() },
+		tf * csl::math::Vector3{ -coll.dimensions.x(), coll.dimensions.y(), coll.dimensions.z() },
+		tf * csl::math::Vector3{ coll.dimensions.x(), coll.dimensions.y(), coll.dimensions.z() },
+	};
+
+	csl::geom::Aabb res{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
+
+	for (size_t i = 0; i < 8; i++)
+		res.AddPoint(corners[i]);
+
+	return res;
+}
+
+csl::geom::Aabb CalcAabb(const hh::physics::GOCCylinderCollider& coll) {
+	auto tf = coll.GetWorldTransform();
+
+	csl::math::Vector3 corners[8]{
+		tf * csl::math::Vector3{ -coll.radius, -coll.halfHeight, -coll.radius },
+		tf * csl::math::Vector3{ -coll.radius, -coll.halfHeight, coll.radius },
+		tf * csl::math::Vector3{ -coll.radius, coll.halfHeight, -coll.radius },
+		tf * csl::math::Vector3{ coll.radius, -coll.halfHeight, -coll.radius },
+		tf * csl::math::Vector3{ coll.radius, coll.halfHeight, -coll.radius },
+		tf * csl::math::Vector3{ coll.radius, -coll.halfHeight, coll.radius },
+		tf * csl::math::Vector3{ -coll.radius, coll.halfHeight, coll.radius },
+		tf * csl::math::Vector3{ coll.radius, coll.halfHeight, coll.radius },
+	};
+
+	csl::geom::Aabb res{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
+
+	for (size_t i = 0; i < 8; i++)
+		res.AddPoint(corners[i]);
+
+	return res;
+}
+
+csl::geom::Aabb CalcAabb(const hh::physics::GOCCapsuleCollider& coll) {
+	auto tf = coll.GetWorldTransform();
+
+	csl::math::Vector3 corners[8]{
+		tf * csl::math::Vector3{ -coll.radius, -(coll.halfHeight + coll.radius), -coll.radius },
+		tf * csl::math::Vector3{ -coll.radius, -(coll.halfHeight + coll.radius), coll.radius },
+		tf * csl::math::Vector3{ -coll.radius, (coll.halfHeight + coll.radius), -coll.radius },
+		tf * csl::math::Vector3{ coll.radius, -(coll.halfHeight + coll.radius), -coll.radius },
+		tf * csl::math::Vector3{ coll.radius, (coll.halfHeight + coll.radius), -coll.radius },
+		tf * csl::math::Vector3{ coll.radius, -(coll.halfHeight + coll.radius), coll.radius },
+		tf * csl::math::Vector3{ -coll.radius, (coll.halfHeight + coll.radius), coll.radius },
+		tf * csl::math::Vector3{ coll.radius, (coll.halfHeight + coll.radius), coll.radius },
 	};
 
 	csl::geom::Aabb res{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
