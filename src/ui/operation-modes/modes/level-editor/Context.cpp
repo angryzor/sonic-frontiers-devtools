@@ -146,10 +146,10 @@ namespace ui::operation_modes::modes::level_editor {
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		// FIXME: We're leaking memory here because the string does not get freed.
 		auto name = new char[100];
-		snprintf(name, 100, "%s_%d", gameObjectClass->GetSpawnerDataClass(), mt() % 0x1000000);
+		snprintf(name, 100, "%s_%d", gameObjectClass->GetName(), mt() % 0x1000000);
 #else
 		char name[100];
-		snprintf(name, 100, "%s_%zd", gameObjectClass->GetSpawnerDataClass(), mt() % 0x1000000);
+		snprintf(name, 100, "%s_%zd", gameObjectClass->GetName(), mt() % 0x1000000);
 #endif
 
 		auto* objData = new (allocator) ObjectData{

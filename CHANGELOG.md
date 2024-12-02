@@ -1,3 +1,7 @@
+# v0.1.57
+* Fixed a bug in object placement introduced in the previous version.
+
+
 # v0.1.56
 * Integrated DevTools with `rip`.
 * Fixed a bug where selecting parented objects didn't work properly in the level editor.
