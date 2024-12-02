@@ -33,21 +33,10 @@ void RenderComponentInspector(hh::physics::GOCCollider& component)
 	Viewer("Transformed world position", component.transformedWorldPosition);
 #endif
 
-	if (component.frame) {
-		ImGui::SeparatorText("HFrame 1 local transform");
-		Viewer("HFrameTransformLocal", component.frame->localTransform);
-
-		ImGui::SeparatorText("HFrame 1 full transform");
-		Viewer("HFrameTransformFull", component.frame->fullTransform);
-	}
-
-	if (component.frame2) {
-		ImGui::SeparatorText("HFrame 2 local transform");
-		Viewer("HFrameTransformLocal", component.frame2->localTransform);
-
-		ImGui::SeparatorText("HFrame 2 full transform");
-		Viewer("HFrameTransformFull", component.frame2->fullTransform);
-	}
+	if (component.frame)
+		Viewer("HFrame 1", *component.frame);
+	if (component.frame2)
+		Viewer("HFrame 2", *component.frame2);
 }
 
 void RenderComponentInspector(hh::physics::GOCSphereCollider& component)

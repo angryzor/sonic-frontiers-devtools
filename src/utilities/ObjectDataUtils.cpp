@@ -1,6 +1,7 @@
 #include "Pch.h"
 #include "ObjectDataUtils.h"
 #include <utilities/math/MathUtils.h>
+#include <utilities/GameObjectUtils.h>
 
 hh::game::ObjectTransformData Affine3fToObjectTransformData(const Eigen::Affine3f& transform) {
 	Eigen::Matrix3f absoluteRotation;
@@ -71,4 +72,6 @@ void UpdateGOCTransform(hh::game::ObjectData& objData, hh::game::GOCTransform& g
 		gocTransform.SetLocalTransform({ objData.localTransform.position, EulerToQuat(objData.localTransform.rotation), csl::math::Vector3{ 1.0f, 1.0f, 1.0f } });
 	else
 		gocTransform.SetLocalTransform({ objData.transform.position, EulerToQuat(objData.transform.rotation), csl::math::Vector3{ 1.0f, 1.0f, 1.0f } });
+
+	EnsureGOCTransformIsUpdating(gocTransform);
 }

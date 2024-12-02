@@ -1,3 +1,13 @@
+# v0.1.59
+* Added toggles for position and rotation inheritance in `GOCTransform` inspector.
+
+## Shadow Generations
+* Ported `Update configuration` panel in object inspection mode.
+* Moving an object now enables `GOCTransform`'s `PRE_ANIM` update flag.
+  This makes it possible to move static objects that turn `GOCTransform` updates off
+  because they don't expect to be moving.
+
+
 # v0.1.58
 * Added panel that allows direct editing of debug camera parameters.
 * Selection box now also works for box, cylinder and capsule colliders.

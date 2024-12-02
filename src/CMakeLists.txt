@@ -49,6 +49,7 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/math/Frustum.cpp
         utilities/math/MathUtils.cpp
         utilities/ObjectDataUtils.cpp
+        utilities/GameObjectUtils.cpp
         utilities/ResourceTypes.cpp
         utilities/CompatibleObject.cpp
     PRIVATE FILE_SET HEADERS FILES
@@ -117,6 +118,7 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/math/Frustum.h
         utilities/math/Ray.h
         utilities/ObjectDataUtils.h
+        utilities/GameObjectUtils.h
         utilities/ResourceTypes.h
         utilities/CompatibleObject.h
         utilities/NameHash.h

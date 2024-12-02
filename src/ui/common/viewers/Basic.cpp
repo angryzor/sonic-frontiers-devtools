@@ -107,3 +107,16 @@ void Viewer(const char* label, const ucsl::colors::Colorf& color)
 {
 	ImGui::Text("%s: R: %f, G: %f, B: %f, A: %f", color.r, color.g, color.b, color.a);
 }
+
+void Viewer(const char* label, const hh::fnd::HFrame& frame)
+{
+	if (ImGui::TreeNode(label)) {
+		Viewer("Transform position", frame.flags.test(hh::fnd::HFrame::Flag::TRANSFORM_POSITION));
+		Viewer("Transform rotation", frame.flags.test(hh::fnd::HFrame::Flag::TRANSFORM_ROTATION));
+		ImGui::SeparatorText("HFrame local transform");
+		Viewer("HFrameTransformLocal", frame.localTransform);
+		ImGui::SeparatorText("HFrame full transform");
+		Viewer("HFrameTransformFull", frame.fullTransform);
+		ImGui::TreePop();
+	}
+}

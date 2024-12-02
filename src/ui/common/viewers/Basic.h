@@ -51,6 +51,7 @@ void Viewer(const char* label, const csl::math::Transform& transform);
 void Viewer(const char* label, hh::game::GameObject* const& gameObject);
 void Viewer(const char* label, const ucsl::colors::Color8& color);
 void Viewer(const char* label, const ucsl::colors::Colorf& color);
+void Viewer(const char* label, const hh::fnd::HFrame& frame);
 
 bool BeginVectorViewerTable(const char* id, bool withWAxis);
 void EndVectorViewerTable();

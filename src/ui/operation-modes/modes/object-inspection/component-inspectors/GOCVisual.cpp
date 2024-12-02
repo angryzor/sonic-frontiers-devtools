@@ -27,22 +27,11 @@ void RenderComponentInspector(hh::gfx::GOCVisualTransformed& component) {
 	ImGui::SeparatorText("World matrix");
 	if (Editor("World matrix", worldMatrix))
 		component.SetWorldMatrix(worldMatrix);
-
-	if (component.frame2) {
-		ImGui::SeparatorText("Calculated HFrame local transform");
-		Viewer("CalculatedHFrameTransformLocal", component.frame2->localTransform);
-
-		ImGui::SeparatorText("Calculated HFrame full transform");
-		Viewer("CalculatedHFrameTransformFull", component.frame2->fullTransform);
-	}
-
-	if (component.frame1) {
-		ImGui::SeparatorText("Offset HFrame local transform");
-		Viewer("OffsetHFrameTransformLocal", component.frame1->localTransform);
-
-		ImGui::SeparatorText("Offset HFrame full transform");
-		Viewer("OffsetHFrameTransformFull", component.frame1->fullTransform);
-	}
+	
+	if (component.frame2)
+		Viewer("Calculated HFrame", *component.frame2);
+	if (component.frame1)
+		Viewer("Offset HFrame", *component.frame1);
 
 	// custom AABB
 }

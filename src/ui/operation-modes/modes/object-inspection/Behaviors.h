@@ -1,6 +1,7 @@
 #pragma once
 #include <utilities/BoundingBoxes.h>
 #include <utilities/math/MathUtils.h>
+#include <utilities/GameObjectUtils.h>
 #include <ui/operation-modes/OperationMode.h>
 #include <ui/operation-modes/behaviors/ForwardDeclarations.h>
 #include "Context.h"
@@ -68,6 +69,7 @@ namespace ui::operation_modes::modes::object_inspection {
 			auto localTransform = TransformToAffine3f(gocTransform->GetTransform());
 
 			gocTransform->SetLocalTransform(Affine3fToTransform(localTransform * absoluteTransform.inverse() * transform));
+			EnsureGOCTransformIsUpdating(*gocTransform);
 		}
 	};
 

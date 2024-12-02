@@ -5,6 +5,7 @@
 #include <ui/common/inputs/Basic.h>
 #include <utilities/math/EulerTransform.h>
 #include <utilities/math/MathUtils.h>
+#include <utilities/GameObjectUtils.h>
 #include <imgui_internal.h>
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
@@ -187,7 +188,7 @@ namespace ui::operation_modes::modes::object_inspection {
 					GameObjectIterator<>::Render(*focusedObject);
 					ImGui::EndTabItem();
 				}
-#ifdef DEVTOOLS_TARGET_SDK_rangers
+#ifndef DEVTOOLS_TARGET_SDK_wars
 				if (ImGui::BeginTabItem("Update configuration")) {
 					if (ImGui::BeginChild("Content")) {
 						CheckboxFlags("Asleep", focusedObject->statusFlags, GameObject::StatusFlags::ASLEEP);
@@ -225,52 +226,16 @@ namespace ui::operation_modes::modes::object_inspection {
 								//ImGui::BeginDisabled();
 								ImGui::BeginGroup();
 								CheckboxFlags("PreAnim", component->updateFlags, UpdatingPhase::PRE_ANIM);
-								if (ImGui::IsItemDeactivatedAfterEdit()) {
-									if (component->updateFlags.test(UpdatingPhase::PRE_ANIM)) {
-										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
-										if (it == -1)
-											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].push_back(component);
-									}
-									else {
-										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].find(component);
-										if (it != -1)
-											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::PRE_ANIM)].remove(it);
-									}
-									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::PRE_ANIM);
-									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::PRE_ANIM);
-								}
+								if (ImGui::IsItemDeactivatedAfterEdit())
+									ApplyComponentUpdateFlag(*component, UpdatingPhase::PRE_ANIM);
 								ImGui::SameLine();
 								CheckboxFlags("PostAnim", component->updateFlags, UpdatingPhase::POST_ANIM);
-								if (ImGui::IsItemDeactivatedAfterEdit()) {
-									if (component->updateFlags.test(UpdatingPhase::POST_ANIM)) {
-										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
-										if (it == -1)
-											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].push_back(component);
-									}
-									else {
-										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].find(component);
-										if (it != -1)
-											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::POST_ANIM)].remove(it);
-									}
-									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::POST_ANIM);
-									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::POST_ANIM);
-								}
+								if (ImGui::IsItemDeactivatedAfterEdit())
+									ApplyComponentUpdateFlag(*component, UpdatingPhase::POST_ANIM);
 								ImGui::SameLine();
 								CheckboxFlags("Final", component->updateFlags, UpdatingPhase::FINAL);
-								if (ImGui::IsItemDeactivatedAfterEdit()) {
-									if (component->updateFlags.test(UpdatingPhase::FINAL)) {
-										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
-										if (it == -1)
-											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].push_back(component);
-									}
-									else {
-										auto it = focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].find(component);
-										if (it != -1)
-											focusedObject->componentsByUpdatingPhase[static_cast<size_t>(UpdatingPhase::FINAL)].remove(it);
-									}
-									focusedObject->UNSAFE_SetComponentLengths(UpdatingPhase::FINAL);
-									focusedObject->UNSAFE_SetUpdateFlags(UpdatingPhase::FINAL);
-								}
+								if (ImGui::IsItemDeactivatedAfterEdit())
+									ApplyComponentUpdateFlag(*component, UpdatingPhase::FINAL);
 								ImGui::EndGroup();
 								//ImGui::EndDisabled();
 								ImGui::Text("Update priorities:");
