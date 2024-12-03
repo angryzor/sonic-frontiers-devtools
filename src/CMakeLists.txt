@@ -44,6 +44,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
         ui/tools/RflComparer.cpp
+        ui/tools/MemoryViewer.cpp
         utilities/BoundingBoxes.cpp
         utilities/math/EulerTransform.cpp
         utilities/math/Frustum.cpp
@@ -111,6 +112,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Shortcuts.h
         ui/ToolBar.h
         ui/tools/RflComparer.h
+        ui/tools/MemoryViewer.h
         utilities/BoundingBoxes.h
         utilities/Helpers.h
         utilities/math/EulerTransform.h

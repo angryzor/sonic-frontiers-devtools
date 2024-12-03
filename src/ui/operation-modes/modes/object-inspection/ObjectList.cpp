@@ -1,6 +1,7 @@
 #include "ObjectList.h"
 #include "Behaviors.h"
 #include <ui/common/Icons.h>
+#include <ui/tools/MemoryViewer.h>
 #include <utilities/math/MathUtils.h>
 
 namespace ui::operation_modes::modes::object_inspection {
@@ -15,6 +16,8 @@ namespace ui::operation_modes::modes::object_inspection {
 		if (selectionBehavior->GetSelection().find(obj) != -1)
 			nodeflags |= ImGuiTreeNodeFlags_Selected;
 
+		ImGui::PushID(obj);
+
 		auto* transform = obj->GetComponent<GOCTransform>();
 
 		if (transform && transform->GetChildren().size() > 0) {// || obj->GetChildren().size() > 0) {
@@ -22,6 +25,12 @@ namespace ui::operation_modes::modes::object_inspection {
 
 			if (ImGui::IsItemClicked())
 				selectionBehavior->Select(obj);
+
+			if (ImGui::BeginPopupContextItem("GameObject Operations")) {
+				if (ImGui::Selectable("Open in memory viewer"))
+					new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), obj, obj->objectClass->GetObjectSize() };
+				ImGui::EndPopup();
+			}
 
 			if (ImGui::BeginDragDropSource()) {
 				ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
@@ -59,6 +68,12 @@ namespace ui::operation_modes::modes::object_inspection {
 			if (ImGui::IsItemClicked())
 				selectionBehavior->Select(obj);
 
+			if (ImGui::BeginPopupContextItem("GameObject Operations")) {
+				if (ImGui::Selectable("Open in memory viewer"))
+					new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), obj, obj->objectClass->GetObjectSize() };
+				ImGui::EndPopup();
+			}
+
 			if (ImGui::BeginDragDropSource()) {
 				ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
 				ImGui::EndDragDropSource();
@@ -82,6 +97,7 @@ namespace ui::operation_modes::modes::object_inspection {
 				ImGui::EndDragDropTarget();
 			}
 		}
+		ImGui::PopID();
 	}
 
 	void ObjectList::RenderPanel() {
@@ -107,6 +123,8 @@ namespace ui::operation_modes::modes::object_inspection {
 					for (auto* layer : GameManager::GetInstance()->gameObjectLayers) {
 						if (layer->objects.size() != 0 && ImGui::TreeNode(layer, layer->name)) {
 							for (auto* obj : layer->objects) {
+								ImGui::PushID(obj);
+
 								ImGuiTreeNodeFlags nodeflags = ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen;
 
 								if (selectionBehavior->IsSelected(obj))
@@ -116,6 +134,12 @@ namespace ui::operation_modes::modes::object_inspection {
 
 								if (ImGui::IsItemClicked())
 									selectionBehavior->Select(obj);
+
+								if (ImGui::BeginPopupContextItem("GameObject Operations")) {
+									if (ImGui::Selectable("Open in memory viewer"))
+										new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), obj, obj->objectClass->GetObjectSize() };
+									ImGui::EndPopup();
+								}
 
 								if (ImGui::BeginDragDropSource()) {
 									ImGui::SetDragDropPayload("GameObject", &obj, sizeof(obj));
@@ -139,6 +163,8 @@ namespace ui::operation_modes::modes::object_inspection {
 									}
 									ImGui::EndDragDropTarget();
 								}
+
+								ImGui::PopID();
 							}
 							ImGui::TreePop();
 						}

@@ -8,6 +8,7 @@
 #include <ui/common/Translations.h>
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
+#include <ui/tools/MemoryViewer.h>
 #include <ui/Desktop.h>
 
 using namespace hh::fnd;
@@ -239,6 +240,8 @@ public:
 				typeInfo->ConstructObject(&obj, hh::fnd::MemoryRouter::GetModuleAllocator());
 				edited = true;
 			}
+			if (ImGui::Selectable("Open in memory viewer"))
+				new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), &obj, rflClass->GetSize() };
 			ImGui::EndPopup();
 		}
 		
@@ -369,6 +372,9 @@ public:
 				typeInfo->ConstructObject(&obj, hh::fnd::MemoryRouter::GetModuleAllocator());
 				edited = true;
 			}
+
+			if (ImGui::Selectable("Open in memory viewer"))
+				new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), &obj, rflClass->GetSize() };
 
 			ImGui::EndPopup();
 		}

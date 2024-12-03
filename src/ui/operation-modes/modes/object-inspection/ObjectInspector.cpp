@@ -3,6 +3,7 @@
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/tools/MemoryViewer.h>
 #include <utilities/math/EulerTransform.h>
 #include <utilities/math/MathUtils.h>
 #include <utilities/GameObjectUtils.h>
@@ -162,9 +163,16 @@ namespace ui::operation_modes::modes::object_inspection {
 		}
 		else {
 			auto focusedObject = selection[0];
+			ImGui::BeginGroup();
 			ImGui::Text("Object name: %s", focusedObject->name.c_str());
 			ImGui::Text("Layer: %d", focusedObject->layer);
 			ImGui::Text("Class: %s", focusedObject->objectClass ? focusedObject->objectClass->GetName() : "<none>");
+			ImGui::EndGroup();
+			if (ImGui::BeginPopupContextItem("GameObject Operations")) {
+				if (ImGui::Selectable("Open in memory viewer"))
+					new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), focusedObject, focusedObject->objectClass->GetObjectSize() };
+				ImGui::EndPopup();
+			}
 			ImGui::Separator();
 			if (ImGui::BeginTabBar("Inspector types")) {
 				if (ImGui::BeginTabItem("Properties")) {
@@ -175,7 +183,15 @@ namespace ui::operation_modes::modes::object_inspection {
 							char title[200];
 							snprintf(title, 200, "%s (%s) - %x", component->pStaticClass->pName, component->pStaticClass->category, component->nameHash);
 
-							if (ImGui::CollapsingHeader(title))
+							bool isComponentSectionOpen = ImGui::CollapsingHeader(title);
+
+							if (ImGui::BeginPopupContextItem("Component Operations")) {
+								if (ImGui::Selectable("Open in memory viewer"))
+									new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), component, component->pStaticClass->size };
+								ImGui::EndPopup();
+							}
+
+							if (isComponentSectionOpen)
 								ComponentIterator<>::Render(*component);
 
 							ImGui::PopID();

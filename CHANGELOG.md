@@ -1,3 +1,8 @@
+# v0.1.60
+* Added a Memory Viewer that lets you view raw memory areas.
+  You can open it by right clicking objects, components, gameservices or RFL data.
+
+
 # v0.1.59
 * Added toggles for position and rotation inheritance in `GOCTransform` inspector.
 

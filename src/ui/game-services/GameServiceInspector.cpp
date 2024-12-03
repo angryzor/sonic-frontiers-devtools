@@ -1,6 +1,7 @@
 #include "GameServiceInspector.h"
 #include <imgui_internal.h>
 #include <ui/Desktop.h>
+#include <ui/tools/MemoryViewer.h>
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include "game-service-inspectors/FxParamManager.h"
@@ -97,7 +98,15 @@ void GameServiceInspector::RenderContents() {
 
 	for (auto* service : gameManager->GetServices()) {
 		ImGui::PushID(service);
-		if (ImGui::CollapsingHeader(service->staticClass->name))
+		bool isOpen = ImGui::CollapsingHeader(service->staticClass->name);
+
+		if (ImGui::BeginPopupContextItem("GameService Operations")) {
+			if (ImGui::Selectable("Open in memory viewer"))
+				new (Desktop::instance->GetAllocator()) MemoryViewer{ Desktop::instance->GetAllocator(), service };
+			ImGui::EndPopup();
+		}
+
+		if (isOpen)
 			ServiceIterator<>::Render(*service);
 		ImGui::PopID();
 	}
