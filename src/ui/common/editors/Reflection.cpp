@@ -331,12 +331,12 @@ public:
 	}
 
 	template<typename F>
-	static bool visit_base_struct(opaque_obj& obj, opaque_obj& orig, const StructureInfo& info, const StructureInfo& infoOrig, F f) {
+	static bool visit_base_struct(opaque_obj& obj, opaque_obj& orig, const StructureInfo& info, F f) {
 		return RenderStaticReflectionEditor::visit_base_struct(obj, info, [&](opaque_obj& obj) { return f(obj, orig); });
 	}
 
 	template<typename F>
-	static bool visit_struct(opaque_obj& obj, opaque_obj& orig, const StructureInfo& info, const StructureInfo& infoOrig, F f) {
+	static bool visit_struct(opaque_obj& obj, opaque_obj& orig, const StructureInfo& info, F f) {
 		ImGui::PushID(&obj);
 		bool edited{};
 		bool isOpen{ ImGui::TreeNodeEx(RenderStaticReflectionEditor::currentMemberName, RenderStaticReflectionEditor::defaultOpen ? ImGuiTreeNodeFlags_DefaultOpen : ImGuiTreeNodeFlags_None) };

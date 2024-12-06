@@ -66,7 +66,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
 				auto* exportProjectData = static_cast<ucsl::resources::swif::v6::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
 				rip::binary::binary_ostream bofs{ ofs };
 				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
 				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportProjectData);

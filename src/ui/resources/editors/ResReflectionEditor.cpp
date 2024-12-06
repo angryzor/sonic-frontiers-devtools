@@ -1,4 +1,5 @@
 #include "ResReflectionEditor.h"
+#include <ucsl-reflection/reflections/resources/rfl/v1.h>
 #include <ucsl-reflection/reflections/resources/rfl/v2.h>
 #include <ucsl-reflection/providers/rflclass.h>
 #include <ucsl-reflection/algorithms/copy.h>
@@ -164,17 +165,21 @@ void ResReflectionEditor::RenderExportDialog()
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 			auto* self = static_cast<ResReflectionEditor*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-			std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+			std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
 			rip::binary::binary_ostream bofs{ ofs };
 			rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
 
+#if DEVTOOLS_TARGET_SDK_miller
 			using namespace ucsl::resources::rfl::v2;
-
 			thread_local const RflClass* gRflClass = self->rflClass;
-
 			auto refl = ucsl::reflection::providers::simplerfl<he2sdk::ucsl::GameInterface>::template reflect<reflections::Ref2Data<Ref2RflData, [](const Ref2Data<Ref2RflData>& d) -> const char* { return gRflClass->GetName(); }>>();
-
-			serializer.serialize(*(Ref2RflData*)self->resource->GetData(), refl);
+			serializer.serialize(*(Ref2Data<Ref2RflData>*)self->resource->ManagedResource::GetData(), refl);
+#else
+			using namespace ucsl::resources::rfl::v1;
+			thread_local const RflClass* gRflClass = self->rflClass;
+			auto refl = ucsl::reflection::providers::simplerfl<he2sdk::ucsl::GameInterface>::template reflect<reflections::Ref1Data<Ref1RflData, [](const Ref1Data<Ref1RflData>& d) -> const char* { return gRflClass->GetName(); }>>();
+			serializer.serialize(*(Ref1Data<Ref1RflData>*)self->resource->unpackedBinaryData, refl);
+#endif
 		}
 		ImGuiFileDialog::Instance()->Close();
 	}

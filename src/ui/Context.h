@@ -22,4 +22,5 @@ public:
     static void deinit_imgui();
 
     static void set_enable_viewports(bool enable);
+    static bool should_enable_viewports_considering_fullscreen(hh::needle::DisplaySwapDevice* swapDevice);
 };

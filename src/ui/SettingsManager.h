@@ -23,7 +23,11 @@ class SettingsManager
         float rflDefaultFloatStep{ 0.01f };
         float rflMinFloatStep{ 0.01f };
         unsigned int rflSliderCutOffRange{ 3000 };
+#ifdef DEVTOOLS_TARGET_SDK_MILLER
         bool enableViewports{ false };
+#else
+        bool enableViewports{ true };
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
         bool debugRenderingColliderFilters[32][32]{
             //    0      1      2      3      4      5      6      7      8      9     10     11     12     13     14     15     16     17     18     19     20     21     22     23     24     25     26     27     28     29     30     31

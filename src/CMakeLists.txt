@@ -252,6 +252,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
         Needle
     )
     set(DEVTOOLS_FEATURE_COMMON_EDITOR_INSPECTORS
+        Needle
     )
     set(DEVTOOLS_FEATURE_COMMON_VIEWER_INSPECTORS
     )
@@ -271,6 +272,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         GraphicsContextInspector
+        RenderManagerInspector
     )
     set(DEVTOOLS_FEATURE_GAME_SERVICE_INSPECTORS
         FxParamManager

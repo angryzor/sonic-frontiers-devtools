@@ -65,7 +65,7 @@ bool Editor(const char* label, hh::needle::Texture*& texture)
 
 	return false;
 }
-
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 bool Editor(const char* label, hh::needle::RsFlagMask& mask)
 {
 	bool edited{};
@@ -88,6 +88,7 @@ bool Editor(const char* label, hh::needle::RsFlagMask& mask)
 
 	return edited;
 }
+#endif
 
 void Viewer(const char* label, const hh::needle::FxCamera& camera) {
 	if (ImGui::TreeNode(label)) {
@@ -150,6 +151,7 @@ bool Editor(const char* label, hh::needle::SupportFX::FxRenderParam& renderParam
 	return edited;
 }
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 bool Editor(const char* label, hh::needle::SceneParamContainer& sceneParamContainer) {
 	bool edited{};
 	if (ImGui::TreeNode(label)) {
@@ -518,3 +520,4 @@ bool Editor(const char* label, hh::needle::MeshResource& meshResource)
 	}
 	return edited;
 }
+#endif

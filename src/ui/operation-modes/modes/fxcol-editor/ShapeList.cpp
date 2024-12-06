@@ -34,7 +34,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
 				auto* exportData = static_cast<ucsl::resources::fxcol::v1::FxColData*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
+				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
 				rip::binary::binary_ostream bofs{ ofs };
 				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
 				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportData);

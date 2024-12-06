@@ -1,3 +1,19 @@
+# v0.1.61
+* Fixed various issues and bugs causing corrupt files and crashes in the new `rip`-based file export.
+* Fixed a bug where alt tabbing with multi-viewport mode disabled in windowed mode would reset ImGui.
+
+## Sonic Forces / Sonic Frontiers
+* Fixed accidentally trying to export REF v2-1.00 instead of v1.
+* Re-enabled multi viewport mode.
+* Re-enabled resource reloading.
+
+## Sonic Forces
+* Fixed accidentally trying to export gedit v3 instead of v2.
+
+## Shadow Generations
+* Ported `RenderManager` inspector.
+
+
 # v0.1.60
 * Added a Memory Viewer that lets you view raw memory areas.
   You can open it by right clicking objects, components, gameservices or RFL data.

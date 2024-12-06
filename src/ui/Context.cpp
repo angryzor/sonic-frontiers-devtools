@@ -110,10 +110,10 @@ HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeB
 	createBackBuffer(self->swapChain);
 
 	if (Context::imguiInited) {
-		bool fullScreenState = self->GetFullScreenState();
+		bool shouldEnableViewports = Context::should_enable_viewports_considering_fullscreen(self);
 		bool viewportsEnabled = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
 
-		if (fullScreenState == viewportsEnabled) {
+		if (shouldEnableViewports != viewportsEnabled) {
 			Context::deinit_imgui();
 			Context::init_imgui();
 		}
@@ -211,7 +211,9 @@ void Context::init_modules()
 	auto* allocator = moduleAllocator;
 #endif
 
-	//ReloadManager::instance = new (allocator) ReloadManager(allocator);
+#ifndef DEVTOOLS_TARGET_SDK_miller
+	ReloadManager::instance = new (allocator) ReloadManager(allocator);
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	RESOLVE_STATIC_VARIABLE(hh::game::DebugCameraManager::instance) = hh::game::DebugCameraManager::Create();
 #endif
@@ -227,7 +229,9 @@ void Context::deinit_modules()
 	Desktop::instance->~Desktop();
 	Desktop::instance->GetAllocator()->Free(Desktop::instance);
 	GOCVisualDebugDrawRenderer::instance = nullptr;
-	//ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
+#ifndef DEVTOOLS_TARGET_SDK_miller
+	ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
+#endif
 }
 
 void Context::init_imgui()
@@ -297,6 +301,11 @@ void Context::set_enable_viewports(bool enable)
 		return;
 
 	reinitImGuiNextFrame = true;
+}
+
+bool Context::should_enable_viewports_considering_fullscreen(hh::needle::DisplaySwapDevice* swapDevice)
+{
+	return enableViewports && !swapDevice->GetFullScreenState();
 }
 
 void Context::update()

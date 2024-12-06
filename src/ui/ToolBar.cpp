@@ -29,6 +29,7 @@
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
 #include "core-services/GraphicsContextInspector.h"
+#include "core-services/RenderManagerInspector.h"
 #include "tools/miller/NeedleFxSceneDataTesterV2.h"
 #endif
 
@@ -71,6 +72,8 @@ void ToolBar::Render() {
 #ifdef DEVTOOLS_TARGET_SDK_miller
 			if (ImGui::MenuItem("GraphicsContext"))
 				new (Desktop::instance->GetAllocator()) GraphicsContextInspector(Desktop::instance->GetAllocator());
+			if (ImGui::MenuItem("RenderManager"))
+				new (Desktop::instance->GetAllocator()) RenderManagerInspector(Desktop::instance->GetAllocator());
 #endif
 			ImGui::EndMenu();
 		}
