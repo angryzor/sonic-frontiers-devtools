@@ -16,7 +16,9 @@ class SettingsManager
         unsigned int theme{ 2 };
 #endif
         Translations::Language language{ Translations::Language::VAR_NAMES };
-        float fontSize{ 14 };
+        float fontSize{ 14.0f };
+        float gizmoLineScale{ 1.0f };
+        float gizmoHandleScale{ 1.0f };
         ImGuiConfigFlags configFlags{ ImGuiConfigFlags_NavEnableKeyboard };
         float debugCameraMouseSensitivityX{ 0.05f };
         float debugCameraMouseSensitivityY{ 0.05f };
@@ -220,6 +222,7 @@ class SettingsManager
     static void WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler, ImGuiTextBuffer* out_buf);
 
     static void ApplySettings();
+    static void ApplyGizmoScale(float gizmoLineScale, float gizmoHandleScale);
 
 public:
     static Settings settings;

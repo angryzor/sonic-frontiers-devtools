@@ -22,7 +22,9 @@ bool Context::passThroughMouse = false;
 bool Context::inited = false;
 bool Context::imguiInited = false;
 bool Context::enableViewports = false;
+float Context::fontSize = 14.0f;
 bool Context::reinitImGuiNextFrame = false;
+bool Context::rebuildFontsNextFrame = false;
 
 using namespace hh::game;
 using namespace hh::needle;
@@ -113,10 +115,8 @@ HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeB
 		bool shouldEnableViewports = Context::should_enable_viewports_considering_fullscreen(self);
 		bool viewportsEnabled = ImGui::GetIO().ConfigFlags & ImGuiConfigFlags_ViewportsEnable;
 
-		if (shouldEnableViewports != viewportsEnabled) {
-			Context::deinit_imgui();
-			Context::init_imgui();
-		}
+		if (shouldEnableViewports != viewportsEnabled)
+			Context::reinit_imgui();
 	}
 
 	return result;
@@ -259,14 +259,7 @@ void Context::init_imgui()
 	if (enableViewports && !renderingEngine->GetSupportFX()->swapDevice->GetFullScreenState())
 		io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;
 
-	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
-	ImFontConfig fontConfig{};
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoHinting;
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
-	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
-	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);// , ranges);
-	io.Fonts->Build();
+	rebuild_fonts();
 
 	// Setup Platform/Renderer backends
 	ImGui_ImplWin32_Init(hwnd);
@@ -288,11 +281,46 @@ void Context::deinit_imgui()
 	ImGui::DestroyContext();
 }
 
+void Context::reinit_imgui()
+{
+	deinit_imgui();
+	init_imgui();
+}
+
+void Context::rebuild_fonts()
+{
+	ImGuiIO& io = ImGui::GetIO();
+
+	//static ImWchar ranges[] = { 0x1, 0xffff, 0 };
+	ImFontConfig fontConfig{};
+	io.Fonts->Clear();
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoHinting;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
+	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
+	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, fontSize, &fontConfig);// , ranges);
+	io.Fonts->Build();
+
+	if (imguiInited)
+		ImGui_ImplDX11_InvalidateDeviceObjects();
+}
+
+void Context::set_font_size(float size)
+{
+	if (fontSize == size)
+		return;
+
+	fontSize = size;
+	
+	if (!imguiInited)
+		return;
+
+	rebuildFontsNextFrame = true;
+}
+
 void Context::set_enable_viewports(bool enable)
 {
-	bool prevEnableViewports = enableViewports;
-
-	if (prevEnableViewports == enable)
+	if (enableViewports == enable)
 		return;
 
 	enableViewports = enable;
@@ -311,18 +339,14 @@ bool Context::should_enable_viewports_considering_fullscreen(hh::needle::Display
 void Context::update()
 {
 	if (reinitImGuiNextFrame) {
-		Context::deinit_imgui();
-		Context::init_imgui();
+		reinit_imgui();
 		reinitImGuiNextFrame = false;
 	}
 
-	//if (font != nullptr && font->FontSize != SettingsManager::settings.fontSize) {
-	//	ImFontConfig fontConfig{};
-	//	ImGuiIO& io = ImGui::GetIO();
-	//	io.Fonts->Clear();
-	//	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, SettingsManager::settings.fontSize, &fontConfig);
-	//	io.Fonts->Build();
-	//}
+	if (rebuildFontsNextFrame) {
+		rebuild_fonts();
+		rebuildFontsNextFrame = false;
+	}
 
 	ImGui_ImplDX11_NewFrame();
 	ImGui_ImplWin32_NewFrame();

@@ -149,7 +149,10 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 
 	ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 1.0f));
 
-	if (ImGui::Selectable(resource->GetName(), selectedResource == resource, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(100, 100 + ImGui::GetFontSize()))) {
+	float previewSize = std::max(64.0f, 100.0f * ImGui::GetFontSize() / 14.0f);
+	float largePreviewSize = 300.0f;
+
+	if (ImGui::Selectable(resource->GetName(), selectedResource == resource, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(previewSize, previewSize + ImGui::GetFontSize()))) {
 		if (ImGui::IsMouseDoubleClicked(0)) {
 			const ResourceTypeInfo* typeInfo = &resource->GetClass();
 
@@ -179,24 +182,24 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 	}
 
 	ImGui::SetCursorPos(cursor);
-	RenderPreview(resource, 100);
+	RenderPreview(resource, previewSize);
 
 	ImGui::PopStyleVar();
 	ImGui::EndGroup();
 
 	if (ImGui::BeginItemTooltip()) {
-		ImGui::PushTextWrapPos(300);
+		ImGui::PushTextWrapPos(largePreviewSize);
 		ImGui::Text("Name: %s", resource->GetName());
 		ImGui::Text("Type: %s", resource->GetClass().pName);
 		RenderDetails(resource);
 		ImGui::PopTextWrapPos();
 		ImGui::Separator();
-		RenderPreview(resource, 300);
+		RenderPreview(resource, largePreviewSize);
 		ImGui::EndTooltip();
 	}
 
 	float lastButtonX = ImGui::GetItemRectMax().x;
-	float nextButtonX = lastButtonX + ImGui::GetStyle().ItemSpacing.x + 100;
+	float nextButtonX = lastButtonX + ImGui::GetStyle().ItemSpacing.x + previewSize;
 
 	if (nextButtonX < ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x)
 		ImGui::SameLine();

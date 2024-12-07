@@ -1,3 +1,7 @@
+# v0.1.62
+* Added accessibility options: font size, gizmo line and handle scale.
+
+
 # v0.1.61
 * Fixed various issues and bugs causing corrupt files and crashes in the new `rip`-based file export.
 * Fixed a bug where alt tabbing with multi-viewport mode disabled in windowed mode would reset ImGui.

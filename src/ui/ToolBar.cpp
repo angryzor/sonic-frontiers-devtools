@@ -41,7 +41,11 @@
 using namespace hh::game;
 
 void ToolBar::Render() {
-	if (!ImGui::BeginViewportSideBar("Main menu", ImGui::GetMainViewport(), ImGuiDir_Up, 56, ImGuiWindowFlags_MenuBar)) {
+	auto& style = ImGui::GetStyle();
+	float menuBarHeight = ImGui::GetFontSize() + style.FramePadding.y * 2.0f;
+	float toolBarHeight = ImGui::GetFontSize() + style.FramePadding.y * 2.0f + style.WindowPadding.y * 2.0f;
+
+	if (!ImGui::BeginViewportSideBar("Main menu", ImGui::GetMainViewport(), ImGuiDir_Up, menuBarHeight + toolBarHeight, ImGuiWindowFlags_MenuBar)) {
 		ImGui::End();
 		return;
 	}

@@ -16,6 +16,8 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 	bool equal = theme == other.theme
 		&& language == other.language
 		&& fontSize == other.fontSize
+		&& gizmoLineScale == other.gizmoLineScale
+		&& gizmoHandleScale == other.gizmoHandleScale
 		&& configFlags == other.configFlags
 		&& debugCameraMouseSensitivityX == other.debugCameraMouseSensitivityX
 		&& debugCameraMouseSensitivityY == other.debugCameraMouseSensitivityY
@@ -78,52 +80,80 @@ void SettingsManager::Render() {
 
 			if (ImGui::BeginTabBar("SettingsTabs")) {
 				if (ImGui::BeginTabItem("UI")) {
-					const char* themeComboStr = Theme::themes[tempSettings.theme].name;
-					if (ImGui::BeginCombo("Theme", themeComboStr)) {
-						for (unsigned int i = 0; i < Theme::themeCount; i++) {
-							bool is_selected = tempSettings.theme == i;
+					if (ImGui::BeginTabBar("UITabs")) {
+						if (ImGui::BeginTabItem("General")) {
+							ImGui::SeparatorText("General");
+							const char* themeComboStr = Theme::themes[tempSettings.theme].name;
+							if (ImGui::BeginCombo("Theme", themeComboStr)) {
+								for (unsigned int i = 0; i < Theme::themeCount; i++) {
+									bool is_selected = tempSettings.theme == i;
 
-							if (ImGui::Selectable(Theme::themes[i].name, is_selected)) {
-								tempSettings.theme = i;
+									if (ImGui::Selectable(Theme::themes[i].name, is_selected)) {
+										tempSettings.theme = i;
+									}
+
+									if (is_selected)
+										ImGui::SetItemDefaultFocus();
+								}
+								ImGui::EndCombo();
 							}
 
-							if (is_selected)
-								ImGui::SetItemDefaultFocus();
-						}
-						ImGui::EndCombo();
-					}
 
-					//ImGui::DragFloat("Font size", &tempSettings.fontSize, 1.0f, 6.0f, 30.0f);
-
-					const char* languageComboStr = Translations::GetLanguageName(Translations::GetCurrentLanguage());
-					if (ImGui::BeginCombo("Reflections description language", languageComboStr)) {
-						for (unsigned int i = 0; i < 3; i++) {
-							Translations::Language language = static_cast<Translations::Language>(i);
-							bool is_selected = tempSettings.language == language;
-
-							if (ImGui::Selectable(Translations::GetLanguageName(language), is_selected)) {
-								tempSettings.language = language;
-							}
-
-							if (is_selected)
-								ImGui::SetItemDefaultFocus();
-						}
-						ImGui::EndCombo();
-					}
 #ifndef DEVTOOLS_TARGET_SDK_miller
-					ImGui::Checkbox("Enable multiple viewports", &tempSettings.enableViewports);
+							ImGui::Checkbox("Enable multiple viewports", &tempSettings.enableViewports);
+							ImGui::SetItemTooltip("Enables ImGui's multiple viewports feature, which lets you drag DevTools windows out of the game window when running in windowed mode.");
 #endif
-					ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
-					ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
-					ImGui::SeparatorText("Reflection editor");
-					ImGui::DragFloat("Default step size for float values", &tempSettings.rflDefaultFloatStep, 0.001f);
-					ImGui::SetItemTooltip("Default precision for float values if the game does not specify a precision.");
-					ImGui::DragFloat("Minimum step size for float values", &tempSettings.rflMinFloatStep, 0.01f);
-					ImGui::SetItemTooltip("The drag control's precision for float values will be capped to this value if the game specifies a smaller precision. Intended to correct for the game often specifying the excessively precise value 0.001.");
-					ImGui::DragScalar("Slider cut-off range", ImGuiDataType_U32, &tempSettings.rflSliderCutOffRange, 1.0f);
-					ImGui::SetItemTooltip("Range between minimum and maximum value at which the editor will choose to use drag controls instead of sliders.");
-					InputDirectory("Default file dialog directory", tempSettings.defaultFileDialogDir);
-					ImGui::SetItemTooltip("Range between minimum and maximum value at which the editor will choose to use drag controls instead of sliders.");
+							ImGui::SeparatorText("Navigation");
+							ImGui::CheckboxFlags("Allow keyboard navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableKeyboard);
+							ImGui::CheckboxFlags("Allow gamepad navigation", &tempSettings.configFlags, ImGuiConfigFlags_NavEnableGamepad);
+
+							ImGui::SeparatorText("File dialogs");
+							InputDirectory("Default directory", tempSettings.defaultFileDialogDir);
+							ImGui::SetItemTooltip("Default location to open in file export dialogs.");
+
+							ImGui::EndTabItem();
+						}
+						if (ImGui::BeginTabItem("Reflection editor")) {
+							const char* languageComboStr = Translations::GetLanguageName(Translations::GetCurrentLanguage());
+							bool languageComboOpen = ImGui::BeginCombo("Description language", languageComboStr);
+							ImGui::SetItemTooltip("Which language to use in reflection editor property descriptions.");
+							if (languageComboOpen) {
+								for (unsigned int i = 0; i < 3; i++) {
+									Translations::Language language = static_cast<Translations::Language>(i);
+									bool is_selected = tempSettings.language == language;
+
+									if (ImGui::Selectable(Translations::GetLanguageName(language), is_selected)) {
+										tempSettings.language = language;
+									}
+
+									if (is_selected)
+										ImGui::SetItemDefaultFocus();
+								}
+								ImGui::EndCombo();
+							}
+							ImGui::DragFloat("Default step size for float values", &tempSettings.rflDefaultFloatStep, 0.001f);
+							ImGui::SetItemTooltip("Default precision for float values if the game does not specify a precision.");
+							ImGui::DragFloat("Minimum step size for float values", &tempSettings.rflMinFloatStep, 0.01f);
+							ImGui::SetItemTooltip("The drag control's precision for float values will be capped to this value if the game specifies a smaller precision. Intended to correct for the game often specifying the excessively precise value 0.001.");
+							ImGui::DragScalar("Slider cut-off range", ImGuiDataType_U32, &tempSettings.rflSliderCutOffRange, 1.0f);
+							ImGui::SetItemTooltip("Range between minimum and maximum value at which the editor will choose to use drag controls instead of sliders.");
+							ImGui::EndTabItem();
+						}
+
+						if (ImGui::BeginTabItem("Accessibility")) {
+							ImGui::SeparatorText("Text");
+							ImGui::DragFloat("Font size", &tempSettings.fontSize, 1.0f, 6.0f, 64.0f);
+							ImGui::SetItemTooltip("Which font size to use. The UI will scale to fit your chosen size.");
+
+							ImGui::SeparatorText("Gizmos");
+							ImGui::DragFloat("Line scale", &tempSettings.gizmoLineScale, 0.01f, 0.01f, 64.0f);
+							ImGui::SetItemTooltip("Scaling to apply to 3D gizmo lines.");
+							ImGui::DragFloat("Handle scale", &tempSettings.gizmoHandleScale, 0.01f, 0.01f, 64.0f);
+							ImGui::SetItemTooltip("Scaling to apply to 3D gizmo handles (the circles and arrows).");
+							ImGui::EndTabItem();
+						}
+						ImGui::EndTabBar();
+					}
 					ImGui::EndTabItem();
 				}
 
@@ -142,7 +172,7 @@ void SettingsManager::Render() {
 								for (int j = 0; j < 32; j++) {
 									char header[10];
 									snprintf(header, 10, "%d", j);
-									ImGui::TableSetupColumn(header, ImGuiTableColumnFlags_WidthFixed, 24.0f);
+									ImGui::TableSetupColumn(header, ImGuiTableColumnFlags_WidthFixed, ImGui::GetFontSize() + ImGui::GetStyle().FramePadding.y * 2.0f);
 								}
 
 								ImGui::TableHeadersRow();
@@ -301,6 +331,7 @@ void SettingsManager::ApplySettings() {
 #else
 	Context::set_enable_viewports(settings.enableViewports);
 #endif
+	Context::set_font_size(settings.fontSize);
 	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
 	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
 	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;
@@ -319,7 +350,22 @@ void SettingsManager::ApplySettings() {
 	for (size_t i = 0; i < shortcutCount; i++)
 		SetShortcutBinding(static_cast<ShortcutId>(i), settings.shortcutBindings[i]);
 
+	ApplyGizmoScale(settings.gizmoLineScale, settings.gizmoHandleScale);
+
 	//ReloadInputSettings();
+}
+
+void SettingsManager::ApplyGizmoScale(float gizmoLineScale, float gizmoHandleScale)
+{
+	auto& style = ImGuizmo::GetStyle();
+	style.TranslationLineThickness = gizmoLineScale * 3.0f;
+	style.TranslationLineArrowSize = gizmoHandleScale * 6.0f;
+	style.RotationLineThickness = gizmoLineScale * 2.0f;
+	style.RotationOuterLineThickness = gizmoLineScale * 3.0f;
+	style.ScaleLineThickness = gizmoLineScale * 3.0f;
+	style.ScaleLineCircleSize = gizmoHandleScale * 6.0f;
+	style.HatchedAxisLineThickness = gizmoLineScale * 6.0f;
+	style.CenterCircleSize = gizmoHandleScale * 6.0f;
 }
 
 void SettingsManager::ClearAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handler)
@@ -343,7 +389,9 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	char s[512];
 	if (sscanf_s(line, "Theme=%u", &u) == 1) { settings.theme = u; return; }
 	if (sscanf_s(line, "Translations=%u", &u) == 1) { settings.language = static_cast<Translations::Language>(u); return; }
-	// if (sscanf_s(line, "FontSize=%f", &f) == 1) { settings.fontSize = f; return; }
+	if (sscanf_s(line, "FontSize=%f", &f) == 1) { settings.fontSize = f; return; }
+	if (sscanf_s(line, "GizmoLineScale=%f", &f) == 1) { settings.gizmoLineScale = f; return; }
+	if (sscanf_s(line, "GizmoHandleScale=%f", &f) == 1) { settings.gizmoHandleScale = f; return; }
 	if (sscanf_s(line, "ConfigFlags=%u", &u) == 1) { settings.configFlags = u; return; }
 	if (sscanf_s(line, "DebugCameraMouseSensitivityX=%f", &f) == 1) { settings.debugCameraMouseSensitivityX = f; return; }
 	if (sscanf_s(line, "DebugCameraMouseSensitivityY=%f", &f) == 1) { settings.debugCameraMouseSensitivityY = f; return; }
@@ -398,7 +446,9 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("[DevTools][]\n");
 	out_buf->appendf("Theme=%u\n", settings.theme);
 	out_buf->appendf("Translations=%u\n", settings.language);
-	//out_buf->appendf("FontSize=%f\n", settings.fontSize);
+	out_buf->appendf("FontSize=%f\n", settings.fontSize);
+	out_buf->appendf("GizmoLineScale=%f\n", settings.gizmoLineScale);
+	out_buf->appendf("GizmoHandleScale=%f\n", settings.gizmoHandleScale);
 	out_buf->appendf("ConfigFlags=%u\n", settings.configFlags);
 	out_buf->appendf("DebugCameraMouseSensitivityX=%f\n", settings.debugCameraMouseSensitivityX);
 	out_buf->appendf("DebugCameraMouseSensitivityY=%f\n", settings.debugCameraMouseSensitivityY);
