@@ -123,7 +123,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		nodeEditor.EndInputPins();
 
 		nodeEditor.BeginControls();
-		ImGui::ProgressBar(progress, { ImGui::CalcTextSize(state.name).x + 10.0f, 0.0f }, state.name);
+		ImGui::ProgressBar(progress, { ImGui::CalcTextSize(state.name).x + 10.0f * ImGui::GetFontSize() / 14.0f, 0.0f }, state.name);
 		Editor("Loop count", state.maxCycles);
 		CheckboxFlags("Loop", state.flags, StateData::Flag::LOOPS);
 		CheckboxFlags("Unknown 1", state.flags, StateData::Flag::UNK1);
@@ -229,7 +229,7 @@ namespace ui::operation_modes::modes::asm_editor {
 	{
 		NodeId nodeId{ NodeType::VARIABLE, variableId };
 
-		nodeEditor.BeginNode(nodeId, 10.0f);
+		nodeEditor.BeginNode(nodeId, 10.0f * ImGui::GetFontSize() / 14.0f);
 
 		nodeEditor.BeginTitle();
 		ImGui::Text("Variable");
@@ -267,7 +267,7 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		NodeId nodeId{ NodeType::CLIP, clipId };
 
-		nodeEditor.BeginNode(nodeId, 10.0f);
+		nodeEditor.BeginNode(nodeId, 10.0f * ImGui::GetFontSize() / 14.0f);
 
 		nodeEditor.BeginTitle();
 		ImGui::Text("Clip");
@@ -312,7 +312,7 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		NodeId nodeId{ NodeType::BLEND_SPACE, blendSpaceId };
 
-		nodeEditor.BeginNode(nodeId, 10.0f);
+		nodeEditor.BeginNode(nodeId, 10.0f * ImGui::GetFontSize() / 14.0f);
 
 		nodeEditor.BeginTitle();
 		ImGui::Text("BlendSpace");
@@ -346,7 +346,7 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		NodeId nodeId{ NodeType::BLEND_MASK, blendMaskId };
 
-		nodeEditor.BeginNode(nodeId, 10.0f);
+		nodeEditor.BeginNode(nodeId, 10.0f * ImGui::GetFontSize() / 14.0f);
 
 		nodeEditor.BeginTitle();
 		ImGui::Text("Blend mask");
@@ -386,7 +386,7 @@ namespace ui::operation_modes::modes::asm_editor {
 
 			auto childNodes = &asmData.blendNodes[nodeData.childNodeArrayOffset];
 
-			if (ImPlot::BeginPlot("Lerp", { 300.0f, 200.0f })) {
+			if (ImPlot::BeginPlot("Lerp", { 300.0f * ImGui::GetFontSize() / 14.0f, 200.0f * ImGui::GetFontSize() / 14.0f })) {
 				ImPlot::SetupAxes("Blend factor", "Contribution", ImPlotAxisFlags_AutoFit, ImPlotAxisFlags_AutoFit);
 
 				for (unsigned short i = 0; i < nodeData.childNodeArraySize; i++) {
@@ -547,7 +547,7 @@ namespace ui::operation_modes::modes::asm_editor {
 	{
 		NodeId nodeId{ NodeType::FLAG, flagId };
 
-		nodeEditor.BeginNode(nodeId, 10.0f);
+		nodeEditor.BeginNode(nodeId, 10.0f * ImGui::GetFontSize() / 14.0f);
 
 		nodeEditor.BeginTitle();
 		ImGui::Text("Flag");
@@ -577,7 +577,7 @@ namespace ui::operation_modes::modes::asm_editor {
 		NodeId nodeId{ NodeType::LAYER_BLEND_TREE_OUTPUT, 0 };
 		InputPinId nextPin{ nodeId, PinType::BLEND_NODE, 0 };
 
-		nodeEditor.BeginNode(nodeId, 10.0f);
+		nodeEditor.BeginNode(nodeId, 10.0f * ImGui::GetFontSize() / 14.0f);
 
 		nodeEditor.BeginTitle();
 		ImGui::Text("Layer blend tree output");
@@ -769,7 +769,7 @@ namespace ui::operation_modes::modes::asm_editor {
 	{
 		auto& blendSpace = asmData.blendSpaces[blendSpaceId];
 
-		if (ImPlot::BeginPlot("Blend space", { 300.0f, 300.0f })) {
+		if (ImPlot::BeginPlot("Blend space", { 300.0f * ImGui::GetFontSize() / 14.0f, 300.0f * ImGui::GetFontSize() / 14.0f })) {
 			ImPlot::SetupAxes(asmData.variables[blendSpace.xVariableIndex], asmData.variables[blendSpace.yVariableIndex], ImPlotAxisFlags_None, ImPlotAxisFlags_None);
 			ImPlot::SetupAxesLimits(blendSpace.xMin, blendSpace.xMax, blendSpace.yMin, blendSpace.yMax);
 

@@ -1,3 +1,8 @@
+# v0.1.63
+## Shadow Generations
+* Upgraded to game version 1.10.0.0.
+
+
 # v0.1.62
 * Added accessibility options: font size, gizmo line and handle scale.
 

@@ -46,7 +46,7 @@ public:
 	void BeginNode(ax::NodeEditor::NodeId nodeId, float maxOutputPinLabelWidth) {
 		ax::NodeEditor::BeginNode(nodeId);
 		ImGui::PushID(reinterpret_cast<void*>(nodeId.Get()));
-		ImGui::PushItemWidth(100.0f);
+		ImGui::PushItemWidth(100.0f * ImGui::GetFontSize() / 14.0f);
 
 		currentNode = nodeId;
 		currentNodeMaxOutputPinLabelWidth = maxOutputPinLabelWidth;

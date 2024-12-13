@@ -44,11 +44,11 @@ constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x1410FB090;
 constexpr size_t displaySwapDevicePresentAddr = 0x1410FAEE0;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
-constexpr size_t appResetAddr = 0x14006E410;
-constexpr size_t appShutdownAddr = 0x14FFD9BA0;
-constexpr size_t wndProcAddr = 0x140A27610;
-constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x140EDA0D0;
-constexpr size_t displaySwapDevicePresentAddr = 0x140ED9F00;
+constexpr size_t appResetAddr = 0x1460F1AE0;
+constexpr size_t appShutdownAddr = 0x14F9588E0;
+constexpr size_t wndProcAddr = 0x140A52630;
+constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x140F04AF0;
+constexpr size_t displaySwapDevicePresentAddr = 0x140F04920;
 #endif
 
 HOOK(uint64_t, __fastcall, GameApplication_Reset, appResetAddr, hh::game::GameApplication* self) {

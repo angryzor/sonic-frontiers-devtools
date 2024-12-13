@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.62
+project(devtools VERSION 0.1.63
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
@@ -15,7 +15,6 @@ set(DEVTOOLS_UPDATE_SERVER_PATH "" CACHE PATH "Path to update server")
 
 set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAndContinue>")
 
-set(UCSL_EIGEN_MATH ON)
 set(OGDF_DEBUG_MODE NONE)
 include(FetchContent)
 FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 7d2a71816f2c12ad858ecc805cbe421b45935c42 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
