@@ -1,4 +1,6 @@
 # v0.1.63
+* Fixed font scaling in ASM editor.
+
 ## Shadow Generations
 * Upgraded to game version 1.10.0.0.
 
