@@ -12,6 +12,7 @@ using namespace hh::game;
 ReloadManager* ReloadManager::instance{};
 
 ReloadManager::ReloadManager(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator } {
+	InitializeCriticalSection(&mutex);
     GameManager::GetInstance()->RegisterGameStepListener(*this);
 }
 
@@ -24,23 +25,46 @@ ReloadManager::~ReloadManager() {
     if (auto* gameManager = GameManager::GetInstance())
         gameManager->UnregisterGameStepListener(*this);
 
-    if (auto prevPtr = static_cast<ReloadRequest*>(InterlockedExchangePointer(&reloadRequestInFlight, nullptr)))
-        delete prevPtr;
+	EnterCriticalSection(&mutex);
+	for (auto* ptr : reloadRequestsInFlight)
+		delete ptr;
+
+	reloadRequestsInFlight.clear();
+	LeaveCriticalSection(&mutex);
+	DeleteCriticalSection(&mutex);
 }
 
 void ReloadManager::QueueReload(const std::wstring& path, ManagedResource* resource)
 {
-	if (auto prevPtr = static_cast<ReloadRequest*>(InterlockedExchangePointer(&reloadRequestInFlight, new (GetAllocator()) ReloadRequest{ GetAllocator(), path, resource })))
-		delete prevPtr;
+	EnterCriticalSection(&mutex);
+	for (auto* request : reloadRequestsInFlight) {
+		if (request->path == path) {
+			LeaveCriticalSection(&mutex);
+			return;
+		}
+	}
+	reloadRequestsInFlight.push_back(new (GetAllocator()) ReloadRequest{ GetAllocator(), path, resource });
+	LeaveCriticalSection(&mutex);
 }
 
 void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo)
 {
-    if (auto* request = static_cast<ReloadRequest*>(InterlockedExchangePointer(&reloadRequestInFlight, nullptr))) {
+	if (reloadRequestsInFlight.empty())
+		return;
+
+	csl::ut::MoveArray<ReloadRequest*> requestsToHandle{ GetTempAllocator() };
+
+	EnterCriticalSection(&mutex);
+	for (auto* request : reloadRequestsInFlight)
+		requestsToHandle.push_back(request);
+	reloadRequestsInFlight.clear();
+	LeaveCriticalSection(&mutex);
+
+	for (auto* request : requestsToHandle) {
 		HANDLE file = CreateFileW(request->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
 		if (file == INVALID_HANDLE_VALUE) {
 			delete request;
-			return;
+			continue;
 		}
 
 		DWORD fileSize = GetFileSize(file, NULL);
@@ -51,7 +75,7 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 		if (!result) {
 			request->resource->GetResourceAllocator()->Free(buffer);
 			delete request;
-			return;
+			continue;
 		}
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
@@ -145,6 +169,16 @@ void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWor
 						resource->unpackedBinaryData = bfile.GetDataAddress(-1);
 						resource->size = fileSize;
 						resource->Load(resource->unpackedBinaryData, resource->size);
+
+						for (auto* objData : resource->GetObjects()) {
+							if (auto* objInfoName = static_cast<const char*>(hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(objData->gameObjectClass)->GetAttributeValue("objinfo"))) {
+								auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
+								auto* objInfoClass = RESOLVE_STATIC_VARIABLE(ObjInfoRegistry::instance)->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
+								auto* objInfo = objInfoClass->Create(GetAllocator());
+
+								objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
+							}
+						}
 
 						chunk->AddLayer(hh::game::ObjectWorldChunkLayer::Create(allocator, resource));
 						chunk->SetLayerEnabled(resource->GetName(), wasEnabled);

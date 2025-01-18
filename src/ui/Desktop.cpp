@@ -6,10 +6,12 @@
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
 #include "operation-modes/modes/level-editor/LevelEditor.h"
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
+#include <debug-rendering/DebugRenderer.h>
 #include <utilities/math/MathUtils.h>
 #include <utilities/CompatibleObject.h>
 #include "common/editors/Basic.h"
 #include "common/inputs/Basic.h"
+#include <imtimeline.h>
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -17,6 +19,8 @@ using namespace hh::physics;
 
 Desktop* Desktop::instance{};
 bool Desktop::selectionColliderFilters[32][32]{ true };
+
+ImTimeline::ImTimelineContext* tlCtx = ImTimeline::CreateContext();
 
 Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }
 {
@@ -53,6 +57,7 @@ void Desktop::Render() {
 	RenderOverlayWindow();
 	RenderSceneWindow();
 
+	devtools::debug_rendering::DebugRenderer::instance->RenderImGuiVisuals();
 	operationMode->Render();
 	ResourceBrowser::RenderDialogs();
 

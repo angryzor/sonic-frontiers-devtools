@@ -7,11 +7,18 @@ target_sources(${DEVTOOLS_TARGET}
         devtools.rc
         DllMain.cpp
         Mod.cpp
-        debug-rendering/GOCVisualDebugDrawRenderer.cpp
+        debug-rendering/DebugRenderable.cpp
+        debug-rendering/DebugRenderer.cpp
+        debug-rendering/DebugRenderingSystem.cpp
+        debug-rendering/renderables/Colliders.cpp
+        debug-rendering/renderables/GOCVisualDebugDraws.cpp
+        debug-rendering/renderables/OcclusionCapsules.cpp
+        debug-rendering/renderables/Paths.cpp
         debug-rendering/visuals/AabbTree.cpp
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/Math.cpp
+        modules/PhotoMode.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
         reflection/RflDiff.cpp
@@ -55,11 +62,18 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/CompatibleObject.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
-        debug-rendering/GOCVisualDebugDrawRenderer.h
+        debug-rendering/DebugRenderable.h
+        debug-rendering/DebugRenderer.h
+        debug-rendering/DebugRenderingSystem.h
+        debug-rendering/renderables/Colliders.h
+        debug-rendering/renderables/GOCVisualDebugDraws.h
+        debug-rendering/renderables/OcclusionCapsules.h
+        debug-rendering/renderables/Paths.h
         debug-rendering/visuals/AabbTree.h
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/Math.h
+        modules/PhotoMode.h
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h
         resources/ReloadManager.h
@@ -148,6 +162,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
         GOCTransform
         GOCCollider
+        GOCSprite
         GOCPlayerParameter
     )
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
@@ -194,6 +209,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
         GOCTransform
         GOCCollider
+        GOCSprite
         GOCPlayerParameter
         GOCEvent
         GOCCamera
@@ -261,6 +277,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
         GOCTransform
         GOCCollider
+        GOCSprite
         GOCPlayerParameter
         GOCAnimator
         GOCPlayerKinematicParams

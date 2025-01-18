@@ -3,7 +3,7 @@
 #include "Behaviors.h"
 #include "texture-editor/TextureEditor.h"
 #include <ucsl-reflection/reflections/resources/swif/v6.h>
-#include <rip/binary/containers/binary-file/BinaryFile.h>
+#include <rip/binary/containers/binary-file/v2.h>
 #include <ui/common/StandaloneOperationModeHost.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/GlobalSettings.h>
@@ -67,8 +67,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				auto* exportProjectData = static_cast<ucsl::resources::swif::v6::SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
 				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
-				rip::binary::binary_ostream bofs{ ofs };
-				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+				rip::binary::containers::binary_file::v2::BinaryFileSerializer<size_t> serializer{ ofs };
 				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportProjectData);
 			}
 			ImGuiFileDialog::Instance()->Close();

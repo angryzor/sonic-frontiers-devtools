@@ -1,10 +1,11 @@
 #pragma once
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <debug-rendering/DebugRenderable.h>
+#include <debug-rendering/DebugRenderer.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include <ui/operation-modes/behaviors/Selection.h>
 #include "ForwardDeclarations.h"
 
-class ObjectLocationVisual3DBehaviorBase : public OperationModeBehavior, public DebugRenderable {
+class ObjectLocationVisual3DBehaviorBase : public OperationModeBehavior, public devtools::debug_rendering::DebugRenderable {
 protected:
 	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> targetBox{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateGraphicsGeometry)(nullptr, GetAllocator()) };
 	hh::fnd::Reference<hh::gfnd::GraphicsGeometry> selectedTargetBox{ RESOLVE_STATIC_VARIABLE(hh::gfnd::DrawSystem::CreateGraphicsGeometry)(nullptr, GetAllocator()) };
@@ -39,9 +40,9 @@ public:
 	void UpdateDebugBoxGeometry() {
 		hh::fnd::Geometry box{ GetAllocator() };
 		box.CreateBox({ 0, 0, 0 }, { debugBoxScale, debugBoxScale, debugBoxScale }, csl::math::Quaternion::Identity());
-		targetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
+		targetBox->Initialize(devtools::debug_rendering::DebugRenderer::instance->drawContext, box);
 		targetBox->SetColor({ 255, 0, 255, 255 });
-		selectedTargetBox->Initialize(GOCVisualDebugDrawRenderer::instance->drawContext, box);
+		selectedTargetBox->Initialize(devtools::debug_rendering::DebugRenderer::instance->drawContext, box);
 		selectedTargetBox->SetColor({ 255, 255, 0, 255 });
 	}
 };
@@ -58,7 +59,7 @@ private:
 public:
 	ObjectLocationVisual3DBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : ObjectLocationVisual3DBehaviorBase{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
-	virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) override {
+	virtual void RenderIngameDebugVisuals(hh::gfnd::DrawContext& ctx) override {
 		auto* selectionBehavior = operationMode.GetBehavior<SelectionBehavior<OpModeContext>>();
 		unsigned int idx{};
 

@@ -1,19 +1,23 @@
 #pragma once
 #include <ui/operation-modes/Panel.h>
 #include <ui/common/inputs/Basic.h>
+#include <imtimeline.h>
 #include "Context.h"
 
 namespace ui::operation_modes::modes::surfride_editor {
 	class Timeline : public Panel<Context> {
-		float zoom{ 1 };
+		ImTimeline::ImTimelineContext* timelineCtx;
+
 	public:
-		using Panel::Panel;
+		Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode);
+		virtual ~Timeline();
 
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
 		void RenderMotion(SurfRide::Layer& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion);
 		void RenderTrack(SurfRide::Layer& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion, ucsl::resources::swif::v6::SRS_TRACK& track);
 		static void RenderPlotLines(ucsl::resources::swif::v6::SRS_TRACK& track);
+		static const char* TrackName(ucsl::resources::swif::v6::ECurveType curveType);
 		static const char* TrackName(ucsl::resources::swif::v6::SRS_TRACK& track);
 
 		static constexpr int POINTS_PER_SEGMENT = 20;
@@ -23,16 +27,16 @@ namespace ui::operation_modes::modes::surfride_editor {
 		static inline ucsl::resources::swif::v6::Key<T>& GetKeyFrame(ucsl::resources::swif::v6::SRS_TRACK& track, size_t i) {
 			switch (track.GetInterpolationType()) {
 			case ucsl::resources::swif::v6::EInterpolationType::CONSTANT:
-				return static_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames)[i];
+				return reinterpret_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames.constantFloat)[i];
 			case ucsl::resources::swif::v6::EInterpolationType::LINEAR:
-				return static_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames)[i];
+				return reinterpret_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames.linearFloat)[i];
 			case ucsl::resources::swif::v6::EInterpolationType::HERMITE:
-				return static_cast<ucsl::resources::swif::v6::KeyHermite<T>*>(track.keyFrames)[i];
+				return reinterpret_cast<ucsl::resources::swif::v6::KeyHermite<T>*>(track.keyFrames.hermiteFloat)[i];
 			case ucsl::resources::swif::v6::EInterpolationType::INDIVIDUAL:
-				return static_cast<ucsl::resources::swif::v6::KeyIndividual<T>*>(track.keyFrames)[i];
+				return reinterpret_cast<ucsl::resources::swif::v6::KeyIndividual<T>*>(track.keyFrames.individualFloat)[i];
 			default:
 				assert(false);
-				return static_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames)[i];
+				return reinterpret_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames.linearFloat)[i];
 			}
 		}
 

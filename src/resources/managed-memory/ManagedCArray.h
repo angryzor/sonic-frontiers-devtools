@@ -39,7 +39,7 @@ namespace resources {
 			length++;
 		}
 
-		void emplace_back() {
+		T& emplace_back() {
 			auto* newBuffer = new (&allocator) T[length + 1]{};
 
 			for (S i = 0; i < length; i++)
@@ -49,6 +49,8 @@ namespace resources {
 			arr = newBuffer;
 
 			length++;
+
+			return arr[length - 1];
 		}
 
 		void remove(S i) {

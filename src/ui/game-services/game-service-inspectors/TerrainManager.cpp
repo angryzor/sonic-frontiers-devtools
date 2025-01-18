@@ -3,8 +3,8 @@
 
 void RenderGameServiceInspector(app::trr::TerrainManager& service)
 {
-	Viewer("Unk11", service.currentTerrain);
-	Viewer("Unk10 count", service.unk10.size());
+	Viewer("Current terrain ID", service.currentTerrain);
+	Viewer("Terrain count", service.terrains.size());
 	//ImGui::SeparatorText("Unk13s:");
 	//if (service.unk13.)
 	//for (auto i = service.unk13.begin(); i != service.unk13.end(); i++) {

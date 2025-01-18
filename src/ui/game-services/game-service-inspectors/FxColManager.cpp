@@ -22,7 +22,7 @@ void RenderGameServiceInspector(app::gfx::FxColManager& service) {
 			ImGui::PushID(shapeIdx);
 			char desc[20];
 			snprintf(desc, sizeof(desc), "Collision shape %d", shapeIdx);
-			Editor(desc, service.resource->fxColData->collisionShapes[shapeIdx]);
+			Editor(desc, service.resource->fxColData->shapes[shapeIdx]);
 			ImGui::PopID();
 		}
 	}

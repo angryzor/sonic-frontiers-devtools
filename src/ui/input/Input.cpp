@@ -1,5 +1,6 @@
 #include <ui/Context.h>
 #include <ui/SettingsManager.h>
+#include "Input.h"
 
 bool ShouldCaptureKeyboardInputs() {
 	return Context::imguiInited && Context::visible && ImGui::GetIO().WantCaptureKeyboard;
@@ -134,4 +135,6 @@ void AddDevToolsInputBindings(hh::hid::InputMapSettings* inputSettings) {
 	//inputSettings->BindActionMapping("HHFreeCameraUpDown", 0x30006u);
 	//inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30005u, -1.0);
 	//inputSettings->BindAxisMapping("HHFreeCameraMoveHorizontal", 0x30006u, 1.0);
+
+	inputSettings->BindActionMapping("DevToolsPhotoMode", 0x1000eu);
 }

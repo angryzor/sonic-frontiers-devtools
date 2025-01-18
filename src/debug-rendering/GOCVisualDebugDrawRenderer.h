@@ -3,8 +3,7 @@
 
 class GOCMyVisualDebugDraw;
 class DebugRenderable;
-class GOCVisualDebugDrawRenderer : public CompatibleObject
-{
+class GOCVisualDebugDrawRenderer : public CompatibleObject {
 	class Renderable : public hh::gfnd::Renderable {
 		GOCVisualDebugDrawRenderer* renderer;
 

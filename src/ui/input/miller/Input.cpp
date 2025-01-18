@@ -1,13 +1,13 @@
 #include <ui/input/Input.h>
 
-HOOK(void, __fastcall, KeyboardUpdate, 0x140C08D10, hh::hid::Keyboard* self, float unkParam)
+HOOK(void, __fastcall, KeyboardUpdate, 0x140C0D240, hh::hid::Keyboard* self, float unkParam)
 {
 	if (!ShouldCaptureKeyboardInputs()) {
 		originalKeyboardUpdate(self, unkParam);
 	}
 }
 
-HOOK(void, __fastcall, MouseUpdate, 0x140C36B00, hh::hid::MouseWin32* self, float unkParam)
+HOOK(void, __fastcall, MouseUpdate, 0x140C3B030, hh::hid::MouseWin32* self, float unkParam)
 {
 	static bool capturing{};
 	if (ShouldCaptureMouseInputs()) {
@@ -39,7 +39,7 @@ HOOK(void, __fastcall, MouseUpdate, 0x140C36B00, hh::hid::MouseWin32* self, floa
 //		return originalPointingGetTarget(self, resstr, inputId);
 //}
 
-HOOK(void, __fastcall, BindMaps, 0x140A2B990, hh::game::GameManager* gameManager, hh::hid::InputMapSettings* inputSettings) {
+HOOK(void, __fastcall, BindMaps, 0x140A2FEC0, hh::game::GameManager* gameManager, hh::hid::InputMapSettings* inputSettings) {
 	AddDevToolsInputBindings(inputSettings);
 	originalBindMaps(gameManager, inputSettings);
 }

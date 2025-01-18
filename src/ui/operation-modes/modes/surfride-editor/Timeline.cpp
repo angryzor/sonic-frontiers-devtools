@@ -3,12 +3,18 @@
 #include "Behaviors.h"
 #include "SurfRideElement.h"
 #include "implot_internal.h"
+#include <span>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	using namespace ucsl::resources::swif::v6;
 
-	void Timeline::RenderPanel()
-	{
+	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } {}
+
+	Timeline::~Timeline() {
+		ImTimeline::DestroyContext(timelineCtx);
+	}
+
+	void Timeline::RenderPanel() {
 		SurfRide::Layer* focusedLayer{};
 
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
@@ -39,7 +45,34 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		if (ImGui::BeginChild("Animation list", ImVec2(100.0f, 0.0f))) {
 			for (int i = 0; i < focusedLayer->layerData->animationCount; i++) {
-				if (ImGui::Selectable(focusedLayer->layerData->animations[i].name, focusedLayer->currentAnimationIndex == i))
+				auto& animation = focusedLayer->layerData->animations[i];
+
+				bool clicked = ImGui::Selectable(animation.name, focusedLayer->currentAnimationIndex == i);
+
+				if (ImGui::BeginPopupContextItem()) {
+					if (ImGui::BeginMenu("Add motion")) {
+						for (auto& cast : std::span(focusedLayer->layerData->casts, focusedLayer->layerData->castCount)) {
+							bool anyFound{};
+
+							for (auto& motion : std::span(animation.motions, animation.motionCount))
+								if (motion.castId == cast.id)
+									anyFound = true;
+
+							if (anyFound)
+								continue;
+
+							ImGui::PushID(cast.id);
+							if (ImGui::MenuItem(cast.name))
+								GetContext().AddMotion(animation, cast);
+							ImGui::PopID();
+						}
+
+						ImGui::EndMenu();
+					}
+					ImGui::EndPopup();
+				}
+
+				if (clicked)
 					focusedLayer->StartAnimation(i);
 				if (focusedLayer->currentAnimationIndex == i)
 					ImGui::SetItemDefaultFocus();
@@ -51,24 +84,26 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		ImGui::SameLine();
 		if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-			ImGui::SliderFloat("Zoom level", &zoom, 0.1f, 10.0f);
+			bool playing = true;
+			auto playHeadFrame = std::fminf(focusedLayer->currentFrame3, static_cast<float>(animation.frameCount));
+			bool currentTimeChanged{};
+
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0);
-			ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
-			if (ImGui::BeginTable("Timeline", 2, ImGuiTableFlags_BordersInnerH)) {
-				ImGui::TableSetupColumn("Cast name", ImGuiTableColumnFlags_WidthFixed, 100.0f);
-				ImGui::TableSetupColumn("Timeline", ImGuiTableColumnFlags_WidthFixed, animation.frameCount * zoom);
-				ImGui::TableHeadersRow();
-
-				for (size_t i = 0; i < animation.motionCount; i++) {
-					ImGui::TableNextRow();
+			ImTimeline::Begin(timelineCtx);
+			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(animation.frameCount), 60.0, &playing, &currentTimeChanged)) {
+				for (size_t i = 0; i < animation.motionCount; i++)
 					RenderMotion(*focusedLayer, animation, animation.motions[i]);
-				}
-
-				ImGui::EndTable();
+				ImTimeline::EndTimeline();
 			}
-			ImGui::PopStyleVar();
+			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
+
+			if (currentTimeChanged) {
+				focusedLayer->currentFrame = playHeadFrame;
+				focusedLayer->currentFrame2 = playHeadFrame;
+				focusedLayer->currentFrame3 = playHeadFrame;
+			}
 		}
 		ImGui::EndChild();
 	}
@@ -80,82 +115,103 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void Timeline::RenderMotion(SurfRide::Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion)
 	{
-		ImGui::TableNextColumn();
-
 		SRS_CASTNODE* cast{};
 		for (size_t i = 0; i < layer.layerData->castCount; i++)
 			if (layer.layerData->casts[i].id == motion.castId)
 				cast = &layer.layerData->casts[i];
 
-		ImGui::Text("%s", cast == nullptr ? "MISSINGNO." : cast->name);
-		ImGui::TableNextColumn();
-		auto cellPos = ImGui::GetCursorPos();
-		auto cellScreenPos = ImGui::GetCursorScreenPos();
-		auto playHeadFrame = std::fminf(layer.currentFrame3, static_cast<float>(animation.frameCount));
-		for (size_t i = 0; i < motion.trackCount; i++) {
-			RenderTrack(layer, animation, motion, motion.tracks[i]);
+		char name[200];
+		snprintf(name, sizeof(name), "%s", cast == nullptr ? "MISSINGNO." : cast->name);
+
+		bool isOpen = ImTimeline::BeginTrackGroup(name);
+
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && ImTimeline::IsNameColumnHovered())
+			ImGui::OpenPopup("contextmenu");
+
+		if (ImGui::BeginPopup("contextmenu")) {
+			if (ImGui::BeginMenu("Add track")) {
+				for (unsigned int i = 0; i < static_cast<unsigned int>(ECurveType::IlluminationColorA); i++)
+					if (ImGui::MenuItem(TrackName(static_cast<ECurveType>(i))))
+						GetContext().AddTrack(motion, static_cast<ECurveType>(i), 0, std::min(animation.frameCount, 10u));
+				ImGui::EndMenu();
+			}
+			ImGui::EndPopup();
 		}
 
-		auto sliceCount = animation.frameCount / 60;
-		auto sliceRemainder = animation.frameCount % 60;
+		if (isOpen) {
+			for (size_t i = 0; i < motion.trackCount; i++)
+				RenderTrack(layer, animation, motion, motion.tracks[i]);
 
-		for (size_t i = 0; i < sliceCount; i++)
-			ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImVec2(cellScreenPos.x + i * 60 * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + (i * 60 + 30) * zoom, ImGui::GetCursorScreenPos().y), 0x20FFFFFF);
-		if (sliceRemainder > 0)
-			ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImVec2(cellScreenPos.x + sliceCount * 60 * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + (sliceCount * 60 + std::min(30u, sliceRemainder)) * zoom, ImGui::GetCursorScreenPos().y), 0x20FFFFFF);
-		ImGui::GetCurrentWindow()->DrawList->AddLine(ImVec2(cellScreenPos.x + playHeadFrame * zoom, cellScreenPos.y), ImVec2(cellScreenPos.x + playHeadFrame * zoom, ImGui::GetCursorScreenPos().y), 0xFFFFFFFF);
+			ImTimeline::EndTrackGroup();
+		}
 	}
 
 	void Timeline::RenderTrack(SurfRide::Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
 	{
-		auto width = (track.lastFrame - track.firstFrame) * zoom;
-		auto posBefore = ImGui::GetCursorPos();
-		ImGui::SetCursorPosX(posBefore.x + track.firstFrame * zoom);
-		ImGui::PushID(&track);
-		if (width == 0) {
-			if (ImGui::BeginChild("TimelineItem", ImVec2(20, 20))) {
-				ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(ImGui::GetCursorScreenPos() + ImVec2(0, 10), 5, 0xFF5A6AED);
-				ImGui::GetCurrentWindow()->DrawList->AddCircle(ImGui::GetCursorScreenPos() + ImVec2(0, 10), 5, 0xFF000000);
+		if (ImTimeline::BeginTrack(TrackName(track))) {
+			auto length = (track.lastFrame - track.firstFrame);
+
+			if (length == 0) {
+				float time{ 0.0f };
+				ImTimeline::Event(TrackName(track), &time);
 			}
-			ImGui::EndChild();
-			//if (ImGui::IsItemClicked()) {
-			//	ImGui::OpenPopup("Editor");
-			//}
-			//assert(track.keyCount == 1);
-			//if (ImGui::BeginPopup("Editor")) {
-			//	RenderKeyFrameValueEditor(track, track.pKeyFrame[0]);
-			//	ImGui::EndPopup();
-			//}
-			ImGui::SetCursorPos(posBefore + ImVec2(0, 20));
-		}
-		else {
-			auto height = 80.0f;
-			if (ImGui::BeginChild("TimelineItem", ImVec2(width, height + ImGui::GetTextLineHeightWithSpacing()))) {
-				ImGui::GetCurrentWindow()->DrawList->AddRectFilled(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + ImVec2(width, ImGui::GetTextLineHeightWithSpacing()), 0xFF5A6AED);
-				ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0, 0, 0, 1));
-				ImGui::Text("%s", TrackName(track));
-				ImGui::PopStyleColor();
-				ImGui::SetItemTooltip("%s", TrackName(track));
-				if (ImPlot::BeginPlot("##Track", ImVec2(width, height), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
-					ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations);
-					ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
-					ImPlot::SetupAxisLimits(ImAxis_X1, track.firstFrame, track.lastFrame, ImPlotCond_Always);
-					RenderPlotLines(track);
-					ImPlot::EndPlot();
+			else {
+				float startTime = track.firstFrame;
+				float endTime = track.lastFrame;
+				bool startTimeChanged{};
+				bool endTimeChanged{};
+				bool moved{};
+
+				ImPlotPoint clickpos{};
+
+				if (ImTimeline::BeginClip(TrackName(track), &startTime, &endTime, 80.0f, &startTimeChanged, &endTimeChanged, &moved)) {
+					if (ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
+						ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations);
+						ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
+						ImPlot::SetupAxisLimits(ImAxis_X1, track.firstFrame, track.lastFrame, ImPlotCond_Always);
+
+
+						RenderPlotLines(track);
+
+						clickpos = ImPlot::GetPlotMousePos(ImAxis_X1, ImAxis_Y1);
+
+						ImPlot::EndPlot();
+
+						if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+							ImGui::OpenPopup("plot-context-menu");
+						}
+
+						if (ImGui::BeginPopup("plot-context-menu")) {
+							if (ImGui::MenuItem("Add keyframe"))
+								GetContext().AddKeyFrame(track, static_cast<unsigned int>(clickpos.x));
+
+							ImGui::EndPopup();
+						}
+					}
+					ImTimeline::EndClip();
 				}
 
-				// Have to create a new child because ImPlot creates some and we need this to enforce draw order
-				ImGui::SetCursorPos(ImVec2(0, 0));
-				if (ImGui::BeginChild("overlays", ImVec2(width, height + ImGui::GetTextLineHeightWithSpacing()), ImGuiChildFlags_None, ImGuiWindowFlags_NoInputs)) {
-					ImGui::GetCurrentWindow()->DrawList->AddRect(ImGui::GetCursorScreenPos(), ImGui::GetCursorScreenPos() + ImVec2(width, height + ImGui::GetTextLineHeightWithSpacing()), 0xFF000000);
-					ImGui::GetCurrentWindow()->DrawList->AddLine(ImGui::GetCursorScreenPos() + ImVec2(0, ImGui::GetTextLineHeightWithSpacing()), ImGui::GetCursorScreenPos() + ImVec2(width, ImGui::GetTextLineHeightWithSpacing()), 0xFF000000);
+				unsigned int newFirstFrame = static_cast<unsigned int>(startTime);
+				unsigned int newLastFrame = static_cast<unsigned int>(endTime);
+
+				if (moved) {
+					int delta = static_cast<int>(newFirstFrame) - static_cast<int>(track.firstFrame);
+
+					for (unsigned short i = 0; i < track.keyCount; i++) {
+						auto& key = GetKeyFrame<int>(track, i);
+						key.frame = static_cast<unsigned int>(static_cast<int>(key.frame) + delta);
+					}
 				}
-				ImGui::EndChild();
+
+				if (startTimeChanged)
+					track.firstFrame = newFirstFrame;
+
+				if (endTimeChanged)
+					track.lastFrame = newLastFrame;
 			}
-			ImGui::EndChild();
-			ImGui::SetCursorPos(posBefore + ImVec2(0, height + ImGui::GetTextLineHeightWithSpacing()));
+
+			ImTimeline::EndTrack();
 		}
-		ImGui::PopID();
 	}
 
 
@@ -244,9 +300,9 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	const char* Timeline::TrackName(SRS_TRACK& track)
+	const char* Timeline::TrackName(ECurveType curveType)
 	{
-		switch (track.trackType) {
+		switch (curveType) {
 		case ECurveType::TranslationX: return "Translation X";
 		case ECurveType::TranslationY: return "Translation Y";
 		case ECurveType::TranslationZ: return "Translation Z";
@@ -294,6 +350,10 @@ namespace ui::operation_modes::modes::surfride_editor {
 		case ECurveType::Unknown: return "Unknown";
 		default: return "Unknown";
 		}
+	}
+
+	const char* Timeline::TrackName(SRS_TRACK& track) {
+		return TrackName(track.trackType);
 	}
 
 	const char* Timeline::interpolationTypes[3] = { "Constant", "Linear", "Hermite" };

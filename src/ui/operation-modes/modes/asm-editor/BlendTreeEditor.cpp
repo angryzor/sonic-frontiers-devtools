@@ -3,7 +3,7 @@
 #include <ui/common/viewers/Basic.h>
 #include <ui/GlobalSettings.h>
 #include <ucsl-reflection/reflections/resources/asm/v103.h>
-#include <rip/binary/containers/binary-file/BinaryFile.h>
+#include <rip/binary/containers/binary-file/v2.h>
 
 namespace ui::operation_modes::modes::asm_editor {
 	using namespace hh::anim;
@@ -42,8 +42,7 @@ namespace ui::operation_modes::modes::asm_editor {
 				auto* exportData = static_cast<ucsl::resources::animation_state_machine::v103::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
 				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
-				rip::binary::binary_ostream bofs{ ofs };
-				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+				rip::binary::containers::binary_file::v2::BinaryFileSerializer<size_t> serializer{ ofs };
 				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportData);
 			}
 			ImGuiFileDialog::Instance()->Close();

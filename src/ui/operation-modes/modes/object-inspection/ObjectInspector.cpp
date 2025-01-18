@@ -12,6 +12,7 @@
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
+#include "component-inspectors/GOCSprite.h"
 #include "component-inspectors/GOCPlayerParameter.h"
 
 typedef std::tuple<
@@ -20,6 +21,7 @@ typedef std::tuple<
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::ui::GOCSprite,
 	app::player::GOCPlayerParameter
 > InspectableComponents;
 #endif
@@ -27,6 +29,7 @@ typedef std::tuple<
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
+#include "component-inspectors/GOCSprite.h"
 #include "component-inspectors/GOCAnimator.h"
 #include "component-inspectors/GOCActivator.h"
 #include "component-inspectors/GOCVisual.h"
@@ -46,6 +49,7 @@ typedef std::tuple<
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::ui::GOCSprite,
 	hh::gfx::GOCVisual,
 	hh::gfx::GOCVisualTransformed,
 	hh::gfx::GOCVisualModel,
@@ -64,6 +68,7 @@ typedef std::tuple<
 #ifdef DEVTOOLS_TARGET_SDK_miller
 #include "component-inspectors/GOCTransform.h"
 #include "component-inspectors/GOCCollider.h"
+#include "component-inspectors/GOCSprite.h"
 #include "component-inspectors/GOCAnimator.h"
 #include "component-inspectors/GOCPlayerParameter.h"
 #include "component-inspectors/GOCPlayerKinematicParams.h"
@@ -74,6 +79,7 @@ typedef std::tuple<
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::ui::GOCSprite,
 	app::player::GOCPlayerParameter,
 	app::player::GOCPlayerKinematicParams,
 	hh::anim::GOCAnimator

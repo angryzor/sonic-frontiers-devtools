@@ -1,4 +1,5 @@
 #pragma once
+#include <modules/Module.h>
 
 class Context
 {
@@ -11,6 +12,7 @@ public:
     static bool passThroughMouse;
     static bool inited;
     static bool imguiInited;
+    static csl::ut::MoveArray<hh::fnd::Reference<Module>> modules;
 
     static void update();
     static void install_hooks();

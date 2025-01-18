@@ -2,13 +2,11 @@
 #include "Behaviors.h"
 #include <ui/GlobalSettings.h>
 #include <ucsl-reflection/reflections/resources/fxcol/v1.h>
-#include <rip/binary/containers/binary-file/BinaryFile.h>
+#include <rip/binary/containers/binary-file/v2.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
-	using namespace app::gfx;
-
 	void ShapeList::RenderPanel() {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 
 		if (!fxColManager) {
 			ImGui::Text("FxColManager service not active.");
@@ -35,8 +33,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 				auto* exportData = static_cast<ucsl::resources::fxcol::v1::FxColData*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
 				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
-				rip::binary::binary_ostream bofs{ ofs };
-				rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+				rip::binary::containers::binary_file::v2::BinaryFileSerializer<size_t> serializer{ ofs };
 				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportData);
 			}
 			ImGuiFileDialog::Instance()->Close();
@@ -46,8 +43,8 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		const char* targetBoundingVolumePreview = "<none>";
 		char targetBoundingVolumeName[100];
 
-		for (size_t i = 0; i < fxColData->boundingVolumeCount; i++) {
-			auto& boundingVolume = fxColData->boundingVolumes[i];
+		for (size_t i = 0; i < fxColData->kdTreeLeafCount; i++) {
+			auto& boundingVolume = fxColData->kdTreeLeaves[i];
 
 			if (context.placementVolume == &boundingVolume) {
 				snprintf(targetBoundingVolumeName, sizeof(targetBoundingVolumeName), "Bounding Volume %zd", i);
@@ -57,8 +54,8 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		}
 
 		if (ImGui::BeginCombo("Target placement volume", targetBoundingVolumePreview)) {
-			for (size_t i = 0; i < fxColData->boundingVolumeCount; i++) {
-				auto& boundingVolume = fxColData->boundingVolumes[i];
+			for (size_t i = 0; i < fxColData->kdTreeLeafCount; i++) {
+				auto& boundingVolume = fxColData->kdTreeLeaves[i];
 				char name[100];
 				snprintf(name, sizeof(name), "Bounding Volume %zd", i);
 
@@ -76,8 +73,8 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			ImGui::EndPopup();
 		}
 
-		for (size_t i = 0; i < fxColData->boundingVolumeCount; i++) {
-			auto& boundingVolume = fxColData->boundingVolumes[i];
+		for (size_t i = 0; i < fxColData->kdTreeLeafCount; i++) {
+			auto& boundingVolume = fxColData->kdTreeLeaves[i];
 			char name[100];
 			snprintf(name, sizeof(name), "Bounding Volume %zd", i);
 
@@ -93,7 +90,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 
 			if (isOpen) {
 				for (size_t j = 0; j < boundingVolume.shapeCount; j++)
-					RenderShapeItem(fxColData->collisionShapes[boundingVolume.shapeStartIdx + j]);
+					RenderShapeItem(fxColData->shapes[boundingVolume.shapeOffset + j]);
 
 				ImGui::TreePop();
 			}
@@ -101,11 +98,11 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			ImGui::PopID();
 		}
 
-		for (size_t i = 0; i < fxColData->collisionShapeCount; i++) {
+		for (size_t i = 0; i < fxColData->shapeCount; i++) {
 			bool found{};
 
-			for (size_t j = 0; j < fxColData->boundingVolumeCount; j++) {
-				if (i >= fxColData->boundingVolumes[j].shapeStartIdx && i < fxColData->boundingVolumes[j].shapeStartIdx + fxColData->boundingVolumes[j].shapeCount) {
+			for (size_t j = 0; j < fxColData->kdTreeLeafCount; j++) {
+				if (i >= fxColData->kdTreeLeaves[j].shapeOffset && i < fxColData->kdTreeLeaves[j].shapeOffset + fxColData->kdTreeLeaves[j].shapeCount) {
 					found = true;
 					break;
 				}
@@ -114,7 +111,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 			if (found)
 				break;
 
-			RenderShapeItem(fxColData->collisionShapes[i]);
+			RenderShapeItem(fxColData->shapes[i]);
 		}
 	}
 

@@ -167,8 +167,8 @@ public:
 		return edited;
 	}
 
-	template<typename F>
-	static bool visit_pointer(opaque_obj*& obj, const PointerInfo& info, F f) {
+	template<typename F, typename A, typename S>
+	static bool visit_pointer(opaque_obj*& obj, const PointerInfo<A, S>& info, F f) {
 		return obj == nullptr ? false : f(*obj);
 	}
 
@@ -310,8 +310,8 @@ public:
 		return RenderStaticReflectionEditor::visit_flags(obj, info);
 	}
 
-	template<typename F>
-	static bool visit_pointer(opaque_obj*& obj, opaque_obj*& orig, const PointerInfo& info, const PointerInfo& infoOrig, F f) {
+	template<typename F, typename A1, typename S1, typename A2, typename S2>
+	static bool visit_pointer(opaque_obj*& obj, opaque_obj*& orig, const PointerInfo<A1, S1>& info, const PointerInfo<A2, S2>& infoOrig, F f) {
 		return RenderStaticReflectionEditor::visit_pointer(obj, info, [&](opaque_obj& obj) { return f(obj, *orig); });
 	}
 

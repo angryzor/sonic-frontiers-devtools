@@ -44,16 +44,19 @@ void RenderComponentInspector(hh::gfx::GOCVisualModel& component) {
 	if (auto& skeleton = component.skeleton)
 		Viewer("Skeleton resource", skeleton->GetName());
 
+	Viewer("Flags", component.description.flags.bits);
+
 	if (ImGui::TreeNode("Material instance parameters")) {
 		if (auto* meshResource = component.model->GetMeshResource()) {
 			for (auto materialIdx = 0; materialIdx < meshResource->GetMaterialCount(); materialIdx++) {
 				auto* materialNameID = meshResource->GetMaterialNameID(materialIdx);
 				if (ImGui::TreeNode(materialNameID, "%s", materialNameID->name)) {
 					auto* modelInstance = component.implementation.modelInstance;
+					auto paramsIdx = modelInstance->GetParameterValueObjectContainerByName(materialNameID);
 
-					if (auto paramsIdx = modelInstance->GetParameterValueObjectContainerByName(materialNameID))
-					if (auto* params = modelInstance->GetParameterValueObjectContainer(paramsIdx))
-						Editor("Parameters", *params);
+					if (paramsIdx != -1)
+						if (auto* params = modelInstance->GetParameterValueObjectContainer(paramsIdx))
+							Editor("Parameters", *params);
 
 					ImGui::TreePop();
 				}

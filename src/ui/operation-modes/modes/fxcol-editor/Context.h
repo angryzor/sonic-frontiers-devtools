@@ -7,15 +7,15 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		using CompatibleObject::CompatibleObject;
 
 		//hh::fnd::Reference<app::gfx::ResFxCol2File> fxColFile;
-		app::gfx::FxColBoundingVolumeData* placementVolume{};
+		ucsl::resources::fxcol::v1::KdTreeLeafData* placementVolume{};
 
-		static app::gfx::FxColBoundingVolumeData* GetBoundingVolumeOfShape(app::gfx::FxColCollisionShapeData* collisionShape);
+		static ucsl::resources::fxcol::v1::KdTreeLeafData* GetBoundingVolumeOfShape(ucsl::resources::fxcol::v1::ShapeData* collisionShape);
 		void AddBoundingVolume();
-		void RemoveBoundingVolume(app::gfx::FxColBoundingVolumeData* boundingVolume);
-		app::gfx::FxColCollisionShapeData* AddCollisionShape(app::gfx::FxColBoundingVolumeData* boundingVolume, const Eigen::Vector3f& position);
-		void RemoveCollisionShape(app::gfx::FxColCollisionShapeData* collisionShape);
+		void RemoveBoundingVolume(ucsl::resources::fxcol::v1::KdTreeLeafData* boundingVolume);
+		ucsl::resources::fxcol::v1::ShapeData* AddCollisionShape(ucsl::resources::fxcol::v1::KdTreeLeafData* boundingVolume, const Eigen::Vector3f& position);
+		void RemoveCollisionShape(ucsl::resources::fxcol::v1::ShapeData* collisionShape);
 
-		void RecalculateBoundingVolume(app::gfx::FxColBoundingVolumeData* boundingVolume);
+		void RecalculateBoundingVolume(ucsl::resources::fxcol::v1::KdTreeLeafData* boundingVolume);
 		void RecalculateKdTree();
 
 		static csl::geom::Aabb CalculateAabb(const app::gfx::FxColCollisionShapeData* collisionShape);

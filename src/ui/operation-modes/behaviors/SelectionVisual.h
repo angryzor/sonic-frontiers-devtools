@@ -1,5 +1,5 @@
 #pragma once
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <debug-rendering/DebugRenderable.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include <utilities/math/MathUtils.h>
 #include "ForwardDeclarations.h"
@@ -36,11 +36,11 @@ public:
 	}
 };
 
-class SelectionVisual3DBehavior : public SelectionVisualBehavior, public DebugRenderable {
+class SelectionVisual3DBehavior : public SelectionVisualBehavior, public devtools::debug_rendering::DebugRenderable {
 public:
 	using SelectionVisualBehavior::SelectionVisualBehavior;
 
-	virtual void RenderDebugVisuals(hh::gfnd::DrawContext& ctx) override {
+	virtual void RenderIngameDebugVisuals(hh::gfnd::DrawContext& ctx) override {
 		auto* selectionAabbBehavior = operationMode.GetBehavior<SelectionAabbBehaviorBase>();
 
 		if (!selectionAabbBehavior || !selectionAabbBehavior->HaveAabb())

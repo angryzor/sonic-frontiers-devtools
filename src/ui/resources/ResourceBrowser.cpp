@@ -11,7 +11,7 @@
 #include <utilities/ResourceTypes.h>
 #include <ucsl-reflection/reflections/resources/object-world/v2.h>
 #include <ucsl-reflection/reflections/resources/object-world/v3.h>
-#include <rip/binary/containers/binary-file/BinaryFile.h>
+#include <rip/binary/containers/binary-file/v2.h>
 
 using namespace hh::fnd;
 
@@ -299,8 +299,7 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
 		std::ofstream ofs{ filePath, std::ios::trunc | std::ios::binary };
-		rip::binary::binary_ostream bofs{ ofs };
-		rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+		rip::binary::containers::binary_file::v2::BinaryFileSerializer<size_t> serializer{ ofs };
 #ifdef DEVTOOLS_TARGET_SDK_wars
 		serializer.serialize<he2sdk::ucsl::GameInterface>(*(ucsl::resources::object_world::v2::ObjectWorldData<he2sdk::ucsl::GameInterface::AllocatorSystem>*)static_cast<hh::game::ResObjectWorld*>(resource)->binaryData);
 #else

@@ -49,8 +49,8 @@ public:
 		return false;
 	}
 
-	template<typename F>
-	static bool visit_pointer(opaque_obj*& obj, const PointerInfo& info, F f) {
+	template<typename F, typename A, typename S>
+	static bool visit_pointer(opaque_obj*& obj, const PointerInfo<A, S>& info, F f) {
 		if (obj != nullptr)
 			f(*obj);
 		return false;

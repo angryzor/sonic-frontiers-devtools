@@ -1,5 +1,5 @@
 #include "ToolBar.h"
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <debug-rendering/DebugRenderer.h>
 #include <rip/schemas/hedgeset.h>
 #include <ui/common/Editors/Basic.h>
 #include "Desktop.h"
@@ -186,7 +186,7 @@ void ToolBar::Render() {
 
 	if (debugCameraMgr->isActive != debugCameraActive) {
 		if (debugCameraActive)
-			debugCameraMgr->ActivateDebugCamera({ 0, 0, 1, 0 });
+			debugCameraMgr->ActivateDebugCamera({ 1, 0, 1, 0 });
 		else
 			debugCameraMgr->DeactivateDebugCamera();
 	}
@@ -230,14 +230,23 @@ void ToolBar::Render() {
 		}
 	}
 
-	ImGui::Checkbox("Render debug visuals", &GOCVisualDebugDrawRenderer::instance->enabled);
+	ImGui::Checkbox("Render debug visuals", &devtools::debug_rendering::DebugRenderer::instance->enabled);
+
+	if (auto* cockpit = hh::game::GameManager::GetInstance()->GetGameObject("UIGameCockpit"))
+	if (auto* cockpitGocSprite = cockpit->GetComponent<hh::ui::GOCSprite>()) {
+		bool enabled = cockpitGocSprite->flags.test(hh::ui::GOCSprite::Flag::ENABLED);
+
+		ImGui::SameLine();
+		if (ImGui::Checkbox("Render cockpit UI", &enabled))
+			cockpitGocSprite->flags.set(hh::ui::GOCSprite::Flag::ENABLED, enabled);
+	}
 
 	if (ImGuiFileDialog::Instance()->Display("HSONExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (ImGuiFileDialog::Instance()->IsOk()) {
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V2> b{};
+			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::GEDIT_V2> b{};
 #else
-			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::V3> b{};
+			rip::schemas::hedgeset::hson_template_builder<he2sdk::ucsl::GameInterface, rip::schemas::hedgeset::HSONFormat::GEDIT_V3> b{};
 #endif
 			b.add_all();
 			rip::schemas::hedgeset::write(ImGuiFileDialog::Instance()->GetFilePathName(), b.get_template());

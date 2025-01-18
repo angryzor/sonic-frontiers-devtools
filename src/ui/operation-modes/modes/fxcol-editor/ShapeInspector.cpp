@@ -3,11 +3,9 @@
 #include <ui/common/editors/FxCol.h>
 
 namespace ui::operation_modes::modes::fxcol_editor {
-	using namespace app::gfx;
-
 	void ShapeInspector::RenderPanel()
 	{
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 
 		if (!fxColManager)
 			return;

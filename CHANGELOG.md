@@ -1,3 +1,21 @@
+# v0.1.64
+* Added path rendering.
+* Added more reload queue.
+* Refactored debug rendering.
+* Fixed bug where reloading a gedit with new object types would crash.
+* Fixed a bug where inspecting the PVO of a GOCVisual's material instance would crash the game if it didn't exist.
+
+## Sonic Frontiers & Sonic Forces
+* Added options to create new timeline items in the SWIF editor.
+
+## Shadow Generations & Sonic Frontiers
+* Added Photo Mode (press L3 to activate).
+* Added occlusion capsule rendering.
+
+## Shadow Generations
+* Updated for v1.10.0.1
+
+
 # v0.1.63
 * Fixed font scaling in ASM editor.
 

@@ -1,6 +1,4 @@
 #include "Context.h"
-#include <resources/ManagedMemoryRegistry.h>
-#include <resources/managed-memory/ManagedCArray.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	using namespace ucsl::resources::swif::v6;
@@ -83,5 +81,78 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void Context::AddImageCast(SurfRide::Cast* parent) {
 		CreateImageCast(*parent->GetChildren().begin());
+	}
+
+	void Context::AddMotion(SRS_ANIMATION& animation, SRS_CASTNODE& cast) {
+		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(gocSprite->projectResource);
+
+		resources::ManagedCArray<SRS_MOTION, unsigned int> motions{ gocSprite->projectResource, animation.motions, animation.motionCount };
+
+		auto& motion = motions.emplace_back();
+		motion.castId = static_cast<unsigned short>(cast.id);
+		motion.tracks = nullptr;
+		motion.trackCount = 0;
+	}
+
+	void Context::AddTrack(SRS_MOTION& motion, ECurveType type, unsigned int firstFrame, unsigned int lastFrame)
+	{
+		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(gocSprite->projectResource);
+
+		resources::ManagedCArray<SRS_TRACK, unsigned short> tracks{ gocSprite->projectResource, motion.tracks, motion.trackCount };
+
+		auto& track = tracks.emplace_back();
+		track.trackType = type;
+		track.flags = (static_cast<unsigned int>(EInterpolationType::LINEAR) & 0x3) | ((static_cast<unsigned int>(ETrackDataType::FLOAT) & 0xF) << 4);
+		track.firstFrame = firstFrame;
+		track.lastFrame = lastFrame;
+		track.keyFrames.constantBool = nullptr;
+		track.keyCount = 0;
+	}
+
+	void Context::AddKeyFrame(SRS_TRACK& track, unsigned int frame)
+	{
+		switch (track.GetInterpolationType()) {
+		case EInterpolationType::CONSTANT:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: AddKeyFrameEx<Key<float>>(track, frame); break;
+			case ETrackDataType::INDEX: AddKeyFrameEx<Key<int>>(track, frame); break;
+			case ETrackDataType::INT: AddKeyFrameEx<Key<int>>(track, frame); break;
+			case ETrackDataType::BOOL: AddKeyFrameEx<Key<bool>>(track, frame); break;
+			case ETrackDataType::COLOR: AddKeyFrameEx<Key<Color>>(track, frame); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		case EInterpolationType::LINEAR:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: AddKeyFrameEx<KeyLinear<float>>(track, frame); break;
+			case ETrackDataType::INDEX: AddKeyFrameEx<KeyLinear<int>>(track, frame); break;
+			case ETrackDataType::INT: AddKeyFrameEx<KeyLinear<int>>(track, frame); break;
+			case ETrackDataType::BOOL: AddKeyFrameEx<KeyLinear<bool>>(track, frame); break;
+			case ETrackDataType::COLOR: AddKeyFrameEx<KeyLinear<Color>>(track, frame); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		case EInterpolationType::HERMITE:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: AddKeyFrameEx<KeyHermite<float>>(track, frame); break;
+			case ETrackDataType::INDEX: AddKeyFrameEx<KeyHermite<int>>(track, frame); break;
+			case ETrackDataType::INT: AddKeyFrameEx<KeyHermite<int>>(track, frame); break;
+			case ETrackDataType::BOOL: AddKeyFrameEx<KeyHermite<bool>>(track, frame); break;
+			case ETrackDataType::COLOR: AddKeyFrameEx<KeyHermite<Color>>(track, frame); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		case EInterpolationType::INDIVIDUAL:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: AddKeyFrameEx<KeyIndividual<float>>(track, frame); break;
+			case ETrackDataType::INDEX: AddKeyFrameEx<KeyIndividual<int>>(track, frame); break;
+			case ETrackDataType::INT: AddKeyFrameEx<KeyIndividual<int>>(track, frame); break;
+			case ETrackDataType::BOOL: AddKeyFrameEx<KeyIndividual<bool>>(track, frame); break;
+			case ETrackDataType::COLOR: AddKeyFrameEx<KeyIndividual<Color>>(track, frame); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		default: assert(false && "Invalid track flags"); break;
+		}
 	}
 }

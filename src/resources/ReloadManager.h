@@ -9,7 +9,8 @@ class ReloadManager : public CompatibleObject, public hh::game::GameStepListener
     public:
         ReloadRequest(csl::fnd::IAllocator* allocator, const std::wstring& path, hh::fnd::ManagedResource* resource);
     };
-    volatile PVOID reloadRequestInFlight{};
+    csl::ut::MoveArray<ReloadRequest*> reloadRequestsInFlight{ GetAllocator() };
+    CRITICAL_SECTION mutex{};
     filewatch::FileWatch<std::string>* fileWatcher{};
 public:
     ReloadManager(csl::fnd::IAllocator* allocator);

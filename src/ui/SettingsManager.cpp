@@ -4,7 +4,7 @@
 #include <ui/Context.h>
 #include <ui/Desktop.h>
 #include <ui/input/Input.h>
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <debug-rendering/DebugRenderingSystem.h>
 #include <ui/operation-modes/behaviors/ObjectLocationVisual3D.h>
 #include <ui/GlobalSettings.h>
 
@@ -28,6 +28,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingRenderGOCVisualDebugDraw == other.debugRenderingRenderGOCVisualDebugDraw
 		&& debugRenderingRenderColliders == other.debugRenderingRenderColliders
 		&& debugRenderingRenderOcclusionCapsules == other.debugRenderingRenderOcclusionCapsules
+		&& debugRenderingRenderPaths == other.debugRenderingRenderPaths
 		&& debugRenderingGOCVisualDebugDrawOpacity == other.debugRenderingGOCVisualDebugDrawOpacity
 		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
@@ -160,6 +161,8 @@ void SettingsManager::Render() {
 				if (ImGui::BeginTabItem("Camera")) {
 					ImGui::DragFloat("Debug camera mouse horizontal sensitivity", &tempSettings.debugCameraMouseSensitivityX, 0.001f);
 					ImGui::DragFloat("Debug camera mouse vertical sensitivity", &tempSettings.debugCameraMouseSensitivityY, 0.001f);
+					//ImGui::Checkbox("Enter debug pause when the debug camera is activated", &tempSettings.debugCameraTogglesDebugPause);
+					//ImGui::Checkbox("Hide HUD while debug camera is active", &tempSettings.debugCameraHidesHUD);
 					ImGui::EndTabItem();
 				}
 
@@ -210,6 +213,7 @@ void SettingsManager::Render() {
 							ImGui::Checkbox("Render GOCVisualDebugDraw visuals", &tempSettings.debugRenderingRenderGOCVisualDebugDraw);
 							ImGui::Checkbox("Render colliders", &tempSettings.debugRenderingRenderColliders);
 							ImGui::Checkbox("Render occlusion capsules", &tempSettings.debugRenderingRenderOcclusionCapsules);
+							ImGui::Checkbox("Render paths", &tempSettings.debugRenderingRenderPaths);
 							ImGui::SliderScalar("GOCVisualDebugDraw opacity (requires stage restart)", ImGuiDataType_U8, &tempSettings.debugRenderingGOCVisualDebugDrawOpacity, &minAlpha, &maxAlpha);
 							ImGui::DragFloat("Level editor debug box scale", &tempSettings.debugRenderingLevelEditorDebugBoxScale, 0.05f);
 							ImGui::DragScalar("Level editor debug box render limit", ImGuiDataType_U32, &tempSettings.debugRenderingLevelEditorDebugBoxRenderLimit);
@@ -332,10 +336,11 @@ void SettingsManager::ApplySettings() {
 	Context::set_enable_viewports(settings.enableViewports);
 #endif
 	Context::set_font_size(settings.fontSize);
-	GOCVisualDebugDrawRenderer::renderGOCVisualDebugDraw = settings.debugRenderingRenderGOCVisualDebugDraw;
-	GOCVisualDebugDrawRenderer::renderColliders = settings.debugRenderingRenderColliders;
-	GOCVisualDebugDrawRenderer::renderOcclusionCapsules = settings.debugRenderingRenderOcclusionCapsules;
-	GOCVisualDebugDrawRenderer::gocVisualDebugDrawOpacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
+	devtools::debug_rendering::DebugRenderingSystem::instance->gocVisualDebugDrawsRenderable.enabled = settings.debugRenderingRenderGOCVisualDebugDraw;
+	devtools::debug_rendering::DebugRenderingSystem::instance->gocVisualDebugDrawsRenderable.opacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
+	devtools::debug_rendering::DebugRenderingSystem::instance->collidersRenderable.enabled = settings.debugRenderingRenderColliders;
+	devtools::debug_rendering::DebugRenderingSystem::instance->occlusionCapsulesRenderable.enabled = settings.debugRenderingRenderOcclusionCapsules;
+	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.enabled = settings.debugRenderingRenderPaths;
 	ObjectLocationVisual3DBehaviorBase::ApplySettings(settings.debugRenderingLevelEditorDebugBoxScale, settings.debugRenderingLevelEditorDebugBoxRenderLimit, settings.debugRenderingLevelEditorDebugBoxRenderDistance);
 	strcpy_s(GlobalSettings::defaultFileDialogDirectory, settings.defaultFileDialogDir);
 
@@ -345,7 +350,7 @@ void SettingsManager::ApplySettings() {
 	
 	for (size_t i = 0; i < 32; i++)
 		for (size_t j = 0; j < 32; j++)
-			GOCVisualDebugDrawRenderer::colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
+			devtools::debug_rendering::DebugRenderingSystem::instance->collidersRenderable.colliderFilters[i][j] = settings.debugRenderingColliderFilters[i][j];
 
 	for (size_t i = 0; i < shortcutCount; i++)
 		SetShortcutBinding(static_cast<ShortcutId>(i), settings.shortcutBindings[i]);
@@ -402,6 +407,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingRenderGOCVisualDebugDraw=%u", &u) == 1) { settings.debugRenderingRenderGOCVisualDebugDraw = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderColliders=%u", &u) == 1) { settings.debugRenderingRenderColliders = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderOcclusionCapsules=%u", &u) == 1) { settings.debugRenderingRenderOcclusionCapsules = u; return; }
+	if (sscanf_s(line, "DebugRenderingRenderPaths=%u", &u) == 1) { settings.debugRenderingRenderPaths = u; return; }
 	if (sscanf_s(line, "DebugRenderingGOCVisualDebugDrawOpacity=%u", &u) == 1) { settings.debugRenderingGOCVisualDebugDrawOpacity = static_cast<uint8_t>(u); return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
@@ -459,6 +465,7 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingRenderGOCVisualDebugDraw=%u\n", settings.debugRenderingRenderGOCVisualDebugDraw);
 	out_buf->appendf("DebugRenderingRenderColliders=%u\n", settings.debugRenderingRenderColliders);
 	out_buf->appendf("DebugRenderingRenderOcclusionCapsules=%u\n", settings.debugRenderingRenderOcclusionCapsules);
+	out_buf->appendf("DebugRenderingRenderPaths=%u\n", settings.debugRenderingRenderPaths);
 	out_buf->appendf("DebugRenderingGOCVisualDebugDrawOpacity=%u\n", settings.debugRenderingGOCVisualDebugDrawOpacity);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);

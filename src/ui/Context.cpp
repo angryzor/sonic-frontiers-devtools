@@ -5,11 +5,12 @@
 #include "Desktop.h"
 #include "SettingsManager.h"
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
-#include <debug-rendering/GOCVisualDebugDrawRenderer.h>
+#include <debug-rendering/DebugRenderingSystem.h>
 #include <resources/ReloadManager.h>
 #include <resources/ManagedMemoryRegistry.h>
 #include "Context.h"
 #include "Context.h"
+#include <modules/PhotoMode.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -25,6 +26,7 @@ bool Context::enableViewports = false;
 float Context::fontSize = 14.0f;
 bool Context::reinitImGuiNextFrame = false;
 bool Context::rebuildFontsNextFrame = false;
+csl::ut::MoveArray<hh::fnd::Reference<Module>> Context::modules{};
 
 using namespace hh::game;
 using namespace hh::needle;
@@ -44,11 +46,11 @@ constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x1410FB090;
 constexpr size_t displaySwapDevicePresentAddr = 0x1410FAEE0;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
-constexpr size_t appResetAddr = 0x1460F1AE0;
-constexpr size_t appShutdownAddr = 0x14F9588E0;
-constexpr size_t wndProcAddr = 0x140A52630;
-constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x140F04AF0;
-constexpr size_t displaySwapDevicePresentAddr = 0x140F04920;
+constexpr size_t appResetAddr = 0x145E64E30;
+constexpr size_t appShutdownAddr = 0x14F2BF7C0;
+constexpr size_t wndProcAddr = 0x140A56B60;
+constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x140F09030;
+constexpr size_t displaySwapDevicePresentAddr = 0x140F08E60;
 #endif
 
 HOOK(uint64_t, __fastcall, GameApplication_Reset, appResetAddr, hh::game::GameApplication* self) {
@@ -124,6 +126,9 @@ HOOK(bool, __fastcall, DisplaySwapDevice_ResizeBuffers, displaySwapDeviceResizeB
 
 HOOK(bool, __fastcall, DisplaySwapDevice_Present, displaySwapDevicePresentAddr, hh::needle::ImplDX11::DisplaySwapDeviceDX11* self, unsigned int flags)
 {
+	for (auto& module : Context::modules)
+		module->Update();
+
 	if (Context::imguiInited && Context::visible) {
 		ShowCursor(true);
 		if (!renderTargetView) {
@@ -217,18 +222,21 @@ void Context::init_modules()
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	RESOLVE_STATIC_VARIABLE(hh::game::DebugCameraManager::instance) = hh::game::DebugCameraManager::Create();
 #endif
-	GOCVisualDebugDrawRenderer::instance = new (allocator) GOCVisualDebugDrawRenderer(allocator);
+	devtools::debug_rendering::DebugRenderingSystem::Init(allocator);
 	Desktop::instance = new (allocator) Desktop{ allocator };
 	Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::object_inspection::ObjectInspection>();
 	resources::ManagedMemoryRegistry::Init(allocator);
+	modules = { allocator };
+	modules.push_back(new (allocator) PhotoMode{ allocator });
 }
 
 void Context::deinit_modules()
 {
+	modules.clear();
 	resources::ManagedMemoryRegistry::Deinit();
 	Desktop::instance->~Desktop();
 	Desktop::instance->GetAllocator()->Free(Desktop::instance);
-	GOCVisualDebugDrawRenderer::instance = nullptr;
+	devtools::debug_rendering::DebugRenderingSystem::Deinit();
 #ifndef DEVTOOLS_TARGET_SDK_miller
 	ReloadManager::instance->GetAllocator()->Free(ReloadManager::instance);
 #endif

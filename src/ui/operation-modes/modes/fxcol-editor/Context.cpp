@@ -4,73 +4,73 @@
 #include <algorithm>
 
 namespace ui::operation_modes::modes::fxcol_editor {
-	using namespace app::gfx;
+	using namespace ucsl::resources::fxcol::v1;
 
-	FxColBoundingVolumeData* Context::GetBoundingVolumeOfShape(FxColCollisionShapeData* collisionShape) {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+	KdTreeLeafData* Context::GetBoundingVolumeOfShape(ShapeData* collisionShape) {
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<KdTreeLeafData, unsigned int> kdTreeLeaves{ fxColManager->resource, fxColData->kdTreeLeaves, fxColData->kdTreeLeafCount };
 
-		auto shapeIdx = collisionShape - fxColData->collisionShapes;
+		auto shapeIdx = collisionShape - fxColData->shapes;
 
-		for (auto& volume : boundingVolumes)
-			if (shapeIdx >= volume.shapeStartIdx && shapeIdx < volume.shapeStartIdx + static_cast<int>(volume.shapeCount))
+		for (auto& volume : kdTreeLeaves)
+			if (shapeIdx >= volume.shapeOffset && shapeIdx < volume.shapeOffset + static_cast<int>(volume.shapeCount))
 				return &volume;
 
 		return nullptr;
 	}
 
 	void Context::AddBoundingVolume() {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
+		resources::ManagedCArray<KdTreeLeafData, unsigned int> kdTreeLeaves{ fxColManager->resource, fxColData->kdTreeLeaves, fxColData->kdTreeLeafCount };
 
-		boundingVolumes.push_back(FxColBoundingVolumeData{
+		kdTreeLeaves.push_back(KdTreeLeafData{
 			0,
-			static_cast<int>(fxColData->boundingVolumeCount),
+			static_cast<int>(fxColData->kdTreeLeafCount),
 			{ -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity(), -std::numeric_limits<float>::infinity() },
 			{ std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity(), std::numeric_limits<float>::infinity() }
 		});
 	}
 
-	void Context::RemoveBoundingVolume(FxColBoundingVolumeData* boundingVolume) {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+	void Context::RemoveBoundingVolume(KdTreeLeafData* kdTreeLeaf) {
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
-		resources::ManagedCArray<FxColCollisionShapeData, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
+		resources::ManagedCArray<KdTreeLeafData, unsigned int> kdTreeLeaves{ fxColManager->resource, fxColData->kdTreeLeaves, fxColData->kdTreeLeafCount };
+		resources::ManagedCArray<ShapeData, unsigned int> shapes{ fxColManager->resource, fxColData->shapes, fxColData->shapeCount };
 
-		for (unsigned int i = 0; i < boundingVolume->shapeCount; i++)
-			collisionShapes.remove(boundingVolume->shapeStartIdx);
+		for (unsigned int i = 0; i < kdTreeLeaf->shapeCount; i++)
+			shapes.remove(kdTreeLeaf->shapeOffset);
 
-		auto volumeIdx = boundingVolume - fxColData->boundingVolumes;
+		auto volumeIdx = kdTreeLeaf - fxColData->kdTreeLeaves;
 
-		if (boundingVolume->shapeCount > 0)
-			for (auto& volume : boundingVolumes)
-				if (volume.shapeStartIdx >= boundingVolume->shapeStartIdx + static_cast<int>(boundingVolume->shapeCount))
-					volume.shapeStartIdx -= boundingVolume->shapeCount;
+		if (kdTreeLeaf->shapeCount > 0)
+			for (auto& volume : kdTreeLeaves)
+				if (volume.shapeOffset >= kdTreeLeaf->shapeOffset + static_cast<int>(kdTreeLeaf->shapeCount))
+					volume.shapeOffset -= kdTreeLeaf->shapeCount;
 
-		boundingVolumes.remove(volumeIdx);
+		kdTreeLeaves.remove(volumeIdx);
 	}
 
-	FxColCollisionShapeData* Context::AddCollisionShape(FxColBoundingVolumeData* boundingVolume, const Eigen::Vector3f& position) {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+	ShapeData* Context::AddCollisionShape(KdTreeLeafData* kdTreeLeaf, const Eigen::Vector3f& position) {
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
-		resources::ManagedCArray<FxColCollisionShapeData, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
+		resources::ManagedCArray<KdTreeLeafData, unsigned int> kdTreeLeaves{ fxColManager->resource, fxColData->kdTreeLeaves, fxColData->kdTreeLeafCount };
+		resources::ManagedCArray<ShapeData, unsigned int> shapes{ fxColManager->resource, fxColData->shapes, fxColData->shapeCount };
 
-		auto shapeIdx = static_cast<unsigned int>(boundingVolume->shapeStartIdx) + boundingVolume->shapeCount;
+		auto shapeIdx = static_cast<unsigned int>(kdTreeLeaf->shapeOffset) + kdTreeLeaf->shapeCount;
 
-		collisionShapes.emplace_back();
-		std::shift_right(collisionShapes.begin() + shapeIdx, collisionShapes.end(), 1);
+		shapes.emplace_back();
+		std::shift_right(shapes.begin() + shapeIdx, shapes.end(), 1);
 
-		auto& shape = collisionShapes[shapeIdx];
+		auto& shape = shapes[shapeIdx];
 		shape.name = "Shape";
-		shape.shape = FxColCollisionShapeData::Shape::SPHERE;
-		shape.type = FxColCollisionShapeData::Type::SCENE_PARAMETER_INDEX;
+		shape.shape = ShapeData::Shape::SPHERE;
+		shape.type = ShapeData::Type::SCENE_PARAMETER_INDEX;
 		shape.unk1 = 0;
 		shape.priority = 0;
 		shape.extents.sphere.radius = 10.0f;
@@ -81,65 +81,65 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		shape.position = position;
 		shape.rotation = Eigen::Quaternionf::Identity();
 
-		for (auto& volume : boundingVolumes)
-			if (volume.shapeStartIdx >= shapeIdx && &volume != boundingVolume)
-				volume.shapeStartIdx++;
+		for (auto& volume : kdTreeLeaves)
+			if (volume.shapeOffset >= shapeIdx && &volume != kdTreeLeaf)
+				volume.shapeOffset++;
 
-		boundingVolume->shapeCount++;
+		kdTreeLeaf->shapeCount++;
 
-		RecalculateBoundingVolume(boundingVolume);
+		RecalculateBoundingVolume(kdTreeLeaf);
 
 		return &shape;
 	}
 
-	void Context::RemoveCollisionShape(FxColCollisionShapeData* collisionShape) {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+	void Context::RemoveCollisionShape(ShapeData* collisionShape) {
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		resources::ManagedCArray<FxColBoundingVolumeData, unsigned int> boundingVolumes{ fxColManager->resource, fxColData->boundingVolumes, fxColData->boundingVolumeCount };
-		resources::ManagedCArray<FxColCollisionShapeData, unsigned int> collisionShapes{ fxColManager->resource, fxColData->collisionShapes, fxColData->collisionShapeCount };
+		resources::ManagedCArray<KdTreeLeafData, unsigned int> kdTreeLeaves{ fxColManager->resource, fxColData->kdTreeLeaves, fxColData->kdTreeLeafCount };
+		resources::ManagedCArray<ShapeData, unsigned int> shapes{ fxColManager->resource, fxColData->shapes, fxColData->shapeCount };
 
-		auto shapeIdx = collisionShape - fxColData->collisionShapes;
+		auto shapeIdx = collisionShape - fxColData->shapes;
 
 		resources::ManagedMemoryRegistry::instance->GetManagedAllocator(fxColManager->resource).Free(const_cast<char*>(collisionShape->name));
 
-		collisionShapes.remove(shapeIdx);
+		shapes.remove(shapeIdx);
 
-		for (auto& volume : boundingVolumes)
-			if (volume.shapeStartIdx > shapeIdx)
-				volume.shapeStartIdx--;
+		for (auto& volume : kdTreeLeaves)
+			if (volume.shapeOffset > shapeIdx)
+				volume.shapeOffset--;
 
-		auto* boundingVolume = GetBoundingVolumeOfShape(collisionShape);
+		auto* kdTreeLeaf = GetBoundingVolumeOfShape(collisionShape);
 
-		boundingVolume->shapeCount--;
+		kdTreeLeaf->shapeCount--;
 
-		RecalculateBoundingVolume(boundingVolume);
+		RecalculateBoundingVolume(kdTreeLeaf);
 	}
 
-	void Context::RecalculateBoundingVolume(app::gfx::FxColBoundingVolumeData* boundingVolume) {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+	void Context::RecalculateBoundingVolume(KdTreeLeafData* kdTreeLeaf) {
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 		auto* fxColData = fxColManager->resource->fxColData;
 
-		if (boundingVolume->shapeCount == 0) {
+		if (kdTreeLeaf->shapeCount == 0) {
 			// I prefer to set it as inverse infinities but this is what the game initializes an empty aabb to.
-			boundingVolume->aabbMin = { 0.0f, 0.0f, 0.0f };
-			boundingVolume->aabbMax = { 0.0f, 0.0f, 0.0f };
+			kdTreeLeaf->aabbMin = { 0.0f, 0.0f, 0.0f };
+			kdTreeLeaf->aabbMax = { 0.0f, 0.0f, 0.0f };
 		}
 		else {
 			csl::geom::Aabb aabb{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
 
-			for (int i = boundingVolume->shapeStartIdx; i < boundingVolume->shapeStartIdx + boundingVolume->shapeCount; i++)
-				AddAabb(aabb, CalculateAabb(&fxColData->collisionShapes[i]));
+			for (int i = kdTreeLeaf->shapeOffset; i < kdTreeLeaf->shapeOffset + kdTreeLeaf->shapeCount; i++)
+				AddAabb(aabb, CalculateAabb(&fxColData->shapes[i]));
 
-			boundingVolume->aabbMin = aabb.min;
-			boundingVolume->aabbMax = aabb.max;
+			kdTreeLeaf->aabbMin = aabb.min;
+			kdTreeLeaf->aabbMax = aabb.max;
 		}
 
 		RecalculateKdTree();
 	}
 
 	void Context::RecalculateKdTree() {
-		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<FxColManager>();
+		auto* fxColManager = hh::game::GameManager::GetInstance()->GetService<app::gfx::FxColManager>();
 
 		auto* oldResource = fxColManager->collisionTreeResource;
 
@@ -169,25 +169,25 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		return aabb;
 	}
 
-	csl::geom::Aabb Context::CalculateAabb(const app::gfx::FxColCollisionShapeData* shape) {
+	csl::geom::Aabb Context::CalculateAabb(const ShapeData* shape) {
 		switch (shape->shape) {
-		case FxColCollisionShapeData::Shape::SPHERE: {
+		case ShapeData::Shape::SPHERE: {
 			csl::geom::Aabb aabb{ { INFINITY, INFINITY, INFINITY }, { -INFINITY, -INFINITY, -INFINITY } };
 			auto& extents = shape->extents.sphere;
 			aabb.AddPoint(shape->position + csl::math::Vector3{ extents.radius, extents.radius, extents.radius });
 			aabb.AddPoint(shape->position - csl::math::Vector3{ extents.radius, extents.radius, extents.radius });
 			return aabb;
 		}
-		case FxColCollisionShapeData::Shape::CYLINDER: {
+		case ShapeData::Shape::CYLINDER: {
 			auto& extents = shape->extents.cylinder;
 			return CalculateAabbForObb(shape->position, shape->rotation, { extents.radius, extents.halfHeight, extents.radius });
 		}
-		case FxColCollisionShapeData::Shape::ANISOTROPIC_OBB: {
+		case ShapeData::Shape::ANISOTROPIC_OBB: {
 			auto& extents = shape->extents.anisotropicObb;
 			return CalculateAabbForObb(shape->position, shape->rotation, { extents.width / 2, extents.height / 2, extents.depth / 2 });
 			break;
 		}
-		case FxColCollisionShapeData::Shape::ISOTROPIC_OBB: {
+		case ShapeData::Shape::ISOTROPIC_OBB: {
 			auto& extents = shape->extents.isotropicObb;
 			return CalculateAabbForObb(shape->position, shape->rotation, { extents.width / 2, extents.height / 2, extents.depth / 2 });
 		}

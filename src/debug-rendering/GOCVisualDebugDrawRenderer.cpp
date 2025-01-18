@@ -1,6 +1,7 @@
 #include "GOCVisualDebugDrawRenderer.h"
 #include <utilities/math/MathUtils.h>
 #include "visuals/AabbTree.h"
+#include "DebugRenderer.h"
 
 using namespace hh::game;
 using namespace hh::gfx;
@@ -18,7 +19,7 @@ constexpr size_t gocVisualDebugDrawSetupAddr = 0x140682D50;
 constexpr size_t gocVisualDebugDrawSetupAddr = 0x140D06320;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
-constexpr size_t gocVisualDebugDrawSetupAddr = 0x1409C4A60;
+constexpr size_t gocVisualDebugDrawSetupAddr = 0x1409F44A0;
 #endif
 
 class GOCMyVisualDebugDraw : public GOCVisualDebugDraw {
@@ -233,6 +234,42 @@ void GOCVisualDebugDrawRenderer::Renderable::Render(const hh::gfnd::RenderablePa
 //		}
 //#endif
 	}
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	for (auto* gameObject : gameManager->objects) {
+		for (auto* goc : gameObject->components) {
+			if (goc->pStaticClass == hh::path::PathComponent::GetClass()) {
+				hh::fnd::Handle<hh::path::PathComponent> hGoc = (hh::path::PathComponent*)goc;
+				hh::gfnd::DrawVertex segments[2 * 100];
+				unsigned short indices[2 * 100];
+
+				float len = getPathLength(hGoc);
+
+				for (size_t i = 0; i < 100; i++) {
+					float time = len * (float)i / 100.0f;
+					float nextTime = len * (float)(i + 1) / 100.0f;
+
+					csl::math::Vector3 pos;
+					csl::math::Vector3 up;
+					csl::math::Vector3 forward;
+
+					interpolatePath(hGoc, time, pos, up, forward);
+
+					segments[i * 2] = { pos.x(), pos.y(), pos.z(), 0xFF00FF00 };
+
+					interpolatePath(hGoc, nextTime, pos, up, forward);
+
+					segments[i * 2 + 1] = { pos.x(), pos.y(), pos.z(), 0xFF00FF00 };
+				}
+
+				for (unsigned short i = 0; i < 200; i++)
+					indices[i] = i;
+
+				renderer->drawContext->DrawPrimitive(hh::gfnd::PrimitiveType::LINE_LIST, segments, indices, 200);
+			}
+		}
+	}
+#endif
 
 	for (auto* debugRenderable : renderer->additionalRenderables)
 		debugRenderable->RenderDebugVisuals(*renderer->drawContext);

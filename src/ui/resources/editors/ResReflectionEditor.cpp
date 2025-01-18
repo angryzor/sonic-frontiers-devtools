@@ -4,7 +4,7 @@
 #include <ucsl-reflection/providers/rflclass.h>
 #include <ucsl-reflection/algorithms/copy.h>
 #include <ucsl-reflection/traversals/traversal.h>
-#include <rip/binary/containers/binary-file/BinaryFile.h>
+#include <rip/binary/containers/binary-file/v2.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/viewers/RflDiff.h>
 #include <ui/GlobalSettings.h>
@@ -166,8 +166,7 @@ void ResReflectionEditor::RenderExportDialog()
 			auto* self = static_cast<ResReflectionEditor*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
 			std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
-			rip::binary::binary_ostream bofs{ ofs };
-			rip::binary::containers::binary_file::v2::BinaryFileSerializer serializer{ bofs };
+			rip::binary::containers::binary_file::v2::BinaryFileSerializer<size_t> serializer{ ofs };
 
 #if DEVTOOLS_TARGET_SDK_miller
 			using namespace ucsl::resources::rfl::v2;

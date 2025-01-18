@@ -18,9 +18,9 @@ void ResFxColFile2Editor::RenderContents()
 {
 	auto* fxColData = resource->fxColData;
 
-	for (unsigned int i = 0; i < fxColData->collisionShapeCount; i++) {
+	for (unsigned int i = 0; i < fxColData->shapeCount; i++) {
 		ImGui::PushID(static_cast<int>(i));
-		Editor("Collision Shape", fxColData->collisionShapes[i]);
+		Editor("Collision Shape", fxColData->shapes[i]);
 		ImGui::PopID();
 	}
 }
