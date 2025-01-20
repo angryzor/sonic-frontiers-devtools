@@ -1,6 +1,6 @@
 # v0.1.64
 * Added path rendering.
-* Added more reload queue.
+* Added reload queue.
 * Refactored debug rendering.
 * Fixed bug where reloading a gedit with new object types would crash.
 * Fixed a bug where inspecting the PVO of a GOCVisual's material instance would crash the game if it didn't exist.
