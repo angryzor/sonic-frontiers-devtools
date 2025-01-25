@@ -12,6 +12,8 @@ class PhotoMode : public Module, public hh::game::GameManagerListener {
 	void Unregister();
 	bool HasRequestedPhotoMode() const;
 public:
+	static bool enabled;
+
 	PhotoMode(csl::fnd::IAllocator* allocator);
 	~PhotoMode();
 

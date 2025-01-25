@@ -7,6 +7,7 @@
 #include <debug-rendering/DebugRenderingSystem.h>
 #include <ui/operation-modes/behaviors/ObjectLocationVisual3D.h>
 #include <ui/GlobalSettings.h>
+#include <modules/PhotoMode.h>
 
 ImGuiSettingsHandler SettingsManager::settingsHandler{};
 SettingsManager::Settings SettingsManager::settings{};
@@ -33,6 +34,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
 		&& debugRenderingLevelEditorDebugBoxRenderDistance == other.debugRenderingLevelEditorDebugBoxRenderDistance
+		&& enablePhotoMode == other.enablePhotoMode
 		&& !strcmp(defaultFileDialogDir, other.defaultFileDialogDir)
 		;
 
@@ -161,8 +163,7 @@ void SettingsManager::Render() {
 				if (ImGui::BeginTabItem("Camera")) {
 					ImGui::DragFloat("Debug camera mouse horizontal sensitivity", &tempSettings.debugCameraMouseSensitivityX, 0.001f);
 					ImGui::DragFloat("Debug camera mouse vertical sensitivity", &tempSettings.debugCameraMouseSensitivityY, 0.001f);
-					//ImGui::Checkbox("Enter debug pause when the debug camera is activated", &tempSettings.debugCameraTogglesDebugPause);
-					//ImGui::Checkbox("Hide HUD while debug camera is active", &tempSettings.debugCameraHidesHUD);
+					ImGui::Checkbox("Enable photo mode (L3)", &tempSettings.enablePhotoMode);
 					ImGui::EndTabItem();
 				}
 
@@ -342,6 +343,7 @@ void SettingsManager::ApplySettings() {
 	devtools::debug_rendering::DebugRenderingSystem::instance->occlusionCapsulesRenderable.enabled = settings.debugRenderingRenderOcclusionCapsules;
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.enabled = settings.debugRenderingRenderPaths;
 	ObjectLocationVisual3DBehaviorBase::ApplySettings(settings.debugRenderingLevelEditorDebugBoxScale, settings.debugRenderingLevelEditorDebugBoxRenderLimit, settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	PhotoMode::enabled = settings.enablePhotoMode;
 	strcpy_s(GlobalSettings::defaultFileDialogDirectory, settings.defaultFileDialogDir);
 
 	for (size_t i = 0; i < 32; i++)
@@ -412,6 +414,7 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderDistance=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderDistance = f; return; }
+	if (sscanf_s(line, "EnablePhotoMode=%u", &u) == 1) { settings.enablePhotoMode = static_cast<bool>(u); return; }
 	if (sscanf_s(line, "DefaultFileDialogDirectory=%511[^\r\n]", s, 512) == 1) { strcpy_s(settings.defaultFileDialogDir, s); return; }
 	if (sscanf_s(line, "SelectionColliderFilters=%256s", s, 512) == 1 && strlen(s) == 256) {
 		for (size_t i = 0; i < 32; i++) {
@@ -470,6 +473,7 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderDistance=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	out_buf->appendf("EnablePhotoMode=%u\n", settings.enablePhotoMode);
 	out_buf->appendf("DefaultFileDialogDirectory=%s\n", settings.defaultFileDialogDir);
 
 	out_buf->appendf("SelectionColliderFilters=");

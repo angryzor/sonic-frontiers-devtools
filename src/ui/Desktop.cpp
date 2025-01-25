@@ -20,6 +20,19 @@ using namespace hh::physics;
 Desktop* Desktop::instance{};
 bool Desktop::selectionColliderFilters[32][32]{ true };
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+hh::fnd::Reference<app::player::PlayerReplayService> replayService{};
+const char* replayCommandNames[] = {
+	"TOGGLE_PLAYBACK",
+	"TOGGLE_RECORDING",
+	"TOGGLE_PLAYBACK_2",
+	"TOGGLE_PLAYBACK_SPEED",
+	"TOGGLE_REPLAY_CAMERA",
+	"LOAD",
+	"SAVE",
+};
+#endif
+
 ImTimeline::ImTimelineContext* tlCtx = ImTimeline::CreateContext();
 
 Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }
@@ -78,6 +91,36 @@ void Desktop::Render() {
 	SettingsManager::Render();
 
 	HandleShortcuts();
+
+//#ifdef DEVTOOLS_TARGET_SDK_miller
+//	auto* gameManager = hh::game::GameManager::GetInstance();
+//	static app::player::MsgReplayCommand::Command command{};
+//
+//	if (ImGui::Button("Create replay service")) {
+//		replayService = gameManager->CreateService<app::player::PlayerReplayService>(nullptr);
+//		gameManager->RegisterService(replayService);
+//	}
+//
+//	if (ImGui::Button("Create replay recorder")) {
+//		if (auto* levelInfo = gameManager->GetService<app::level::LevelInfo>()) {
+//			auto* player = (app::player::Player*)static_cast<hh::fnd::Messenger*>(levelInfo->GetPlayerObject(0));
+//			auto* rec = player->UNSAFE_CreateComponent<app::player::GOCPlayerReplayRecorder>();
+//			player->UNSAFE_AddComponent(rec);
+//		}
+//	}
+//
+//	ComboEnum("replay command", command, replayCommandNames);
+//	ImGui::SameLine();
+//
+//	if (ImGui::Button("Send")) {
+//		if (auto* levelInfo = gameManager->GetService<app::level::LevelInfo>()) {
+//			auto hPlayer = levelInfo->GetPlayerObject(0);
+//			app::player::MsgReplayCommand msg{ command };
+//
+//			hPlayer->SendMessageImm(msg);
+//		}
+//	}
+//#endif
 
 	//if (auto* s = GameManager::GetInstance()->GetService<app::game::GrindService>()) {
 	//	ImGui::Text("%d", *reinterpret_cast<bool*>(reinterpret_cast<size_t>(s) + 0x1d0));

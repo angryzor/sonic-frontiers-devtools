@@ -18,6 +18,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/Math.cpp
+        modules/API.cpp
         modules/PhotoMode.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
@@ -73,6 +74,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/Math.h
+        modules/API.h
         modules/PhotoMode.h
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h

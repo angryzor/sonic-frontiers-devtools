@@ -31,3 +31,9 @@
 [submodule "sdks/miller-sdk"]
 	path = sdks/miller-sdk
 	url = https://github.com/angryzor/miller-sdk.git
+[submodule "vendor/uwebsockets/libuv"]
+	path = vendor/uwebsockets/libuv
+	url = https://github.com/libuv/libuv.git
+[submodule "vendor/uwebsockets/uWebSockets"]
+	path = vendor/uwebsockets/uWebSockets
+	url = https://github.com/uNetworking/uWebSockets.git

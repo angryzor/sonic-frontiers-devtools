@@ -11,6 +11,7 @@
 #include "Context.h"
 #include "Context.h"
 #include <modules/PhotoMode.h>
+#include <modules/API.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -39,8 +40,8 @@ constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x14082FD50;
 constexpr size_t displaySwapDevicePresentAddr = 0x1463FA880;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-constexpr size_t appResetAddr = 0x1501A41F0;
-constexpr size_t appShutdownAddr = 0x150192E80;
+constexpr size_t appResetAddr = 0x14FEF16E0;
+constexpr size_t appShutdownAddr = 0x14FEE88A0;
 constexpr size_t wndProcAddr = 0x140D68F80;
 constexpr size_t displaySwapDeviceResizeBuffersAddr = 0x1410FB090;
 constexpr size_t displaySwapDevicePresentAddr = 0x1410FAEE0;
@@ -228,6 +229,7 @@ void Context::init_modules()
 	resources::ManagedMemoryRegistry::Init(allocator);
 	modules = { allocator };
 	modules.push_back(new (allocator) PhotoMode{ allocator });
+	//modules.push_back(new (allocator) API{ allocator });
 }
 
 void Context::deinit_modules()

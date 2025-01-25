@@ -181,6 +181,7 @@ class SettingsManager
         float debugRenderingLevelEditorDebugBoxScale{ 0.3f };
         unsigned int debugRenderingLevelEditorDebugBoxRenderLimit{ 500 };
         float debugRenderingLevelEditorDebugBoxRenderDistance{ 500.0f };
+        bool enablePhotoMode{ true };
         ImGuiKeyChord shortcutBindings[20]{
             ImGuiKey_Escape,
             ImGuiMod_Ctrl | ImGuiKey_X,

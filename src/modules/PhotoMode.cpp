@@ -2,6 +2,8 @@
 
 using namespace hh::game;
 
+bool PhotoMode::enabled{ true };
+
 PhotoMode::PhotoMode(csl::fnd::IAllocator* allocator) : Module{ allocator } {
 	::QueryPerformanceFrequency((LARGE_INTEGER*)&perfFreq);
 
@@ -51,6 +53,9 @@ bool PhotoMode::HasRequestedPhotoMode() const {
 }
 
 void PhotoMode::Update() {
+	if (!enabled)
+		return;
+
 	if (!inputComponent)
 		return;
 
