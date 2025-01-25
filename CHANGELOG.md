@@ -1,3 +1,10 @@
+# v0.1.65
+* Added toggle to disable photo mode in Camera settings.
+
+## Sonic Frontiers
+* Updated for Sonic Frontiers v1.42
+
+
 # v0.1.64
 * Added path rendering.
 * Added reload queue.
