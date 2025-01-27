@@ -23,6 +23,7 @@ private:
 
 	hh::game::ObjectWorld* objectWorld;
 	std::thread httpThread;
+	uWS::App* pApp;
 	uWS::Loop* loop;
 	CRITICAL_SECTION mutex{};
 	std::queue<std::packaged_task<Response()>> requests{};
@@ -56,9 +57,12 @@ private:
 	}
 	
 public:
-	API(csl::fnd::IAllocator* allocator);
+	static constexpr unsigned int id = 0x41504930;
+
+	API(csl::fnd::IAllocator* allocator, const char* host, unsigned short port);
 	~API();
 
+	virtual unsigned int GetId() const override;
 	virtual void Update() override;
 	virtual void GameServiceAddedCallback(hh::game::GameService* gameService) override;
 	virtual void GameServiceRemovedCallback(hh::game::GameService* gameService) override;

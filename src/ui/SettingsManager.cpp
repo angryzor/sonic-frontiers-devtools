@@ -35,6 +35,9 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
 		&& debugRenderingLevelEditorDebugBoxRenderDistance == other.debugRenderingLevelEditorDebugBoxRenderDistance
 		&& enablePhotoMode == other.enablePhotoMode
+		&& enableApi == other.enableApi
+		&& !strcmp(apiHost, other.apiHost)
+		&& apiPort == other.apiPort
 		&& !strcmp(defaultFileDialogDir, other.defaultFileDialogDir)
 		;
 
@@ -216,9 +219,14 @@ void SettingsManager::Render() {
 							ImGui::Checkbox("Render occlusion capsules", &tempSettings.debugRenderingRenderOcclusionCapsules);
 							ImGui::Checkbox("Render paths", &tempSettings.debugRenderingRenderPaths);
 							ImGui::SliderScalar("GOCVisualDebugDraw opacity (requires stage restart)", ImGuiDataType_U8, &tempSettings.debugRenderingGOCVisualDebugDrawOpacity, &minAlpha, &maxAlpha);
+							ImGui::SeparatorText("Debug boxes");
+							ImGui::SetItemTooltip("Options for debug boxes (the purple boxes showing the position of invisible objects).");
 							ImGui::DragFloat("Level editor debug box scale", &tempSettings.debugRenderingLevelEditorDebugBoxScale, 0.05f);
+							ImGui::SetItemTooltip("Size of the debug boxes.");
 							ImGui::DragScalar("Level editor debug box render limit", ImGuiDataType_U32, &tempSettings.debugRenderingLevelEditorDebugBoxRenderLimit);
+							ImGui::SetItemTooltip("Max amount of debug boxes that can be rendered.");
 							ImGui::DragFloat("Level editor debug box render distance", &tempSettings.debugRenderingLevelEditorDebugBoxRenderDistance, 0.05f);
+							ImGui::SetItemTooltip("Culls any debug boxes beyond this distance.");
 							ImGui::EndTabItem();
 						}
 						if (ImGui::BeginTabItem("Collider rendering filters")) {
@@ -255,6 +263,16 @@ void SettingsManager::Render() {
 						}
 						ImGui::EndTabBar();
 					}
+					ImGui::EndTabItem();
+				}
+
+				if (ImGui::BeginTabItem("API")) {
+					ImGui::Checkbox("Enable DevTools API", &tempSettings.enableApi);
+					ImGui::SetItemTooltip("Runs a HTTP REST API that other tools can connect to to control DevTools or read out game information.");
+					ImGui::InputText("Host", tempSettings.apiHost, sizeof(tempSettings.apiHost));
+					ImGui::SetItemTooltip("Which host the API will listen on.");
+					ImGui::InputScalar("Port", ImGuiDataType_U16, &tempSettings.apiPort);
+					ImGui::SetItemTooltip("Which port the API will listen on.");
 					ImGui::EndTabItem();
 				}
 
@@ -337,6 +355,7 @@ void SettingsManager::ApplySettings() {
 	Context::set_enable_viewports(settings.enableViewports);
 #endif
 	Context::set_font_size(settings.fontSize);
+	Context::set_api_config(settings.enableApi, settings.apiHost, settings.apiPort);
 	devtools::debug_rendering::DebugRenderingSystem::instance->gocVisualDebugDrawsRenderable.enabled = settings.debugRenderingRenderGOCVisualDebugDraw;
 	devtools::debug_rendering::DebugRenderingSystem::instance->gocVisualDebugDrawsRenderable.opacity = settings.debugRenderingGOCVisualDebugDrawOpacity;
 	devtools::debug_rendering::DebugRenderingSystem::instance->collidersRenderable.enabled = settings.debugRenderingRenderColliders;
@@ -414,6 +433,9 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderDistance=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderDistance = f; return; }
+	if (sscanf_s(line, "EnableAPI=%u", &u) == 1) { settings.enableApi = static_cast<bool>(u); return; }
+	if (sscanf_s(line, "APIHost=%127[^\r\n]", s, 128) == 1) { strcpy_s(settings.apiHost, s); return; }
+	if (sscanf_s(line, "APIPort=%u", &u) == 1) { settings.apiPort = static_cast<unsigned short>(u); return; }
 	if (sscanf_s(line, "EnablePhotoMode=%u", &u) == 1) { settings.enablePhotoMode = static_cast<bool>(u); return; }
 	if (sscanf_s(line, "DefaultFileDialogDirectory=%511[^\r\n]", s, 512) == 1) { strcpy_s(settings.defaultFileDialogDir, s); return; }
 	if (sscanf_s(line, "SelectionColliderFilters=%256s", s, 512) == 1 && strlen(s) == 256) {
@@ -473,6 +495,9 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderDistance=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	out_buf->appendf("EnableAPI=%u\n", settings.enableApi);
+	out_buf->appendf("APIHost=%s\n", settings.apiHost);
+	out_buf->appendf("APIPort=%u\n", settings.apiPort);
 	out_buf->appendf("EnablePhotoMode=%u\n", settings.enablePhotoMode);
 	out_buf->appendf("DefaultFileDialogDirectory=%s\n", settings.defaultFileDialogDir);
 

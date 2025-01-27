@@ -1,6 +1,9 @@
 #include "Pch.h"
 #include "ResourceBrowser.h"
 #include "editors/ResReflectionEditor.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include "editors/ResEffectEditor.h"
+#endif
 //#include "editors/ResObjectWorldEditor.h"
 #include "editors/ResMaterialEditor.h"
 #include <resources/ReloadManager.h>
@@ -163,6 +166,11 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			else if (typeInfo == ResReflection::GetTypeInfo()) {
 				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection*>(resource));
 			}
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+			else if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) {
+				ResEffectEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::eff::ResEffect*>(resource));
+			}
+#endif
 #ifndef DEVTOOLS_TARGET_SDK_wars
 			else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
 				ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));

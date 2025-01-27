@@ -27,6 +27,10 @@ bool Context::enableViewports = false;
 float Context::fontSize = 14.0f;
 bool Context::reinitImGuiNextFrame = false;
 bool Context::rebuildFontsNextFrame = false;
+bool Context::enableApi = false;
+char Context::apiHost[] = "127.0.0.1";
+unsigned short Context::apiPort = 7007;
+csl::fnd::IAllocator* Context::allocator = nullptr;
 csl::ut::MoveArray<hh::fnd::Reference<Module>> Context::modules{};
 
 using namespace hh::game;
@@ -206,15 +210,15 @@ void Context::init_modules()
 	//devtoolsAllocator.Setup(moduleAllocator, 100 * 1024 * 1024, nullptr, 0, true);
 	//devtoolsAllocator.SetName("devtools");
 	//auto* allocator = &devtoolsAllocator;
-	auto* allocator = moduleAllocator;
+	allocator = moduleAllocator;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 	static hh::fnd::ThreadSafeTlsfHeapAllocator devtoolsAllocator{ "devtools" };
 	devtoolsAllocator.Setup(moduleAllocator, { 100 * 1024 * 1024, true });
-	auto* allocator = &devtoolsAllocator;
+	allocator = &devtoolsAllocator;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
-	auto* allocator = moduleAllocator;
+	allocator = moduleAllocator;
 #endif
 
 #ifndef DEVTOOLS_TARGET_SDK_miller
@@ -229,7 +233,6 @@ void Context::init_modules()
 	resources::ManagedMemoryRegistry::Init(allocator);
 	modules = { allocator };
 	modules.push_back(new (allocator) PhotoMode{ allocator });
-	//modules.push_back(new (allocator) API{ allocator });
 }
 
 void Context::deinit_modules()
@@ -313,6 +316,22 @@ void Context::rebuild_fonts()
 
 	if (imguiInited)
 		ImGui_ImplDX11_InvalidateDeviceObjects();
+}
+
+void Context::set_api_config(bool enable, const char* host, unsigned short port)
+{
+	if (enable != enableApi || strcmp(apiHost, host) || apiPort != port) {
+		for (size_t i = 0; i < modules.size(); i++) {
+			if (modules[i]->GetId() == API::id)
+				modules.remove(i);
+		}
+
+		if (enable)
+			modules.push_back(new (allocator) API{ allocator, host, port });
+	}
+	enableApi = enable;
+	strcpy_s(apiHost, host);
+	apiPort = port;
 }
 
 void Context::set_font_size(float size)

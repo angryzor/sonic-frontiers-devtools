@@ -10,45 +10,50 @@ namespace json_rfls {
 	struct Empty {};
 
 	struct Vector3 {
-		float x; float y; float z;
+		float x{}; float y{}; float z{};
 	};
 
 	struct DebugCameraSettings {
-		Vector3 origin;
-		Vector3 position;
-		float yaw;
-		float pitch;
-		float roll;
-		float zoom;
-		float nearClip;
-		float farClip;
-		float fov;
-		float speed;
+		Vector3 origin{};
+		Vector3 position{};
+		float yaw{};
+		float pitch{};
+		float roll{};
+		float zoom{};
+		float nearClip{};
+		float farClip{};
+		float fov{};
+		float speed{};
+	};
+
+	struct DebugCamera {
+		bool enabled{};
+		std::optional<DebugCameraSettings> settings{};
 	};
 
 	struct ObjectWorldChunk {
-		std::string id;
+		std::string id{};
 	};
 
 	struct ObjectWorldChunkLayer {
-		std::string id;
-		bool enabled;
+		std::string id{};
+		bool enabled{};
 	};
 
 	struct ObjectWorldComponentData {
-		std::string type;
-		rfl::Generic parameters;
+		std::string type{};
+		rfl::Generic parameters{};
 	};
 
 	struct ObjectWorldObjectData {
-		std::string id;
-		std::string parentId;
-		std::string name;
-		std::string type;
-		Vector3 position;
-		Vector3 rotation;
-		std::vector<ObjectWorldComponentData> components;
-		rfl::Generic parameters;
+		std::string id{};
+		std::string parentId{};
+		std::string name{};
+		std::string type{};
+		Vector3 position{};
+		Vector3 rotation{};
+		std::vector<ObjectWorldComponentData> components{};
+		rfl::Generic parameters{};
 	};
 }
 
@@ -128,17 +133,15 @@ hh::game::ObjectData* getObjectData(hh::game::ObjectWorldChunkLayer* layer, cons
 	return *object_it;
 }
 
-API::API(csl::fnd::IAllocator* allocator) : Module{ allocator }, httpThread{ [this]() {
-	uWS::App()
-		.get("/debug-camera/parameters", [this](auto* res, auto* req) {
+API::API(csl::fnd::IAllocator* allocator, const char* host, unsigned short port) : Module{ allocator }, httpThread{ [this, host, port]() {
+	bool running{};
+	auto app = uWS::App()
+		.get("/debug-camera", [this](auto* res, auto* req) {
 			apiCall(res, []() {
 				auto* debugCameraMgr = hh::game::DebugCameraManager::GetInstance();
 
 				if (!debugCameraMgr->isActive)
-					throw ErrorResponse{
-						.status = "400 Bad Request",
-						.message = "Debug camera is not active",
-					};
+					return json_rfls::DebugCamera{ .enabled = false };
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 				auto& camCtrl = *((hh::game::FreeCameraController*)&*debugCameraMgr->GetCamera()->controller);
@@ -146,21 +149,24 @@ API::API(csl::fnd::IAllocator* allocator) : Module{ allocator }, httpThread{ [th
 				auto& camCtrl = *((hh::game::DefaultFreeCameraController*)&*debugCameraMgr->GetCamera()->controller)->padController;
 #endif
 
-				return json_rfls::DebugCameraSettings{
-					.origin = { .x = camCtrl.unk3.camera.origin.x(), .y = camCtrl.unk3.camera.origin.y(), .z = camCtrl.unk3.camera.origin.z() },
-					.position = { .x = camCtrl.unk3.camera.position.x(), .y = camCtrl.unk3.camera.position.y(), .z = camCtrl.unk3.camera.position.z() },
-					.yaw = camCtrl.unk3.camera.yaw,
-					.pitch = camCtrl.unk3.camera.pitch,
-					.roll = camCtrl.unk3.camera.roll,
-					.zoom = camCtrl.unk3.camera.zoom,
-					.nearClip = camCtrl.unk3.viewport.nearClip,
-					.farClip = camCtrl.unk3.viewport.farClip,
-					.fov = camCtrl.unk3.viewport.fov,
-					.speed = camCtrl.currentSpeed,
+				return json_rfls::DebugCamera{
+					.enabled = true,
+					.settings = json_rfls::DebugCameraSettings{
+						.origin = {.x = camCtrl.unk3.camera.origin.x(), .y = camCtrl.unk3.camera.origin.y(), .z = camCtrl.unk3.camera.origin.z() },
+						.position = {.x = camCtrl.unk3.camera.position.x(), .y = camCtrl.unk3.camera.position.y(), .z = camCtrl.unk3.camera.position.z() },
+						.yaw = camCtrl.unk3.camera.yaw,
+						.pitch = camCtrl.unk3.camera.pitch,
+						.roll = camCtrl.unk3.camera.roll,
+						.zoom = camCtrl.unk3.camera.zoom,
+						.nearClip = camCtrl.unk3.viewport.nearClip,
+						.farClip = camCtrl.unk3.viewport.farClip,
+						.fov = camCtrl.unk3.viewport.fov,
+						.speed = camCtrl.currentSpeed,
+					},
 				};
 			});
 		})
-		.put("/debug-camera/parameters", [this](auto* res, auto* req) {
+		.put("/debug-camera", [this](auto* res, auto* req) {
 			auto input = std::make_shared<std::ostringstream>();
 			auto isAborted = std::make_shared<bool>();
 
@@ -176,19 +182,7 @@ API::API(csl::fnd::IAllocator* allocator) : Module{ allocator }, httpThread{ [th
 				apiCall(res, [body = input->str()]() {
 					auto* debugCameraMgr = hh::game::DebugCameraManager::GetInstance();
 
-					if (!debugCameraMgr->isActive) {
-						throw ErrorResponse{
-							.status = "400 Bad Request",
-							.message = "Debug camera is not active",
-						};
-					}
-
-#ifdef DEVTOOLS_TARGET_SDK_wars
-					auto& camCtrl = *((hh::game::FreeCameraController*)&*debugCameraMgr->GetCamera()->controller);
-#else
-					auto& camCtrl = *((hh::game::DefaultFreeCameraController*)&*debugCameraMgr->GetCamera()->controller)->padController;
-#endif
-					auto parsedBody = rfl::json::read<json_rfls::DebugCameraSettings>(body);
+					auto parsedBody = rfl::json::read<json_rfls::DebugCamera>(body);
 
 					if (!parsedBody) {
 						throw ErrorResponse{
@@ -199,16 +193,33 @@ API::API(csl::fnd::IAllocator* allocator) : Module{ allocator }, httpThread{ [th
 
 					auto params = parsedBody.value();
 
-					camCtrl.unk3.camera.origin = { params.origin.x, params.origin.y, params.origin.z };
-					camCtrl.unk3.camera.position = { params.position.x, params.position.y, params.position.z };
-					camCtrl.unk3.camera.yaw = params.yaw;
-					camCtrl.unk3.camera.pitch = params.pitch;
-					camCtrl.unk3.camera.roll = params.roll;
-					camCtrl.unk3.camera.zoom = params.zoom;
-					camCtrl.unk3.viewport.nearClip = params.nearClip;
-					camCtrl.unk3.viewport.farClip = params.farClip;
-					camCtrl.unk3.viewport.fov = params.fov;
-					camCtrl.currentSpeed = params.speed;
+					if (debugCameraMgr->isActive != params.enabled) {
+						if (params.enabled)
+							debugCameraMgr->ActivateDebugCamera({ 1, 0, 1, 0 });
+						else
+							debugCameraMgr->DeactivateDebugCamera();
+					}
+
+					if (debugCameraMgr->isActive && params.settings.has_value()) {
+#ifdef DEVTOOLS_TARGET_SDK_wars
+						auto& camCtrl = *((hh::game::FreeCameraController*)&*debugCameraMgr->GetCamera()->controller);
+#else
+						auto& camCtrl = *((hh::game::DefaultFreeCameraController*)&*debugCameraMgr->GetCamera()->controller)->padController;
+#endif
+
+						auto& settings = params.settings.value();
+
+						camCtrl.unk3.camera.origin = { settings.origin.x, settings.origin.y, settings.origin.z };
+						camCtrl.unk3.camera.position = { settings.position.x, settings.position.y, settings.position.z };
+						camCtrl.unk3.camera.yaw = settings.yaw;
+						camCtrl.unk3.camera.pitch = settings.pitch;
+						camCtrl.unk3.camera.roll = settings.roll;
+						camCtrl.unk3.camera.zoom = settings.zoom;
+						camCtrl.unk3.viewport.nearClip = settings.nearClip;
+						camCtrl.unk3.viewport.farClip = settings.farClip;
+						camCtrl.unk3.viewport.fov = settings.fov;
+						camCtrl.currentSpeed = settings.speed;
+					}
 
 					return json_rfls::Empty{};
 				});
@@ -338,8 +349,12 @@ API::API(csl::fnd::IAllocator* allocator) : Module{ allocator }, httpThread{ [th
 				};
 			});
 		})
-		.listen(7007, [](auto* socket) {})
-		.run();
+		.listen(host, port, [&running](auto* socket) {
+			running = socket != nullptr;
+		});
+	pApp = &app;
+	loop = running ? app.getLoop() : nullptr;
+	app.run();
 } }
 {
 	InitializeCriticalSection(&mutex);
@@ -347,6 +362,13 @@ API::API(csl::fnd::IAllocator* allocator) : Module{ allocator }, httpThread{ [th
 
 API::~API() {
 	DeleteCriticalSection(&mutex);
+	if (loop)
+		loop->defer([this]() { pApp->close(); });
+	httpThread.join();
+}
+
+unsigned int API::GetId() const {
+	return id;
 }
 
 void API::Update() {

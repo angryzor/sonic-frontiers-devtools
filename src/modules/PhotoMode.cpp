@@ -52,6 +52,10 @@ bool PhotoMode::HasRequestedPhotoMode() const {
 	return inputComponent->actionMonitors[0].state & 512;
 }
 
+unsigned int PhotoMode::GetId() const {
+	return id;
+}
+
 void PhotoMode::Update() {
 	if (!enabled)
 		return;

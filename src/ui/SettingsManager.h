@@ -182,6 +182,9 @@ class SettingsManager
         unsigned int debugRenderingLevelEditorDebugBoxRenderLimit{ 500 };
         float debugRenderingLevelEditorDebugBoxRenderDistance{ 500.0f };
         bool enablePhotoMode{ true };
+        bool enableApi{ false };
+        char apiHost[128]{ "127.0.0.1" };
+        unsigned short apiPort{ 7007 };
         ImGuiKeyChord shortcutBindings[20]{
             ImGuiKey_Escape,
             ImGuiMod_Ctrl | ImGuiKey_X,

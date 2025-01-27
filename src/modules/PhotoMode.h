@@ -12,11 +12,13 @@ class PhotoMode : public Module, public hh::game::GameManagerListener {
 	void Unregister();
 	bool HasRequestedPhotoMode() const;
 public:
+	static constexpr unsigned int id = 0x50484f54;
 	static bool enabled;
 
 	PhotoMode(csl::fnd::IAllocator* allocator);
 	~PhotoMode();
 
+	virtual unsigned int GetId() const override;
 	virtual void Update() override;
 	virtual void GameServiceAddedCallback(hh::game::GameService* gameService) override;
 	virtual void GameServiceRemovedCallback(hh::game::GameService* gameService) override;

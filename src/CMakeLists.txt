@@ -229,6 +229,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         ResReflectionEditor
         ResMaterialEditor
         ResFxColFile2Editor
+        ResEffectEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         MemoryInspector
