@@ -18,7 +18,10 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
         debug-rendering/visuals/Math.cpp
-        modules/API.cpp
+        api/API.cpp
+        api/DebugCamera.cpp
+        api/ObjectWorld.cpp
+        api/GameManager.cpp
         modules/PhotoMode.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
@@ -74,7 +77,12 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
         debug-rendering/visuals/Math.h
-        modules/API.h
+        api/API.h
+        api/APIContext.h
+        api/Common.h
+        api/DebugCamera.h
+        api/ObjectWorld.h
+        api/GameManager.h
         modules/PhotoMode.h
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h

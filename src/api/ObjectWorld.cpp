@@ -1,0 +1,210 @@
+#include "ObjectWorld.h"
+#include "Common.h"
+
+namespace devtools::api::object_world {
+	struct ObjectWorldChunk {
+		std::string id{};
+	};
+
+	struct ObjectWorldChunkLayer {
+		std::string id{};
+		bool enabled{};
+	};
+
+	struct ComponentData {
+		std::string type{};
+		rfl::Generic parameters{};
+	};
+
+	struct ObjectData {
+		std::string id{};
+		std::string parentId{};
+		std::string name{};
+		std::string type{};
+		Vector3 position{};
+		Vector3 rotation{};
+		std::vector<ComponentData> components{};
+		rfl::Generic parameters{};
+	};
+
+	hh::game::ObjectWorld* getObjectWorld() {
+		auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
+
+		if (!objWorld) {
+			throw ErrorResponse{
+				.status = "400 Bad Request",
+				.message = "ObjectWorld service is not active",
+			};
+		}
+
+		return objWorld;
+	}
+
+	hh::game::ObjectWorldChunk* getObjectWorldChunk(hh::game::ObjectWorld* objWorld, const std::string& chunkId) {
+		size_t iChunkId;
+
+		std::istringstream{ chunkId } >> iChunkId;
+
+		if (iChunkId > objWorld->GetWorldChunks().size()) {
+			throw ErrorResponse{
+				.status = "404 Not Found",
+				.message = "chunkId: invalid index",
+			};
+		}
+
+		return objWorld->GetWorldChunks()[iChunkId];
+	}
+
+	hh::game::ObjectWorldChunkLayer* getObjectWorldChunkLayer(hh::game::ObjectWorldChunk* chunk, const std::string& layerId) {
+		auto* layer = chunk->GetLayerByName(layerId.c_str());
+
+		if (!layer) {
+			throw ErrorResponse{
+				.status = "404 Not Found",
+				.message = "layerId: invalid id",
+			};
+		}
+
+		return layer;
+	}
+
+	hh::game::ObjectData* getObjectData(hh::game::ObjectWorldChunkLayer* layer, const std::string& objectId) {
+		auto objId = rip::util::fromGUID<hh::game::ObjectId>(objectId.c_str());
+
+		auto& objects = layer->GetResource()->GetObjects();
+		auto object_it = std::find_if(objects.begin(), objects.end(), [objId](auto* obj) { return obj->id == objId; });
+
+		if (object_it == objects.end()) {
+			throw ErrorResponse{
+				.status = "404 Not Found",
+				.message = "objectId: invalid id",
+			};
+		}
+
+		return *object_it;
+	}
+
+	void RegisterRoutes(APIContext& ctx) {
+		ctx.app->get("/object-world/chunks", [&ctx](auto* res, auto* req) {
+			ctx.apiCall(res, []() {
+				auto* objWorld = getObjectWorld();
+
+				std::vector<ObjectWorldChunk> results{};
+
+				for (size_t i = 0; i < objWorld->GetWorldChunks().size(); i++) {
+					std::ostringstream oss{};
+					oss << i;
+					results.push_back({ .id = oss.str() });
+				}
+
+				return results;
+			});
+		});
+		ctx.app->get("/object-world/chunks/:chunkId", [&ctx](auto* res, auto* req) {
+			ctx.apiCall(res, [chunkId = std::string{ req->getParameter("chunkId") }]() {
+				auto* objWorld = getObjectWorld();
+				getObjectWorldChunk(objWorld, chunkId);
+
+				return ObjectWorldChunk{ .id = chunkId };
+			});
+		});
+		ctx.app->get("/object-world/chunks/:chunkId/layers", [&ctx](auto* res, auto* req) {
+			ctx.apiCall(res, [chunkId = std::string{ req->getParameter("chunkId") }, layerId = std::string{ req->getParameter("layerId") }]() {
+				auto* objWorld = getObjectWorld();
+				auto* chunk = getObjectWorldChunk(objWorld, chunkId);
+
+				std::vector<ObjectWorldChunkLayer> results{};
+
+				for (auto* layer : chunk->GetLayers()) {
+					results.push_back({
+						.id = layer->GetName(),
+						.enabled = layer->IsEnable(),
+					});
+				}
+
+				return results;
+			});
+		});
+		ctx.app->get("/object-world/chunks/:chunkId/layers/:layerId", [&ctx](auto* res, auto* req) {
+			ctx.apiCall(res, [chunkId = std::string{ req->getParameter("chunkId") }, layerId = std::string{ req->getParameter("layerId") }]() {
+				auto* objWorld = getObjectWorld();
+				auto* chunk = getObjectWorldChunk(objWorld, chunkId);
+				auto* layer = getObjectWorldChunkLayer(chunk, layerId);
+
+				return ObjectWorldChunkLayer{
+					.id = layerId,
+					.enabled = layer->IsEnable(),
+				};
+			});
+		});
+		ctx.app->get("/object-world/chunks/:chunkId/layers/:layerId/objects", [&ctx](auto* res, auto* req) {
+			ctx.apiCall(res, [chunkId = std::string{ req->getParameter("chunkId") }, layerId = std::string{ req->getParameter("layerId") }]() {
+				auto* objWorld = getObjectWorld();
+				auto* chunk = getObjectWorldChunk(objWorld, chunkId);
+				auto* layer = getObjectWorldChunkLayer(chunk, layerId);
+
+				std::vector<ObjectData> results{};
+
+				for (auto* object : layer->GetResource()->GetObjects()) {
+					std::vector<ComponentData> components{};
+
+					for (auto* component : object->componentData) {
+						components.push_back({
+							.type = component->type,
+							.parameters = getRflClassSerialization(component->data, hh::game::GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(component->type)->GetSpawnerDataClass()),
+						});
+					}
+
+					results.push_back({
+						.id = rip::util::toGUID(object->id),
+						.parentId = rip::util::toGUID(object->parentID),
+#ifdef DEVTOOLS_TARGET_SDK_wars
+						.name = object->name,
+#else
+						.name = object->name.c_str(),
+#endif
+						.type = object->gameObjectClass,
+						.position = { object->localTransform.position.x(), object->localTransform.position.y(), object->localTransform.position.z() },
+						.rotation = { object->localTransform.rotation.x(), object->localTransform.rotation.y(), object->localTransform.rotation.z() },
+						.components = components,
+						.parameters = getRflClassSerialization(object->spawnerData, hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(object->gameObjectClass)->GetSpawnerDataClass()),
+					});
+				}
+
+				return results;
+			});
+		});
+		ctx.app->get("/object-world/chunks/:chunkId/layers/:layerId/objects/:objectId", [&ctx](auto* res, auto* req) {
+			ctx.apiCall(res, [chunkId = std::string{ req->getParameter("chunkId") }, layerId = std::string{ req->getParameter("layerId") }, objectId = std::string{ req->getParameter("objectId") }]() {
+				auto* objWorld = getObjectWorld();
+				auto* chunk = getObjectWorldChunk(objWorld, chunkId);
+				auto* layer = getObjectWorldChunkLayer(chunk, layerId);
+				auto* object = getObjectData(layer, objectId);
+
+				std::vector<ComponentData> components{};
+
+				for (auto* component : object->componentData) {
+					components.push_back({
+						.type = component->type,
+						.parameters = getRflClassSerialization(component->data, hh::game::GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(component->type)->GetSpawnerDataClass()),
+				});
+				}
+				
+				return ObjectData{
+					.id = rip::util::toGUID(object->id),
+					.parentId = rip::util::toGUID(object->parentID),
+#ifdef DEVTOOLS_TARGET_SDK_wars
+					.name = object->name,
+#else
+					.name = object->name.c_str(),
+#endif
+					.type = object->gameObjectClass,
+					.position = { object->localTransform.position.x(), object->localTransform.position.y(), object->localTransform.position.z() },
+					.rotation = { object->localTransform.rotation.x(), object->localTransform.rotation.y(), object->localTransform.rotation.z() },
+					.components = components,
+					.parameters = getRflClassSerialization(object->spawnerData, hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(object->gameObjectClass)->GetSpawnerDataClass()),
+				};
+			});
+		});
+	}
+}

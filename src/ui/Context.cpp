@@ -11,7 +11,7 @@
 #include "Context.h"
 #include "Context.h"
 #include <modules/PhotoMode.h>
-#include <modules/API.h>
+#include <api/API.h>
 
 static ID3D11Device* device;
 static ID3D11DeviceContext* deviceContext;
@@ -322,12 +322,12 @@ void Context::set_api_config(bool enable, const char* host, unsigned short port)
 {
 	if (enable != enableApi || strcmp(apiHost, host) || apiPort != port) {
 		for (size_t i = 0; i < modules.size(); i++) {
-			if (modules[i]->GetId() == API::id)
+			if (modules[i]->GetId() == devtools::api::API::id)
 				modules.remove(i);
 		}
 
 		if (enable)
-			modules.push_back(new (allocator) API{ allocator, host, port });
+			modules.push_back(new (allocator) devtools::api::API{ allocator, host, port });
 	}
 	enableApi = enable;
 	strcpy_s(apiHost, host);
