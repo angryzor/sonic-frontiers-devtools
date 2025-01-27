@@ -155,11 +155,13 @@ bool PrimitiveMatches(const void* obj1, const void* obj2, const RflClassMember::
 	case RflClassMember::Type::STRING: return strcmp(static_cast<const csl::ut::VariableString*>(obj1)->c_str(), static_cast<const csl::ut::VariableString*>(obj2)->c_str()) == 0;
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	case RflClassMember::Type::OBJECT_ID_V1: return Matches<hh::game::ObjectId>(obj1, obj2);
+	case RflClassMember::Type::COLOR_BYTE_RGBA: return Matches<csl::ut::Color8>(obj1, obj2);
+	case RflClassMember::Type::COLOR_FLOAT_RGBA: return Matches<csl::ut::Colorf>(obj1, obj2);
 #else
 	case RflClassMember::Type::OBJECT_ID_V2: return Matches<hh::game::ObjectId>(obj1, obj2);
+	case RflClassMember::Type::COLOR_BYTE_ABGR: return Matches<csl::ut::Color8>(obj1, obj2);
+	case RflClassMember::Type::COLOR_FLOAT_ABGR: return Matches<csl::ut::Colorf>(obj1, obj2);
 #endif
-	case RflClassMember::Type::COLOR_BYTE: return Matches<csl::ut::Color8>(obj1, obj2);
-	case RflClassMember::Type::COLOR_FLOAT: return Matches<csl::ut::Colorf>(obj1, obj2);
 	case RflClassMember::Type::POSITION: return Matches<csl::math::Vector3>(obj1, obj2);
 	default:
 		assert(!"rfl editor assertion failed: unknown primitive type");

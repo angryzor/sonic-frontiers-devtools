@@ -98,16 +98,6 @@ void Viewer(const char* label, hh::game::GameObject* const& gameObject)
 	ImGui::PopID();
 }
 
-void Viewer(const char* label, const ucsl::colors::Color8& color)
-{
-	ImGui::Text("%s: R: %d, G: %d, B: %d, A: %d", color.r, color.g, color.b, color.a);
-}
-
-void Viewer(const char* label, const ucsl::colors::Colorf& color)
-{
-	ImGui::Text("%s: R: %f, G: %f, B: %f, A: %f", color.r, color.g, color.b, color.a);
-}
-
 void Viewer(const char* label, const hh::fnd::HFrame& frame)
 {
 	if (ImGui::TreeNode(label)) {

@@ -1,3 +1,10 @@
+# v0.1.67
+* Added API query endpoint for objects.
+
+## Sonic Forces
+* Fixed color channel order issue that occurred since UCSL integration.
+
+
 # v0.1.66
 * Added API.
 

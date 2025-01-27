@@ -26,42 +26,6 @@ bool Editor(const char* label, csl::math::Transform& transform) {
     return edited;
 }
 
-bool Editor(const char* label, ucsl::colors::Colorf& color) {
-	float editableColor[4]{ color.r, color.g, color.b , color.a };
-
-	bool edited = ImGui::ColorEdit4(label, editableColor, ImGuiColorEditFlags_Float);
-
-	if (edited) {
-		color.r = editableColor[0];
-		color.g = editableColor[1];
-		color.b = editableColor[2];
-		color.a = editableColor[3];
-	}
-
-	return edited;
-}
-
-bool Editor(const char* label, ucsl::colors::Color8& color) {
-	float colorAsFloat[]{
-		static_cast<float>(color.r) / 255,
-		static_cast<float>(color.g) / 255,
-		static_cast<float>(color.b) / 255,
-		static_cast<float>(color.a) / 255,
-	};
-	float editableColor[4]{ colorAsFloat[0], colorAsFloat[1], colorAsFloat[2], colorAsFloat[3] };
-
-	bool edited = ImGui::ColorEdit4(label, editableColor, ImGuiColorEditFlags_Uint8);
-
-	if (edited) {
-		color.r = static_cast<uint8_t>(editableColor[0] * 255);
-		color.g = static_cast<uint8_t>(editableColor[1] * 255);
-		color.b = static_cast<uint8_t>(editableColor[2] * 255);
-		color.a = static_cast<uint8_t>(editableColor[3] * 255);
-	}
-
-	return edited;
-}
-
 bool Editor(const char* label, hh::game::ObjectId& id) {
     bool edited{};
 	auto* objWorld = hh::game::GameManager::GetInstance()->GetService<hh::game::ObjectWorld>();
