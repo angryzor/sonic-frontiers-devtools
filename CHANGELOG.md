@@ -1,3 +1,10 @@
+# v0.1.66
+* Added API.
+
+## Sonic Frontiers
+* Added extremely experimental CEMT editor.
+
+
 # v0.1.65
 * Added toggle to disable photo mode in Camera settings.
 
