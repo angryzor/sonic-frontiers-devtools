@@ -15,18 +15,17 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	void Timeline::RenderPanel() {
-		SurfRide::Layer* focusedLayer{};
+		SRS_LAYER* focusedLayer{};
 
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
+		auto& context = GetContext();
 
 		for (auto& element : selection) {
-			SurfRide::Layer* newLayer{};
-			if (element.type == SurfRideElement::Type::LAYER) {
-				newLayer = element.layer;
-			}
-			else if (element.type == SurfRideElement::Type::CAST) {
-				newLayer = element.cast->layer;
-			}
+			SRS_LAYER* newLayer{};
+			if (element.type == SurfRideElement::Type::LAYER)
+				newLayer = context.FindLayer(element.id);
+			else if (element.type == SurfRideElement::Type::CAST)
+				newLayer = context.FindCastLayer(element.id);
 
 			if (newLayer != nullptr) {
 				if (focusedLayer != nullptr) {
@@ -44,14 +43,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		if (ImGui::BeginChild("Animation list", ImVec2(100.0f, 0.0f))) {
-			for (int i = 0; i < focusedLayer->layerData->animationCount; i++) {
-				auto& animation = focusedLayer->layerData->animations[i];
+			for (int i = 0; i < focusedLayer->animationCount; i++) {
+				auto& animation = focusedLayer->animations[i];
 
 				bool clicked = ImGui::Selectable(animation.name, focusedLayer->currentAnimationIndex == i);
 
 				if (ImGui::BeginPopupContextItem()) {
 					if (ImGui::BeginMenu("Add motion")) {
-						for (auto& cast : std::span(focusedLayer->layerData->casts, focusedLayer->layerData->castCount)) {
+						for (auto& cast : std::span(focusedLayer->casts, focusedLayer->castCount)) {
 							bool anyFound{};
 
 							for (auto& motion : std::span(animation.motions, animation.motionCount))
@@ -63,7 +62,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 							ImGui::PushID(cast.id);
 							if (ImGui::MenuItem(cast.name))
-								GetContext().AddMotion(animation, cast);
+								context.AddMotion(animation, cast);
 							ImGui::PopID();
 						}
 
@@ -73,25 +72,26 @@ namespace ui::operation_modes::modes::surfride_editor {
 				}
 
 				if (clicked)
-					focusedLayer->StartAnimation(i);
+					context.StartAnimationByIndex(*focusedLayer, i);
+
 				if (focusedLayer->currentAnimationIndex == i)
 					ImGui::SetItemDefaultFocus();
 			}
 		}
 		ImGui::EndChild();
 
-		auto& animation = focusedLayer->layerData->animations[focusedLayer->currentAnimationIndex];
+		auto& animation = focusedLayer->animations[focusedLayer->currentAnimationIndex];
 
 		ImGui::SameLine();
 		if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
 			bool playing = true;
-			auto playHeadFrame = std::fminf(focusedLayer->currentFrame3, static_cast<float>(animation.frameCount));
+			auto playHeadFrame = std::fminf(context.GetAnimationFrame(*focusedLayer), static_cast<float>(animation.frameCount));
 			bool currentTimeChanged{};
 
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0);
 			ImTimeline::Begin(timelineCtx);
-			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(animation.frameCount), 60.0, &playing, &currentTimeChanged)) {
+			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(animation.frameCount), 60.0f, &playing, &currentTimeChanged)) {
 				for (size_t i = 0; i < animation.motionCount; i++)
 					RenderMotion(*focusedLayer, animation, animation.motions[i]);
 				ImTimeline::EndTimeline();
@@ -99,11 +99,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
 
-			if (currentTimeChanged) {
-				focusedLayer->currentFrame = playHeadFrame;
-				focusedLayer->currentFrame2 = playHeadFrame;
-				focusedLayer->currentFrame3 = playHeadFrame;
-			}
+			if (currentTimeChanged)
+				context.SetAnimationFrame(*focusedLayer, playHeadFrame);
 		}
 		ImGui::EndChild();
 	}
@@ -113,12 +110,10 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return { "Timeline", ImVec2(0, ImGui::GetMainViewport()->WorkSize.y - 575), ImVec2(1200, 550), ImVec2(1, 0) };
 	}
 
-	void Timeline::RenderMotion(SurfRide::Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion)
+	void Timeline::RenderMotion(SRS_LAYER& layer, SRS_ANIMATION& animation, SRS_MOTION& motion)
 	{
-		SRS_CASTNODE* cast{};
-		for (size_t i = 0; i < layer.layerData->castCount; i++)
-			if (layer.layerData->casts[i].id == motion.castId)
-				cast = &layer.layerData->casts[i];
+		auto& context = GetContext();
+		SRS_CASTNODE* cast = context.FindCast(layer, motion.castId);
 
 		char name[200];
 		snprintf(name, sizeof(name), "%s", cast == nullptr ? "MISSINGNO." : cast->name);
@@ -132,23 +127,24 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (ImGui::BeginMenu("Add track")) {
 				for (unsigned int i = 0; i < static_cast<unsigned int>(ECurveType::IlluminationColorA); i++)
 					if (ImGui::MenuItem(TrackName(static_cast<ECurveType>(i))))
-						GetContext().AddTrack(motion, static_cast<ECurveType>(i), 0, std::min(animation.frameCount, 10u));
+						context.AddTrack(motion, static_cast<ECurveType>(i), 0, std::min(animation.frameCount, 10u));
 				ImGui::EndMenu();
 			}
 			ImGui::EndPopup();
 		}
 
 		if (isOpen) {
-			for (size_t i = 0; i < motion.trackCount; i++)
-				RenderTrack(layer, animation, motion, motion.tracks[i]);
+			for (auto track : std::span(motion.tracks, motion.trackCount))
+				RenderTrack(layer, animation, motion, track);
 
 			ImTimeline::EndTrackGroup();
 		}
 	}
 
-	void Timeline::RenderTrack(SurfRide::Layer& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
+	void Timeline::RenderTrack(SRS_LAYER& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
 	{
 		if (ImTimeline::BeginTrack(TrackName(track))) {
+			auto context = GetContext();
 			auto length = (track.lastFrame - track.firstFrame);
 
 			if (length == 0) {
@@ -183,7 +179,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 						if (ImGui::BeginPopup("plot-context-menu")) {
 							if (ImGui::MenuItem("Add keyframe"))
-								GetContext().AddKeyFrame(track, static_cast<unsigned int>(clickpos.x));
+								context.AddKeyFrame(track, static_cast<unsigned int>(clickpos.x));
 
 							ImGui::EndPopup();
 						}
@@ -194,20 +190,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 				unsigned int newFirstFrame = static_cast<unsigned int>(startTime);
 				unsigned int newLastFrame = static_cast<unsigned int>(endTime);
 
-				if (moved) {
-					int delta = static_cast<int>(newFirstFrame) - static_cast<int>(track.firstFrame);
-
-					for (unsigned short i = 0; i < track.keyCount; i++) {
-						auto& key = GetKeyFrame<int>(track, i);
-						key.frame = static_cast<unsigned int>(static_cast<int>(key.frame) + delta);
-					}
-				}
+				if (moved)
+					context.MoveTrack(track, static_cast<int>(newFirstFrame) - static_cast<int>(track.firstFrame));
 
 				if (startTimeChanged)
-					track.firstFrame = newFirstFrame;
+					context.SetTrackStart(track, newFirstFrame);
 
 				if (endTimeChanged)
-					track.lastFrame = newLastFrame;
+					context.SetTrackEnd(track, newLastFrame);
 			}
 
 			ImTimeline::EndTrack();

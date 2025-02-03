@@ -14,8 +14,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
-		void RenderMotion(SurfRide::Layer& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion);
-		void RenderTrack(SurfRide::Layer& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion, ucsl::resources::swif::v6::SRS_TRACK& track);
+		void RenderMotion(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion);
+		void RenderTrack(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion, ucsl::resources::swif::v6::SRS_TRACK& track);
 		static void RenderPlotLines(ucsl::resources::swif::v6::SRS_TRACK& track);
 		static const char* TrackName(ucsl::resources::swif::v6::ECurveType curveType);
 		static const char* TrackName(ucsl::resources::swif::v6::SRS_TRACK& track);
