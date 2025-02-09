@@ -2,7 +2,7 @@
 #include <debug-rendering/DebugRenderable.h>
 
 namespace devtools::debug_rendering::renderables {
-	class Paths : public DebugRenderable {
+	class Paths : public OptionalDebugRenderable {
 	public:
 		bool enabled{};
 

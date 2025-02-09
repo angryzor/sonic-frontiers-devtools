@@ -11,9 +11,16 @@ namespace devtools::debug_rendering {
 
 	class DebugRenderable {
 	public:
-		DebugRenderable();
+		bool always{};
+
+		DebugRenderable(bool always = true);
 		virtual ~DebugRenderable();
 		virtual void RenderIngameDebugVisuals(hh::gfnd::DrawContext& ctx);
 		virtual void RenderImGuiDebugVisuals(const ImGuiDrawContext& ctx);
+	};
+
+	class OptionalDebugRenderable : public DebugRenderable {
+	public:
+		OptionalDebugRenderable();
 	};
 }

@@ -18,6 +18,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			case SurfRideElement::Type::CAMERA: return context.FindCamera(object.id)->name;
 			case SurfRideElement::Type::LAYER: return context.FindLayer(object.id)->name;
 			case SurfRideElement::Type::CAST: return context.FindCast(object.id)->name;
+			default: return nullptr;
 			}
 		}
 		bool IsSelectable(SurfRideElement object) { return object.type != SurfRideElement::Type::CAST ? false : context.FindRuntimeCast(object.id)->transform->display; }
@@ -30,20 +31,33 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		void GetChildren(SurfRideElement object, csl::ut::MoveArray<SurfRideElement>& children) {
-			for (auto* child : context.FindRuntimeCast(object.id)->GetChildren())
+			auto* cast = context.FindRuntimeCast(object.id);
+
+			for (auto* child : cast->GetChildren())
 				children.push_back(*child->castData);
+
+			//if (cast->castData->GetType() == ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE && static_cast<SurfRide::ReferenceCast*>(cast)->refLayer)
+			//	for (auto* child : static_cast<SurfRide::ReferenceCast*>(cast)->refLayer->GetCasts())
+			//		children.push_back(*child->castData);
 		}
 
 		void GetFrustumResults(const Frustum& frustum, csl::ut::MoveArray<SurfRideElement>& results) {
 			for (auto* layer : context.FindRuntimeScene(context.focusedScene->id)->GetLayers())
-				if (!(layer->flags & 0x100))
-					for (auto* cast : layer->GetCasts())
-						GetFrustumResultsForCast(cast, frustum, results);
+				GetFrustumResultsForLayer(layer, frustum, results);
+		}
+
+		void GetFrustumResultsForLayer(SurfRide::Layer* layer, const Frustum& frustum, csl::ut::MoveArray<SurfRideElement>& results) {
+			if (!(layer->flags & 0x100))
+				for (auto* cast : layer->GetCasts())
+					GetFrustumResultsForCast(cast, frustum, results);
 		}
 
 		void GetFrustumResultsForCast(SurfRide::Cast* cast, const Frustum& frustum, csl::ut::MoveArray<SurfRideElement>& results) {
-			if (cast->transform->display && frustum.Test(cast->transform->transformationMatrix * Eigen::Vector3f::Zero()))
+			if (cast->transform->display && frustum.Test(cast->transform->transformationMatrix * context.GetPivotTranslation(cast) * Eigen::Vector3f::Zero()))
 				results.push_back(*cast->castData);
+
+			//if (cast->castData->GetType() == ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE && static_cast<SurfRide::ReferenceCast*>(cast)->refLayer)
+			//	GetFrustumResultsForLayer(static_cast<SurfRide::ReferenceCast*>(cast)->refLayer, frustum, results);
 
 			for (auto* child : cast->GetChildren())
 				GetFrustumResultsForCast(child, frustum, results);
@@ -51,20 +65,20 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		bool Intersects(const SurfRide::Cast& cast, const Ray3f& ray) {
 			switch (static_cast<ucsl::resources::swif::v6::SRS_CASTNODE::Type>(cast.flags & 0xF)) {
-			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::IMAGE: return Intersects(*cast.transform, static_cast<const SurfRide::ImageCast&>(cast).size, ray);
-			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::SLICE: return Intersects(*cast.transform, static_cast<const SurfRide::SliceCast&>(cast).size, ray);
+			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::IMAGE: return Intersects(*cast.transform, context.GetPivotTranslation(&cast), static_cast<const SurfRide::ImageCast&>(cast).size, ray);
+			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::SLICE: return Intersects(*cast.transform, context.GetPivotTranslation(&cast), static_cast<const SurfRide::SliceCast&>(cast).size, ray);
 			default: return false;
 			}
 		}
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-		bool Intersects(const SurfRide::Transform3D& transform, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
+		bool Intersects(const SurfRide::Transform3D& transform, const Eigen::Translation3f& pivotTranslation, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
 #else
-		bool Intersects(const SurfRide::Transform& transform, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
+		bool Intersects(const SurfRide::Transform& transform, const Eigen::Translation3f& pivotTranslation, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
 #endif
 			auto halfSize = size / 2.0f;
 
-			Eigen::Affine3f invertedTransformMatrix{ transform.transformationMatrix.inverse() };
+			Eigen::Affine3f invertedTransformMatrix{ pivotTranslation.inverse() * transform.transformationMatrix.inverse() };
 			Eigen::ParametrizedLine<float, 3> worldLine{ ray };
 			Eigen::ParametrizedLine<float, 3> localLine{ invertedTransformMatrix * ray };
 			Eigen::Hyperplane<float, 3> castPlane{ { 0.0f, 0.0f, 1.0f }, { 0.0f, 0.0f, 0.0f } };
@@ -126,30 +140,8 @@ namespace ui::operation_modes::modes::surfride_editor
 				if (el.type != SurfRideElement::Type::CAST)
 					continue;
 
-				updated |= UpdateAabb(context.FindRuntimeCast(el.id), aabb);
-			}
-
-			return updated;
-		}
-
-		void UpdateAabb(const Eigen::Transform<float, 3, Eigen::Projective>& transform, const ucsl::resources::swif::v6::Vector2& size, csl::geom::Aabb& aabb)
-		{
-			aabb.AddPoint((transform * Eigen::Vector3f{ -size.x() / 2.0f, size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
-			aabb.AddPoint((transform * Eigen::Vector3f{ size.x() / 2.0f, size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
-			aabb.AddPoint((transform * Eigen::Vector3f{ size.x() / 2.0f, -size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
-			aabb.AddPoint((transform * Eigen::Vector3f{ -size.x() / 2.0f, -size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
-		}
-
-		bool UpdateAabb(const SurfRide::Cast* cast, csl::geom::Aabb& aabb)
-		{
-			bool updated{};
-
-			for (auto* child : cast->GetChildren())
-				updated |= UpdateAabb(child, aabb);
-
-			switch (static_cast<ucsl::resources::swif::v6::SRS_CASTNODE::Type>(cast->flags & 0xF)) {
-			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::IMAGE: UpdateAabb(context.GetFullCastTransform(cast), static_cast<const SurfRide::ImageCast*>(cast)->size, aabb); updated |= true; break;
-			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::SLICE: UpdateAabb(context.GetFullCastTransform(cast), static_cast<const SurfRide::SliceCast*>(cast)->size, aabb); updated |= true; break;
+				if (auto* runtimeCast = context.FindRuntimeCast(el.id))
+					updated |= context.UpdateAabb(runtimeCast, aabb);
 			}
 
 			return updated;
@@ -159,9 +151,9 @@ namespace ui::operation_modes::modes::surfride_editor
 	template<> struct SelectionTransformationBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
 		static constexpr bool Projective = true;
-		bool HasTransform(SurfRideElement element) { return element.type == SurfRideElement::Type::CAST; }
-		bool IsRoot(SurfRideElement element) { return context.FindRuntimeCast(element.id)->parentCast == nullptr; }
-		SurfRideElement GetParent(SurfRideElement element) { return *context.FindRuntimeCast(element.id)->parentCast->castData; }
+		bool HasTransform(SurfRideElement element) { return element.type == SurfRideElement::Type::CAST && context.FindRuntimeCast(element.id); }
+		bool IsRoot(SurfRideElement element) { return context.FindCastParent(element.id) == nullptr; }
+		SurfRideElement GetParent(SurfRideElement element) { return *context.FindCastParent(element.id); }
 		Eigen::Projective3f GetSelectionSpaceTransform(SurfRideElement element) const { return context.GetFullCastTransform(context.FindRuntimeCast(element.id)); }
 		void SetSelectionSpaceTransform(SurfRideElement element, const Eigen::Projective3f& transform) {
 #ifdef DEVTOOLS_TARGET_SDK_wars

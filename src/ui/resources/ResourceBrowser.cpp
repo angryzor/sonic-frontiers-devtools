@@ -18,41 +18,45 @@
 
 using namespace hh::fnd;
 
-AssetIconId ResourceTypeToAssetIconId(const ResourceTypeInfo* typeInfo) {
-	if (typeInfo == hh::snd::ResAtomConfig::GetTypeInfo()) return AssetIconId::ATOM_CONFIG;
-	if (typeInfo == hh::snd::ResAtomCueSheet::GetTypeInfo()) return AssetIconId::ATOM_PLAYLIST;
-	if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo()) return AssetIconId::LIGHTING;
-	if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) return AssetIconId::MATERIAL;
-	if (typeInfo == hh::gfx::ResTerrainModel::GetTypeInfo()) return AssetIconId::TERRAIN_MODEL;
-	if (typeInfo == hh::gfx::ResModel::GetTypeInfo()) return AssetIconId::MODEL;
-	if (typeInfo == hh::gfnd::ResFragmentShader::GetTypeInfo()) return AssetIconId::FRAGMENT_SHADER;
-	if (typeInfo == hh::gfnd::ResVertexShader::GetTypeInfo()) return AssetIconId::VERTEX_SHADER;
-	if (typeInfo == hh::gfnd::ResTexture::GetTypeInfo()) return AssetIconId::TEXTURE;
-	if (typeInfo == hh::font::ResBitmapFont::GetTypeInfo()) return AssetIconId::BITMAP_FONT;
-	if (typeInfo == hh::font::ResScalableFontSet::GetTypeInfo()) return AssetIconId::SCALABLE_FONT;
-	if (typeInfo == hh::fnd::ResReflection::GetTypeInfo()) return AssetIconId::REFLECTION;
-	if (typeInfo == hh::fnd::Packfile::GetTypeInfo()) return AssetIconId::PACKFILE;
-	if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) return AssetIconId::PARTICLESYSTEM;
+IconId ResourceTypeToIconId(const ResourceTypeInfo* typeInfo) {
+	if (typeInfo == hh::snd::ResAtomConfig::GetTypeInfo()) return IconId::RESOURCE_ATOM_CONFIG;
+	if (typeInfo == hh::snd::ResAtomCueSheet::GetTypeInfo()) return IconId::RESOURCE_ATOM_PLAYLIST;
+	if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo()) return IconId::RESOURCE_LIGHTING;
+	if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) return IconId::RESOURCE_MATERIAL;
+	if (typeInfo == hh::gfx::ResTerrainModel::GetTypeInfo()) return IconId::RESOURCE_TERRAIN_MODEL;
+	if (typeInfo == hh::gfx::ResModel::GetTypeInfo()) return IconId::RESOURCE_MODEL;
+	if (typeInfo == hh::gfnd::ResFragmentShader::GetTypeInfo()) return IconId::RESOURCE_FRAGMENT_SHADER;
+	if (typeInfo == hh::gfnd::ResVertexShader::GetTypeInfo()) return IconId::RESOURCE_VERTEX_SHADER;
+	if (typeInfo == hh::gfnd::ResTexture::GetTypeInfo()) return IconId::RESOURCE_TEXTURE;
+	if (typeInfo == hh::font::ResBitmapFont::GetTypeInfo()) return IconId::RESOURCE_BITMAP_FONT;
+	if (typeInfo == hh::font::ResScalableFontSet::GetTypeInfo()) return IconId::RESOURCE_SCALABLE_FONT;
+	if (typeInfo == hh::fnd::ResReflection::GetTypeInfo()) return IconId::RESOURCE_REFLECTION;
+	if (typeInfo == hh::fnd::Packfile::GetTypeInfo()) return IconId::RESOURCE_PACKFILE;
+	if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) return IconId::RESOURCE_PARTICLESYSTEM;
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-	if (typeInfo == hh::gfnd::ResComputeShader::GetTypeInfo()) return AssetIconId::COMPUTE_SHADER;
-	if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return AssetIconId::SURFRIDE_PROJECT;
-	if (typeInfo == heur::resources::ResLevel::GetTypeInfo()) return AssetIconId::LEVEL;
-	if (typeInfo == heur::resources::ResMasterLevel::GetTypeInfo()) return AssetIconId::MASTER_LEVEL;
-	//if (typeInfo == Res::GetTypeInfo()) return AssetIconId::PACKFILE_LEVELS;
-	if (typeInfo == heur::resources::ResPhysicalSkeleton::GetTypeInfo()) return AssetIconId::PHYSICS_BONE;
-	//if (typeInfo == heur::resources::ResSoftBody::GetTypeInfo()) return AssetIconId::SOFTBODY;
-	//if (typeInfo == heur::resources::ResHelperBone::GetTypeInfo()) return AssetIconId::HELPER_BONE;
-	//if (typeInfo == heur::resources::ResOrcaData::GetTypeInfo()) return AssetIconId::ORCA;
-	//if (typeInfo == Res::GetTypeInfo()) return AssetIconId::UI;
-	if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return AssetIconId::ANIMATION;
-	if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return AssetIconId::SKELETON;
-	if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return AssetIconId::DVSCENE;
+	if (typeInfo == hh::gfnd::ResComputeShader::GetTypeInfo()) return IconId::RESOURCE_COMPUTE_SHADER;
+	if (typeInfo == hh::ui::ResSurfRideProject::GetTypeInfo()) return IconId::RESOURCE_SURFRIDE_PROJECT;
+	if (typeInfo == heur::resources::ResLevel::GetTypeInfo()) return IconId::RESOURCE_LEVEL;
+	if (typeInfo == heur::resources::ResMasterLevel::GetTypeInfo()) return IconId::RESOURCE_MASTER_LEVEL;
+	//if (typeInfo == Res::GetTypeInfo()) return IconId::RESOURCE_PACKFILE_LEVELS;
+	if (typeInfo == heur::resources::ResPhysicalSkeleton::GetTypeInfo()) return IconId::RESOURCE_PHYSICS_BONE;
+	//if (typeInfo == heur::resources::ResSoftBody::GetTypeInfo()) return IconId::RESOURCE_SOFTBODY;
+	//if (typeInfo == heur::resources::ResHelperBone::GetTypeInfo()) return IconId::RESOURCE_HELPER_BONE;
+	//if (typeInfo == heur::resources::ResOrcaData::GetTypeInfo()) return IconId::RESOURCE_ORCA;
+	//if (typeInfo == Res::GetTypeInfo()) return IconId::RESOURCE_UI;
+	if (typeInfo == heur::resources::ResAnimation::GetTypeInfo()) return IconId::RESOURCE_ANIMATION;
+	if (typeInfo == heur::resources::ResSkeleton::GetTypeInfo()) return IconId::RESOURCE_SKELETON;
+	if (typeInfo == heur::resources::ResDvScene::GetTypeInfo()) return IconId::RESOURCE_DVSCENE;
 #endif
-	return AssetIconId::MODEL;
+	return IconId::RESOURCE_MODEL;
 }
 
-ResourceBrowser::ResourceBrowser(csl::fnd::IAllocator* allocator) : StandaloneWindow{ allocator } {
+ResourceBrowser::ResourceBrowser(csl::fnd::IAllocator* allocator) : StandaloneWindow{ allocator }, browser{ ImBrowser::CreateContext() } {
 	SetTitle("Resource browser");
+}
+
+ResourceBrowser::~ResourceBrowser() {
+	ImBrowser::DestroyContext(browser);
 }
 
 void ResourceBrowser::PreRender() {
@@ -81,6 +85,18 @@ void ResourceBrowser::RenderContents() {
 			cfg.flags = ImGuiFileDialogFlags_Modal;
 			ImGuiFileDialog::Instance()->OpenDialog("ResourceBrowserWatchDirectory", "Choose directory", nullptr, cfg);
 		}
+		
+		if (ImGui::BeginMenu("View")) {
+			if (ImGui::MenuItem("Thumbnails", nullptr, currentView == ImBrowser::ViewType::THUMBNAILS))
+				currentView = ImBrowser::ViewType::THUMBNAILS;
+			if (ImGui::MenuItem("List", nullptr, currentView == ImBrowser::ViewType::LIST))
+				currentView = ImBrowser::ViewType::LIST;
+			if (ImGui::MenuItem("Tiles", nullptr, currentView == ImBrowser::ViewType::TILES))
+				currentView = ImBrowser::ViewType::TILES;
+			if (ImGui::MenuItem("Details", nullptr, currentView == ImBrowser::ViewType::DETAILS))
+				currentView = ImBrowser::ViewType::DETAILS;
+			ImGui::EndMenu();
+		}
 
 		ImGui::EndMenuBar();
 	}
@@ -102,115 +118,117 @@ void ResourceBrowser::RenderContents() {
 				currentPath.remove(j);
 	}
 
-	if (ImGui::BeginChild("Main area"))
+	if (ImGui::BeginChild("Main area", {}, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 		RenderMainArea();
 	ImGui::EndChild();
 }
 
+const char* rank1Props[] = { "Type", "Size" };
+
 void ResourceBrowser::RenderMainArea() {
-	if (currentPath.size() == 0) {
-		auto* resourceManager = ResourceManager::GetInstance();
+	ImBrowser::Begin(browser);
+
+	if (ImBrowser::BeginBrowser("Resource browser", currentView, rank1Props, 2, nullptr, 0)) {
+		if (currentPath.size() == 0) {
+			auto* resourceManager = ResourceManager::GetInstance();
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
-		RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
+			RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
 #else
-		for (auto* container : resourceManager->GetResourceContainers()) {
-			RenderContainerContents(container);
-		}
+			for (auto* container : resourceManager->GetResourceContainers())
+				RenderContainerContents(container);
 #endif
-	}
-	else {
-		for (auto* container : currentPath[currentPath.size() - 1]->GetResourceContainers()) {
-			ImGui::PushID(container);
-			RenderContainerContents(container);
-			ImGui::PopID();
 		}
+		else {
+			for (auto* container : currentPath[currentPath.size() - 1]->GetResourceContainers())
+				RenderContainerContents(container);
+		}
+		ImBrowser::EndBrowser();
 	}
+
+	ImBrowser::End();
 }
 
 void ResourceBrowser::RenderContainerContents(const ResourceContainer* container) {
 	auto resourceCount = container->GetNumResources();
-
-	for (int i = 0; i < resourceCount; i++) {
-		ManagedResource* resource = container->GetResourceByIndex(i);
-		ImGui::PushID(resource);
-		RenderResource(resource);
-		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
-			if (ImGui::MenuItem("Load from file")) {
-				ShowLoadResourceDialog(resource);
-			}
-			ImGui::EndPopup();
-		}
-		ImGui::PopID();
-	}
+	
+	ImGui::PushID(container);
+	for (int i = 0; i < resourceCount; i++)
+		RenderResource(container->GetResourceByIndex(i));
+	ImGui::PopID();
 }
 
 void ResourceBrowser::RenderResource(ManagedResource* resource) {
-	ImGui::BeginGroup();
+	const ResourceTypeInfo* typeInfo = &resource->GetClass();
+	bool isSelected{};
+	bool isOpened{};
 
-	auto cursor = ImGui::GetCursorPos();
+	auto icon = GetIconAsImage(ResourceTypeToIconId(typeInfo));
+	ImBrowser::Image browserImage{ icon.texId, icon.uv1, icon.uv2, icon.size };
 
-	ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 1.0f));
+	PropSet props{ hh::fnd::MemoryRouter::GetTempAllocator() };
+	GetProps(resource, props);
 
-	float previewSize = std::max(64.0f, 100.0f * ImGui::GetFontSize() / 14.0f);
-	float largePreviewSize = 300.0f;
+	csl::ut::MoveArray<ImBrowser::PropertyValue> propVals{ hh::fnd::MemoryRouter::GetTempAllocator() };
+	for (auto& p : props.props)
+		propVals.push_back({ .key = p.key, .value = p.value });
 
-	if (ImGui::Selectable(resource->GetName(), selectedResource == resource, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(previewSize, previewSize + ImGui::GetFontSize()))) {
-		if (ImGui::IsMouseDoubleClicked(0)) {
-			const ResourceTypeInfo* typeInfo = &resource->GetClass();
+	ImBrowser::Item(resource, resource->GetName(), selectedResource == resource, &isSelected, &isOpened, propVals.begin(), propVals.size(), browserImage, GetImage(resource));
 
-			if (typeInfo == Packfile::GetTypeInfo()) {
-				selectedResource = nullptr;
-				currentPath.push_back(static_cast<Packfile*>(resource));
-			}
-			else if (typeInfo == ResReflection::GetTypeInfo()) {
-				ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection*>(resource));
-			}
+//		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
+//			if (ImGui::MenuItem("Load from file"))
+//				ShowLoadResourceDialog(resource);
+//
+//			ImGui::EndPopup();
+//		}
+//
+	if (isSelected)
+		selectedResource = resource;
+
+	if (isOpened) {
+		if (typeInfo == Packfile::GetTypeInfo()) {
+			selectedResource = nullptr;
+			currentPath.push_back(static_cast<Packfile*>(resource));
+		}
+		else if (typeInfo == ResReflection::GetTypeInfo())
+			ResReflectionEditor::Create(Desktop::instance->GetAllocator(), static_cast<ResReflection*>(resource));
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-			else if (typeInfo == hh::eff::ResEffect::GetTypeInfo()) {
-				ResEffectEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::eff::ResEffect*>(resource));
-			}
+		else if (typeInfo == hh::eff::ResEffect::GetTypeInfo())
+			ResEffectEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::eff::ResEffect*>(resource));
 #endif
 #ifndef DEVTOOLS_TARGET_SDK_wars
-			else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo()) {
-				ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
-			}
+		else if (typeInfo == hh::gfx::ResMaterial::GetTypeInfo())
+			ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
 #endif
-			//else if (typeInfo == hh::game::ResObjectWorld::GetTypeInfo()) {
-			//	ResObjectWorldEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::game::ResObjectWorld*>(resource));
-			//}
+	}
+}
+
+ImBrowser::Image ResourceBrowser::GetImage(hh::fnd::ManagedResource* resource)
+{
+	if (&resource->GetClass() != hh::gfnd::ResTexture::GetTypeInfo())
+		return {};
+
+	auto* resTex = static_cast<hh::gfnd::ResTexture*>(resource);
+	auto* tex = resTex->GetTexture();
+
+	return { GetTextureIDFromResTexture(resTex), { 0.0f, 0.0f }, { 1.0f, 1.0f }, { static_cast<float>(tex->format.width), static_cast<float>(tex->format.height) } };
+}
+
+void ResourceBrowser::GetProps(hh::fnd::ManagedResource* resource, PropSet& props)
+{
+	props.AddProp("Type", "%s", resource->GetClass().pName);
+	props.AddProp("Size", "%d kB", resource->GetSize() / 1024);
+
+	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
+		if (auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource)->GetTexture()) {
+			props.AddProp("Resolution", "%d x %d x %d", texture->format.width, texture->format.height, texture->format.depth);
+			props.AddProp("Array size", "%d", texture->format.arraySize);
+			props.AddProp("Mip levels", "%d", texture->format.mipLevels);
+			props.AddProp("Sample description index", "%d", texture->format.sampleDescIndex);
+			props.AddProp("Texture type", "%d", static_cast<unsigned int>(texture->format.type));
+			props.AddProp("Format", "%d", static_cast<unsigned int>(texture->format.format));
 		}
-		else
-			selectedResource = resource;
 	}
-
-	if (ImGui::BeginDragDropSource()) {
-		ImGui::SetDragDropPayload("Resource", &resource, sizeof(resource));
-		ImGui::EndDragDropSource();
-	}
-
-	ImGui::SetCursorPos(cursor);
-	RenderPreview(resource, previewSize);
-
-	ImGui::PopStyleVar();
-	ImGui::EndGroup();
-
-	if (ImGui::BeginItemTooltip()) {
-		ImGui::PushTextWrapPos(largePreviewSize);
-		ImGui::Text("Name: %s", resource->GetName());
-		ImGui::Text("Type: %s", resource->GetClass().pName);
-		RenderDetails(resource);
-		ImGui::PopTextWrapPos();
-		ImGui::Separator();
-		RenderPreview(resource, largePreviewSize);
-		ImGui::EndTooltip();
-	}
-
-	float lastButtonX = ImGui::GetItemRectMax().x;
-	float nextButtonX = lastButtonX + ImGui::GetStyle().ItemSpacing.x + previewSize;
-
-	if (nextButtonX < ImGui::GetWindowPos().x + ImGui::GetWindowContentRegionMax().x)
-		ImGui::SameLine();
 }
 
 void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
@@ -283,22 +301,22 @@ void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, fl
 {
 	auto cursor = ImGui::GetCursorPos();
 	
-	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
-		auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource);
-		if (auto* textureId = GetTextureIDFromResTexture(texture)) {
-			ImGui::Image(textureId, ImVec2(size, size));
-			ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
-			RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()), ImVec2(32, 32));
-		}
-		else {
-			ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
-			RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()));
-		}
-	}
-	else {
-		ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
-		RenderIcon(assetIcons, ResourceTypeToAssetIconId(&resource->GetClass()));
-	}
+	//if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
+	//	auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource);
+	//	if (auto* textureId = GetTextureIDFromResTexture(texture)) {
+	//		ImGui::Image(textureId, ImVec2(size, size));
+	//		ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
+	//		RenderIcon(assetIcons, ResourceTypeToIconId(&resource->GetClass()), ImVec2(32, 32));
+	//	}
+	//	else {
+	//		ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
+	//		RenderIcon(assetIcons, ResourceTypeToIconId(&resource->GetClass()));
+	//	}
+	//}
+	//else {
+	//	ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
+	//	RenderIcon(assetIcons, ResourceTypeToIconId(&resource->GetClass()));
+	//}
 
 	ImGui::SetCursorPos(cursor);
 	ImGui::Dummy(ImVec2(size, size));
@@ -317,14 +335,4 @@ void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* r
 }
 
 void ResourceBrowser::RenderDetails(const hh::fnd::ManagedResource* resource) {
-	if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
-		if (auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource)->GetTexture()) {
-			ImGui::Text("Resolution: %d x %d x %d", texture->format.width, texture->format.height, texture->format.depth);
-			Viewer("Array size", texture->format.arraySize);
-			Viewer("Mip levels", texture->format.mipLevels);
-			Viewer("Sample description index", texture->format.sampleDescIndex);
-			Viewer("Type", static_cast<unsigned int>(texture->format.type));
-			Viewer("Format", static_cast<unsigned int>(texture->format.format));
-		}
-	}
 }

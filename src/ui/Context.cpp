@@ -9,8 +9,8 @@
 #include <resources/ReloadManager.h>
 #include <resources/ManagedMemoryRegistry.h>
 #include "Context.h"
-#include "Context.h"
 #include <modules/PhotoMode.h>
+#include <ui/common/icons.h>
 #include <api/API.h>
 
 static ID3D11Device* device;
@@ -312,7 +312,9 @@ void Context::rebuild_fonts()
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
 	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, fontSize, &fontConfig);// , ranges);
+	RegisterIconGlyphs(font);
 	io.Fonts->Build();
+	AddIconTextures();
 
 	if (imguiInited)
 		ImGui_ImplDX11_InvalidateDeviceObjects();

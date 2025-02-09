@@ -97,7 +97,7 @@ namespace ImTimeline {
 		auto screenPos = ImGui::GetCursorScreenPos();
 		static constexpr auto playHeadHeight = playHeadSize * 0.86602540378443864676372317075294f;
 
-		bool changed = TimeSelect(id, currentTime, ImVec2(gCtx->length * gCtx->zoom, height));
+		bool changed = gCtx->length > 0.0f ? TimeSelect(id, currentTime, ImVec2(gCtx->length * gCtx->zoom, height)) : false;
 
 		auto playHeadScreenPos = ImVec2(screenPos.x + *currentTime * gCtx->zoom, screenPos.y + height);
 

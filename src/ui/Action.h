@@ -42,6 +42,15 @@ enum class ActionId {
 	LEVEL_EDITOR_FOCUSED_CHUNK_CHANGED,
 	FOCUS_GAME_OBJECT,
 	FOCUS_OBJECT_DATA,
+	EXPORT_RESOURCE,
+	SURFRIDE_EDITOR_SET_RESOURCE,
+	SURFRIDE_EDITOR_RESOURCE_CHANGED,
+	SURFRIDE_EDITOR_SET_FOCUSED_SCENE,
+	SURFRIDE_EDITOR_FOCUSED_SCENE_CHANGED,
+	SURFRIDE_EDITOR_ADD_CAST_TO_LAYER,
+	SURFRIDE_EDITOR_ADD_CAST_TO_CAST,
+	SURFRIDE_EDITOR_REMOVE_CAST,
+	SURFRIDE_EDITOR_OPEN_TEXTURE_EDITOR,
 };
 
 struct ActionBase {
@@ -59,8 +68,8 @@ struct Action : ActionBase {
 	Payload payload;
 
 	explicit Action() : ActionBase{ actionId }, payload{} {}
-	explicit Action(const Payload& payload) : ActionBase{ actionId }, payload{ payload } {}
-	explicit Action(Payload&& payload) : ActionBase{ actionId }, payload{ std::move(payload) } {}
+	explicit Action(const std::remove_reference_t<Payload>& payload) : ActionBase{ actionId }, payload{ payload } {}
+	explicit Action(std::remove_reference_t<Payload>&& payload) : ActionBase{ actionId }, payload{ std::move(payload) } {}
 };
 
 class ActionDispatcher {
@@ -75,3 +84,4 @@ public:
 
 using FocusGameObjectAction = Action<ActionId::FOCUS_GAME_OBJECT, hh::game::GameObject*>;
 using FocusObjectDataAction = Action<ActionId::FOCUS_OBJECT_DATA, hh::game::ObjectData*>;
+using ExportResourceAction = Action<ActionId::EXPORT_RESOURCE>;

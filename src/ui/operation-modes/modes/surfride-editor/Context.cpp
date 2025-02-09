@@ -1,5 +1,6 @@
 #include "Context.h"
 #include <span>
+#include <resources/ReloadManager.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	using namespace ucsl::resources::swif::v6;
@@ -29,8 +30,35 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return GetSceneCameraMatrix(cast->layer->scene) * cast->transform->transformationMatrix;
 	}
 
-	void Context::CreateImageCast(SRS_LAYER& layer, SRS_CASTNODE& sibling) {
-		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(gocSprite->projectResource);
+	SRS_CASTNODE* Context::CreateCast(SRS_LAYER& layer, int sibling)
+	{
+		resources::ManagedCArray<SRS_CASTNODE, int> casts{ projectResource, layer.casts, layer.castCount };
+
+		auto prevSize = casts.size();
+
+		SRS_CASTNODE newNode{};
+		newNode.name = "newcast";
+		newNode.id = static_cast<int>(mt());
+		newNode.flags = 0x750;
+		newNode.data.none = nullptr;
+		newNode.SetType(SRS_CASTNODE::Type::NORMAL);
+
+		casts.push_back(std::move(newNode));
+
+		FindLastSibling(layer, sibling).siblingIndex = static_cast<short>(prevSize);
+
+		resources::ManagedCArray<SRS_TRS3D, int> transforms{ projectResource, layer.transforms.transforms3d, prevSize };
+		transforms.emplace_back();
+		transforms[transforms.size() - 1].materialColor = { 255, 255, 255, 255 };
+		transforms[transforms.size() - 1].display = true;
+
+		return &casts[casts.size() - 1];
+	}
+
+	SRS_CASTNODE* Context::CreateImageCast(SRS_LAYER& layer, int sibling) {
+		auto* cast = CreateCast(layer, sibling);
+
+		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(projectResource);
 
 		auto* imageCast = new (&managedAllocator) SRS_IMAGECAST{};
 		imageCast->flags = 0x00202000;
@@ -41,39 +69,130 @@ namespace ui::operation_modes::modes::surfride_editor {
 		imageCast->vertexColorTopRight = { 255, 255, 255, 255 };
 		imageCast->vertexColorBottomRight = { 255, 255, 255, 255 };
 
-		resources::ManagedCArray<SRS_CASTNODE, int> casts{ gocSprite->projectResource, layer.casts, layer.castCount };
+		cast->data.image = imageCast;
+		cast->SetType(SRS_CASTNODE::Type::IMAGE);
 
-		auto prevSize = casts.size();
-
-		SRS_CASTNODE newNode{};
-		newNode.name = "img_newcast";
-		newNode.id = static_cast<int>(mt());
-		newNode.flags = 0x750;
-		newNode.data.image = imageCast;
-		newNode.SetType(SRS_CASTNODE::Type::IMAGE);
-
-		casts.push_back(std::move(newNode));
-
-		// TODO: update live version
-		//for (int i = 0; i < prevSize; i++)
-		//	layer->casts[i]->castData = (SurfRide::SRS_CASTNODE*)&layer.casts[i];
-
-		FindLastSibling(layer, sibling).siblingIndex = static_cast<short>(prevSize);
-
-		resources::ManagedCArray<SRS_TRS3D, int> transforms{ gocSprite->projectResource, layer.transforms.transforms3d, prevSize };
-		transforms.emplace_back();
-		transforms[transforms.size() - 1].materialColor = { 255, 255, 255, 255 };
-		transforms[transforms.size() - 1].display = true;
+		return cast;
 	}
 
-	void Context::AddImageCast(SRS_LAYER& layer) {
-		CreateImageCast(layer, layer.casts[0]);
+	SRS_CASTNODE* Context::CreateSliceCast(SRS_LAYER& layer, int sibling) {
+		auto* cast = CreateCast(layer, sibling);
+
+		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(projectResource);
+
+		char* buffer = new (&managedAllocator) char[sizeof(SRS_SLICECAST) + 4 * sizeof(SRS_SLICE)];
+
+		auto* sliceCast = new (buffer) SRS_SLICECAST{};
+		auto* slices = new (buffer + sizeof(SRS_SLICECAST)) SRS_SLICE[4]{};
+
+		sliceCast->flags = 0x00202000;
+		sliceCast->size = { 100.0f, 100.0f };
+		sliceCast->SetPivotType(EPivotType::CENTER_CENTER);
+		sliceCast->vertexColorTopLeft = { 255, 255, 255, 255 };
+		sliceCast->vertexColorBottomLeft = { 255, 255, 255, 255 };
+		sliceCast->vertexColorTopRight = { 255, 255, 255, 255 };
+		sliceCast->vertexColorBottomRight = { 255, 255, 255, 255 };
+		sliceCast->sliceHorizontalCount = 2;
+		sliceCast->sliceVerticalCount = 2;
+
+		cast->data.slice = sliceCast;
+		cast->SetType(SRS_CASTNODE::Type::SLICE);
+
+		return cast;
 	}
 
-	void Context::AddImageCast(SRS_CASTNODE& parent) {
-		auto& layer = *FindCastLayer(parent.id);
+	SRS_CASTNODE* Context::CreateReferenceCast(SRS_LAYER& layer, int sibling) {
+		auto* cast = CreateCast(layer, sibling);
 
-		CreateImageCast(layer, layer.casts[parent.childIndex]);
+		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(projectResource);
+
+		auto* referenceCast = new (&managedAllocator) SRS_REFERENCECAST{};
+
+		referenceCast->flags = 0x0;
+
+		cast->data.reference = referenceCast;
+		cast->SetType(SRS_CASTNODE::Type::REFERENCE);
+
+		return cast;
+	}
+
+	void Context::SetResource(hh::ui::GOCSprite* goc)
+	{
+		gocSprite = static_cast<hh::ui::GOCSprite*>(goc);
+		projectResource = gocSprite->projectResource;
+		project = gocSprite->project->projectData;
+		focusedScene = nullptr;
+	}
+
+	void Context::AddCast(SRS_LAYER& layer, SRS_CASTNODE::Type type) {
+		switch (type) { 
+		case SRS_CASTNODE::Type::NORMAL: CreateCast(layer, 0); break;
+		case SRS_CASTNODE::Type::IMAGE: CreateImageCast(layer, 0); break;
+		case SRS_CASTNODE::Type::SLICE: CreateSliceCast(layer, 0); break;
+		case SRS_CASTNODE::Type::REFERENCE: CreateReferenceCast(layer, 0); break;
+		}
+
+		ReloadManager::instance->ReloadSync(projectResource);
+	}
+
+	void Context::AddCast(SRS_CASTNODE& parent, SRS_CASTNODE::Type type) {
+		switch (type) { 
+		case SRS_CASTNODE::Type::NORMAL: CreateCast(*FindCastLayer(parent.id), parent.childIndex); break;
+		case SRS_CASTNODE::Type::IMAGE: CreateImageCast(*FindCastLayer(parent.id), parent.childIndex); break;
+		case SRS_CASTNODE::Type::SLICE: CreateSliceCast(*FindCastLayer(parent.id), parent.childIndex); break;
+		case SRS_CASTNODE::Type::REFERENCE: CreateReferenceCast(*FindCastLayer(parent.id), parent.childIndex); break;
+		}
+
+		ReloadManager::instance->ReloadSync(projectResource);
+	}
+
+	void Context::RemoveCast(SRS_CASTNODE& cast)
+	{
+		auto& layer = *FindCastLayer(cast.id);
+		size_t castIndex = &cast - layer.casts;
+
+		ForEachChild(layer, cast, [this](auto& child) { RemoveCast(child); });
+
+		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(projectResource);
+
+		switch (cast.GetType()) {
+		case SRS_CASTNODE::Type::IMAGE:
+			if (cast.data.image->textData)
+				managedAllocator.Free(cast.data.image->textData);
+			if (cast.data.image->effectData.blur)
+				managedAllocator.Free(cast.data.image->effectData.blur);
+			managedAllocator.Free(cast.data.image);
+			break;
+		case SRS_CASTNODE::Type::SLICE:
+			if (cast.data.slice->effectData.blur)
+				managedAllocator.Free(cast.data.slice->effectData.blur);
+			managedAllocator.Free(cast.data.slice);
+			break;
+		}
+
+		auto siblingIndex = cast.siblingIndex;
+
+		resources::ManagedCArray<SRS_CASTNODE, int> casts{ projectResource, layer.casts, layer.castCount };
+
+		for (auto& cast : casts) {
+			if (cast.siblingIndex == castIndex)
+				cast.siblingIndex = siblingIndex;
+
+			if (cast.childIndex == castIndex)
+				cast.childIndex = siblingIndex;
+		}
+		
+		for (auto& cast : casts) {
+			if (cast.siblingIndex != -1 && cast.siblingIndex > castIndex)
+				cast.siblingIndex--;
+
+			if (cast.childIndex != -1 && cast.childIndex > castIndex)
+				cast.childIndex--;
+		}
+
+		casts.remove(castIndex);
+		
+		ReloadManager::instance->ReloadSync(projectResource);
 	}
 
 	void Context::AddMotion(SRS_ANIMATION& animation, SRS_CASTNODE& cast) {
@@ -85,6 +204,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 		motion.castId = static_cast<unsigned short>(cast.id);
 		motion.tracks = nullptr;
 		motion.trackCount = 0;
+
+		ReloadManager::instance->ReloadSync(projectResource);
 	}
 
 	void Context::AddTrack(SRS_MOTION& motion, ECurveType type, unsigned int firstFrame, unsigned int lastFrame) {
@@ -94,7 +215,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		auto& track = tracks.emplace_back();
 		track.trackType = type;
-		track.flags = (static_cast<unsigned int>(EInterpolationType::LINEAR) & 0x3) | ((static_cast<unsigned int>(ETrackDataType::FLOAT) & 0xF) << 4);
+		track.flags = static_cast<unsigned int>(EInterpolationType::LINEAR) | (static_cast<unsigned int>(GetTrackDataTypeForCurveType(type)) << 4);
 		track.firstFrame = firstFrame;
 		track.lastFrame = lastFrame;
 		track.keyFrames.constantBool = nullptr;
@@ -147,22 +268,85 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 	}
 
-	void Context::SetTrackStart(ucsl::resources::swif::v6::SRS_TRACK& track, unsigned int frame) {
+	void Context::RemoveMotion(SRS_ANIMATION& animation, SRS_MOTION& motion) {
+		resources::ManagedCArray<SRS_MOTION, unsigned int> motions{ gocSprite->projectResource, animation.motions, animation.motionCount };
+
+		size_t motionIndex = &motion - animation.motions;
+		motions.remove(motionIndex);
+
+		ReloadManager::instance->ReloadSync(projectResource);
+	}
+
+	void Context::RemoveTrack(SRS_MOTION& motion, SRS_TRACK& track) {
+		resources::ManagedCArray<SRS_TRACK, unsigned short> tracks{ gocSprite->projectResource, motion.tracks, motion.trackCount };
+
+		size_t trackIndex = &track - motion.tracks;
+		tracks.remove(trackIndex);
+	}
+
+	void Context::RemoveKeyFrame(SRS_TRACK& track, unsigned int frameIndex)
+	{
+		switch (track.GetInterpolationType()) {
+		case EInterpolationType::CONSTANT:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: RemoveKeyFrameEx<Key<float>>(track, frameIndex); break;
+			case ETrackDataType::INDEX: RemoveKeyFrameEx<Key<int>>(track, frameIndex); break;
+			case ETrackDataType::INT: RemoveKeyFrameEx<Key<int>>(track, frameIndex); break;
+			case ETrackDataType::BOOL: RemoveKeyFrameEx<Key<bool>>(track, frameIndex); break;
+			case ETrackDataType::COLOR: RemoveKeyFrameEx<Key<Color>>(track, frameIndex); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		case EInterpolationType::LINEAR:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: RemoveKeyFrameEx<KeyLinear<float>>(track, frameIndex); break;
+			case ETrackDataType::INDEX: RemoveKeyFrameEx<KeyLinear<int>>(track, frameIndex); break;
+			case ETrackDataType::INT: RemoveKeyFrameEx<KeyLinear<int>>(track, frameIndex); break;
+			case ETrackDataType::BOOL: RemoveKeyFrameEx<KeyLinear<bool>>(track, frameIndex); break;
+			case ETrackDataType::COLOR: RemoveKeyFrameEx<KeyLinear<Color>>(track, frameIndex); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		case EInterpolationType::HERMITE:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: RemoveKeyFrameEx<KeyHermite<float>>(track, frameIndex); break;
+			case ETrackDataType::INDEX: RemoveKeyFrameEx<KeyHermite<int>>(track, frameIndex); break;
+			case ETrackDataType::INT: RemoveKeyFrameEx<KeyHermite<int>>(track, frameIndex); break;
+			case ETrackDataType::BOOL: RemoveKeyFrameEx<KeyHermite<bool>>(track, frameIndex); break;
+			case ETrackDataType::COLOR: RemoveKeyFrameEx<KeyHermite<Color>>(track, frameIndex); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		case EInterpolationType::INDIVIDUAL:
+			switch (track.GetDataType()) {
+			case ETrackDataType::FLOAT: RemoveKeyFrameEx<KeyIndividual<float>>(track, frameIndex); break;
+			case ETrackDataType::INDEX: RemoveKeyFrameEx<KeyIndividual<int>>(track, frameIndex); break;
+			case ETrackDataType::INT: RemoveKeyFrameEx<KeyIndividual<int>>(track, frameIndex); break;
+			case ETrackDataType::BOOL: RemoveKeyFrameEx<KeyIndividual<bool>>(track, frameIndex); break;
+			case ETrackDataType::COLOR: RemoveKeyFrameEx<KeyIndividual<Color>>(track, frameIndex); break;
+			default: assert(false && "Invalid track flags"); break;
+			}
+			break;
+		default: assert(false && "Invalid track flags"); break;
+		}
+	}
+
+	void Context::SetTrackStart(SRS_TRACK& track, unsigned int frame) {
 		track.firstFrame = frame;
 	}
 
-	void Context::SetTrackEnd(ucsl::resources::swif::v6::SRS_TRACK& track, unsigned int frame) {
+	void Context::SetTrackEnd(SRS_TRACK& track, unsigned int frame) {
 		track.lastFrame = frame;
 	}
 
-	void Context::MoveTrack(ucsl::resources::swif::v6::SRS_TRACK& track, int delta) {
+	void Context::MoveTrack(SRS_TRACK& track, int delta) {
 		VisitKeyFrames(track, [&track, delta](auto* keys) {
 			for (auto& key : std::span(keys, track.keyCount))
 				key.frame = static_cast<unsigned int>(static_cast<int>(key.frame) + delta);
 		});
 	}
 
-	SRS_SCENE* Context::FindScene(int id) const {
+	SRS_SCENE* Context::FindScene(unsigned int id) const {
 		for (auto& scene : std::span(project->scenes, project->sceneCount))
 			if (scene.id == id)
 				return &scene;
@@ -170,7 +354,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_LAYER* Context::FindLayer(SRS_SCENE& scene, int id) const {
+	SRS_LAYER* Context::FindLayer(SRS_SCENE& scene, unsigned int id) const {
 		for (auto& layer : std::span(scene.layers, scene.layerCount))
 			if (layer.id == id)
 				return &layer;
@@ -178,7 +362,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_LAYER* Context::FindLayer(int id) const {
+	SRS_LAYER* Context::FindLayer(unsigned int id) const {
 		for (auto& scene : std::span(project->scenes, project->sceneCount))
 			if (auto* layer = FindLayer(scene, id))
 				return layer;
@@ -186,7 +370,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_CAMERA* Context::FindCamera(SRS_SCENE& scene, int id) const {
+	SRS_CAMERA* Context::FindCamera(SRS_SCENE& scene, unsigned int id) const {
 		for (auto& camera : std::span(scene.cameras, scene.cameraCount))
 			if (camera.id == id)
 				return &camera;
@@ -194,7 +378,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_CAMERA* Context::FindCamera(int id) const {
+	SRS_CAMERA* Context::FindCamera(unsigned int id) const {
 		for (auto& scene : std::span(project->scenes, project->sceneCount))
 			if (auto* camera = FindCamera(scene, id))
 				return camera;
@@ -202,7 +386,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_CASTNODE* Context::FindCast(SRS_LAYER& layer, int id) const {
+	SRS_CASTNODE* Context::FindCast(SRS_LAYER& layer, unsigned int id) const {
 		for (auto& cast : std::span(layer.casts, layer.castCount))
 			if (cast.id == id)
 				return &cast;
@@ -210,7 +394,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_CASTNODE* Context::FindCast(SRS_SCENE& scene, int id) const {
+	SRS_CASTNODE* Context::FindCast(SRS_SCENE& scene, unsigned int id) const {
 		for (auto& layer : std::span(scene.layers, scene.layerCount))
 			if (auto* cast = FindCast(layer, id))
 				return cast;
@@ -218,7 +402,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_CASTNODE* Context::FindCast(int id) const {
+	SRS_CASTNODE* Context::FindCast(unsigned int id) const {
 		for (auto& scene : std::span(project->scenes, project->sceneCount))
 			if (auto* cast = FindCast(scene, id))
 				return cast;
@@ -226,15 +410,37 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_LAYER* Context::FindCastLayer(int castId) const {
+	SRS_LAYER* Context::FindCastLayer(unsigned int castId) const {
 		for (auto& scene : std::span(project->scenes, project->sceneCount))
 			for (auto& layer : std::span(scene.layers, scene.layerCount))
 				if (auto* found = FindCast(layer, castId))
 					return &layer;
+
+		return nullptr;
 	}
 
-	SRS_CASTNODE& Context::FindLastSibling(const SRS_LAYER& layer, SRS_CASTNODE& sibling) const {
-		auto* res = &sibling;
+	SRS_CASTNODE* Context::FindCastParent(unsigned int castId) const {
+		for (auto& scene : std::span(project->scenes, project->sceneCount)) {
+			for (auto& layer : std::span(scene.layers, scene.layerCount)) {
+				for (auto& cast : std::span(layer.casts, layer.castCount)) {
+					bool found{};
+
+					ForEachChild(layer, cast, [&found, castId](auto& child) {
+						if (child.id == castId)
+							found = true;
+					});
+
+					if (found)
+						return &cast;
+				}
+			}
+		}
+
+		return nullptr;
+	}
+
+	SRS_CASTNODE& Context::FindLastSibling(const SRS_LAYER& layer, int sibling) const {
+		auto* res = &layer.casts[sibling];
 
 		while (res->siblingIndex != -1)
 			res = &layer.casts[res->siblingIndex];
@@ -278,146 +484,293 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return runtimeLayer->GetCast(id);
 	}
 
-	void Context::StartAnimationByIndex(const ucsl::resources::swif::v6::SRS_LAYER& layer, int animationIndex) {
-		if (auto* runtimeLayer = FindRuntimeLayer(layer.id))
-			runtimeLayer->StartAnimation(animationIndex);
+	void Context::StartAnimationByIndex(const SRS_LAYER& layer, int animationIndex) {
+		//if (auto* runtimeLayer = FindRuntimeLayer(layer.id))
+		//	runtimeLayer->StartAnimation(animationIndex);
 	}
 
-	float Context::GetAnimationFrame(const ucsl::resources::swif::v6::SRS_LAYER& layer) const {
-		auto* runtimeLayer = FindRuntimeLayer(layer.id);
+	float Context::GetAnimationFrame(const SRS_LAYER& layer) const {
+		//auto* runtimeLayer = FindRuntimeLayer(layer.id);
 
-		return runtimeLayer ? runtimeLayer->currentFrame3 : 0.0f;
+		//return runtimeLayer ? runtimeLayer->currentFrame3 : 0.0f;
+		return 0.0f;
 	}
 
-	void Context::SetAnimationFrame(const ucsl::resources::swif::v6::SRS_LAYER& layer, float frame) {
-		if (auto* runtimeLayer = FindRuntimeLayer(layer.id)) {
-			runtimeLayer->currentFrame = frame;
-			runtimeLayer->currentFrame2 = frame;
-			runtimeLayer->currentFrame3 = frame;
+	void Context::SetAnimationFrame(const SRS_LAYER& layer, float frame) {
+		//if (auto* runtimeLayer = FindRuntimeLayer(layer.id)) {
+		//	runtimeLayer->currentFrame = frame;
+		//	runtimeLayer->currentFrame2 = frame;
+		//	runtimeLayer->currentFrame3 = frame;
+		//}
+	}
+
+	ETrackDataType Context::GetTrackDataTypeForCurveType(ECurveType curveType)
+	{
+		switch (curveType) {
+		case ECurveType::TranslationX: return ETrackDataType::FLOAT;
+		case ECurveType::TranslationY: return ETrackDataType::FLOAT;
+		case ECurveType::TranslationZ: return ETrackDataType::FLOAT;
+		case ECurveType::RotationX: return ETrackDataType::INT;
+		case ECurveType::RotationY: return ETrackDataType::INT;
+		case ECurveType::RotationZ: return ETrackDataType::INT;
+		case ECurveType::ScaleX: return ETrackDataType::FLOAT;
+		case ECurveType::ScaleY: return ETrackDataType::FLOAT;
+		case ECurveType::ScaleZ: return ETrackDataType::FLOAT;
+		case ECurveType::MaterialColorR: return ETrackDataType::FLOAT;
+		case ECurveType::MaterialColorG: return ETrackDataType::FLOAT;
+		case ECurveType::MaterialColorB: return ETrackDataType::FLOAT;
+		case ECurveType::MaterialColorA: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopLeftR: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopLeftG: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopLeftB: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopLeftA: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopRightR: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopRightG: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopRightB: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopRightA: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomLeftR: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomLeftG: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomLeftB: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomLeftA: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomRightR: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomRightG: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomRightB: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomRightA: return ETrackDataType::FLOAT;
+		case ECurveType::IlluminationColorR: return ETrackDataType::FLOAT;
+		case ECurveType::IlluminationColorG: return ETrackDataType::FLOAT;
+		case ECurveType::IlluminationColorB: return ETrackDataType::FLOAT;
+		case ECurveType::IlluminationColorA: return ETrackDataType::FLOAT;
+		case ECurveType::Display: return ETrackDataType::BOOL;
+		case ECurveType::Width: return ETrackDataType::INT;
+		case ECurveType::Height: return ETrackDataType::INT;
+		case ECurveType::CropIndex0: return ETrackDataType::INDEX;
+		case ECurveType::CropIndex1: return ETrackDataType::INDEX;
+		case ECurveType::VertexColorTopLeft: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorTopRight: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomLeft: return ETrackDataType::FLOAT;
+		case ECurveType::VertexColorBottomRight: return ETrackDataType::FLOAT;
+		case ECurveType::MaterialColor: return ETrackDataType::COLOR;
+		case ECurveType::IlluminationColor: return ETrackDataType::COLOR;
+		default: return ETrackDataType::FLOAT;
 		}
 	}
 
-	void Context::ApplyTransformChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
+	Eigen::Translation3f Context::GetPivotTranslation(EPivotType pivotType, const Vector2& customPivot, const Vector2& size)
+	{
+		switch (pivotType) {
+		case EPivotType::TOP_LEFT: return Eigen::Translation3f{ size.x() / 2.0f, -size.y() / 2.0f, 0.0f };
+		case EPivotType::TOP_CENTER: return Eigen::Translation3f{ 0.0f, -size.y() / 2.0f, 0.0f };
+		case EPivotType::TOP_RIGHT: return Eigen::Translation3f{ -size.x() / 2.0f, -size.y() / 2.0f, 0.0f };
+		case EPivotType::CENTER_LEFT: return Eigen::Translation3f{ size.x() / 2.0f, 0.0f, 0.0f };
+		case EPivotType::CENTER_CENTER: return Eigen::Translation3f{ 0.0f, 0.0f, 0.0f };
+		case EPivotType::CENTER_RIGHT: return Eigen::Translation3f{ -size.x() / 2.0f, 0.0f, 0.0f };
+		case EPivotType::BOTTOM_LEFT: return Eigen::Translation3f{ size.x() / 2.0f, size.y() / 2.0f, 0.0f };
+		case EPivotType::BOTTOM_CENTER: return Eigen::Translation3f{ 0.0f, size.y() / 2.0f, 0.0f };
+		case EPivotType::BOTTOM_RIGHT: return Eigen::Translation3f{ -size.x() / 2.0f, size.y() / 2.0f, 0.0f };
+		case EPivotType::CUSTOM: return Eigen::Translation3f{ size.x() / 2.0f - customPivot.x(), -size.y() / 2.0f + customPivot.y(), 0.0f };
+		default: assert("invalid pivot type"); return Eigen::Translation3f{ 0.0f, 0.0f, 0.0f };
+		}
+	}
+
+	Eigen::Translation3f Context::GetPivotTranslation(const SurfRide::Cast* cast)
+	{
+		switch (cast->castData->GetType()) {
+		case SRS_CASTNODE::Type::IMAGE: {
+			auto* imageCast = static_cast<const SurfRide::ImageCast*>(cast);
+
+			return GetPivotTranslation(imageCast->imageCastData->GetPivotType(), imageCast->imageCastData->pivot, imageCast->size);
+		}
+		case SRS_CASTNODE::Type::SLICE: {
+			auto* sliceCast = static_cast<const SurfRide::SliceCast*>(cast);
+
+			return GetPivotTranslation(sliceCast->sliceCastData->GetPivotType(), sliceCast->sliceCastData->pivot, sliceCast->size);
+		}
+		default: return {};
+		}
+	}
+
+	void Context::UpdateAabb(const Eigen::Transform<float, 3, Eigen::Projective>& transform, EPivotType pivotType, const Vector2& customPivot, const Vector2& size, csl::geom::Aabb& aabb)
+	{
+		auto pivotTrans = GetPivotTranslation(pivotType, customPivot, size);
+
+		aabb.AddPoint((transform * pivotTrans * Eigen::Vector3f{ -size.x() / 2.0f, size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
+		aabb.AddPoint((transform * pivotTrans * Eigen::Vector3f{ size.x() / 2.0f, size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
+		aabb.AddPoint((transform * pivotTrans * Eigen::Vector3f{ size.x() / 2.0f, -size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
+		aabb.AddPoint((transform * pivotTrans * Eigen::Vector3f{ -size.x() / 2.0f, -size.y() / 2.0f, 0.0f }.homogeneous()).hnormalized());
+	}
+
+	bool Context::UpdateAabbWithoutChildren(const SurfRide::Cast* cast, csl::geom::Aabb& aabb)
+	{
+		bool updated{};
+
+		//if (cast->flags & 0x1000 || !cast->transform->fullDisplay)
+		//	return false;
+
+		switch (cast->castData->GetType()) {
+		case SRS_CASTNODE::Type::IMAGE: {
+			auto* imageCast = static_cast<const SurfRide::ImageCast*>(cast);
+
+			UpdateAabb(GetFullCastTransform(cast), imageCast->imageCastData->GetPivotType(), imageCast->imageCastData->pivot, imageCast->size, aabb);
+			updated |= true;
+			break;
+		}
+		case SRS_CASTNODE::Type::SLICE: {
+			auto* sliceCast = static_cast<const SurfRide::SliceCast*>(cast);
+
+			UpdateAabb(GetFullCastTransform(cast), sliceCast->sliceCastData->GetPivotType(), sliceCast->sliceCastData->pivot, sliceCast->size, aabb);
+			updated |= true;
+			break;
+		}
+		case SRS_CASTNODE::Type::REFERENCE: {
+			if (auto* refLayer = static_cast<const SurfRide::ReferenceCast*>(cast)->refLayer)
+				updated |= UpdateAabb(refLayer, aabb);
+			break;
+		}
+		}
+
+		return updated;
+	}
+
+	bool Context::UpdateAabb(const SurfRide::Cast* cast, csl::geom::Aabb& aabb)
+	{
+		bool updated{};
+
+		//if (cast->flags & 0x1000 || !cast->transform->fullDisplay)
+		//	return false;
+
+		for (auto child : cast->GetChildren())
+			updated |= UpdateAabb(child, aabb);
+
+		updated |= UpdateAabbWithoutChildren(cast, aabb);
+
+		return updated;
+	}
+
+	bool Context::UpdateAabb(const SurfRide::Layer* layer, csl::geom::Aabb& aabb)
+	{
+		bool updated{};
+
+		//if (layer->flags & 0x100)
+		//	return false;
+
+		for (auto cast : layer->GetCasts())
+			updated |= UpdateAabb(cast, aabb);
+
+		return updated;
+	}
+
+	void Context::ApplyTransformChange(const SRS_CASTNODE& cast) {
 		auto* layer = FindCastLayer(cast.id);
-		auto* runtimeCast = FindRuntimeCast(cast.id);
-
-		if (!runtimeCast)
-			return;
-
 		size_t castIndex = &cast - layer->casts;
-		
-		if (layer->Is3D()) {
-			auto& transform = layer->transforms.transforms3d[castIndex];
+
+		ForEachRuntimeCast(cast.id, [layer, castIndex, &cast](auto& runtimeCast) {
+			if (layer->Is3D()) {
+				auto& transform = layer->transforms.transforms3d[castIndex];
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			auto* castTransform = reinterpret_cast<SRS_TRS3D*>(runtimeCast->transformData);
-			castTransform->position = transform.position;
-			castTransform->rotation = transform.rotation;
-			castTransform->scale = transform.scale;
-			static_cast<SurfRide::Cast3D&>(cast).position = transform.position;
+				auto* castTransform = reinterpret_cast<SRS_TRS3D*>(runtimeCast.transformData);
+				castTransform->position = transform.position;
+				castTransform->rotation = transform.rotation;
+				castTransform->scale = transform.scale;
+				static_cast<SurfRide::Cast3D&>(cast).position = transform.position;
 #else
-			runtimeCast->transform->position = transform.position;
-			runtimeCast->transform->rotation = transform.rotation;
-			runtimeCast->transform->scale = transform.scale;
+				runtimeCast.transform->position = transform.position;
+				runtimeCast.transform->rotation = transform.rotation;
+				runtimeCast.transform->scale = transform.scale;
 #endif
-			runtimeCast->flags = cast.flags;
-			runtimeCast->transform->materialColor = transform.materialColor;
-			runtimeCast->transform->illuminationColor = transform.illuminationColor;
-			runtimeCast->transform->display = transform.display;
+				runtimeCast.flags = cast.flags;
+				runtimeCast.transform->materialColor = transform.materialColor;
+				runtimeCast.transform->illuminationColor = transform.illuminationColor;
+				runtimeCast.transform->display = transform.display;
 
-			runtimeCast->transform->dirtyFlag.SetTransformAll();
+				runtimeCast.transform->dirtyFlag.SetTransformAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			runtimeCast->UpdateParentsAndThisTransformRecursively();
+				runtimeCast.UpdateParentsAndThisTransformRecursively();
 #endif
-		}
-		else {
-			auto& transform = layer->transforms.transforms2d[castIndex];
+			}
+			else {
+				auto& transform = layer->transforms.transforms2d[castIndex];
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			auto* castTransform = reinterpret_cast<SRS_TRS3D*>(runtimeCast->transformData);
-			castTransform->position = { transform.position.x(), transform.position.y(), 0.0f };
-			castTransform->rotation = { 0, 0, transform.rotation };
-			castTransform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
-			static_cast<SurfRide::Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
+				auto* castTransform = reinterpret_cast<SRS_TRS3D*>(runtimeCast.transformData);
+				castTransform->position = { transform.position.x(), transform.position.y(), 0.0f };
+				castTransform->rotation = { 0, 0, transform.rotation };
+				castTransform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
+				static_cast<SurfRide::Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
 #else
-			runtimeCast->transform->position = { transform.position.x(), transform.position.y(), 0.0f };
-			runtimeCast->transform->rotation = { 0, 0, transform.rotation };
-			runtimeCast->transform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
+				runtimeCast.transform->position = { transform.position.x(), transform.position.y(), 0.0f };
+				runtimeCast.transform->rotation = { 0, 0, transform.rotation };
+				runtimeCast.transform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
 #endif
-			runtimeCast->flags = cast.flags;
-			runtimeCast->transform->materialColor = transform.materialColor;
-			runtimeCast->transform->illuminationColor = transform.illuminationColor;
-			runtimeCast->transform->display = transform.display;
+				runtimeCast.flags = cast.flags;
+				runtimeCast.transform->materialColor = transform.materialColor;
+				runtimeCast.transform->illuminationColor = transform.illuminationColor;
+				runtimeCast.transform->display = transform.display;
 
-			runtimeCast->transform->dirtyFlag.SetTransformAll();
+				runtimeCast.transform->dirtyFlag.SetTransformAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
-			runtimeCast->UpdateParentsAndThisTransformRecursively();
+				runtimeCast.UpdateParentsAndThisTransformRecursively();
 #endif
-		}
+			}
+		});
 	}
 
-	void Context::ApplyImageCastChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
+	void Context::ApplyImageCastChange(const SRS_CASTNODE& cast) {
 		auto& imageCast = *cast.data.image;
-		auto* runtimeCast = static_cast<SurfRide::ImageCast*>(FindRuntimeCast(cast.id));
 
-		if (!runtimeCast)
-			return;
+		ForEachRuntimeCast(cast.id, [&imageCast](auto& runtimeCast_) {
+			auto& runtimeCast = static_cast<SurfRide::ImageCast&>(runtimeCast_);
 
-		runtimeCast->size = imageCast.size;
+			runtimeCast.size = imageCast.size;
 #ifndef DEVTOOLS_TARGET_SDK_wars
-		runtimeCast->vertexColorTopLeft = imageCast.vertexColorTopLeft;
-		runtimeCast->vertexColorBottomLeft = imageCast.vertexColorBottomLeft;
-		runtimeCast->vertexColorTopRight = imageCast.vertexColorTopRight;
-		runtimeCast->vertexColorBottomRight = imageCast.vertexColorBottomRight;
+			runtimeCast.vertexColorTopLeft = imageCast.vertexColorTopLeft;
+			runtimeCast.vertexColorBottomLeft = imageCast.vertexColorBottomLeft;
+			runtimeCast.vertexColorTopRight = imageCast.vertexColorTopRight;
+			runtimeCast.vertexColorBottomRight = imageCast.vertexColorBottomRight;
 #endif
-		runtimeCast->cropIndex[0] = imageCast.cropIndex0;
-		runtimeCast->cropIndex[1] = imageCast.cropIndex1;
-		//runtimeCast->cropRectDirty[0] = true;
-		//runtimeCast->cropRectDirty[1] = true;
+			runtimeCast.cropIndex[0] = imageCast.cropIndex0;
+			runtimeCast.cropIndex[1] = imageCast.cropIndex1;
+			//runtimeCast.cropRectDirty[0] = true;
+			//runtimeCast.cropRectDirty[1] = true;
 
 #ifndef DEVTOOLS_TARGET_SDK_wars
-		runtimeCast->blurEffect = nullptr;
-		runtimeCast->reflectEffect = nullptr;
-		runtimeCast->CreateEffectCast(imageCast.effectData.blur);
+			runtimeCast.blurEffect = nullptr;
+			runtimeCast.reflectEffect = nullptr;
+			runtimeCast.CreateEffectCast(imageCast.effectData.blur);
 #endif
 
-		runtimeCast->transform->dirtyFlag.SetCellAll();
+			runtimeCast.transform->dirtyFlag.SetCellAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
-		runtimeCast->UpdateParentsAndThisTransformRecursively();
+			runtimeCast.UpdateParentsAndThisTransformRecursively();
 #endif
+		});
 	}
 
-	void Context::ApplyReferenceCastChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
-		auto& referenceCast = *cast.data.reference;
-		auto* runtimeCast = static_cast<SurfRide::ReferenceCast*>(FindRuntimeCast(cast.id));
-
-		if (!runtimeCast)
-			return;
-
+	void Context::ApplyReferenceCastChange(const SRS_CASTNODE& cast) {
 	}
 
-	void Context::ApplySliceCastChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
+	void Context::ApplySliceCastChange(const SRS_CASTNODE& cast) {
 		auto& sliceCast = *cast.data.slice;
-		auto* runtimeCast = static_cast<SurfRide::SliceCast*>(FindRuntimeCast(cast.id));
 
-		if (!runtimeCast)
-			return;
+		ForEachRuntimeCast(cast.id, [&sliceCast](auto& runtimeCast_) {
+			auto& runtimeCast = static_cast<SurfRide::SliceCast&>(runtimeCast_);
 
-		runtimeCast->size = sliceCast.size;
+			runtimeCast.size = sliceCast.size;
 #ifndef DEVTOOLS_TARGET_SDK_wars
-		runtimeCast->vertexColorTopLeft = sliceCast.vertexColorTopLeft;
-		runtimeCast->vertexColorBottomLeft = sliceCast.vertexColorBottomLeft;
-		runtimeCast->vertexColorTopRight = sliceCast.vertexColorTopRight;
-		runtimeCast->vertexColorBottomRight = sliceCast.vertexColorBottomRight;
+			runtimeCast.vertexColorTopLeft = sliceCast.vertexColorTopLeft;
+			runtimeCast.vertexColorBottomLeft = sliceCast.vertexColorBottomLeft;
+			runtimeCast.vertexColorTopRight = sliceCast.vertexColorTopRight;
+			runtimeCast.vertexColorBottomRight = sliceCast.vertexColorBottomRight;
 #endif
 #ifndef DEVTOOLS_TARGET_SDK_wars
-		runtimeCast->blurEffect = nullptr;
-		runtimeCast->reflectEffect = nullptr;
-		runtimeCast->CreateEffectCast(sliceCast.effectData.blur);
+			runtimeCast.blurEffect = nullptr;
+			runtimeCast.reflectEffect = nullptr;
+			runtimeCast.CreateEffectCast(sliceCast.effectData.blur);
 #endif
-		runtimeCast->transform->dirtyFlag.SetCellAll();
+			runtimeCast.transform->dirtyFlag.SetCellAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
-		runtimeCast->UpdateParentsAndThisTransformRecursively();
+			runtimeCast.UpdateParentsAndThisTransformRecursively();
 #endif
+		});
 	}
 }

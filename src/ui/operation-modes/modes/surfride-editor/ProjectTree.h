@@ -32,7 +32,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 			auto& selected = selectionBehavior->GetSelection();
-			auto& context = GetContext();
 
 			if (selected.find(element) != -1)
 				nodeFlags |= ImGuiTreeNodeFlags_Selected;

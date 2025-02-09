@@ -10,7 +10,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resourc
 
 using namespace ucsl::resources::swif::v6;
 
-const char* blendModeNames[]{ "Mix", "Add", "Subtract", "Multiply", "Mix - No Alpha", "Override" };
+const char* blendModeNames[]{ "Mix", "Add", "Subtract", "Multiply", "Mix - Premultiplied Alpha", "Override" };
 const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
 const char* orientationNames[]{ "Up", "Left", "Down", "Right" };
 const char* effectTypeNames[]{ "None", "Blur", "Reflect" };
@@ -313,39 +313,41 @@ bool Editor(const char* label, SRS_REFERENCECAST& referenceCastData)
 	bool edited{};
 	ImGui::PushID(label);
 	ImGui::SeparatorText(label);
-	Viewer("Layer ID", referenceCastData.layer->id);
-	Viewer("Layer name", referenceCastData.layer->name);
+	if (referenceCastData.layer) {
+		Viewer("Layer ID", referenceCastData.layer->id);
+		Viewer("Layer name", referenceCastData.layer->name);
 
-	size_t castAnimIdx{};
+		size_t castAnimIdx{};
 
-	for (size_t i = 0; i < referenceCastData.layer->animationCount; i++)
-		if (referenceCastData.layer->animations[i].id == referenceCastData.animationId)
-			castAnimIdx = i;
+		for (size_t i = 0; i < referenceCastData.layer->animationCount; i++)
+			if (referenceCastData.layer->animations[i].id == referenceCastData.animationId)
+				castAnimIdx = i;
 
-	if (ImGui::BeginCombo("Animation", referenceCastData.layer->animations[castAnimIdx].name)) {
-		for (int i = 0; i < referenceCastData.layer->animationCount; i++) {
-			auto& anim = referenceCastData.layer->animations[i];
+		if (ImGui::BeginCombo("Animation", referenceCastData.layer->animations[castAnimIdx].name)) {
+			for (int i = 0; i < referenceCastData.layer->animationCount; i++) {
+				auto& anim = referenceCastData.layer->animations[i];
 
-			if (ImGui::Selectable(anim.name, anim.id == referenceCastData.animationId)) {
-				referenceCastData.animationId = i;
-				edited = true;
+				if (ImGui::Selectable(anim.name, anim.id == referenceCastData.animationId)) {
+					referenceCastData.animationId = i;
+					edited = true;
+				}
+
+				if (anim.id == referenceCastData.animationId)
+					ImGui::SetItemDefaultFocus();
 			}
-
-			if (anim.id == referenceCastData.animationId)
-				ImGui::SetItemDefaultFocus();
+			ImGui::EndCombo();
 		}
-		ImGui::EndCombo();
-	}
 
-	unsigned int zero{};
-	edited |= SliderScalar("Animation frame", referenceCastData.animationFrame, &zero, &referenceCastData.layer->animations[castAnimIdx].frameCount);
-	edited |= Editor("unk2", referenceCastData.unk2);
-	ImGui::Separator();
-	edited |= CheckboxFlags("Enable blending", referenceCastData.flags, 0x2u);
-	auto blendMode = referenceCastData.GetBlendMode();
-	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
-		referenceCastData.SetBlendMode(blendMode);
-		edited = true;
+		unsigned int zero{};
+		edited |= SliderScalar("Animation frame", referenceCastData.animationFrame, &zero, &referenceCastData.layer->animations[castAnimIdx].frameCount);
+		edited |= Editor("unk2", referenceCastData.unk2);
+		ImGui::Separator();
+		edited |= CheckboxFlags("Enable blending", referenceCastData.flags, 0x2u);
+		auto blendMode = referenceCastData.GetBlendMode();
+		if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
+			referenceCastData.SetBlendMode(blendMode);
+			edited = true;
+		}
 	}
 	ImGui::PopID();
 	return edited;
@@ -504,7 +506,8 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA&
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*& userData)
 {
 	bool edited{};
-
+	
+	ImGui::SeparatorText(label);
 	if (userData != nullptr) {
 		edited |= Editor(label, resource, *userData);
 		if (ImGui::Button("Remove all user data")) {

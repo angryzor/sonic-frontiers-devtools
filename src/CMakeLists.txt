@@ -35,7 +35,9 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/viewers/Basic.cpp
         ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
+        ui/common/icons.cpp
         ui/common/StandaloneWindow.cpp
+        ui/common/stb_image.cpp
         ui/common/Textures.cpp
         ui/common/Theme.cpp
         ui/common/Translations.cpp
@@ -64,6 +66,7 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/GameObjectUtils.cpp
         utilities/ResourceTypes.cpp
         utilities/CompatibleObject.cpp
+        utilities/SurfRideBugFix.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
         debug-rendering/DebugRenderable.h
@@ -104,6 +107,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/icons.h
         ui/common/NodeEditor.h
         ui/common/StandaloneWindow.h
+        ui/common/stb_image.h
         ui/common/Textures.h
         ui/common/Theme.h
         ui/common/Translations.h
@@ -148,6 +152,7 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/ResourceTypes.h
         utilities/CompatibleObject.h
         utilities/NameHash.h
+        utilities/SurfRideBugFix.h
 )
 
 
@@ -155,6 +160,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_OBJECT_INSPECTION ON)
     set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
@@ -196,6 +202,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_OBJECT_INSPECTION ON)
     set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
@@ -269,7 +276,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_OBJECT_INSPECTION ON)
     set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR OFF)
-    set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_SVCOL_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
@@ -429,6 +437,25 @@ if(${DEVTOOLS_FEATURE_FXCOL_EDITOR})
             ui/operation-modes/modes/fxcol-editor/FxColEditor.h
             ui/operation-modes/modes/fxcol-editor/ShapeInspector.h
             ui/operation-modes/modes/fxcol-editor/ShapeList.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_SVCOL_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            debug-rendering/visuals/SvColShape.cpp
+            ui/common/editors/SvCol.cpp
+            ui/operation-modes/modes/svcol-editor/Context.cpp
+            ui/operation-modes/modes/svcol-editor/SvColEditor.cpp
+            ui/operation-modes/modes/svcol-editor/ShapeInspector.cpp
+            ui/operation-modes/modes/svcol-editor/ShapeList.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            debug-rendering/visuals/SvColShape.h
+            ui/common/editors/SvCol.h
+            ui/operation-modes/modes/svcol-editor/Context.h
+            ui/operation-modes/modes/svcol-editor/SvColEditor.h
+            ui/operation-modes/modes/svcol-editor/ShapeInspector.h
+            ui/operation-modes/modes/svcol-editor/ShapeList.h
     )
 endif()
 

@@ -54,7 +54,7 @@ if(DEVTOOLS_INSTALL_TO_UPDATE_SERVER)
 endif()
 
 # The main target
-foreach(DEVTOOLS_TARGET_SDK rangers) #miller rangers wars)
+foreach(DEVTOOLS_TARGET_SDK rangers miller) #miller rangers wars)
     set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
     set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
     set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
@@ -80,7 +80,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers) #miller rangers wars)
     add_subdirectory(${SDK_PATH} ${DEVTOOLS_TARGET_SDK}-sdk EXCLUDE_FROM_ALL)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
-    target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${DEVTOOLS_TARGET_SDK}-sdk filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imgui-memory-editor imguizmo implot imtimeline yyjson reflectcpp OGDF rip-hl uwebsockets)
+    target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${DEVTOOLS_TARGET_SDK}-sdk filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imgui-memory-editor imguizmo implot imtimeline imbrowser yyjson reflectcpp OGDF rip-hl uwebsockets)
     target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_20)
     target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive- /W4 /wd4100 /wd4458 /wd4324)
     target_compile_definitions(${DEVTOOLS_TARGET}
@@ -97,6 +97,7 @@ foreach(DEVTOOLS_TARGET_SDK rangers) #miller rangers wars)
             DEVTOOLS_VERSION_MAJOR=${PROJECT_VERSION_MAJOR}
             DEVTOOLS_VERSION_MINOR=${PROJECT_VERSION_MINOR}
             DEVTOOLS_VERSION_PATCH=${PROJECT_VERSION_PATCH}
+            DEVTOOLS_MOD_FOLDER="${MOD_FOLDER}"
     )
     set_target_properties(${DEVTOOLS_TARGET}
         PROPERTIES

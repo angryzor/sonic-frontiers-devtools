@@ -49,7 +49,7 @@ public:
 			for (auto& object : selection)
 				previousSelection.push_back(object);
 
-			for (auto& object : static_cast<const SelectAction&>(action).payload)
+			for (auto& object : selected)
 				selection.push_back(object);
 
 			Dispatch(SelectionChangedAction{ { previousSelection, selection, selected, {} } });

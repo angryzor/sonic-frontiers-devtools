@@ -130,11 +130,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 						context.AddTrack(motion, static_cast<ECurveType>(i), 0, std::min(animation.frameCount, 10u));
 				ImGui::EndMenu();
 			}
+			if (ImGui::MenuItem("Remove")) {
+				context.RemoveMotion(animation, motion);
+			}
 			ImGui::EndPopup();
 		}
 
 		if (isOpen) {
-			for (auto track : std::span(motion.tracks, motion.trackCount))
+			for (auto& track : std::span(motion.tracks, motion.trackCount))
 				RenderTrack(layer, animation, motion, track);
 
 			ImTimeline::EndTrackGroup();
@@ -143,8 +146,20 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void Timeline::RenderTrack(SRS_LAYER& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
 	{
-		if (ImTimeline::BeginTrack(TrackName(track))) {
-			auto context = GetContext();
+		auto context = GetContext();
+		bool isOpen = ImTimeline::BeginTrack(TrackName(track));
+
+		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && ImTimeline::IsNameColumnHovered())
+			ImGui::OpenPopup("contextmenu");
+
+		if (ImGui::BeginPopup("contextmenu")) {
+			if (ImGui::MenuItem("Remove")) {
+				context.RemoveTrack(motion, track);
+			}
+			ImGui::EndPopup();
+		}
+
+		if (isOpen) {
 			auto length = (track.lastFrame - track.firstFrame);
 
 			if (length == 0) {
@@ -152,8 +167,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 				ImTimeline::Event(TrackName(track), &time);
 			}
 			else {
-				float startTime = track.firstFrame;
-				float endTime = track.lastFrame;
+				float startTime = static_cast<float>(track.firstFrame);
+				float endTime = static_cast<float>(track.lastFrame);
 				bool startTimeChanged{};
 				bool endTimeChanged{};
 				bool moved{};
@@ -165,7 +180,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 						ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations);
 						ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
 						ImPlot::SetupAxisLimits(ImAxis_X1, track.firstFrame, track.lastFrame, ImPlotCond_Always);
-
 
 						RenderPlotLines(track);
 

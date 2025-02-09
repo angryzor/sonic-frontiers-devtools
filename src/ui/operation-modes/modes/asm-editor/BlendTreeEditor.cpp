@@ -2,8 +2,14 @@
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
 #include <ui/GlobalSettings.h>
-#include <ucsl-reflection/reflections/resources/asm/v103.h>
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+#include <ucsl-reflection/reflections/resources/asm/v103-rangers.h>
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+#include <ucsl-reflection/reflections/resources/asm/v103-miller.h>
+#endif
 #include <rip/binary/containers/binary-file/v2.h>
+#include <span>
 
 namespace ui::operation_modes::modes::asm_editor {
 	using namespace hh::anim;
@@ -16,6 +22,12 @@ namespace ui::operation_modes::modes::asm_editor {
 		char title[400];
 		snprintf(title, sizeof(title), "Blend tree @ %016zx", focusedRootBlendNode);
 		SetTitle(title);
+		timelineCtx = ImTimeline::CreateContext();
+	}
+
+	BlendTreeEditor::~BlendTreeEditor()
+	{
+		ImTimeline::DestroyContext(timelineCtx);
 	}
 
 	void BlendTreeEditor::RenderContents()
@@ -39,7 +51,12 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		if (ImGuiFileDialog::Instance()->Display("ResAnimatorExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
-				auto* exportData = static_cast<ucsl::resources::animation_state_machine::v103::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+				auto* exportData = static_cast<ucsl::resources::animation_state_machine::v103_rangers::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+				auto* exportData = static_cast<ucsl::resources::animation_state_machine::v103_miller::AsmData*>(ImGuiFileDialog::Instance()->GetUserDatas());
+#endif
 
 				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::binary };
 				rip::binary::containers::binary_file::v2::BinaryFileSerializer<size_t> serializer{ ofs };
@@ -140,10 +157,40 @@ namespace ui::operation_modes::modes::asm_editor {
 			ImGui::EndPopup();
 		}
 		ax::NodeEditor::Resume();
+		
+		ax::NodeEditor::NodeId ids[1];
+		auto selectedCount = ax::NodeEditor::GetSelectedNodes(ids, 1);
 
 		nodeEditor.EndCreate();
 
 		nodeEditor.End();
+
+		if (selectedCount > 0) {
+			NodeId nodeId = ids[0];
+
+			if (nodeId.type == NodeType::CLIP) {
+				auto& clip = asmData.clips[nodeId.idx];
+
+				float playHeadFrame = 0.0f;
+				bool playing{};
+				bool currentTimeChanged{};
+				if (ImGui::Begin("test")) {
+					ImTimeline::Begin(timelineCtx);
+					if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, 500.0f, 60.0f, &playing, &currentTimeChanged)) {
+						if (ImTimeline::BeginTrack("Triggers")) {
+							for (auto& trigger : std::span(asmData.triggers + clip.triggerOffset, clip.triggerCount)) {
+								float time = trigger.unknown2;
+								ImTimeline::Event(trigger.name, &time);
+							}
+							ImTimeline::EndTrack();
+						}
+						ImTimeline::EndTimeline();
+					}
+					ImTimeline::End();
+				}
+				ImGui::End();
+			}
+		}
 	}
 
 	void BlendTreeEditor::RenderVariable(short variableId)

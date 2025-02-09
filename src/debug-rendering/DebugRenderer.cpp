@@ -30,7 +30,6 @@ namespace devtools::debug_rendering {
 
 	void DebugRenderer::RenderImGuiVisuals()
 	{
-		if (enabled)
 		if (auto* cameraManager = hh::game::GameManager::GetInstance()->GetService<hh::game::CameraManager>())
 		if (auto* camera = cameraManager->GetTopComponent(0)) {
 			Eigen::Projective3f cameraMatrix{ camera->viewportData.projMatrix * camera->viewportData.viewMatrix };
@@ -38,7 +37,8 @@ namespace devtools::debug_rendering {
 
 			if (Desktop::instance->BeginOverlayWindow()) {
 				for (auto* debugRenderable : debugRenderables)
-					debugRenderable->RenderImGuiDebugVisuals(ctx);
+					if (debugRenderable->always || enabled)
+						debugRenderable->RenderImGuiDebugVisuals(ctx);
 
 				Desktop::instance->EndOverlayWindow();
 			}

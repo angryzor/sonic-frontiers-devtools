@@ -21,7 +21,7 @@ namespace devtools::debug_rendering {
 		return ImVec2{ (transformedPos.x() + 0.5f) * ivp->Size.x, (0.5f - transformedPos.y()) * ivp->Size.y };
 	}
 
-	DebugRenderable::DebugRenderable() {
+	DebugRenderable::DebugRenderable(bool always) : always{ always } {
 		DebugRenderer::instance->AddRenderable(this);
 	}
 
@@ -33,5 +33,9 @@ namespace devtools::debug_rendering {
 	}
 
 	void DebugRenderable::RenderImGuiDebugVisuals(const ImGuiDrawContext& ctx) {
+	}
+
+	OptionalDebugRenderable::OptionalDebugRenderable() : DebugRenderable{ false }
+	{
 	}
 }

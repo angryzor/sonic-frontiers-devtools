@@ -22,10 +22,10 @@ namespace ui::operation_modes::modes::surfride_editor {
 			auto& focusedElement = selection[0];
 
 			switch (focusedElement.type) {
-			case SurfRideElement::Type::SCENE: RenderSceneInspector(*context.FindScene(focusedElement.id), *context.FindRuntimeScene(focusedElement.id)); break;
+			case SurfRideElement::Type::SCENE: RenderSceneInspector(*context.FindScene(focusedElement.id), context.FindRuntimeScene(focusedElement.id)); break;
 			case SurfRideElement::Type::CAMERA: RenderCameraInspector(*context.FindCamera(focusedElement.id)); break;
-			case SurfRideElement::Type::LAYER: RenderLayerInspector(*context.FindLayer(focusedElement.id), *context.FindRuntimeLayer(focusedElement.id)); break;
-			case SurfRideElement::Type::CAST: RenderCastInspector(*context.FindCast(focusedElement.id), *context.FindRuntimeCast(focusedElement.id)); break;
+			case SurfRideElement::Type::LAYER: RenderLayerInspector(*context.FindLayer(focusedElement.id), context.FindRuntimeLayer(focusedElement.id)); break;
+			case SurfRideElement::Type::CAST: RenderCastInspector(*context.FindCast(focusedElement.id), context.FindRuntimeCast(focusedElement.id)); break;
 			}
 		}
 	}
@@ -35,7 +35,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return { "Element inspector", ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImVec2(1, 0) };
 	}
 
-	void ElementInspector::RenderSceneInspector(SRS_SCENE& scene, SurfRide::Scene& runtimeScene)
+	void ElementInspector::RenderSceneInspector(SRS_SCENE& scene, SurfRide::Scene* runtimeScene)
 	{
 		ImGui::SeparatorText("Scene");
 		ImGui::Text("ID: %d", scene.id);
@@ -64,7 +64,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		Editor("User data", GetContext().projectResource, scene.userData);
 	}
 
-	void ElementInspector::RenderLayerInspector(SRS_LAYER& layer, SurfRide::Layer& runtimeLayer)
+	void ElementInspector::RenderLayerInspector(SRS_LAYER& layer, SurfRide::Layer* runtimeLayer)
 	{
 		ImGui::SeparatorText("Layer");
 		ImGui::Text("ID: %d", layer.id);
@@ -108,18 +108,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 //#endif
 	}
 
-	void ElementInspector::RenderCastInspector(SRS_CASTNODE& cast, SurfRide::Cast& runtimeCast)
+	void ElementInspector::RenderCastInspector(SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast)
 	{
 		switch (static_cast<SRS_CASTNODE::Type>(cast.flags & 0xF)) {
 		case SRS_CASTNODE::Type::NORMAL: RenderNormalCastInspector(cast, runtimeCast); break;
-		case SRS_CASTNODE::Type::IMAGE: RenderImageCastInspector(cast, static_cast<SurfRide::ImageCast&>(runtimeCast)); break;
-		case SRS_CASTNODE::Type::REFERENCE: RenderReferenceCastInspector(cast, static_cast<SurfRide::ReferenceCast&>(runtimeCast)); break;
-		case SRS_CASTNODE::Type::SLICE: RenderSliceCastInspector(cast, static_cast<SurfRide::SliceCast&>(runtimeCast)); break;
+		case SRS_CASTNODE::Type::IMAGE: RenderImageCastInspector(cast, static_cast<SurfRide::ImageCast*>(runtimeCast)); break;
+		case SRS_CASTNODE::Type::REFERENCE: RenderReferenceCastInspector(cast, static_cast<SurfRide::ReferenceCast*>(runtimeCast)); break;
+		case SRS_CASTNODE::Type::SLICE: RenderSliceCastInspector(cast, static_cast<SurfRide::SliceCast*>(runtimeCast)); break;
 		default: break;
 		}
 	}
 
-	void ElementInspector::RenderBaseCastInspector(SRS_CASTNODE& cast, SurfRide::Cast& runtimeCast)
+	void ElementInspector::RenderBaseCastInspector(SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast)
 	{
 		auto context = GetContext();
 
@@ -129,7 +129,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 		bool transformEdited{};
 		transformEdited |= Editor("Cast", cast);
 
-		ImGui::Separator();
 		Editor("User data", context.projectResource, cast.userData);
 
 		auto& layer = *context.FindCastLayer(cast.id);
@@ -144,14 +143,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 			context.ApplyTransformChange(cast);
 	}
 
-	void ElementInspector::RenderNormalCastInspector(SRS_CASTNODE& cast, SurfRide::Cast& runtimeCast)
+	void ElementInspector::RenderNormalCastInspector(SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast)
 	{
 		ImGui::SeparatorText("Cast");
 
 		RenderBaseCastInspector(cast, runtimeCast);
 	}
 
-	void ElementInspector::RenderImageCastInspector(SRS_CASTNODE& cast, SurfRide::ImageCast& runtimeCast)
+	void ElementInspector::RenderImageCastInspector(SRS_CASTNODE& cast, SurfRide::ImageCast* runtimeCast)
 	{
 		ImGui::SeparatorText("Image cast");
 
@@ -163,7 +162,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			GetContext().ApplyImageCastChange(cast);
 	}
 
-	void ElementInspector::RenderReferenceCastInspector(SRS_CASTNODE& cast, SurfRide::ReferenceCast& runtimeCast)
+	void ElementInspector::RenderReferenceCastInspector(SRS_CASTNODE& cast, SurfRide::ReferenceCast* runtimeCast)
 	{
 		ImGui::SeparatorText("Reference cast");
 
@@ -173,7 +172,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			GetContext().ApplyReferenceCastChange(cast);
 	}
 
-	void ElementInspector::RenderSliceCastInspector(SRS_CASTNODE& cast, SurfRide::SliceCast& runtimeCast)
+	void ElementInspector::RenderSliceCastInspector(SRS_CASTNODE& cast, SurfRide::SliceCast* runtimeCast)
 	{
 		ImGui::SeparatorText("Slice cast");
 
