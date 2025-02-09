@@ -51,7 +51,7 @@ const char* ReadFrag(const char* path, csl::ut::String& frag) {
 	}
 }
 
-SurfRide::Cast* GetCast(SurfRide::Project* project, const char* path) {
+SurfRide::Cast* ResolveCast(SurfRide::Project* project, const char* path) {
 	if (path == nullptr)
 		return nullptr;
 
@@ -89,7 +89,7 @@ SurfRide::Cast* GetCast(SurfRide::Project* project, const char* path) {
 	return cast;
 }
 
-SurfRide::Layer* GetLayer(SurfRide::Project* project, const char* path) {
+SurfRide::Layer* ResolveLayer(SurfRide::Project* project, const char* path) {
 	if (path == nullptr)
 		return nullptr;
 
@@ -122,7 +122,7 @@ SurfRide::Layer* GetLayer(SurfRide::Project* project, const char* path) {
 }
 
 HOOK(void, __fastcall, SurfRideCastHandle_PreReload, surfRideCastHandlePreReloadAddr, hh::ui::SurfRideCastHandle* self, SurfRide::Project* project) {
-	auto* cast = reinterpret_cast<SurfRide::Cast*>(reinterpret_cast<size_t>(self->surfRideObject) - 8);
+	auto* cast = self->GetCast();
 
 	self->key.clear();
 
@@ -133,7 +133,7 @@ HOOK(void, __fastcall, SurfRideCastHandle_PreReload, surfRideCastHandlePreReload
 }
 
 HOOK(void, __fastcall, SurfRideLayerHandle_PreReload, surfRideLayerHandlePreReloadAddr, hh::ui::SurfRideLayerHandle* self, SurfRide::Project* project) {
-	auto* layer = reinterpret_cast<SurfRide::Layer*>(reinterpret_cast<size_t>(self->surfRideObject) - 8);
+	auto* layer = self->GetLayer();
 
 	self->key.clear();
 
@@ -144,17 +144,11 @@ HOOK(void, __fastcall, SurfRideLayerHandle_PreReload, surfRideLayerHandlePreRelo
 }
 
 HOOK(void, __fastcall, SurfRideCastHandle_PostReload, surfRideCastHandlePostReloadAddr, hh::ui::SurfRideCastHandle* self, SurfRide::Project* project) {
-	if (SurfRide::Cast* cast = GetCast(project, self->key.c_str()))
-		self->surfRideObject = reinterpret_cast<void*>(reinterpret_cast<size_t>(cast) + 8);
-	else
-		self->surfRideObject = nullptr;
+	self->SetCast(ResolveCast(project, self->key.c_str()));
 }
 
 HOOK(void, __fastcall, SurfRideLayerHandle_PostReload, surfRideLayerHandlePostReloadAddr, hh::ui::SurfRideLayerHandle* self, SurfRide::Project* project) {
-	if (SurfRide::Layer* layer = GetLayer(project, self->key.c_str()))
-		self->surfRideObject = reinterpret_cast<void*>(reinterpret_cast<size_t>(layer) + 8);
-	else
-		self->surfRideObject = nullptr;
+	self->SetLayer(ResolveLayer(project, self->key.c_str()));
 }
 
 void InstallSurfRideBugFixHooks() {
