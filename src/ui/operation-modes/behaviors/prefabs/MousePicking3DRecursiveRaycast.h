@@ -15,8 +15,7 @@ struct MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl {
 		traits.GetRootObjects(rootObjects);
 
 		for (auto object : rootObjects)
-			if (auto pick = Raycast(object, ray))
-				results.push_back(*pick);
+			RaycastAll(object, ray, results);
 	}
 
 	virtual void GetBestRaycastResult(const Ray3f& ray, csl::ut::MoveArray<ObjectType>& results, LocationType& location, bool& pickedLocation) {
@@ -24,7 +23,7 @@ struct MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl {
 		traits.GetRootObjects(rootObjects);
 
 		for (auto object : rootObjects)
-			if (auto pick = Raycast(object, ray)) {
+			if (auto pick = RaycastBest(object, ray)) {
 				results.push_back(*pick);
 				return;
 			}
@@ -38,7 +37,22 @@ struct MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl {
 		return traits.GetObjectName(object);
 	}
 
-	std::optional<ObjectType> Raycast(ObjectType object, const Ray3f& ray)
+	void RaycastAll(ObjectType object, const Ray3f& ray, csl::ut::MoveArray<ObjectType>& results)
+	{
+		if (!traits.IsSelectable(object))
+			return;
+
+		csl::ut::MoveArray<ObjectType> children{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		traits.GetChildren(object, children);
+
+		for (size_t i = children.size(); i > 0; i--)
+			RaycastAll(children[i - 1], ray, results);
+
+		if (traits.Intersects(object, ray))
+			results.push_back(object);
+	}
+
+	std::optional<ObjectType> RaycastBest(ObjectType object, const Ray3f& ray)
 	{
 		if (!traits.IsSelectable(object))
 			return std::nullopt;
@@ -47,7 +61,7 @@ struct MousePicking3DRecursiveRaycastMousePicking3DBehaviorTraitsImpl {
 		traits.GetChildren(object, children);
 
 		for (size_t i = children.size(); i > 0; i--)
-			if (auto childPick = Raycast(children[i - 1], ray))
+			if (auto childPick = RaycastBest(children[i - 1], ray))
 				return childPick;
 
 		if (traits.Intersects(object, ray))
