@@ -69,7 +69,7 @@ namespace ui::operation_modes::modes::surfride_editor
 		case RemoveCastAction::id: {
 			auto& cast = static_cast<const RemoveCastAction&>(action).payload;
 
-			GetBehavior<SelectionBehavior<Context>>()->Deselect(cast);
+			GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
 			GetContext().RemoveCast(cast);
 			break;
 		}

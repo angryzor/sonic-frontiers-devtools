@@ -7,6 +7,7 @@
 namespace ui::operation_modes::modes::surfride_editor {
 	class Timeline : public Panel<Context> {
 		ImTimeline::ImTimelineContext* timelineCtx;
+		unsigned int animationIdx{};
 
 	public:
 		Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode);

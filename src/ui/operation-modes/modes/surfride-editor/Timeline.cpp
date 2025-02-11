@@ -16,24 +16,32 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void Timeline::RenderPanel() {
 		SRS_LAYER* focusedLayer{};
+		SurfRide::Layer* focusedRuntimeLayer{};
 
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 		auto& context = GetContext();
 
 		for (auto& element : selection) {
 			SRS_LAYER* newLayer{};
-			if (element.type == SurfRideElement::Type::LAYER)
-				newLayer = context.FindLayer(element.id);
-			else if (element.type == SurfRideElement::Type::CAST)
-				newLayer = context.FindCastLayer(element.id);
-
+			SurfRide::Layer* newRuntimeLayer{};
+			if (element.type == SurfRideElement::Type::LAYER) {
+				newLayer = context.ResolveLayer(element);
+				newRuntimeLayer = context.ResolveRuntimeLayer(element);
+			}
+			else if (element.type == SurfRideElement::Type::CAST) {
+				newLayer = context.FindCastLayer(context.ResolveCast(element)->id);
+				auto* rtCast = context.ResolveRuntimeCast(element);
+				newRuntimeLayer = !rtCast ? nullptr : rtCast->layer;
+			}
 			if (newLayer != nullptr) {
 				if (focusedLayer != nullptr) {
 					ImGui::Text("Multiple layers selected");
 					return;
 				}
-				else
+				else {
 					focusedLayer = newLayer;
+					focusedRuntimeLayer = newRuntimeLayer;
+				}
 			}
 		}
 
@@ -42,13 +50,21 @@ namespace ui::operation_modes::modes::surfride_editor {
 			return;
 		}
 
+		if (animationIdx >= focusedLayer->animationCount)
+			animationIdx = 0;
+
 		if (ImGui::BeginChild("Animation list", ImVec2(100.0f, 0.0f))) {
 			for (int i = 0; i < focusedLayer->animationCount; i++) {
 				auto& animation = focusedLayer->animations[i];
 
-				bool clicked = ImGui::Selectable(animation.name, focusedLayer->currentAnimationIndex == i);
+				bool clicked = ImGui::Selectable(animation.name, animationIdx == i);
+
+				if (focusedRuntimeLayer && focusedRuntimeLayer->currentAnimationIndex == i)
+					ImGui::GetWindowDrawList()->AddRect(ImGui::GetItemRectMin() + ImVec2(4.0f, 0.0f), ImGui::GetItemRectMax() - ImVec2(4.0f, 0.0f), IM_COL32_WHITE);
 
 				if (ImGui::BeginPopupContextItem()) {
+					if (focusedRuntimeLayer && ImGui::MenuItem("Switch to"))
+						context.StartAnimationByIndex(focusedRuntimeLayer, i);
 					if (ImGui::BeginMenu("Add motion")) {
 						for (auto& cast : std::span(focusedLayer->casts, focusedLayer->castCount)) {
 							bool anyFound{};
@@ -71,21 +87,25 @@ namespace ui::operation_modes::modes::surfride_editor {
 					ImGui::EndPopup();
 				}
 
-				if (clicked)
-					context.StartAnimationByIndex(*focusedLayer, i);
+				if (clicked) {
+					animationIdx = i;
 
-				if (focusedLayer->currentAnimationIndex == i)
+					if (focusedRuntimeLayer && ImGui::IsKeyDown(ImGuiKey_ModCtrl))
+						context.StartAnimationByIndex(focusedRuntimeLayer, i);
+				}
+
+				if (animationIdx == i)
 					ImGui::SetItemDefaultFocus();
 			}
 		}
 		ImGui::EndChild();
 
-		auto& animation = focusedLayer->animations[focusedLayer->currentAnimationIndex];
+		auto& animation = focusedLayer->animations[animationIdx];
 
 		ImGui::SameLine();
 		if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
 			bool playing = true;
-			auto playHeadFrame = std::fminf(context.GetAnimationFrame(*focusedLayer), static_cast<float>(animation.frameCount));
+			auto playHeadFrame = std::fminf(focusedRuntimeLayer && focusedRuntimeLayer->currentAnimationIndex == animationIdx ? context.GetAnimationFrame(focusedRuntimeLayer) : 0.0f, static_cast<float>(animation.frameCount));
 			bool currentTimeChanged{};
 
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
@@ -99,8 +119,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
 
-			if (currentTimeChanged)
-				context.SetAnimationFrame(*focusedLayer, playHeadFrame);
+			if (currentTimeChanged && focusedRuntimeLayer && focusedRuntimeLayer->currentAnimationIndex == animationIdx)
+				context.SetAnimationFrame(focusedRuntimeLayer, playHeadFrame);
 		}
 		ImGui::EndChild();
 	}

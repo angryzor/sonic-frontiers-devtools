@@ -5,10 +5,10 @@
 
 namespace ui::operation_modes::modes::surfride_editor {
 	class ProjectTree : public Panel<Context> {
-		void RenderElement(ucsl::resources::swif::v6::SRS_SCENE& scene);
-		void RenderElement(ucsl::resources::swif::v6::SRS_CAMERA& camera);
-		void RenderElement(ucsl::resources::swif::v6::SRS_LAYER& layer);
-		void RenderElement(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_CASTNODE& cast);
+		void RenderElement(ucsl::resources::swif::v6::SRS_SCENE& scene, SurfRide::Scene* runtimeScene);
+		void RenderElement(ucsl::resources::swif::v6::SRS_CAMERA& camera, SurfRide::Camera* runtimeCamera);
+		void RenderElement(ucsl::resources::swif::v6::SRS_LAYER& layer, SurfRide::Layer* runtimeLayer);
+		void RenderElement(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast);
 		bool HasContextMenu(ucsl::resources::swif::v6::SRS_SCENE& scene);
 		bool HasContextMenu(ucsl::resources::swif::v6::SRS_CAMERA& camera);
 		bool HasContextMenu(ucsl::resources::swif::v6::SRS_LAYER& layer);
@@ -23,8 +23,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
 
-		template<typename T>
-		bool BeginElement(T& element, bool hasContent) {
+		template<typename T, typename U, typename... A>
+		bool BeginElement(T& element, U* runtimeElement, bool hasContent, const A&... prefix) {
 			ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
 			if (!hasContent)
@@ -33,7 +33,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 			auto& selected = selectionBehavior->GetSelection();
 
-			if (selected.find(element) != -1)
+			if (selected.find(SurfRideElement{ prefix..., element, runtimeElement }) != -1)
 				nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 			char ids[20];
@@ -41,7 +41,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			bool isOpen = ImGui::TreeNodeEx(ids, nodeFlags, "%s", element.name);
 
 			if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
-				selectionBehavior->Select(element);
+				selectionBehavior->Select(SurfRideElement{ prefix..., element, runtimeElement });
 
 			if (HasContextMenu(element) && ImGui::BeginPopupContextItem()) {
 				RenderContextMenu(element);

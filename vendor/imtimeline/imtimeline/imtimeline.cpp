@@ -121,7 +121,7 @@ namespace ImTimeline {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
-		if (!ImGui::BeginTable("Timeline", 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_ScrollX)) {
+		if (!ImGui::BeginTable("Timeline", 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY)) {
 			ImGui::PopStyleVar();
 			ImGui::PopID();
 			return false;

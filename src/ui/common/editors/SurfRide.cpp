@@ -80,6 +80,8 @@ bool Editor(const char* label, ucsl::resources::swif::v6::SRS_CASTNODE& castData
 	edited |= CheckboxFlags("Disable rotation", castData.flags, 0x200u);
 	edited |= CheckboxFlags("Disable scale", castData.flags, 0x400u);
 
+	edited |= CheckboxFlags("Hide", castData.flags, 0x1000u);
+
 	edited |= CheckboxFlags("Transform position", castData.flags, 0x10000u);
 	edited |= CheckboxFlags("Transform rotation", castData.flags, 0x20000u);
 	edited |= CheckboxFlags("Transform scale", castData.flags, 0x40000u);

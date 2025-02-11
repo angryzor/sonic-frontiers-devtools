@@ -34,25 +34,34 @@ namespace ui::operation_modes::modes::surfride_editor {
 		void SetTrackEnd(ucsl::resources::swif::v6::SRS_TRACK& track, unsigned int frame);
 		void MoveTrack(ucsl::resources::swif::v6::SRS_TRACK& track, int delta);
 
-		template<typename F>
-		void VisitElement(const SurfRideElement& element, F f) {
-			switch (element.type) {
-			case SurfRideElement::Type::SCENE: f(FindScene(element.id));
-			case SurfRideElement::Type::CAMERA: f(FindCamera(element.id));
-			case SurfRideElement::Type::LAYER: f(FindLayer(element.id));
-			case SurfRideElement::Type::CAST: f(FindCast(element.id));
-			default: f(FindScene(element.id));
-			}
-		}
+		//template<typename F>
+		//void VisitElement(const SurfRideElement& element, F f) {
+		//	switch (element.type) {
+		//	case SurfRideElement::Type::SCENE: f(FindScene(element.id));
+		//	case SurfRideElement::Type::CAMERA: f(FindCamera(element.id));
+		//	case SurfRideElement::Type::LAYER: f(FindLayer(element.id));
+		//	case SurfRideElement::Type::CAST: f(FindCast(element.id));
+		//	default: f(FindScene(element.id));
+		//	}
+		//}
 
-		ucsl::resources::swif::v6::SRS_SCENE* FindScene(unsigned int id) const;
-		ucsl::resources::swif::v6::SRS_LAYER* FindLayer(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
-		ucsl::resources::swif::v6::SRS_LAYER* FindLayer(unsigned int id) const;
-		ucsl::resources::swif::v6::SRS_CAMERA* FindCamera(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
-		ucsl::resources::swif::v6::SRS_CAMERA* FindCamera(unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_SCENE* FindScene(unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_LAYER* FindLayer(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_LAYER* FindLayer(unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_CAMERA* FindCamera(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_CAMERA* FindCamera(unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
+		//ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(unsigned int id) const;
 		ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(ucsl::resources::swif::v6::SRS_LAYER& layer, unsigned int id) const;
-		ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
-		ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(unsigned int id) const;
+		
+		ucsl::resources::swif::v6::SRS_SCENE* ResolveScene(const SurfRideElement& element) const;
+		ucsl::resources::swif::v6::SRS_CAMERA* ResolveCamera(const SurfRideElement& element) const;
+		ucsl::resources::swif::v6::SRS_LAYER* ResolveLayer(const SurfRideElement& element) const;
+		ucsl::resources::swif::v6::SRS_CASTNODE* ResolveCast(const SurfRideElement& element) const;
+		SurfRide::Scene* ResolveRuntimeScene(const SurfRideElement& element) const;
+		SurfRide::Camera* ResolveRuntimeCamera(const SurfRideElement& element) const;
+		SurfRide::Layer* ResolveRuntimeLayer(const SurfRideElement& element) const;
+		SurfRide::Cast* ResolveRuntimeCast(const SurfRideElement& element) const;
 		
 		ucsl::resources::swif::v6::SRS_LAYER* FindCastLayer(unsigned int castId) const;
 		ucsl::resources::swif::v6::SRS_CASTNODE* FindCastParent(unsigned int castId) const;
@@ -91,6 +100,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				case ucsl::resources::swif::v6::ETrackDataType::COLOR: f(track.keyFrames.constantColor); break;
 				default: assert(false && "Invalid track flags"); break;
 				}
+				break;
 			case ucsl::resources::swif::v6::EInterpolationType::LINEAR:
 				switch (track.GetDataType()) {
 				case ucsl::resources::swif::v6::ETrackDataType::FLOAT: f(track.keyFrames.linearFloat); break;
@@ -100,6 +110,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				case ucsl::resources::swif::v6::ETrackDataType::COLOR: f(track.keyFrames.linearColor); break;
 				default: assert(false && "Invalid track flags"); break;
 				}
+				break;
 			case ucsl::resources::swif::v6::EInterpolationType::HERMITE:
 				switch (track.GetDataType()) {
 				case ucsl::resources::swif::v6::ETrackDataType::FLOAT: f(track.keyFrames.hermiteFloat); break;
@@ -109,6 +120,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				case ucsl::resources::swif::v6::ETrackDataType::COLOR: f(track.keyFrames.hermiteColor); break;
 				default: assert(false && "Invalid track flags"); break;
 				}
+				break;
 			case ucsl::resources::swif::v6::EInterpolationType::INDIVIDUAL:
 				switch (track.GetDataType()) {
 				case ucsl::resources::swif::v6::ETrackDataType::FLOAT: f(track.keyFrames.individualFloat); break;
@@ -118,6 +130,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				case ucsl::resources::swif::v6::ETrackDataType::COLOR: f(track.keyFrames.individualColor); break;
 				default: assert(false && "Invalid track flags"); break;
 				}
+				break;
 			default: assert(false && "Invalid track flags"); break;
 			}
 		}
@@ -213,14 +226,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 			for (auto scene : gocSprite->GetProject()->GetScenes())
 				ForEachRuntimeCast(*scene, std::forward<F>(f));
 		}
-		SurfRide::Layer* FindRuntimeLayer(unsigned int id) const;
-		SurfRide::Cast* FindRuntimeCast(unsigned int id) const;
+		//SurfRide::Layer* FindRuntimeLayer(unsigned int id) const;
+		//SurfRide::Cast* FindRuntimeCast(unsigned int id) const;
 		static bool UpdateAabbWithoutChildren(const SurfRide::Cast* cast, csl::geom::Aabb& aabb);
 		static bool UpdateAabb(const SurfRide::Cast* cast, csl::geom::Aabb& aabb);
 		static bool UpdateAabb(const SurfRide::Layer* layer, csl::geom::Aabb& aabb);
-		void StartAnimationByIndex(const ucsl::resources::swif::v6::SRS_LAYER& layer, int animationIndex);
-		float GetAnimationFrame(const ucsl::resources::swif::v6::SRS_LAYER& layer) const;
-		void SetAnimationFrame(const ucsl::resources::swif::v6::SRS_LAYER& layer, float frame);
+		void StartAnimationByIndex(SurfRide::Layer* layer, int animationIndex);
+		float GetAnimationFrame(SurfRide::Layer* layer) const;
+		void SetAnimationFrame(SurfRide::Layer* layer, float frame);
 		void ApplyTransformChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast);
 		void ApplyImageCastChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast);
 		void ApplyReferenceCastChange(const ucsl::resources::swif::v6::SRS_CASTNODE& cast);

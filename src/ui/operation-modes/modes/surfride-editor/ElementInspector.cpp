@@ -22,10 +22,10 @@ namespace ui::operation_modes::modes::surfride_editor {
 			auto& focusedElement = selection[0];
 
 			switch (focusedElement.type) {
-			case SurfRideElement::Type::SCENE: RenderSceneInspector(*context.FindScene(focusedElement.id), context.FindRuntimeScene(focusedElement.id)); break;
-			case SurfRideElement::Type::CAMERA: RenderCameraInspector(*context.FindCamera(focusedElement.id)); break;
-			case SurfRideElement::Type::LAYER: RenderLayerInspector(*context.FindLayer(focusedElement.id), context.FindRuntimeLayer(focusedElement.id)); break;
-			case SurfRideElement::Type::CAST: RenderCastInspector(*context.FindCast(focusedElement.id), context.FindRuntimeCast(focusedElement.id)); break;
+			case SurfRideElement::Type::SCENE: RenderSceneInspector(*context.ResolveScene(focusedElement), context.ResolveRuntimeScene(focusedElement)); break;
+			case SurfRideElement::Type::CAMERA: RenderCameraInspector(*context.ResolveCamera(focusedElement)); break;
+			case SurfRideElement::Type::LAYER: RenderLayerInspector(*context.ResolveLayer(focusedElement), context.ResolveRuntimeLayer(focusedElement)); break;
+			case SurfRideElement::Type::CAST: RenderCastInspector(*context.ResolveCast(focusedElement), context.ResolveRuntimeCast(focusedElement)); break;
 			}
 		}
 	}
@@ -73,7 +73,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (ImGui::BeginCombo("Current animation", layer.animations[layer.currentAnimationIndex].name)) {
 			for (int i = 0; i < layer.animationCount; i++) {
 				if (ImGui::Selectable(layer.animations[i].name, layer.currentAnimationIndex == i))
-					GetContext().StartAnimationByIndex(layer, i);
+					layer.currentAnimationIndex = i;
 				if (layer.currentAnimationIndex == i)
 					ImGui::SetItemDefaultFocus();
 			}

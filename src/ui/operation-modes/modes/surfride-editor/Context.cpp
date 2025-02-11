@@ -346,45 +346,45 @@ namespace ui::operation_modes::modes::surfride_editor {
 		});
 	}
 
-	SRS_SCENE* Context::FindScene(unsigned int id) const {
-		for (auto& scene : std::span(project->scenes, project->sceneCount))
-			if (scene.id == id)
-				return &scene;
+	//SRS_SCENE* Context::FindScene(unsigned int id) const {
+	//	for (auto& scene : std::span(project->scenes, project->sceneCount))
+	//		if (scene.id == id)
+	//			return &scene;
 
-		return nullptr;
-	}
+	//	return nullptr;
+	//}
 
-	SRS_LAYER* Context::FindLayer(SRS_SCENE& scene, unsigned int id) const {
-		for (auto& layer : std::span(scene.layers, scene.layerCount))
-			if (layer.id == id)
-				return &layer;
+	//SRS_LAYER* Context::FindLayer(SRS_SCENE& scene, unsigned int id) const {
+	//	for (auto& layer : std::span(scene.layers, scene.layerCount))
+	//		if (layer.id == id)
+	//			return &layer;
 
-		return nullptr;
-	}
+	//	return nullptr;
+	//}
 
-	SRS_LAYER* Context::FindLayer(unsigned int id) const {
-		for (auto& scene : std::span(project->scenes, project->sceneCount))
-			if (auto* layer = FindLayer(scene, id))
-				return layer;
+	//SRS_LAYER* Context::FindLayer(unsigned int id) const {
+	//	for (auto& scene : std::span(project->scenes, project->sceneCount))
+	//		if (auto* layer = FindLayer(scene, id))
+	//			return layer;
 
-		return nullptr;
-	}
+	//	return nullptr;
+	//}
 
-	SRS_CAMERA* Context::FindCamera(SRS_SCENE& scene, unsigned int id) const {
-		for (auto& camera : std::span(scene.cameras, scene.cameraCount))
-			if (camera.id == id)
-				return &camera;
+	//SRS_CAMERA* Context::FindCamera(SRS_SCENE& scene, unsigned int id) const {
+	//	for (auto& camera : std::span(scene.cameras, scene.cameraCount))
+	//		if (camera.id == id)
+	//			return &camera;
 
-		return nullptr;
-	}
+	//	return nullptr;
+	//}
 
-	SRS_CAMERA* Context::FindCamera(unsigned int id) const {
-		for (auto& scene : std::span(project->scenes, project->sceneCount))
-			if (auto* camera = FindCamera(scene, id))
-				return camera;
+	//SRS_CAMERA* Context::FindCamera(unsigned int id) const {
+	//	for (auto& scene : std::span(project->scenes, project->sceneCount))
+	//		if (auto* camera = FindCamera(scene, id))
+	//			return camera;
 
-		return nullptr;
-	}
+	//	return nullptr;
+	//}
 
 	SRS_CASTNODE* Context::FindCast(SRS_LAYER& layer, unsigned int id) const {
 		for (auto& cast : std::span(layer.casts, layer.castCount))
@@ -394,27 +394,60 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SRS_CASTNODE* Context::FindCast(SRS_SCENE& scene, unsigned int id) const {
-		for (auto& layer : std::span(scene.layers, scene.layerCount))
-			if (auto* cast = FindCast(layer, id))
-				return cast;
+	//SRS_CASTNODE* Context::FindCast(SRS_SCENE& scene, unsigned int id) const {
+	//	for (auto& layer : std::span(scene.layers, scene.layerCount))
+	//		if (auto* cast = FindCast(layer, id))
+	//			return cast;
 
-		return nullptr;
+	//	return nullptr;
+	//}
+
+	//SRS_CASTNODE* Context::FindCast(unsigned int id) const {
+	//	for (auto& scene : std::span(project->scenes, project->sceneCount))
+	//		if (auto* cast = FindCast(scene, id))
+	//			return cast;
+
+	//	return nullptr;
+	//}
+
+	ucsl::resources::swif::v6::SRS_SCENE* Context::ResolveScene(const SurfRideElement& element) const {
+		return ResolveScenePath(*project, element.path);
 	}
 
-	SRS_CASTNODE* Context::FindCast(unsigned int id) const {
-		for (auto& scene : std::span(project->scenes, project->sceneCount))
-			if (auto* cast = FindCast(scene, id))
-				return cast;
+	ucsl::resources::swif::v6::SRS_CAMERA* Context::ResolveCamera(const SurfRideElement& element) const {
+		return ResolveCameraPath(*project, element.path);
+	}
 
-		return nullptr;
+	ucsl::resources::swif::v6::SRS_LAYER* Context::ResolveLayer(const SurfRideElement& element) const {
+		return ResolveLayerPath(*project, element.path);
+	}
+
+	ucsl::resources::swif::v6::SRS_CASTNODE* Context::ResolveCast(const SurfRideElement& element) const {
+		return ResolveCastPath(*project, element.path);
+	}
+
+	SurfRide::Scene* Context::ResolveRuntimeScene(const SurfRideElement& element) const {
+		return !element.runtimePath ? nullptr : ResolveRuntimeScenePath(*gocSprite->project, *element.runtimePath);
+	}
+
+	SurfRide::Camera* Context::ResolveRuntimeCamera(const SurfRideElement& element) const {
+		return !element.runtimePath ? nullptr : ResolveRuntimeCameraPath(*gocSprite->project, *element.runtimePath);
+	}
+
+	SurfRide::Layer* Context::ResolveRuntimeLayer(const SurfRideElement& element) const {
+		return !element.runtimePath ? nullptr : ResolveRuntimeLayerPath(*gocSprite->project, *element.runtimePath);
+	}
+
+	SurfRide::Cast* Context::ResolveRuntimeCast(const SurfRideElement& element) const {
+		return !element.runtimePath ? nullptr : ResolveRuntimeCastPath(*gocSprite->project, *element.runtimePath);
 	}
 
 	SRS_LAYER* Context::FindCastLayer(unsigned int castId) const {
 		for (auto& scene : std::span(project->scenes, project->sceneCount))
 			for (auto& layer : std::span(scene.layers, scene.layerCount))
-				if (auto* found = FindCast(layer, castId))
-					return &layer;
+				for (auto& cast : std::span(layer.casts, layer.castCount))
+					if (cast.id == castId)
+						return &layer;
 
 		return nullptr;
 	}
@@ -459,49 +492,43 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	SurfRide::Layer* Context::FindRuntimeLayer(unsigned int id) const {
-		if (gocSprite == nullptr)
-			return nullptr;
+	//SurfRide::Layer* Context::FindRuntimeLayer(unsigned int id) const {
+	//	if (gocSprite == nullptr)
+	//		return nullptr;
 
-		for (auto scene : gocSprite->GetProject()->GetScenes())
-			if (auto* layer = scene->GetLayer(id))
-				return layer;
+	//	for (auto scene : gocSprite->GetProject()->GetScenes())
+	//		if (auto* layer = scene->GetLayer(id))
+	//			return layer;
 
-		return nullptr;
+	//	return nullptr;
+	//}
+
+	//SurfRide::Cast* Context::FindRuntimeCast(unsigned int id) const {
+	//	auto* layer = FindCastLayer(id);
+
+	//	if (!layer)
+	//		return nullptr;
+
+	//	auto* runtimeLayer = FindRuntimeLayer(layer->id);
+
+	//	if (!runtimeLayer)
+	//		return nullptr;
+
+	//	return runtimeLayer->GetCast(id);
+	//}
+
+	void Context::StartAnimationByIndex(SurfRide::Layer* runtimeLayer, int animationIndex) {
+		runtimeLayer->StartAnimation(animationIndex);
 	}
 
-	SurfRide::Cast* Context::FindRuntimeCast(unsigned int id) const {
-		auto* layer = FindCastLayer(id);
-
-		if (!layer)
-			return nullptr;
-
-		auto* runtimeLayer = FindRuntimeLayer(layer->id);
-
-		if (!runtimeLayer)
-			return nullptr;
-
-		return runtimeLayer->GetCast(id);
+	float Context::GetAnimationFrame(SurfRide::Layer* runtimeLayer) const {
+		return runtimeLayer->currentFrame3;
 	}
 
-	void Context::StartAnimationByIndex(const SRS_LAYER& layer, int animationIndex) {
-		//if (auto* runtimeLayer = FindRuntimeLayer(layer.id))
-		//	runtimeLayer->StartAnimation(animationIndex);
-	}
-
-	float Context::GetAnimationFrame(const SRS_LAYER& layer) const {
-		//auto* runtimeLayer = FindRuntimeLayer(layer.id);
-
-		//return runtimeLayer ? runtimeLayer->currentFrame3 : 0.0f;
-		return 0.0f;
-	}
-
-	void Context::SetAnimationFrame(const SRS_LAYER& layer, float frame) {
-		//if (auto* runtimeLayer = FindRuntimeLayer(layer.id)) {
-		//	runtimeLayer->currentFrame = frame;
-		//	runtimeLayer->currentFrame2 = frame;
-		//	runtimeLayer->currentFrame3 = frame;
-		//}
+	void Context::SetAnimationFrame(SurfRide::Layer* runtimeLayer, float frame) {
+		runtimeLayer->currentFrame = frame;
+		runtimeLayer->currentFrame2 = frame;
+		runtimeLayer->currentFrame3 = frame;
 	}
 
 	ETrackDataType Context::GetTrackDataTypeForCurveType(ECurveType curveType)
@@ -682,7 +709,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 				runtimeCast.transform->materialColor = transform.materialColor;
 				runtimeCast.transform->illuminationColor = transform.illuminationColor;
 				runtimeCast.transform->display = transform.display;
-
+				
+				runtimeCast.transform->dirtyFlag.SetCellAll();
 				runtimeCast.transform->dirtyFlag.SetTransformAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
 				runtimeCast.UpdateParentsAndThisTransformRecursively();
@@ -706,7 +734,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 				runtimeCast.transform->materialColor = transform.materialColor;
 				runtimeCast.transform->illuminationColor = transform.illuminationColor;
 				runtimeCast.transform->display = transform.display;
-
+				
+				runtimeCast.transform->dirtyFlag.SetCellAll();
 				runtimeCast.transform->dirtyFlag.SetTransformAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
 				runtimeCast.UpdateParentsAndThisTransformRecursively();
