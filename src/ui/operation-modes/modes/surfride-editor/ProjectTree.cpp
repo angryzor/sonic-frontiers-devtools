@@ -163,7 +163,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				Dispatch(AddCastToCastAction{ { cast, SRS_CASTNODE::Type::REFERENCE } });
 			ImGui::EndMenu();
 		}
-		if (ImGui::MenuItem("Remove")) {
-		}
+		//if (ImGui::MenuItem("Remove"))
+		//	Dispatch(RemoveCastAction{ cast });
 	}
 }

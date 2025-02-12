@@ -165,32 +165,52 @@ namespace ui::operation_modes::modes::asm_editor {
 
 		nodeEditor.End();
 
-		if (selectedCount > 0) {
-			NodeId nodeId = ids[0];
+		if (ImGui::Begin("Timeline")) {
+			if (selectedCount > 0) {
+				NodeId nodeId = ids[0];
 
-			if (nodeId.type == NodeType::CLIP) {
-				auto& clip = asmData.clips[nodeId.idx];
+				if (nodeId.type == NodeType::CLIP) {
+					auto& clip = asmData.clips[nodeId.idx];
 
-				float playHeadFrame = 0.0f;
-				bool playing{};
-				bool currentTimeChanged{};
-				if (ImGui::Begin("test")) {
+					float playHeadFrame = 0.0f;
+					bool playing{};
+					bool currentTimeChanged{};
+
 					ImTimeline::Begin(timelineCtx);
 					if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, 500.0f, 60.0f, &playing, &currentTimeChanged)) {
-						if (ImTimeline::BeginTrack("Triggers")) {
-							for (auto& trigger : std::span(asmData.triggers + clip.triggerOffset, clip.triggerCount)) {
-								float time = trigger.unknown2;
-								ImTimeline::Event(trigger.name, &time);
+						for (unsigned int triggerTypeIndex = 0; triggerTypeIndex < asmData.triggerTypeCount; triggerTypeIndex++) {
+							if (ImTimeline::BeginTrack(asmData.triggerTypes[triggerTypeIndex])) {
+								for (auto& trigger : std::span(asmData.triggers + clip.triggerOffset, clip.triggerCount)) {
+									if (trigger.triggerTypeIndex != triggerTypeIndex)
+										continue;
+
+									ImGui::PushID(&trigger);
+									ImTimeline::Event(trigger.name, &trigger.unknown2);
+
+									if (ImGui::IsItemClicked())
+										ImGui::OpenPopup("Editor");
+
+									if (ImGui::BeginPopup("Editor")) {
+										Viewer("name", trigger.name);
+										Editor("type", reinterpret_cast<uint8_t&>(trigger.type));
+										Viewer("trigger type name", trigger.triggerTypeIndex < 0 ? "<none>" : asmData.triggerTypes[trigger.triggerTypeIndex]);
+										Viewer("collider", trigger.colliderIndex < 0 ? "<none>" : asmData.colliders[trigger.colliderIndex]);
+										Editor("unknown2", trigger.unknown2);
+										Editor("unknown3", trigger.unknown3);
+										ImGui::EndPopup();
+									}
+									ImGui::PopID();
+								}
+								ImTimeline::EndTrack();
 							}
-							ImTimeline::EndTrack();
 						}
 						ImTimeline::EndTimeline();
 					}
 					ImTimeline::End();
 				}
-				ImGui::End();
 			}
 		}
+		ImGui::End();
 	}
 
 	void BlendTreeEditor::RenderVariable(short variableId)

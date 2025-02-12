@@ -31,7 +31,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	ucsl::resources::swif::v6::SRS_SCENE* ResolveScenePathFragment(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPathFragment& path) {
 		for (auto& scene : std::span(project.scenes, project.sceneCount))
-			if (path == scene.name)
+			if (path == scene.id)
 				return &scene;
 
 		return nullptr;
@@ -39,7 +39,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	ucsl::resources::swif::v6::SRS_CAMERA* ResolveCameraPathFragment(ucsl::resources::swif::v6::SRS_SCENE& scene, const SurfRideElementPathFragment& path) {
 		for (auto& camera : std::span(scene.cameras, scene.cameraCount))
-			if (path == camera.name)
+			if (path == camera.id)
 				return &camera;
 
 		return nullptr;
@@ -47,7 +47,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	ucsl::resources::swif::v6::SRS_LAYER* ResolveLayerPathFragment(ucsl::resources::swif::v6::SRS_SCENE& scene, const SurfRideElementPathFragment& path) {
 		for (auto& layer : std::span(scene.layers, scene.layerCount))
-			if (path == layer.name)
+			if (path == layer.id)
 				return &layer;
 
 		return nullptr;
@@ -55,14 +55,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	ucsl::resources::swif::v6::SRS_CASTNODE* ResolveCastPathFragment(ucsl::resources::swif::v6::SRS_LAYER& layer, const SurfRideElementPathFragment& path) {
 		for (auto& cast : std::span(layer.casts, layer.castCount))
-			if (path == cast.name)
+			if (path == cast.id)
 				return &cast;
 
 		return nullptr;
 	}
 
 	SurfRide::Scene* ResolveRuntimeScenePathFragment(SurfRide::Project& project, const SurfRideElementPathFragment& path) {
-		return project.GetScene(path.c_str());
+		for (auto scene : project.GetScenes())
+			if (scene->sceneData->id == path)
+				return &*scene;
+
+		return nullptr;
 	}
 
 	SurfRide::Camera* ResolveRuntimeCameraPathFragment(SurfRide::Scene& scene, const SurfRideElementPathFragment& path) {
@@ -70,47 +74,47 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	SurfRide::Layer* ResolveRuntimeLayerPathFragment(SurfRide::Scene& scene, const SurfRideElementPathFragment& path) {
-		return scene.GetLayer(path.c_str());
+		return scene.GetLayer(path);
 	}
 
 	SurfRide::Layer* ResolveRuntimeLayerPathFragment(SurfRide::ReferenceCast& cast, const SurfRideElementPathFragment& path) {
-		return path == cast.refLayer->name.c_str() ? cast.refLayer : nullptr;
+		return path == cast.refLayer->layerData->id ? cast.refLayer : nullptr;
 	}
 
 	SurfRide::Cast* ResolveRuntimeCastPathFragment(SurfRide::Layer& layer, const SurfRideElementPathFragment& path) {
-		return layer.GetCast(path.c_str());
+		return layer.GetCast(path);
 	}
 
 	SurfRideElementPathFragment BuildScenePathFragment(const ucsl::resources::swif::v6::SRS_SCENE& scene) {
-		return scene.name;
+		return scene.id;
 	}
 
 	SurfRideElementPathFragment BuildCameraPathFragment(const ucsl::resources::swif::v6::SRS_CAMERA& camera) {
-		return camera.name;
+		return camera.id;
 	}
 
 	SurfRideElementPathFragment BuildLayerPathFragment(const ucsl::resources::swif::v6::SRS_LAYER& layer) {
-		return layer.name;
+		return layer.id;
 	}
 
 	SurfRideElementPathFragment BuildCastPathFragment(const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
-		return cast.name;
+		return cast.id;
 	}
 
 	SurfRideElementPathFragment BuildRuntimeScenePathFragment(const SurfRide::Scene& scene) {
-		return scene.sceneData->name;
+		return scene.sceneData->id;
 	}
 
 	SurfRideElementPathFragment BuildRuntimeCameraPathFragment(const SurfRide::Camera& camera) {
-		return camera.camera.name;
+		return camera.camera.id;
 	}
 
 	SurfRideElementPathFragment BuildRuntimeLayerPathFragment(const SurfRide::Layer& layer) {
-		return layer.name.c_str();
+		return layer.layerData->id;
 	}
 
 	SurfRideElementPathFragment BuildRuntimeCastPathFragment(const SurfRide::Cast& cast) {
-		return cast.castData->name;
+		return cast.castData->id;
 	}
 
 	ucsl::resources::swif::v6::SRS_SCENE* ResolveScenePath(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPath& path) {

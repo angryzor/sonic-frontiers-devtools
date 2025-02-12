@@ -151,6 +151,7 @@ namespace ImBrowser {
 	}
 	
 	bool ThumbnailsItem(void* id, const char* name, bool selected, PropertyValue* propertyValues, size_t propertyCount, Image icon, Image thumbnail) {
+		ImGui::PushID(id);
 		ImGui::BeginGroup();
 
 		auto cursor = ImGui::GetCursorPos();
@@ -158,15 +159,14 @@ namespace ImBrowser {
 
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 1.0f));
 		
-		ImGui::PushID(id);
 		bool res = ImGui::Selectable(name, selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(standardThumbnailSize, standardThumbnailSize + ImGui::GetFontSize()));
-		ImGui::PopID();
 
 		ImGui::SetCursorPos(cursor);
 		Thumbnail(standardThumbnailSize, icon, thumbnail);
 
 		ImGui::PopStyleVar();
 		ImGui::EndGroup();
+		ImGui::PopID();
 		
 		float lastButtonX = ImGui::GetItemRectMax().x;
 		float nextButtonX = lastButtonX + ImGui::GetStyle().ItemSpacing.x + standardThumbnailSize;
@@ -219,19 +219,19 @@ namespace ImBrowser {
 
 		auto textSize = ImGui::CalcTextSize(name);
 		
+		ImGui::PushID(id);
 		ImGui::BeginGroup();
 
 		auto cursor = ImGui::GetCursorPos();
 
-		ImGui::PushID(id);
 		bool res = ImGui::Selectable("", selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(textSize.x + smallThumbIconSize, smallThumbIconSize));
-		ImGui::PopID();
 
 		ImGui::SetCursorPos(cursor);
 		Thumbnail(ImGui::GetFontSize(), icon, thumbnail);
 		ImGui::SameLine();
 		ImGui::Text("%s", name);
 		ImGui::EndGroup();
+		ImGui::PopID();
 		
 		return res;
 	}
@@ -245,16 +245,15 @@ namespace ImBrowser {
 			ImGui::SameLine();
 			ImGui::BeginGroup();
 		}
-
+		
+		ImGui::PushID(id);
 		ImGui::BeginGroup();
 
 		auto cursor = ImGui::GetCursorPos();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(1.0f, 0.5f));
 		
-		ImGui::PushID(id);
 		bool res = ImGui::Selectable("", selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(height + 200.0f, height));
-		ImGui::PopID();
 
 		ImGui::SetCursorPos(cursor);
 		Thumbnail(height, icon, thumbnail);
@@ -264,6 +263,7 @@ namespace ImBrowser {
 
 		ImGui::PopStyleVar();
 		ImGui::EndGroup();
+		ImGui::PopID();
 
 		return res;
 	}
@@ -296,9 +296,10 @@ namespace ImBrowser {
 		bool clicked = ItemCore(id, name, selected, propertyValues, propertyCount, icon, thumbnail);
 
 		if (clicked) {
-			*is_selected = true;
+			if (is_selected)
+				*is_selected = true;
 
-			if (ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
+			if (is_opened && ImGui::IsMouseDoubleClicked(ImGuiMouseButton_Left))
 				*is_opened = true;
 		}
 

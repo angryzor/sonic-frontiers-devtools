@@ -1,7 +1,7 @@
 #pragma once
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using SurfRideElementPathFragment = std::string;
+	using SurfRideElementPathFragment = unsigned int;
 	struct SurfRideElementPath : std::vector<SurfRideElementPathFragment> {
 		bool operator==(const SurfRideElementPath& other) const;
 		bool operator!=(const SurfRideElementPath& other) const;
@@ -31,7 +31,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 			CAMERA,
 			LAYER,
 			CAST,
-			//TEXTURE,
 		};
 
 		Type type{};

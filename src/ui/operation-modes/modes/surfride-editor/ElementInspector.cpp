@@ -66,6 +66,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	void ElementInspector::RenderLayerInspector(SRS_LAYER& layer, SurfRide::Layer* runtimeLayer)
 	{
+		if (runtimeLayer) {
+			auto& animation = runtimeLayer->layerData->animations[runtimeLayer->currentAnimationIndex];
+
+			ImGui::SeparatorText("Active layer instance");
+			Editor("Paused", runtimeLayer->pause);
+			ImGui::Text("Current animation: %s (%d)", animation.name, animation.id);
+			
+			float currentFrame = GetContext().GetAnimationFrame(runtimeLayer);
+			if (ImGui::SliderFloat("Current frame", &currentFrame, runtimeLayer->startFrame, runtimeLayer->endFrame))
+				GetContext().SetAnimationFrame(runtimeLayer, currentFrame);
+		}
+
 		ImGui::SeparatorText("Layer");
 		ImGui::Text("ID: %d", layer.id);
 		ImGui::Text("Name: %s", layer.name);

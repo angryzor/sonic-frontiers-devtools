@@ -213,6 +213,38 @@ bool Editor(const char* label, SRS_CROPREF& cropRef) {
 	return edited;
 }
 
+bool CropRefEditor(const char* label, resources::ManagedCArray<SRS_CROPREF, short>& cropRefs) {
+	ImGui::BeginGroup();
+	bool edited = Editor(label, cropRefs);
+	ImGui::EndGroup();
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (auto* payload = ImGui::AcceptDragDropPayload("surfride:TextureRef")) {
+			auto textureRef = *static_cast<ui::operation_modes::modes::surfride_editor::texture_editor::TextureRef*>(payload->Data);
+
+			auto& cropRef = cropRefs.emplace_back();
+			cropRef.textureListIndex = static_cast<short>(textureRef.textureListIndex);
+			cropRef.textureIndex = static_cast<short>(textureRef.textureIndex);
+			cropRef.cropIndex = -1;
+
+			edited = true;
+		}
+		else if (auto* payload = ImGui::AcceptDragDropPayload("surfride:CropRef")) {
+			auto sourceCropRef = *static_cast<ui::operation_modes::modes::surfride_editor::texture_editor::CropRef*>(payload->Data);
+
+			auto& cropRef = cropRefs.emplace_back();
+			cropRef.textureListIndex = static_cast<short>(sourceCropRef.textureListIndex);
+			cropRef.textureIndex = static_cast<short>(sourceCropRef.textureIndex);
+			cropRef.cropIndex = static_cast<short>(sourceCropRef.cropIndex);
+
+			edited = true;
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	return edited;
+}
+
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST& imageCastData) {
 	bool edited{};
 	ImGui::PushID(label);
@@ -269,8 +301,8 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST
 	resources::ManagedCArray cropRefs0{ resource, imageCastData.cropRefs0, imageCastData.cropRef0Count };
 	resources::ManagedCArray cropRefs1{ resource, imageCastData.cropRefs1, imageCastData.cropRef1Count };
 
-	edited |= Editor("Crop References 0", cropRefs0);
-	edited |= Editor("Crop References 1", cropRefs1);
+	edited |= CropRefEditor("Crop References 0", cropRefs0);
+	edited |= CropRefEditor("Crop References 1", cropRefs1);
 
 	edited |= CheckboxFlags("Unknown 1", imageCastData.flags, 0x2000u);
 
@@ -412,7 +444,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_SLICECAST
 
 	resources::ManagedCArray cropRefs0{ resource, sliceCastData.cropRefs0, sliceCastData.cropRef0Count };
 
-	edited |= Editor("Crop References 0", cropRefs0);
+	edited |= CropRefEditor("Crop References 0", cropRefs0);
 
 	edited |= CheckboxFlags("Unknown 1", sliceCastData.flags, 0x2000u);
 
@@ -535,5 +567,17 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*
 		}
 	}
 
+	return edited;
+}
+
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_ANIMATION& animation) {
+	bool edited{};
+	ImGui::PushID(label);
+	edited |= InputText("Name", animation.name, resource);
+	Viewer("ID", animation.id);
+	edited |= Editor("Frame count", animation.frameCount);
+	edited |= Editor("Repeat", animation.repeat);
+	edited |= Editor("User data", resource, animation.userData);
+	ImGui::PopID();
 	return edited;
 }

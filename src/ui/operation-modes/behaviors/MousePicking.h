@@ -128,6 +128,7 @@ public:
 	void HandlePopupSelect() {
 		if (ImGui::BeginPopup("Picker results")) {
 			for (auto& object : intermediateResults) {
+				ImGui::PushID(&object);
 				if (ImGui::Selectable(traits.GetObjectName(object))) {
 					this->pickedObjects.push_back(object);
 					this->mouseButton = intermediateMouseButton;
@@ -135,6 +136,7 @@ public:
 
 					this->Dispatch(ObjectsPickedAction{ intermediateMouseButton });
 				}
+				ImGui::PopID();
 			}
 			ImGui::EndPopup();
 		}

@@ -7,6 +7,7 @@
 namespace ui::operation_modes::modes::surfride_editor {
 	class Timeline : public Panel<Context> {
 		ImTimeline::ImTimelineContext* timelineCtx;
+		ImPlotPoint clickpos{};
 		unsigned int animationIdx{};
 
 	public:
@@ -23,6 +24,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		static constexpr int POINTS_PER_SEGMENT = 20;
 		static const char* interpolationTypes[3];
+		static const char* interpolationTypesExtended[4];
 
 		template<typename T>
 		static inline ucsl::resources::swif::v6::Key<T>& GetKeyFrame(ucsl::resources::swif::v6::SRS_TRACK& track, size_t i) {
@@ -77,13 +79,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 			case ucsl::resources::swif::v6::EInterpolationType::LINEAR:
 				return ImPlotPoint(kf.frame + dx * t, Selector(kf.value) + (Selector(nextKf.value) - Selector(kf.value)) * t);
 			case ucsl::resources::swif::v6::EInterpolationType::HERMITE:
-				return ImPlotPoint(
-					kf.frame + dx * t,
-					Selector(kf.value) * (1.0 + 2.0 * t) * (1.0 - t) * (1.0 - t) +
-					Selector(static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(kf).derivativeOut) * (dx * t) * (1.0 - t) * (1.0 - t) +
-					Selector(nextKf.value) * (1.0 + 2.0 * (1.0 - t)) * t * t +
-					Selector(static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(nextKf).derivativeIn) * (dx * (t - 1.0)) * t * t
-				);
+				if constexpr (!std::is_same_v<ucsl::resources::swif::v6::Color, T>)
+					return ImPlotPoint(
+						kf.frame + dx * t,
+						Selector(kf.value) * (1.0 + 2.0 * t) * (1.0 - t) * (1.0 - t) +
+						Selector(static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(kf).derivativeOut) * (dx * t) * (1.0 - t) * (1.0 - t) +
+						Selector(nextKf.value) * (1.0 + 2.0 * (1.0 - t)) * t * t +
+						Selector(static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(nextKf).derivativeIn) * (dx * (t - 1.0)) * t * t
+					);
 			default:
 				assert(false);
 				return ImPlotPoint(0, 0);
@@ -176,7 +179,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 					ImGui::SetTooltip("Frame: %d\nValue: %f", kf.frame, value);
 				}
 
-				if (clicked && !ImGui::IsMouseDragging(ImGuiMouseButton_Left)) {
+				if (clicked && !held) {
 					ImGui::OpenPopup("Editor");
 				}
 

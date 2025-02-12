@@ -2,11 +2,14 @@
 #include "ProjectTree.h"
 #include "Timeline.h"
 #include "ElementInspector.h"
+#include "CropLibrary.h"
 #include "Behaviors.h"
 #include "Actions.h"
 #include "texture-editor/TextureEditor.h"
 #include <ucsl-reflection/reflections/resources/swif/v6.h>
-//#include <rip/binary/containers/swif/SWIF.h>
+#include <rip/util/byteswap.h>
+#include <rip/binary/stream.h>
+#include <rip/binary/containers/swif/SWIF.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/StandaloneOperationModeHost.h>
 #include <ui/GlobalSettings.h>
@@ -23,6 +26,7 @@ namespace ui::operation_modes::modes::surfride_editor
 		AddPanel<ProjectTree>();
 		AddPanel<Timeline>();
 		AddPanel<ElementInspector>();
+		AddPanel<CropLibrary>();
 		AddBehavior<SelectionBehavior>();
 		AddBehavior<SelectionAabbBehavior>();
 		AddBehavior<SelectionTransformationBehavior>();
@@ -152,11 +156,11 @@ namespace ui::operation_modes::modes::surfride_editor
 
 		if (ImGuiFileDialog::Instance()->Display("ResSurfRideProjectExportDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 			if (ImGuiFileDialog::Instance()->IsOk()) {
-				//auto* exportProjectData = static_cast<SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
+				auto* exportProjectData = static_cast<SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
-				//std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
-				//rip::binary::containers::swif::v6::SWIFSerializer serializer{ ofs };
-				//serializer.serialize<he2sdk::ucsl::GameInterface>(*exportProjectData);
+				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
+				rip::binary::containers::swif::v6::SWIFSerializer serializer{ ofs };
+				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportProjectData);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}

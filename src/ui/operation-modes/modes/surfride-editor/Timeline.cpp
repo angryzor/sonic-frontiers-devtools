@@ -4,6 +4,7 @@
 #include "SurfRideElement.h"
 #include "implot_internal.h"
 #include <span>
+#include <ui/common/editors/SurfRide.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
 	using namespace ucsl::resources::swif::v6;
@@ -101,11 +102,23 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::EndChild();
 
 		auto& animation = focusedLayer->animations[animationIdx];
+		bool animationIsCurrentRuntimeAnimation = focusedRuntimeLayer && focusedRuntimeLayer->currentAnimationIndex == animationIdx;
 
 		ImGui::SameLine();
-		if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
-			bool playing = true;
-			auto playHeadFrame = std::fminf(focusedRuntimeLayer && focusedRuntimeLayer->currentAnimationIndex == animationIdx ? context.GetAnimationFrame(focusedRuntimeLayer) : 0.0f, static_cast<float>(animation.frameCount));
+
+		if (ImGui::BeginChild("Properties", ImVec2(250.0f, 0.0f))) {
+			ImGui::SeparatorText("Animation");
+			if (Editor("Properties", context.projectResource, animation))
+				if (animationIsCurrentRuntimeAnimation)
+					focusedRuntimeLayer->ApplyAnimationByIndex(animationIdx);
+		}
+		ImGui::EndChild();
+
+		ImGui::SameLine();
+
+		if (ImGui::BeginChild("Timeline", ImVec2(0, 0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+			bool playing = animationIsCurrentRuntimeAnimation ? !focusedRuntimeLayer->pause : false;
+			auto playHeadFrame = std::fminf(animationIsCurrentRuntimeAnimation ? context.GetAnimationFrame(focusedRuntimeLayer) : 0.0f, static_cast<float>(animation.frameCount));
 			bool currentTimeChanged{};
 
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
@@ -119,8 +132,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
 
-			if (currentTimeChanged && focusedRuntimeLayer && focusedRuntimeLayer->currentAnimationIndex == animationIdx)
-				context.SetAnimationFrame(focusedRuntimeLayer, playHeadFrame);
+			if (animationIsCurrentRuntimeAnimation) {
+				focusedRuntimeLayer->pause = !playing;
+
+				if (currentTimeChanged)
+					context.SetAnimationFrame(focusedRuntimeLayer, playHeadFrame);
+			}
 		}
 		ImGui::EndChild();
 	}
@@ -138,6 +155,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		char name[200];
 		snprintf(name, sizeof(name), "%s", cast == nullptr ? "MISSINGNO." : cast->name);
 
+		ImGui::PushID(&motion);
 		bool isOpen = ImTimeline::BeginTrackGroup(name);
 
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && ImTimeline::IsNameColumnHovered())
@@ -162,11 +180,13 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			ImTimeline::EndTrackGroup();
 		}
+		ImGui::PopID();
 	}
 
 	void Timeline::RenderTrack(SRS_LAYER& layer, SRS_ANIMATION& animation, SRS_MOTION& motion, SRS_TRACK& track)
 	{
 		auto context = GetContext();
+		ImGui::PushID(&track);
 		bool isOpen = ImTimeline::BeginTrack(TrackName(track));
 
 		if (ImGui::IsItemClicked(ImGuiMouseButton_Right) && ImTimeline::IsNameColumnHovered())
@@ -193,8 +213,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				bool endTimeChanged{};
 				bool moved{};
 
-				ImPlotPoint clickpos{};
-
+				ImPlotPoint thisClickpos{};
 				if (ImTimeline::BeginClip(TrackName(track), &startTime, &endTime, 80.0f, &startTimeChanged, &endTimeChanged, &moved)) {
 					if (ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
 						ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations);
@@ -202,18 +221,24 @@ namespace ui::operation_modes::modes::surfride_editor {
 						ImPlot::SetupAxisLimits(ImAxis_X1, track.firstFrame, track.lastFrame, ImPlotCond_Always);
 
 						RenderPlotLines(track);
-
-						clickpos = ImPlot::GetPlotMousePos(ImAxis_X1, ImAxis_Y1);
+						
+						thisClickpos = ImPlot::GetPlotMousePos(ImAxis_X1, ImAxis_Y1);
 
 						ImPlot::EndPlot();
 
 						if (ImGui::IsItemClicked(ImGuiMouseButton_Right)) {
+							clickpos = thisClickpos;
 							ImGui::OpenPopup("plot-context-menu");
 						}
 
 						if (ImGui::BeginPopup("plot-context-menu")) {
 							if (ImGui::MenuItem("Add keyframe"))
 								context.AddKeyFrame(track, static_cast<unsigned int>(clickpos.x));
+
+							auto interpolationType = track.GetInterpolationType();
+							ImGui::SeparatorText("Properties");
+							if (ComboEnum("Interpolation type", interpolationType, interpolationTypesExtended))
+								context.SetTrackInterpolationType(track, interpolationType);
 
 							ImGui::EndPopup();
 						}
@@ -236,6 +261,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 			ImTimeline::EndTrack();
 		}
+		ImGui::PopID();
 	}
 
 
@@ -381,4 +407,5 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	const char* Timeline::interpolationTypes[3] = { "Constant", "Linear", "Hermite" };
+	const char* Timeline::interpolationTypesExtended[4] = { "Constant", "Linear", "Hermite", "Individual" };
 }

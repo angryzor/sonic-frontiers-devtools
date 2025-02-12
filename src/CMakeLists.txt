@@ -465,6 +465,7 @@ if(${DEVTOOLS_FEATURE_SURFRIDE_EDITOR})
             ui/common/editors/SurfRide.cpp
             ui/operation-modes/modes/surfride-editor/Context.cpp
             ui/operation-modes/modes/surfride-editor/Timeline.cpp
+            ui/operation-modes/modes/surfride-editor/CropLibrary.cpp
             ui/operation-modes/modes/surfride-editor/ProjectTree.cpp
             ui/operation-modes/modes/surfride-editor/ElementInspector.cpp
             ui/operation-modes/modes/surfride-editor/SurfRideEditor.cpp
@@ -479,6 +480,7 @@ if(${DEVTOOLS_FEATURE_SURFRIDE_EDITOR})
             ui/common/editors/SurfRide.h
             ui/operation-modes/modes/surfride-editor/Context.h
             ui/operation-modes/modes/surfride-editor/Timeline.h
+            ui/operation-modes/modes/surfride-editor/CropLibrary.h
             ui/operation-modes/modes/surfride-editor/ProjectTree.h
             ui/operation-modes/modes/surfride-editor/ElementInspector.h
             ui/operation-modes/modes/surfride-editor/SurfRideEditor.h

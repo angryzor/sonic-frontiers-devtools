@@ -33,25 +33,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 		void SetTrackStart(ucsl::resources::swif::v6::SRS_TRACK& track, unsigned int frame);
 		void SetTrackEnd(ucsl::resources::swif::v6::SRS_TRACK& track, unsigned int frame);
 		void MoveTrack(ucsl::resources::swif::v6::SRS_TRACK& track, int delta);
+		void SetTrackInterpolationType(ucsl::resources::swif::v6::SRS_TRACK& track, ucsl::resources::swif::v6::EInterpolationType interpolationType);
 
-		//template<typename F>
-		//void VisitElement(const SurfRideElement& element, F f) {
-		//	switch (element.type) {
-		//	case SurfRideElement::Type::SCENE: f(FindScene(element.id));
-		//	case SurfRideElement::Type::CAMERA: f(FindCamera(element.id));
-		//	case SurfRideElement::Type::LAYER: f(FindLayer(element.id));
-		//	case SurfRideElement::Type::CAST: f(FindCast(element.id));
-		//	default: f(FindScene(element.id));
-		//	}
-		//}
-
-		//ucsl::resources::swif::v6::SRS_SCENE* FindScene(unsigned int id) const;
-		//ucsl::resources::swif::v6::SRS_LAYER* FindLayer(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
-		//ucsl::resources::swif::v6::SRS_LAYER* FindLayer(unsigned int id) const;
-		//ucsl::resources::swif::v6::SRS_CAMERA* FindCamera(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
-		//ucsl::resources::swif::v6::SRS_CAMERA* FindCamera(unsigned int id) const;
-		//ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(ucsl::resources::swif::v6::SRS_SCENE& scene, unsigned int id) const;
-		//ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(unsigned int id) const;
 		ucsl::resources::swif::v6::SRS_CASTNODE* FindCast(ucsl::resources::swif::v6::SRS_LAYER& layer, unsigned int id) const;
 		
 		ucsl::resources::swif::v6::SRS_SCENE* ResolveScene(const SurfRideElement& element) const;
@@ -89,7 +72,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<typename F>
-		static void VisitKeyFrames(const ucsl::resources::swif::v6::SRS_TRACK& track, F f) {
+		static void VisitKeyFrames(ucsl::resources::swif::v6::SRS_TRACK& track, F f) {
 			switch (track.GetInterpolationType()) {
 			case ucsl::resources::swif::v6::EInterpolationType::CONSTANT:
 				switch (track.GetDataType()) {

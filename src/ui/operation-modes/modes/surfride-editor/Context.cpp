@@ -346,6 +346,41 @@ namespace ui::operation_modes::modes::surfride_editor {
 		});
 	}
 
+	void Context::SetTrackInterpolationType(ucsl::resources::swif::v6::SRS_TRACK& track, ucsl::resources::swif::v6::EInterpolationType interpolationType) {
+		VisitKeyFrames(track, [this, &track, interpolationType](auto*& kf1){
+			using KeyFrameType1 = std::remove_pointer_t<std::remove_reference_t<decltype(kf1)>>;
+			using ValueType1 = typename KeyFrameType1::ValueType;
+
+			csl::ut::MoveArray<std::tuple<unsigned int, ValueType1>> savedData{ hh::fnd::MemoryRouter::GetTempAllocator() };
+
+			resources::ManagedCArray kfs1{ projectResource, kf1, track.keyCount };
+
+			for (auto& kf : kfs1)
+				savedData.push_back({ kf.frame, kf.value });
+
+			kfs1.clear();
+
+			track.SetInterpolationType(interpolationType);
+
+			VisitKeyFrames(track, [this, &track, &savedData](auto*& kf2) {
+				using KeyFrameType2 = std::remove_pointer_t<std::remove_reference_t<decltype(kf2)>>;
+				using ValueType2 = typename KeyFrameType2::ValueType;
+
+				if constexpr (!std::is_same_v<ValueType1, ValueType2>)
+					assert(false && "impossible situation");
+				else {
+					resources::ManagedCArray kfs2{ projectResource, kf2, track.keyCount };
+
+					for (auto& savedDatum : savedData) {
+						auto& kf = kfs2.emplace_back();
+						kf.frame = std::get<0>(savedDatum);
+						kf.value = std::get<1>(savedDatum);
+					}
+				}
+			});
+		});
+	}
+
 	//SRS_SCENE* Context::FindScene(unsigned int id) const {
 	//	for (auto& scene : std::span(project->scenes, project->sceneCount))
 	//		if (scene.id == id)
@@ -518,7 +553,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	//}
 
 	void Context::StartAnimationByIndex(SurfRide::Layer* runtimeLayer, int animationIndex) {
-		runtimeLayer->StartAnimation(animationIndex);
+		runtimeLayer->ApplyAnimationByIndex(animationIndex);
 	}
 
 	float Context::GetAnimationFrame(SurfRide::Layer* runtimeLayer) const {
@@ -526,9 +561,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	void Context::SetAnimationFrame(SurfRide::Layer* runtimeLayer, float frame) {
-		runtimeLayer->currentFrame = frame;
-		runtimeLayer->currentFrame2 = frame;
-		runtimeLayer->currentFrame3 = frame;
+		runtimeLayer->SetCurrentFrame(frame);
 	}
 
 	ETrackDataType Context::GetTrackDataTypeForCurveType(ECurveType curveType)

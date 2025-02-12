@@ -12,6 +12,7 @@ bool Editor(const char* label, ucsl::resources::swif::v6::Colorf& color);
 bool Editor(const char* label, ucsl::resources::swif::v6::SRS_TRS2D& transformData);
 bool Editor(const char* label, ucsl::resources::swif::v6::SRS_TRS3D& transformData);
 bool Editor(const char* label, ucsl::resources::swif::v6::SRS_CASTNODE& castData);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_ANIMATION& animation);
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_IMAGECAST& imageCastData);
 bool Editor(const char* label, ucsl::resources::swif::v6::SRS_REFERENCECAST& referenceCastData);
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_SLICECAST& sliceCastData);
