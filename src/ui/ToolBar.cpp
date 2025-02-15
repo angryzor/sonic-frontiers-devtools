@@ -11,6 +11,7 @@
 #include "game-services/GameServiceInspector.h"
 #include "core-services/MemoryInspector.h"
 #include "tools/RflComparer.h"
+#include <ui/common/viewers/Basic.h>
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include "tools/wars/NeedleFxSceneDataTesterV2.h"
@@ -37,6 +38,7 @@
 #include "operation-modes/modes/level-editor/LevelEditor.h"
 #include "operation-modes/modes/fxcol-editor/FxColEditor.h"
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
+#include "operation-modes/modes/dvscene-editor/DvSceneEditor.h"
 
 using namespace hh::game;
 
@@ -49,6 +51,83 @@ void ToolBar::Render() {
 		ImGui::End();
 		return;
 	}
+
+	ImGui::Begin("Testing Stuff");
+	if(ImGui::TreeNode("ViewerManager Viewers"))
+	{
+		if (auto* x = RESOLVE_STATIC_VARIABLE(hh::dbg::ViewerManager::instance)) {
+			for (auto& y : x->viewers) {
+				ImGui::Text(y->name);
+			}
+		}
+		ImGui::TreePop();
+	}
+	if (ImGui::TreeNode("ViewerContextManager ViewerContexts"))
+	{
+		if (auto* x = RESOLVE_STATIC_VARIABLE(hh::dbg::ViewerManager::instance)) {
+			auto z = x->viewerContextManager;
+			for (auto& y : z->viewerContexts) {
+				ImGui::Text("test");
+			}
+		}
+		ImGui::TreePop();
+	}
+	Viewer("viewermgr address", (size_t)RESOLVE_STATIC_VARIABLE(hh::dbg::ViewerManager::instance));
+	Viewer("winmgr address", (size_t)RESOLVE_STATIC_VARIABLE(hh::dbg::WindowManager::instance));
+	if (ImGui::Button("create viewermanager")) {
+		auto* gameManager = hh::game::GameManager::GetInstance();
+		auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+		hh::dbg::ViewerManager& test = []() -> hh::dbg::ViewerManager& {
+			auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+			static hh::dbg::ViewerManager instance(allocator);
+			return instance;
+		}();
+		RESOLVE_STATIC_VARIABLE(hh::dbg::ViewerManager::instance) = &test;
+		hh::dbg::WindowManager& testw = []() -> hh::dbg::WindowManager& {
+			auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
+			static hh::dbg::WindowManager instance(allocator);
+			return instance;
+		}();
+		RESOLVE_STATIC_VARIABLE(hh::dbg::WindowManager::instance) = &testw;
+		RESOLVE_STATIC_VARIABLE(hh::dbg::WindowManager::instance)->control = new gindows::Control();
+		RESOLVE_STATIC_VARIABLE(hh::dbg::WindowManager::instance)->form = new gindows::Form();
+
+		hh::ui::SurfRideViewerManager* srVMgr = gameManager->CreateService<hh::ui::SurfRideViewerManager>(allocator);
+		hh::ui::SurfRideViewerContext* srVCtx = (hh::ui::SurfRideViewerContext*)RESOLVE_STATIC_VARIABLE(hh::dbg::ViewerManager::instance)->viewerContextManager->CreateViewerContext(hh::ui::SurfRideViewerContext::GetClass());
+		// hh::ui::SurfRideViewerWindow* srVWin = ...
+		// hh::ui::SurfRideViewer* srV = ...
+		auto* window = RESOLVE_STATIC_VARIABLE(hh::dbg::WindowManager::instance)->WM_CreateWindow("test");
+
+		gameManager->RegisterService(srVMgr);
+		RESOLVE_STATIC_VARIABLE(hh::dbg::ViewerManager::instance)->viewerContextManager->viewerContexts.push_back(srVCtx);
+	}
+	if (ImGui::Button("create eventpreviewhelper")) {
+		auto* gameManager = hh::game::GameManager::GetInstance();
+		if (!gameManager->GetService<app::evt::EventPreviewHelper>()) {
+			auto* y = gameManager->CreateService<hh::dv::DiEventPreviewManager>(hh::fnd::MemoryRouter::GetModuleAllocator());
+			auto* s = gameManager->CreateService<app::evt::EventPreviewHelper>(hh::fnd::MemoryRouter::GetModuleAllocator());
+			auto* x = gameManager->CreateService<app::evt::DevEventInfo>(hh::fnd::MemoryRouter::GetModuleAllocator());
+			s->staticClass = (hh::game::GameServiceClass*)app::evt::EventPreviewHelper::GetClass();
+			gameManager->RegisterService(x);
+			gameManager->RegisterService(y);
+			gameManager->RegisterService(s);
+		}
+	}
+	if (ImGui::Button("Suspend World")) {
+		auto* gameManager = hh::game::GameManager::GetInstance();
+		hh::fnd::Message msg(hh::fnd::MessageID::SUSPEND_WORLD);
+		size_t msgtable = 0x1414190D0;
+		size_t& msgsize = (size_t&)msg;
+		msgsize = msgtable;
+		gameManager->SendMessageImm(msg);
+		gameManager->GetService<hh::dv::DiEventManager>()->GetDvSceneControl()->timeline->currentFrame0 -= 500;
+		hh::fnd::Message msg0(hh::fnd::MessageID::RESUME_WORLD);
+		size_t msgtable0 = 0x141419100;
+		size_t& msgsize0 = (size_t&)msg0;
+		msgsize0 = msgtable0;
+		gameManager->SendMessageImm(msg0);
+	}
+	ImGui::End();
 
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::MenuItem("Resource Browser"))
@@ -116,6 +195,10 @@ void ToolBar::Render() {
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::fxcol_editor::FxColEditor>();
 			if (ImGui::MenuItem("SurfRide Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+			if (ImGui::MenuItem("DvScene Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::dvscene_editor::DvSceneEditor>();
 #endif
 			ImGui::EndMenu();
 		}

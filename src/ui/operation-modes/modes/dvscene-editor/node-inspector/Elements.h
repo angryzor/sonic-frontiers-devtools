@@ -1,0 +1,129 @@
+#pragma once
+#include "NodeInspector.h"
+#include <ui/common/viewers/Basic.h>
+#include <ui/common/editors/Basic.h>
+#include <ui/common/editors/DvScene.h>
+
+#include "elements/CameraParams.h"
+#include "elements/PathOffset.h"
+#include "elements/CameraShake.h"
+#include "elements/CameraShakeLoop.h"
+#include "elements/Effect.h"
+#include "elements/PathInterpolation.h"
+#include "elements/CameraNearFar.h"
+#include "elements/UVAnim.h"
+#include "elements/VisibilityAnim.h"
+#include "elements/MaterialAnim.h"
+#include "elements/MultipleAnim.h"
+#include "elements/CameraOffset.h"
+#include "elements/ModelFade.h"
+//#include "elements/DebugMotion.h"
+#include "elements/CameraHedgehog.h"
+#include "elements/CameraInGame.h"
+//#include "elements/PointLight.h"
+#include "elements/VertexAnimationTexture.h"
+#include "elements/Spotlight.h"
+//#include "elements/ControllerVibration.h"
+//#include "elements/SpotlightModel.h"
+#include "elements/BloomParam.h"
+#include "elements/DOFParam.h"
+#include "elements/ColorContrast.h"
+#include "elements/CameraControlParam.h"
+#include "elements/ShadowResolution.h"
+#include "elements/GodrayParam.h"
+#include "elements/AtmosphereGodrayParam.h"
+//#include "elements/AtmosphereHeightFogParam.h"
+#include "elements/ChromaticAberrationFilterParam.h"
+#include "elements/VignetteParam.h"
+#include "elements/Fade.h"
+#include "elements/BossName.h"
+#include "elements/Caption.h"
+#include "elements/Sound.h"
+#include "elements/Time.h"
+#include "elements/Sun.h"
+#include "elements/LookAtIK.h"
+#include "elements/CameraBlurParam.h"
+#include "elements/GeneralTrigger.h"
+//#include "elements/FootIk.h"
+#include "elements/DitherParam.h"
+#include "elements/QTE.h"
+#include "elements/FacialAnimation.h"
+#include "elements/OverrideASM.h"
+#include "elements/Aura.h"
+#include "elements/ChangeTimeScale.h"
+#include "elements/LipAnimation.h"
+#include "elements/CrossFade.h"
+#include "elements/Weather.h"
+#include "elements/ShadowMapParam.h"
+#include "elements/VariablePointLight.h"
+#include "elements/DensitySectorPoint.h"
+#include "elements/VAT.h"
+#include "elements/QTEAccel.h"
+#include "elements/TheEndCableObject.h"
+
+namespace ui::operation_modes::modes::dvscene_editor {
+    using ElementFuncType = void(*)(hh::dv::DvElementBase*);
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+    constexpr std::pair<int, ElementFuncType> RenderElementInspectors[] = {
+        {1, RenderElementInspector<1>},
+        {5, RenderElementInspector<5>},
+        {6, RenderElementInspector<6>},
+        {7, RenderElementInspector<7>},
+        {8, RenderElementInspector<8>},
+        {10, RenderElementInspector<10>},
+        {12, RenderElementInspector<12>},
+        {13, RenderElementInspector<13>},
+        {14, RenderElementInspector<14>},
+        {15, RenderElementInspector<15>},
+        {16, RenderElementInspector<16>},
+        {17, RenderElementInspector<17>},
+        {18, RenderElementInspector<18>},
+        {19, RenderElementInspector<16>},
+        {20, RenderElementInspector<20>},
+        {21, RenderElementInspector<21>},
+        {23, RenderElementInspector<23>},
+        {24, RenderElementInspector<24>},
+        {1000, RenderElementInspector<1000>},
+        {1001, RenderElementInspector<1001>},
+        {1002, RenderElementInspector<1002>},
+        {1003, RenderElementInspector<1003>},
+        {1004, RenderElementInspector<1004>},
+        {1005, RenderElementInspector<1005>},
+        {1006, RenderElementInspector<1006>},
+        {1008, RenderElementInspector<1008>},
+        {1009, RenderElementInspector<1009>},
+        {1010, RenderElementInspector<1010>},
+        {1014, RenderElementInspector<1014>},
+        {1015, RenderElementInspector<1015>},
+        {1016, RenderElementInspector<1016>},
+        {1017, RenderElementInspector<1017>},
+        {1018, RenderElementInspector<1018>},
+        {1019, RenderElementInspector<1019>},
+        {1020, RenderElementInspector<1020>},
+        {1021, RenderElementInspector<1021>},
+        {1023, RenderElementInspector<1023>},
+        {1024, RenderElementInspector<1024>},
+        {1025, RenderElementInspector<1025>},
+        {1026, RenderElementInspector<1026>},
+        {1027, RenderElementInspector<1027>},
+        {1028, RenderElementInspector<1028>},
+        {1030, RenderElementInspector<1030>},
+        {1033, RenderElementInspector<1033>},
+        {1034, RenderElementInspector<1034>},
+        {1035, RenderElementInspector<1035>},
+        {1036, RenderElementInspector<1036>},
+        {1038, RenderElementInspector<1038>},
+        {1040, RenderElementInspector<1040>},
+        {1041, RenderElementInspector<1041>},
+        {1042, RenderElementInspector<1042>}
+    };
+#endif
+
+    constexpr ElementFuncType GetElementInspectorRender(int type) {
+        for (const auto& [key, func] : RenderElementInspectors) {
+            if (key == type) return func;
+        }
+        return nullptr;
+    }
+}

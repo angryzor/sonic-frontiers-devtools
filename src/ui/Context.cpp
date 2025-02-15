@@ -311,7 +311,7 @@ void Context::rebuild_fonts()
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_NoAutoHint;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
-	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, fontSize, &fontConfig);// , ranges);
+	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, fontSize, &fontConfig, io.Fonts->GetGlyphRangesJapanese());// , ranges);
 	io.Fonts->Build();
 
 	if (imguiInited)
