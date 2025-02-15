@@ -23,6 +23,24 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	};
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+	const char* nodeTypeNames1[] = {
+		"",
+		"Path",
+		"PathMotion",
+		"Camera",
+		"CameraMotion",
+		"Character",
+		"CharacterMotion",
+		"CharacterBehavior",
+		"Model",
+		"",
+		"ModelMotion",
+		"ModelNode",
+		"Element"
+	};
+#endif
+
     void Tree::RenderNode(hh::dv::DvNodeBase* node){
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		DvNode selection{ node };
@@ -47,6 +65,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			selectionBehavior->Select(selection);
         
         if(isOpen){
+			#ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::BeginPopupContextItem("Options")) {
 				if (ImGui::Selectable("Add Element")) {
 					char* setupInfoBuffer = new char[sizeof(hh::dv::DvNodeElement::Data) + sizeof(hh::dv::DvElementEffect::Data)];
@@ -73,6 +92,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				}
 				ImGui::EndPopup();
 			}
+			#endif
 
             for(auto* x : node->childrenElements0)
                 RenderNode(x);

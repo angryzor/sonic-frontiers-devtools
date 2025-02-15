@@ -65,6 +65,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	}
 
 	void Timeline::SetTimescale(float scale) {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 		auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
 		if (!seqExt)
 			return;
@@ -79,6 +80,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				ext->timeScaleInterpolators[25].unk1[0].timeScale = scale;
 			}
 		}
+#endif
 	}
 
 	void Timeline::RenderTimeline(int* start, int* end, float* curve, int size, bool axisLimit, float maxValue) {

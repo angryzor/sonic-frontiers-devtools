@@ -122,10 +122,8 @@ void ToolBar::Render() {
 #endif
 			if (ImGui::MenuItem("SurfRide Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("DvScene Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::dvscene_editor::DvSceneEditor>();
-#endif
 			ImGui::EndMenu();
 		}
 

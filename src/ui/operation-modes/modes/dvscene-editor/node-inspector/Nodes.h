@@ -3,6 +3,7 @@
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "nodes/Path.h"
 #include "nodes/Character.h"
 #include "nodes/CharacterMotion.h"
@@ -10,12 +11,13 @@
 #include "nodes/ModelMotion.h"
 #include "nodes/ModelNode.h"
 #include "nodes/Element.h"
+#endif
 
 namespace ui::operation_modes::modes::dvscene_editor {
     using NodeFuncType = void(*)(hh::dv::DvNodeBase*);
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
     constexpr std::pair<int, NodeFuncType> RenderNodeInspectors[] = {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
         {1, RenderNodeInspector<1>},
         {5, RenderNodeInspector<5>},
         {6, RenderNodeInspector<6>},
@@ -23,8 +25,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {10, RenderNodeInspector<10>},
         {11, RenderNodeInspector<11>},
         {12, RenderNodeInspector<12>}
-    };
 #endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+        {}
+#endif
+    };
 
     constexpr NodeFuncType GetNodeInspectorRender(int type) {
         for (const auto& [key, func] : RenderNodeInspectors) {

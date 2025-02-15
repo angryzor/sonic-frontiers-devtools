@@ -11,6 +11,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		}
 
 		void Delete(hh::dv::DvNodeBase* node){
+			#ifdef DEVTOOLS_TARGET_SDK_rangers
 			if(auto* y = node->parent){
 				y->childrenElements0.remove(y->childrenElements0.find(node));
 				y->childrenElements1.remove(y->childrenElements1.find(node));
@@ -40,6 +41,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 						Delete(node->childrenMotion[x]);
 				node->Free();
 			}
+			#endif
 		}
 	public:
         hh::dv::DvNodeBase* node;

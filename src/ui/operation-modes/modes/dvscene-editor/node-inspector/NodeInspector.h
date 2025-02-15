@@ -14,6 +14,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	template<int type>
 	void RenderNodeInspector(hh::dv::DvNodeBase* node) {}
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 	template<int type>
 	void RenderElementInspector(hh::dv::DvElementBase* element) {}
+#endif
 }

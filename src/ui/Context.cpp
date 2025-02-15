@@ -312,9 +312,9 @@ void Context::rebuild_fonts()
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_Bitmap;
 	//fontConfig.FontBuilderFlags |= ImGuiFreeTypeBuilderFlags_LoadColor;
 	font = io.Fonts->AddFontFromMemoryCompressedTTF((void*)inter_compressed_data, inter_compressed_size, fontSize, &fontConfig);// , ranges);
-	RegisterIconGlyphs(font);
+	//RegisterIconGlyphs(font);
 	io.Fonts->Build();
-	AddIconTextures();
+	//AddIconTextures();
 
 	if (imguiInited)
 		ImGui_ImplDX11_InvalidateDeviceObjects();

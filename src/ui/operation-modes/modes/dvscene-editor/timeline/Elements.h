@@ -2,6 +2,7 @@
 #include "Timeline.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
     using ElementTimelineFuncType = void(*)(Timeline*, hh::dv::DvNodeElement*);
 
     template<>
@@ -237,4 +238,5 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         return nullptr;
     }
+#endif
 }

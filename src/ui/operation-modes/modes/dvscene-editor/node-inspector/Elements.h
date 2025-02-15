@@ -2,6 +2,7 @@
 #include "NodeInspector.h"
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 #include <ui/common/editors/DvScene.h>
 
 #include "elements/CameraParams.h"
@@ -60,12 +61,13 @@
 #include "elements/VAT.h"
 #include "elements/QTEAccel.h"
 #include "elements/TheEndCableObject.h"
+#endif
 
 namespace ui::operation_modes::modes::dvscene_editor {
     using ElementFuncType = void(*)(hh::dv::DvElementBase*);
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
     constexpr std::pair<int, ElementFuncType> RenderElementInspectors[] = {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
         {1, RenderElementInspector<1>},
         {5, RenderElementInspector<5>},
         {6, RenderElementInspector<6>},
@@ -117,8 +119,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {1040, RenderElementInspector<1040>},
         {1041, RenderElementInspector<1041>},
         {1042, RenderElementInspector<1042>}
-    };
 #endif
+    };
 
     constexpr ElementFuncType GetElementInspectorRender(int type) {
         for (const auto& [key, func] : RenderElementInspectors) {

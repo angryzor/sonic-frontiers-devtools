@@ -1,5 +1,6 @@
 #include <ui/common/editors/Basic.h>
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 bool Editor(const char* label, app::dv::DvElementDOFParam::Data::DOFParam& param) {
     if(ImGui::TreeNode(label)) {
         Editor("Focus", param.focus);
@@ -150,3 +151,4 @@ bool Editor(const char* label, app::dv::DvElementBloomParam::Data::Parameters& d
     }
     return false;
 }
+#endif

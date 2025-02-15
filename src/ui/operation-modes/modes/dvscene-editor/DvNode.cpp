@@ -25,6 +25,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 	Eigen::Affine3f DvNode::GetTransform() 
 	{
+		#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if(node->nodeType == hh::dv::DvNodeBase::NodeType::PATH)
 		{
 			auto* path = reinterpret_cast<hh::dv::DvNodePath*>(node);
@@ -36,11 +37,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			return transform;
 		}
 		else
+#endif
 			return Eigen::Affine3f{};
 	}
 	
     void DvNode::SetTransform(const Eigen::Affine3f &transform)
     {
+		#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if(node->nodeType == hh::dv::DvNodeBase::NodeType::PATH)
 		{
 			auto* path = reinterpret_cast<hh::dv::DvNodePath*>(node);
@@ -51,6 +54,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 			path->transform = Affine3fToTransform(trans);
 		}
+		#endif
     }
 
 	DvNode DvNode::GetParent() {

@@ -27,6 +27,24 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	};
 #endif
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+	const char* nodeTypeNames0[] = {
+		"",
+		"Path",
+		"PathMotion",
+		"Camera",
+		"CameraMotion",
+		"Character",
+		"CharacterMotion",
+		"CharacterBehavior",
+		"Model",
+		"",
+		"ModelMotion",
+		"ModelNode",
+		"Element"
+	};
+#endif
+
 	void NodeInspector::RenderPanel()
 	{
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
