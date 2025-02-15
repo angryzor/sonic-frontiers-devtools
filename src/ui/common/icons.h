@@ -175,14 +175,13 @@ constexpr IconMap icons[] = {
     { u'\uE044', "components/object" },
     { u'\uE045', "components/scripting" },
     { u'\uE046', "components/event" },
-    { u'\uE046', "components/path" },
-    { u'\uE046', "components/posture" },
-    { u'\uE046', "components/enemy" },
+    { u'\uE047', "components/path" },
+    { u'\uE048', "components/posture" },
+    { u'\uE049', "components/enemy" },
 };
 
 void RegisterIconGlyphs(ImFont* font);
 void AddIconTextures();
-void CreateImgIcons();
 
 //template<typename Atlas>
 //void RenderIcon(const Atlas& atlas, typename Atlas::Id_t id, ImVec2 size) {

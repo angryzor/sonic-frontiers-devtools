@@ -1,3 +1,12 @@
+# v0.1.69
+* Fixed a crash when not installed in default Steam library location.
+* Fixed broken SWIF export.
+* Fixed some wrongly tagged icons.
+
+## Shadow Generations
+* Fixed resource browser showing too many resources.
+
+
 # v0.1.68
 * Added SvCol editor.
 * Added animation editing to SurfRide editor.

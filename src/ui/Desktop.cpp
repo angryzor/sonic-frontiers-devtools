@@ -35,16 +35,7 @@ const char* replayCommandNames[] = {
 
 ImTimeline::ImTimelineContext* tlCtx = ImTimeline::CreateContext();
 
-Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }
-{
-	resourceLoader = hh::fnd::ResourceLoader::Create(allocator);
-
-#ifdef DEVTOOLS_TARGET_SDK_miller
-	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac");
-#else
-	resourceLoader->LoadPackfile("mods/angryzor_devtools/devtools.pac", 0);
-#endif
-
+Desktop::Desktop(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator } {
 	Translations::Init(allocator);
 }
 

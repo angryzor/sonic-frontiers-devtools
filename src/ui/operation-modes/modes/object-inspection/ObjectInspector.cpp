@@ -106,6 +106,13 @@ typedef std::tuple<
 > InspectableGameObjects;
 #endif
 
+namespace app {
+	class GOCEnemy : public hh::game::GOComponent {
+	public:
+		GOCOMPONENT_CLASS_DECLARATION(GOCEnemy);
+	};
+}
+
 namespace ui::operation_modes::modes::object_inspection {
 
 	using namespace hh::fnd;
@@ -332,6 +339,8 @@ namespace ui::operation_modes::modes::object_inspection {
 #ifndef DEVTOOLS_TARGET_SDK_wars
 		else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_ANIMATION);
+		else if (component.pStaticClass == app::GOCEnemy::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_ENEMY);
 #endif
 		else return GetIconGlyph(IconId::COMPONENT_OBJECT);
 	}

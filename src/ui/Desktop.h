@@ -20,7 +20,6 @@ class Desktop : public CompatibleObject, OperationModeHost {
 public:
     static bool selectionColliderFilters[32][32];
     hh::fnd::Reference<OperationModeBase> operationMode{};
-    hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader{};
     static Desktop* instance;
 
     ID3D11ShaderResourceView* iconView;
