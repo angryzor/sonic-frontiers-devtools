@@ -10,7 +10,7 @@
 #include "Nodes.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
-	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } { playing = true; }
+	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } { playing = GetTimescale() != 0; }
 
 	Timeline::~Timeline() {
 		ImTimeline::DestroyContext(timelineCtx);
@@ -53,8 +53,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				SetTimescale(0);
 			else
 				SetTimescale(1);
-			context.goDVSC->timeline->currentFrame0 = playHeadFrame*100;
-			context.goDVSC->timeline->currentFrame1 = playHeadFrame*100;
+			context.goDVSC->timeline->currentFrame0 = static_cast<int>(playHeadFrame * 100);
+			context.goDVSC->timeline->currentFrame1 = static_cast<int>(playHeadFrame * 100);
 		}
 		ImGui::EndChild();
 	}
@@ -83,17 +83,37 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
 	}
 
-	void Timeline::RenderTimeline(int* start, int* end, float* curve, int size, bool axisLimit, float maxValue) {
+	float Timeline::GetTimescale() {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
+		if (!seqExt)
+			return 1.0f;
+
+		auto* gameMode = seqExt->GetCurrentGameMode();
+		if (!gameMode)
+			return 1.0f;
+
+		for (auto* extension : gameMode->extensions) {
+			if (extension->GetNameHash() == 0x42983F51) {
+				auto* ext = static_cast<app::game::GameModeLayerStatusExtension*>(extension);
+				return ext->timeScaleInterpolators[25].unk1[0].timeScale;
+			}
+		}
+		return 1.0f;
+#endif
+	}
+
+	void Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
 		if (ImTimeline::BeginTrack("")) {
-			auto length = *end/100 - *start/100;
+			auto length = end / 100 - start / 100;
 
 			if (length == 0) {
 				float time{ 0.0f };
 				ImTimeline::Event("", &time);
 			}
 			else {
-				float startTime = *start/100;
-				float endTime = *end/100;
+				float startTime = static_cast<float>(start / 100);
+				float endTime = static_cast<float>(end / 100);
 				bool startTimeChanged{};
 				bool endTimeChanged{};
 				bool moved{};
@@ -154,10 +174,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				}
 
 				if (startTimeChanged)
-					*start = startTime*100;
+					start = static_cast<int>(startTime * 100);
 
 				if (endTimeChanged)
-					*end = endTime*100;
+					end = static_cast<int>(endTime * 100);
 			}
 			ImTimeline::EndTrack();
 		}

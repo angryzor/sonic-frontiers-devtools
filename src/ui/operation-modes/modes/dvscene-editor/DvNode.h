@@ -52,8 +52,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		bool operator==(const DvNode& other) const;
 		const char* GetName() const;
 		bool CanTransform() const;
-		Eigen::Affine3f GetTransform();
-		void SetTransform(const Eigen::Affine3f& transform);
+		Eigen::Affine3f GetTransform() const;
+		void SetTransform(const Eigen::Affine3f& transform) const;
 		DvNode GetParent();
 		void DeleteNode();
 	};

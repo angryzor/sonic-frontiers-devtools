@@ -10,21 +10,21 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	void RenderNodeTimeline<4>(Timeline* timeline, hh::dv::DvNodeBase* node) {
 		auto* camMot = reinterpret_cast<hh::dv::DvNodeCameraMotion*>(node);
         auto& data = camMot->binaryData;
-		timeline->RenderTimeline(&data.start, &data.end);
+		timeline->RenderTimeline(data.start, data.end);
 	}
 
 	template<>
 	void RenderNodeTimeline<6>(Timeline* timeline, hh::dv::DvNodeBase* node) {
 		auto* charMot = reinterpret_cast<hh::dv::DvNodeCharacterMotion*>(node);
         auto& data = charMot->binaryData;
-		timeline->RenderTimeline(&data.start, &data.end);
+		timeline->RenderTimeline(data.start, data.end);
 	}
 
 	template<>
 	void RenderNodeTimeline<10>(Timeline* timeline, hh::dv::DvNodeBase* node) {
 		auto* modelMot = reinterpret_cast<hh::dv::DvNodeModelMotion*>(node);
         auto& data = modelMot->binaryData;
-		timeline->RenderTimeline(&data.start, &data.end);
+		timeline->RenderTimeline(data.start, data.end);
 	}
 
 	template<>
@@ -38,7 +38,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         if(render)
             render(timeline, element);
         else
-            timeline->RenderTimeline(&element->start, &element->end);
+            timeline->RenderTimeline(element->start, element->end);
 	}
 #endif
 
@@ -49,7 +49,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {10, RenderNodeTimeline<10>},
         {12, RenderNodeTimeline<12>}
 #endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
         {}
+#endif
     };
 
     constexpr NodeTimelineFuncType GetNodeTimelineRender(int type) {

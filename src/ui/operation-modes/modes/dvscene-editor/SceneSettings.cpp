@@ -58,15 +58,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
         
 		auto* timeline = context.goDVSC->timeline;
         ImGui::SeparatorText("DvCommon Settings");
-        Editor("Start", timeline->frameStart);
-        Editor("End", timeline->frameEnd);
-		if(timeline->cuts.size() > 0){
-			if(ImGui::TreeNode("Scene Cuts")){
-				for(auto& x : timeline->cuts)
-					DragScalar("", x);
-				ImGui::TreePop();
-			}
-		}
+		int start = static_cast<int>(timeline->frameStart / 100);
+        if(Editor("Start", start));
+			timeline->frameStart = static_cast<float>(start) * 100;
+		int end = static_cast<int>(timeline->frameEnd / 100);
+		if (Editor("End", end));
+			timeline->frameEnd = static_cast<float>(end) * 100;
 		if(timeline->authPages.size() > 0){
 			if(ImGui::TreeNode("Pages")){
 				for(auto* x : timeline->authPages)

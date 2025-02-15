@@ -23,47 +23,18 @@ namespace ui::operation_modes::modes::dvscene_editor
 		AddBehavior<DeleteBehavior>();
 		auto* gameManager = hh::game::GameManager::GetInstance();
 		gameManager->AddListener(this);
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		if(auto* diEvtMgr = gameManager->GetService<hh::dv::DiEventManager>()) {
-			diEvtMgr->AddListener(this);
-			listenerAdded = true;
-		}
-#endif
 	}
 
 	DvSceneEditor::~DvSceneEditor(){
 		auto* gameManager = hh::game::GameManager::GetInstance();
 		gameManager->RemoveListener(this);
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		if(auto* diEvtMgr = gameManager->GetService<hh::dv::DiEventManager>()) {
-			diEvtMgr->RemoveListener(this);
-			listenerAdded = false;
-		}
-#endif
 	}
 
-	void DvSceneEditor::GameServiceAddedCallback(hh::game::GameService* gameService) {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		if(!listenerAdded)
-			if(gameService->staticClass == hh::dv::DiEventManager::GetClass()){
-				auto* diEvtMgr = reinterpret_cast<hh::dv::DiEventManager*>(gameService);
-				diEvtMgr->AddListener(this);
-				listenerAdded = true;
-			}
-#endif
-	}
-	void DvSceneEditor::GameServiceRemovedCallback(hh::game::GameService* gameService) {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		if(listenerAdded)
-			if(gameService->staticClass == hh::dv::DiEventManager::GetClass()){
-				auto* diEvtMgr = reinterpret_cast<hh::dv::DiEventManager*>(gameService);
-				diEvtMgr->RemoveListener(this);
-				listenerAdded = false;
-			}
-#endif
-	}
-
-	void DvSceneEditor::DSCL_UnkFunc7() {
-		GetContext().goDVSC = nullptr;
+	void DvSceneEditor::GameObjectRemovedCallback(hh::game::GameManager* gameManager, hh::game::GameObject* gameObject)
+	{
+		auto& ctx = GetContext();
+		if (gameObject->objectClass == hh::dv::DvSceneControl::GetClass())
+			if (gameObject == ctx.goDVSC)
+				ctx.goDVSC = nullptr;
 	}
 }

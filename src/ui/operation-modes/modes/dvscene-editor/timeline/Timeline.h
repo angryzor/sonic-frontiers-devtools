@@ -19,7 +19,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		virtual PanelTraits GetPanelTraits() const override;
 
 		void SetTimescale(float scale);
-		void RenderTimeline(int* start, int* end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
+		float GetTimescale();
+		void RenderTimeline(int& start, int& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
 	};
 
 	template<int type>

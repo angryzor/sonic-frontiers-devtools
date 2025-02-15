@@ -6,8 +6,7 @@ namespace ui::operation_modes::modes::dvscene_editor
 {
 	class DvSceneEditor : 
 		public OperationMode<Context>,
-		public hh::game::GameManagerListener,
-		public hh::dv::DvSceneControlListener
+		public hh::game::GameManagerListener
 	{
 	public:
 		DvSceneEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host);
@@ -15,8 +14,6 @@ namespace ui::operation_modes::modes::dvscene_editor
 		
 		bool listenerAdded = false;
 
-		virtual void GameServiceAddedCallback(hh::game::GameService* gameService) override;
-		virtual void GameServiceRemovedCallback(hh::game::GameService* gameService) override;
-		virtual void DSCL_UnkFunc7() override;
+		virtual void GameObjectRemovedCallback(hh::game::GameManager* gameManager, hh::game::GameObject* gameObject) override;
 	};
 }
