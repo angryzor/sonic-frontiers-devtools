@@ -133,9 +133,9 @@ void ResourceBrowser::RenderMainArea() {
 			auto* resourceManager = ResourceManager::GetInstance();
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
-			for (auto* container : resourceManager->unpackedResourceContainer.uniqueResourceContainers)
-				RenderContainerContents(container);
-			//RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
+			//for (auto* container : resourceManager->unpackedResourceContainer.uniqueResourceContainers)
+			//	RenderContainerContents(container);
+			RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
 #else
 			for (auto* container : resourceManager->GetResourceContainers())
 				RenderContainerContents(container);

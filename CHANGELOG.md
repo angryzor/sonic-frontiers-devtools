@@ -1,3 +1,8 @@
+# v0.1.69
+* Fix crash when not installed in default Steam library location.
+* 
+
+
 # v0.1.68
 * Added SvCol editor.
 * Added animation editing to SurfRide editor.

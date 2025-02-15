@@ -76,11 +76,6 @@ void AddIconTextures() {
     }
 }
 
-void CreateImgIcons() {
-    for (size_t i = 0; i < sizeof(icons) / sizeof(IconMap); i++)
-        imgIcons[i] = CreateImgIcon(i);
-}
-
 const char* GetIconGlyph(IconId id) {
     return glyphs[static_cast<size_t>(id)];
 }
