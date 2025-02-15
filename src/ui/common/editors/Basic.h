@@ -39,14 +39,50 @@ static bool Editor(const char* label, char (&str)[Len]) {
 bool Editor(const char* label, bool& obj);
 bool Editor(const char* label, ucsl::strings::VariableString& str);
 bool Editor(const char* label, csl::ut::String& str);
-bool Editor(const char* label, ucsl::colors::Colorf& color);
-bool Editor(const char* label, ucsl::colors::Color8& color);
 bool Editor(const char* label, hh::game::ObjectId& id);
 bool Editor(const char* label, ucsl::objectids::ObjectIdV1& id);
 bool Editor(const char* label, ucsl::objectids::ObjectIdV2& id);
 bool Editor(const char* label, hh::game::GameObject*& gameObject);
 bool Editor(const char* label, hh::fnd::WorldPosition& worldPos);
 bool Editor(const char* label, csl::math::Transform& transform);
+
+template<ucsl::colors::ChannelOrder order>
+bool Editor(const char* label, ucsl::colors::Colorf<order>& color) {
+	float editableColor[4]{ color.r, color.g, color.b, color.a };
+
+	bool edited = ImGui::ColorEdit4(label, editableColor, ImGuiColorEditFlags_Float);
+
+	if (edited) {
+		color.r = editableColor[0];
+		color.g = editableColor[1];
+		color.b = editableColor[2];
+		color.a = editableColor[3];
+	}
+
+	return edited;
+}
+
+template<ucsl::colors::ChannelOrder order>
+bool Editor(const char* label, ucsl::colors::Color8<order>& color) {
+	float colorAsFloat[]{
+		static_cast<float>(color.r) / 255,
+		static_cast<float>(color.g) / 255,
+		static_cast<float>(color.b) / 255,
+		static_cast<float>(color.a) / 255,
+	};
+	float editableColor[4]{ colorAsFloat[0], colorAsFloat[1], colorAsFloat[2], colorAsFloat[3] };
+
+	bool edited = ImGui::ColorEdit4(label, editableColor, ImGuiColorEditFlags_Uint8);
+
+	if (edited) {
+		color.r = static_cast<uint8_t>(editableColor[0] * 255);
+		color.g = static_cast<uint8_t>(editableColor[1] * 255);
+		color.b = static_cast<uint8_t>(editableColor[2] * 255);
+		color.a = static_cast<uint8_t>(editableColor[3] * 255);
+	}
+
+	return edited;
+}
 
 template<int Options>
 bool Editor(const char* label, Eigen::Quaternion<float, Options>& quat) {

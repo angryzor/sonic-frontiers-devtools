@@ -97,7 +97,7 @@ namespace ImTimeline {
 		auto screenPos = ImGui::GetCursorScreenPos();
 		static constexpr auto playHeadHeight = playHeadSize * 0.86602540378443864676372317075294f;
 
-		bool changed = TimeSelect(id, currentTime, ImVec2(gCtx->length * gCtx->zoom, height));
+		bool changed = gCtx->length > 0.0f ? TimeSelect(id, currentTime, ImVec2(gCtx->length * gCtx->zoom, height)) : false;
 
 		auto playHeadScreenPos = ImVec2(screenPos.x + *currentTime * gCtx->zoom, screenPos.y + height);
 
@@ -117,11 +117,14 @@ namespace ImTimeline {
 		ImGui::Checkbox("Play", playing);
 
 		if (ImGui::IsKeyChordPressed(ImGuiKey_MouseWheelY | ImGuiMod_Ctrl))
-			gCtx->zoom = std::max(minZoom, std::min(maxZoom, gCtx->zoom + ImGui::GetIO().MouseWheel));
+			gCtx->zoom = std::max(minZoom, std::min(maxZoom, gCtx->zoom * std::exp2f(ImGui::GetIO().MouseWheel)));
+
+		ImGui::SameLine();
+		ImGui::Text("Zoom: %f", gCtx->zoom);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_CellPadding, ImVec2(0, 0));
 
-		if (!ImGui::BeginTable("Timeline", 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_ScrollX)) {
+		if (!ImGui::BeginTable("Timeline", 2, ImGuiTableFlags_BordersInner | ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY)) {
 			ImGui::PopStyleVar();
 			ImGui::PopID();
 			return false;
@@ -174,7 +177,7 @@ namespace ImTimeline {
 		ImGui::TableNextRow(ImGuiTableRowFlags_None, 20.0f);
 		ImGui::TableNextColumn();
 
-		auto isOpen = ImGui::TreeNodeEx(id, ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen, "%s", id);
+		auto isOpen = ImGui::TreeNodeEx(id, ImGuiTreeNodeFlags_DefaultOpen, "%s", id);
 
 		ImGui::TableNextColumn();
 
@@ -189,7 +192,7 @@ namespace ImTimeline {
 		ImGui::TableNextRow(ImGuiTableRowFlags_None, 20.0f);
 		ImGui::TableNextColumn();
 
-		auto isOpen = ImGui::TreeNodeEx(id, ImGuiTreeNodeFlags_SpanAllColumns | ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", id);
+		auto isOpen = ImGui::TreeNodeEx(id, ImGuiTreeNodeFlags_DefaultOpen | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen, "%s", id);
 
 		ImGui::TableNextColumn();
 
@@ -285,14 +288,14 @@ namespace ImTimeline {
 		static constexpr float radius = 5.0f;
 		static constexpr float spacing = 5.0f;
 
-		ImGui::SetCursorScreenPos(gCtx->trackScreenPos + ImVec2(*time * gCtx->zoom, 0.0f));
+		ImGui::SetCursorScreenPos(gCtx->trackScreenPos + ImVec2(*time * gCtx->zoom - radius - spacing, 0.0f));
 
 		auto screenPos = ImGui::GetCursorScreenPos();
 
 		ImGui::PushID(id);
 
-		ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(screenPos + ImVec2(0.0f, radius + spacing), radius, 0xFF5A6AED);
-		ImGui::GetCurrentWindow()->DrawList->AddCircle(screenPos + ImVec2(0.0f, radius + spacing), radius, 0xFF000000);
+		ImGui::GetCurrentWindow()->DrawList->AddCircleFilled(screenPos + ImVec2(radius + spacing, radius + spacing), radius, 0xFF5A6AED);
+		ImGui::GetCurrentWindow()->DrawList->AddCircle(screenPos + ImVec2(radius + spacing, radius + spacing), radius, 0xFF000000);
 
 		bool changed = TimeDrag("handle", time, ImVec2((radius + spacing) * 2.0f, (radius + spacing) * 2.0f));
 

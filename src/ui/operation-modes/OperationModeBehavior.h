@@ -15,6 +15,7 @@ public:
 	virtual void Init();
 	virtual void Deinit();
 	void Dispatch(const ActionBase& action);
+	//void Dispatch(ActionBase&& action);
 	virtual void ProcessAction(const ActionBase& action);
 	virtual void Render();
 };

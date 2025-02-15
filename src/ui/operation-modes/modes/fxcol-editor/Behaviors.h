@@ -124,6 +124,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 #include <ui/operation-modes/behaviors/Selection.h>
 #include <ui/operation-modes/behaviors/SelectionAabb.h>
 #include <ui/operation-modes/behaviors/SelectionTransformation.h>
+#include <ui/operation-modes/behaviors/SelectionVisual.h>
 #include <ui/operation-modes/behaviors/Gizmo.h>
 #include <ui/operation-modes/behaviors/MousePicking.h>
 #include <ui/operation-modes/behaviors/SelectionMousePicking.h>

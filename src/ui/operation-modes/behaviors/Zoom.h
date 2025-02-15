@@ -17,7 +17,7 @@ public:
 	virtual void Render() override {
 		if (operationMode.IsMouseOverSceneWindow() && (ImGui::IsKeyDown(ImGuiKey_LeftCtrl) || ImGui::IsKeyDown(ImGuiKey_RightCtrl))) {
 			//if (ImGui::IsKeyPressed(ImGuiKey_MouseWheelY))
-				zoomLevel = std::max(0.1f, zoomLevel + ImGui::GetIO().MouseWheel * sensitivity);
+				zoomLevel = std::max(0.1f, zoomLevel * std::exp2f(ImGui::GetIO().MouseWheel * sensitivity));
 		}
 	}
 };

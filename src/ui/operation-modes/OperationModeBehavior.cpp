@@ -13,6 +13,10 @@ void OperationModeBehavior::Dispatch(const ActionBase& action) {
 	operationMode.Dispatch(action);
 }
 
+//void OperationModeBehavior::Dispatch(ActionBase&& action) {
+//	operationMode.Dispatch(std::move(action));
+//}
+
 void OperationModeBehavior::ProcessAction(const ActionBase& action) {
 }
 

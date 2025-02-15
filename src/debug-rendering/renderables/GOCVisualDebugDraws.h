@@ -4,7 +4,7 @@
 
 namespace devtools::debug_rendering::renderables {
 	class GOCMyVisualDebugDraw;
-	class GOCVisualDebugDraws : public CompatibleObject, public DebugRenderable {
+	class GOCVisualDebugDraws : public CompatibleObject, public OptionalDebugRenderable {
 		csl::ut::MoveArray<GOCMyVisualDebugDraw*> gocs{ GetAllocator() };
 
 		friend class GOCMyVisualDebugDraw;

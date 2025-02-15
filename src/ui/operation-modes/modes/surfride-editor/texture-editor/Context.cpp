@@ -2,7 +2,7 @@
 #include <resources/ManagedMemoryRegistry.h>
 #include <resources/managed-memory/ManagedCArray.h>
 
-using namespace ucsl::resources::swif::v6;
+using namespace ucsl::resources::swif::swif_version;
 
 namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 	void Context::AddTexture(const TextureListRef& textureListRef, hh::gfnd::ResTexture* textureResource) {

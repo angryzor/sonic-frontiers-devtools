@@ -9,14 +9,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 
         virtual void RenderPanel() override;
         virtual PanelTraits GetPanelTraits() const override;
-        void RenderSceneInspector(SurfRide::Scene& scene);
-        void RenderCameraDataInspector(ucsl::resources::swif::v6::SRS_CAMERA& cameraData);
-        void RenderLayerInspector(SurfRide::Layer& layer);
-        void RenderCastInspector(SurfRide::Cast& cast);
-        void RenderNormalCastInspector(SurfRide::Cast& cast);
-        void RenderBaseCastInspector(SurfRide::Cast& cast);
-        void RenderImageCastInspector(SurfRide::ImageCast& cast);
-        void RenderReferenceCastInspector(SurfRide::ReferenceCast& cast);
-        void RenderSliceCastInspector(SurfRide::SliceCast& cast);
+        void RenderSceneInspector(ucsl::resources::swif::swif_version::SRS_SCENE& scene, SurfRide::Scene* runtimeScene);
+        void RenderCameraInspector(ucsl::resources::swif::swif_version::SRS_CAMERA& cameraData);
+        void RenderLayerInspector(ucsl::resources::swif::swif_version::SRS_LAYER& layer, SurfRide::Layer* runtimeLayer);
+        void RenderCastInspector(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast);
+        void RenderNormalCastInspector(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast);
+        void RenderBaseCastInspector(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast);
+        void RenderImageCastInspector(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::ImageCast* runtimeCast);
+        void RenderReferenceCastInspector(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::ReferenceCast* runtimeCast);
+        void RenderSliceCastInspector(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::SliceCast* runtimeCast);
     };
 }

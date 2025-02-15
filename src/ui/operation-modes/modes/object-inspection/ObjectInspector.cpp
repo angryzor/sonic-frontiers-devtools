@@ -3,6 +3,7 @@
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/common/icons.h>
 #include <ui/tools/MemoryViewer.h>
 #include <utilities/math/EulerTransform.h>
 #include <utilities/math/MathUtils.h>
@@ -187,7 +188,7 @@ namespace ui::operation_modes::modes::object_inspection {
 							ImGui::PushID(component);
 
 							char title[200];
-							snprintf(title, 200, "%s (%s) - %x", component->pStaticClass->pName, component->pStaticClass->category, component->nameHash);
+							snprintf(title, 200, "%s %s (%s) - %x", GetIcon(*component), component->pStaticClass->pName, component->pStaticClass->category, component->nameHash);
 
 							bool isComponentSectionOpen = ImGui::CollapsingHeader(title);
 
@@ -280,5 +281,58 @@ namespace ui::operation_modes::modes::object_inspection {
 	PanelTraits ObjectInspector::GetPanelTraits() const
 	{
 		return { "Object inspector", ImVec2(ImGui::GetMainViewport()->WorkSize.x, 100), ImVec2(600, ImGui::GetMainViewport()->WorkSize.y - 140), ImVec2(1, 0) };
+	}
+
+	const char* ObjectInspector::GetIcon(hh::game::GOComponent& component)
+	{
+		if (component.pStaticClass == hh::game::GOCTransform::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_TRANSFORM);
+		else if (component.pStaticClass == hh::gfx::GOCVisual::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
+		else if (component.pStaticClass == hh::gfx::GOCVisualTransformed::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		else if (component.pStaticClass == hh::gfx::GOCVisualModel::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
+		else if (component.pStaticClass == hh::game::GOCInput::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_INPUT);
+		else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_CAMERA);
+#endif
+		else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_PARAMETER);
+		else if (component.pStaticClass == hh::path::PathComponent::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_PATH);
+		else if (component.pStaticClass == hh::game::GOCTransform::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+#ifndef DEVTOOLS_TARGET_SDK_wars
+		else if (component.pStaticClass == app::player::GOCPlayerHsm::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+#endif
+		//else if (component.pStaticClass == app_cmn::fsm::GOCHsm2::GetClass())
+		//	return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+		//else if (component.pStaticClass == app_cmn::fsm::GOCTinyFsm2::GetClass())
+		//	return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+		//else if (component.pStaticClass == hh::physics::GOCCollider::GetClass())
+		//	return GetIconGlyph(IconId::COMPONENT_COLLISION);
+		else if (component.pStaticClass == hh::physics::GOCSphereCollider::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_COLLISION);
+		else if (component.pStaticClass == hh::physics::GOCBoxCollider::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_COLLISION);
+		else if (component.pStaticClass == hh::physics::GOCCapsuleCollider::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_COLLISION);
+		else if (component.pStaticClass == hh::physics::GOCCylinderCollider::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_COLLISION);
+		else if (component.pStaticClass == hh::ui::GOCSprite::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_UI);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		else if (component.pStaticClass == hh::snd::GOCSound::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_SOUND);
+#endif
+#ifndef DEVTOOLS_TARGET_SDK_wars
+		else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_ANIMATION);
+#endif
+		else return GetIconGlyph(IconId::COMPONENT_OBJECT);
 	}
 }

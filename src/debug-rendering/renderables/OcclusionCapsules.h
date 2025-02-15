@@ -2,7 +2,7 @@
 #include <debug-rendering/DebugRenderable.h>
 
 namespace devtools::debug_rendering::renderables {
-	class OcclusionCapsules : public DebugRenderable {
+	class OcclusionCapsules : public OptionalDebugRenderable {
 	public:
 		bool enabled{};
 

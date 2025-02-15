@@ -1,5 +1,5 @@
-bool Editor(const char* label, ucsl::resources::swif::v6::SRS_CROPREF& cropRef);
-bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_DATA& data);
+bool Editor(const char* label, ucsl::resources::swif::swif_version::SRS_CROPREF& cropRef);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::swif_version::SRS_DATA& data);
 
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
@@ -8,7 +8,16 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resourc
 #include <ui/operation-modes/modes/surfride-editor/texture-editor/References.h>
 #include "SurfRide.h"
 
-using namespace ucsl::resources::swif::v6;
+using namespace ucsl::resources::swif::swif_version;
+
+const char* blendModeNames[]{ "Mix", "Add", "Subtract", "Multiply", "Mix - Premultiplied Alpha", "Override" };
+const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
+const char* orientationNames[]{ "Up", "Left", "Down", "Right" };
+const char* effectTypeNames[]{ "None", "Blur", "Reflect" };
+const char* sliceConstraintNames[]{ "Unknown 0", "Unknown 1", "Unknown 2", "Unknown 3", "Unknown 4", "Unknown 5", "Unknown 6", "Unknown 7", "Unknown 8", "Unknown 9" };
+const char* cropBlendModeNames[]{ "Crop 0", "Crop 1", "Modulate", "Alpha blend" };
+const char* renderModeNames[]{ "Unknown 0", "Override", "Unknown 2", "Unknown 3" };
+const char* userDataTypes[]{ "Boolean", "Signed integer", "Unsigned integer", "Float", "Unknown", "String"};
 
 bool Editor(const char* label, Color& color) {
 	float colorAsFloat[]{
@@ -65,6 +74,35 @@ bool Editor(const char* label, SRS_TRS3D& transformData) {
 	return edited;
 }
 
+bool Editor(const char* label, ucsl::resources::swif::swif_version::SRS_CASTNODE& castData) {
+	bool edited{};
+	edited |= CheckboxFlags("Disable position", castData.flags, 0x100u);
+	edited |= CheckboxFlags("Disable rotation", castData.flags, 0x200u);
+	edited |= CheckboxFlags("Disable scale", castData.flags, 0x400u);
+
+	edited |= CheckboxFlags("Hide", castData.flags, 0x1000u);
+
+	edited |= CheckboxFlags("Transform position", castData.flags, 0x10000u);
+	edited |= CheckboxFlags("Transform rotation", castData.flags, 0x20000u);
+	edited |= CheckboxFlags("Transform scale", castData.flags, 0x40000u);
+
+	edited |= CheckboxFlags("Transform material color", castData.flags, 0x20u);
+	edited |= CheckboxFlags("Transform illumination color", castData.flags, 0x80u);
+
+	edited |= CheckboxFlags("Transform display flag", castData.flags, 0x40u);
+
+	edited |= CheckboxFlags("Transform crop index 0", castData.flags, 0x4000u);
+	edited |= CheckboxFlags("Transform crop index 1", castData.flags, 0x8000u);
+
+	auto sliceConstraint = castData.GetSliceConstraint();
+	if (ComboEnum("Slice constraint", sliceConstraint, sliceConstraintNames)) {
+		castData.SetSliceConstraint(sliceConstraint);
+		edited = true;
+	}
+
+	return edited;
+}
+
 //bool Editor(const char* label, Transform& transform) {
 //	bool edited{};
 //	ImGui::PushID(label);
@@ -79,8 +117,6 @@ bool Editor(const char* label, SRS_TRS3D& transformData) {
 //	return edited;
 //}
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-const char* blendModeNames[]{ "Default", "Add", "Mode2", "Mode3" };
 bool Editor(const char* label, SRS_BLUR3D& effect) {
 	bool edited{};
 	edited |= Editor("Unk1", effect.unk1);
@@ -89,6 +125,7 @@ bool Editor(const char* label, SRS_BLUR3D& effect) {
 	edited |= Editor("Steps", effect.steps);
 	edited |= Editor("Duration", effect.duration);
 	edited |= Editor("Color", effect.color);
+	edited |= CheckboxFlags("Hide", effect.flags, 0x1000u);
 
 	auto blendMode = effect.GetBlendMode();
 	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
@@ -109,6 +146,7 @@ bool Editor(const char* label, SRS_REFLECT3D& effect) {
 	edited |= Editor("Unk6", effect.unk6);
 	edited |= Editor("Unk7", effect.unk7);
 	edited |= Editor("Color", effect.color);
+	edited |= CheckboxFlags("Hide", effect.flags, 0x1000u);
 
 	auto blendMode = effect.GetBlendMode();
 	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
@@ -118,7 +156,6 @@ bool Editor(const char* label, SRS_REFLECT3D& effect) {
 
 	return edited;
 }
-#endif
 
 const char* verticalAlignmentNames[]{ "Top", "Center", "Bottom" };
 bool Editor(const char* label, SRS_TEXTDATA& textData) {
@@ -176,9 +213,38 @@ bool Editor(const char* label, SRS_CROPREF& cropRef) {
 	return edited;
 }
 
-const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
-const char* orientationNames[]{ "Up", "Left", "Down", "Right" };
-const char* effectTypeNames[]{ "None", "Blur", "Reflect" };
+bool CropRefEditor(const char* label, resources::ManagedCArray<SRS_CROPREF, short>& cropRefs) {
+	ImGui::BeginGroup();
+	bool edited = Editor(label, cropRefs);
+	ImGui::EndGroup();
+
+	if (ImGui::BeginDragDropTarget()) {
+		if (auto* payload = ImGui::AcceptDragDropPayload("surfride:TextureRef")) {
+			auto textureRef = *static_cast<ui::operation_modes::modes::surfride_editor::texture_editor::TextureRef*>(payload->Data);
+
+			auto& cropRef = cropRefs.emplace_back();
+			cropRef.textureListIndex = static_cast<short>(textureRef.textureListIndex);
+			cropRef.textureIndex = static_cast<short>(textureRef.textureIndex);
+			cropRef.cropIndex = -1;
+
+			edited = true;
+		}
+		else if (auto* payload = ImGui::AcceptDragDropPayload("surfride:CropRef")) {
+			auto sourceCropRef = *static_cast<ui::operation_modes::modes::surfride_editor::texture_editor::CropRef*>(payload->Data);
+
+			auto& cropRef = cropRefs.emplace_back();
+			cropRef.textureListIndex = static_cast<short>(sourceCropRef.textureListIndex);
+			cropRef.textureIndex = static_cast<short>(sourceCropRef.textureIndex);
+			cropRef.cropIndex = static_cast<short>(sourceCropRef.cropIndex);
+
+			edited = true;
+		}
+		ImGui::EndDragDropTarget();
+	}
+
+	return edited;
+}
+
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST& imageCastData) {
 	bool edited{};
 	ImGui::PushID(label);
@@ -194,32 +260,54 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_IMAGECAST
 	if (pivotType == EPivotType::CUSTOM)
 		edited |= Editor("Pivot", imageCastData.pivot);
 
+	auto orientation = imageCastData.GetOrientation();
+	if (ComboEnum("Orientation", orientation, orientationNames)) {
+		imageCastData.SetOrientation(orientation);
+		edited = true;
+	}
+
+	edited |= CheckboxFlags("Flip horizontally", imageCastData.flags, 0x10u);
+	edited |= CheckboxFlags("Flip vertically", imageCastData.flags, 0x20u);
+
 	ImGui::Separator();
-	//edited |= CheckboxFlags("Disable Texture Color", imageCastData.flags, 0x1u);
-	//edited |= CheckboxFlags("Disable Material Color", imageCastData.flags, 0x2u);
-	//edited |= CheckboxFlags("Disable Illumination Color", imageCastData.flags, 0x4u);
+	auto renderMode = imageCastData.GetRenderMode();
+	if (ComboEnum("Render mode", renderMode, renderModeNames)) {
+		imageCastData.SetRenderMode(renderMode);
+		edited = true;
+	}
+
+	auto blendMode = imageCastData.GetBlendMode();
+	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
+		imageCastData.SetBlendMode(blendMode);
+		edited = true;
+	}
+
 	edited |= Editor("Vertex Color Top Left", imageCastData.vertexColorTopLeft);
 	edited |= Editor("Vertex Color Bottom Left", imageCastData.vertexColorBottomLeft);
 	edited |= Editor("Vertex Color Top Right", imageCastData.vertexColorTopRight);
 	edited |= Editor("Vertex Color Bottom Right", imageCastData.vertexColorBottomRight);
 
 	ImGui::Separator();
-	auto orientation = imageCastData.GetOrientation();
-	if (ComboEnum("Orientation", orientation, orientationNames)) {
-		imageCastData.SetOrientation(orientation);
+	auto cropBlendMode = imageCastData.GetCropBlendMode();
+	if (ComboEnum("Crop blend mode", cropBlendMode, cropBlendModeNames)) {
+		imageCastData.SetCropBlendMode(cropBlendMode);
 		edited = true;
 	}
-	edited |= CheckboxFlags("Flip horizontally", imageCastData.flags, 0x10u);
-	edited |= CheckboxFlags("Flip vertically", imageCastData.flags, 0x20u);
+	edited |= CheckboxFlags("Use crop 0 alpha", imageCastData.flags, 0x20000000u);
+
 	edited |= Editor("Crop Index 0", imageCastData.cropIndex0);
 	edited |= Editor("Crop Index 1", imageCastData.cropIndex1);
 
 	resources::ManagedCArray cropRefs0{ resource, imageCastData.cropRefs0, imageCastData.cropRef0Count };
 	resources::ManagedCArray cropRefs1{ resource, imageCastData.cropRefs1, imageCastData.cropRef1Count };
 
-	edited |= Editor("Crop References 0", cropRefs0);
-	edited |= Editor("Crop References 1", cropRefs1);
+	edited |= CropRefEditor("Crop References 0", cropRefs0);
+	edited |= CropRefEditor("Crop References 1", cropRefs1);
 
+	edited |= CheckboxFlags("Unknown 1", imageCastData.flags, 0x2000u);
+
+	ImGui::Separator();
+	edited |= CheckboxFlags("Enable text rendering", imageCastData.flags, 0x100u);
 	if (imageCastData.textData)
 		edited |= Editor("Text Data", *imageCastData.textData);
 
@@ -259,33 +347,42 @@ bool Editor(const char* label, SRS_REFERENCECAST& referenceCastData)
 	bool edited{};
 	ImGui::PushID(label);
 	ImGui::SeparatorText(label);
-	Viewer("Layer ID", referenceCastData.layer->id);
-	Viewer("Layer name", referenceCastData.layer->name);
+	if (referenceCastData.layer) {
+		Viewer("Layer ID", referenceCastData.layer->id);
+		Viewer("Layer name", referenceCastData.layer->name);
 
-	size_t castAnimIdx{};
+		size_t castAnimIdx{};
 
-	for (size_t i = 0; i < referenceCastData.layer->animationCount; i++)
-		if (referenceCastData.layer->animations[i].id == referenceCastData.animationId)
-			castAnimIdx = i;
+		for (size_t i = 0; i < referenceCastData.layer->animationCount; i++)
+			if (referenceCastData.layer->animations[i].id == referenceCastData.animationId)
+				castAnimIdx = i;
 
-	if (ImGui::BeginCombo("Animation", referenceCastData.layer->animations[castAnimIdx].name)) {
-		for (int i = 0; i < referenceCastData.layer->animationCount; i++) {
-			auto& anim = referenceCastData.layer->animations[i];
+		if (ImGui::BeginCombo("Animation", referenceCastData.layer->animations[castAnimIdx].name)) {
+			for (int i = 0; i < referenceCastData.layer->animationCount; i++) {
+				auto& anim = referenceCastData.layer->animations[i];
 
-			if (ImGui::Selectable(anim.name, anim.id == referenceCastData.animationId)) {
-				referenceCastData.animationId = i;
-				edited = true;
+				if (ImGui::Selectable(anim.name, anim.id == referenceCastData.animationId)) {
+					referenceCastData.animationId = i;
+					edited = true;
+				}
+
+				if (anim.id == referenceCastData.animationId)
+					ImGui::SetItemDefaultFocus();
 			}
-
-			if (anim.id == referenceCastData.animationId)
-				ImGui::SetItemDefaultFocus();
+			ImGui::EndCombo();
 		}
-		ImGui::EndCombo();
-	}
 
-	unsigned int zero{};
-	edited |= SliderScalar("Animation frame", referenceCastData.animationFrame, &zero, &referenceCastData.layer->animations[castAnimIdx].frameCount);
-	edited |= Editor("unk2", referenceCastData.unk2);
+		unsigned int zero{};
+		edited |= SliderScalar("Animation frame", referenceCastData.animationFrame, &zero, &referenceCastData.layer->animations[castAnimIdx].frameCount);
+		edited |= Editor("unk2", referenceCastData.unk2);
+		ImGui::Separator();
+		edited |= CheckboxFlags("Enable blending", referenceCastData.flags, 0x2u);
+		auto blendMode = referenceCastData.GetBlendMode();
+		if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
+			referenceCastData.SetBlendMode(blendMode);
+			edited = true;
+		}
+	}
 	ImGui::PopID();
 	return edited;
 }
@@ -312,16 +409,44 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_SLICECAST
 		edited = true;
 	}
 
-	//edited |= CheckboxFlags("Disable Texture Color", sliceCastData.flags, 0x1u);
-	//edited |= CheckboxFlags("Disable Material Color", sliceCastData.flags, 0x2u);
-	//edited |= CheckboxFlags("Disable Illumination Color", sliceCastData.flags, 0x4u);
 	edited |= CheckboxFlags("Flip horizontally", sliceCastData.flags, 0x10u);
 	edited |= CheckboxFlags("Flip vertically", sliceCastData.flags, 0x20u);
+
+	ImGui::Separator();
+	auto renderMode = sliceCastData.GetRenderMode();
+	if (ComboEnum("Render mode", renderMode, renderModeNames)) {
+		sliceCastData.SetRenderMode(renderMode);
+		edited = true;
+	}
+
+	auto blendMode = sliceCastData.GetBlendMode();
+	if (ComboEnum("Blend mode", blendMode, blendModeNames)) {
+		sliceCastData.SetBlendMode(blendMode);
+		edited = true;
+	}
+
 	edited |= Editor("Fixed size", sliceCastData.fixedSize);
 	edited |= Editor("Vertex Color Top Left", sliceCastData.vertexColorTopLeft);
 	edited |= Editor("Vertex Color Bottom Left", sliceCastData.vertexColorBottomLeft);
 	edited |= Editor("Vertex Color Top Right", sliceCastData.vertexColorTopRight);
 	edited |= Editor("Vertex Color Bottom Right", sliceCastData.vertexColorBottomRight);
+
+	ImGui::Separator();
+	auto cropBlendMode = sliceCastData.GetCropBlendMode();
+	if (ComboEnum("Crop blend mode", cropBlendMode, cropBlendModeNames)) {
+		sliceCastData.SetCropBlendMode(cropBlendMode);
+		edited = true;
+	}
+
+	edited |= CheckboxFlags("Use crop 0 alpha", sliceCastData.flags, 0x20000000u);
+
+	//edited |= Editor("Crop Index 0", sliceCastData.cropIndex0);
+
+	resources::ManagedCArray cropRefs0{ resource, sliceCastData.cropRefs0, sliceCastData.cropRef0Count };
+
+	edited |= CropRefEditor("Crop References 0", cropRefs0);
+
+	edited |= CheckboxFlags("Unknown 1", sliceCastData.flags, 0x2000u);
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 	ImGui::Separator();
@@ -354,7 +479,6 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_SLICECAST
 	return edited;
 }
 
-const char* userDataTypes[]{ "Boolean", "Signed integer", "Unsigned integer", "Float", "Unknown", "String"};
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_DATA& data)
 {
 	bool edited{};
@@ -417,6 +541,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*
 {
 	bool edited{};
 
+	ImGui::SeparatorText(label);
 	if (userData != nullptr) {
 		edited |= Editor(label, resource, *userData);
 		if (ImGui::Button("Remove all user data")) {
@@ -442,5 +567,17 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*
 		}
 	}
 
+	return edited;
+}
+
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::swif_version::SRS_ANIMATION& animation) {
+	bool edited{};
+	ImGui::PushID(label);
+	edited |= InputText("Name", animation.name, resource);
+	Viewer("ID", animation.id);
+	edited |= Editor("Frame count", animation.frameCount);
+	edited |= Editor("Repeat", animation.repeat);
+	edited |= Editor("User data", resource, animation.userData);
+	ImGui::PopID();
 	return edited;
 }

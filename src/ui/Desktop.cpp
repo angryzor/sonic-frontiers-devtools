@@ -131,14 +131,6 @@ void Desktop::Render() {
 	//if (ImGui::Button("Put packfile in objectworld lol"))
 	//	if (auto* objectWorld = GameManager::GetInstance()->GetService<hh::game::ObjectWorld>())
 	//		objectWorld->packFile = ResourceManager::GetInstance()->GetResource<hh::fnd::Packfile>(packfileName);
-
-	//if (ImGui::Button("Add island objinfo")) {
-
-	//	auto* moduleAllocator = hh::fnd::MemoryRouter::GetModuleAllocator();
-	//	auto* islandObjInfo = new (moduleAllocator) app::IslandObjInfo(moduleAllocator);
-	//	GameManager::GetInstance()->GetService<ObjInfoContainer>()->Register(islandObjInfo->GetInfoName(), islandObjInfo);
-
-	//}
 }
 
 void Desktop::RenderSceneWindow()
@@ -207,6 +199,9 @@ void Desktop::UnbindShortcut(ShortcutId shortcutId)
 
 void Desktop::HandleShortcuts()
 {
+	if (ImGui::GetIO().WantCaptureKeyboard)
+		return;
+
 	for (auto& boundShortcut : boundShortcuts) {
 		auto binding = GetShortcutBinding(boundShortcut.shortcutId);
 

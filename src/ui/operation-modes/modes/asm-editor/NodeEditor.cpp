@@ -130,10 +130,12 @@ namespace ui::operation_modes::modes::asm_editor {
 		CheckboxFlags("Disable PBA", state.flags, StateData::Flag::DISABLE_PBA);
 		CheckboxFlags("Use PBA blend factor", state.flags, StateData::Flag::USE_PBA_BLEND_FACTOR);
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
 		float zero = 0.0f;
 		float one = 1.0f;
 		if (state.flags.test(StateData::Flag::USE_PBA_BLEND_FACTOR))
 			SliderScalar("PBA blend factor", state.pbaBlendFactor, &zero, &one);
+#endif
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();

@@ -3,7 +3,7 @@
 #include <utilities/ColliderFilter.h>
 
 namespace devtools::debug_rendering::renderables {
-	class Colliders : public DebugRenderable {
+	class Colliders : public OptionalDebugRenderable {
 	public:
 		bool enabled{};
 		bool colliderFilters[32][32];

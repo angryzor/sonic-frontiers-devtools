@@ -5,6 +5,8 @@
 #include <locale>
 #include <codecvt>
 #include <filesystem>
+#include <future>
+#include "ManagedMemoryRegistry.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -12,8 +14,8 @@ using namespace hh::game;
 ReloadManager* ReloadManager::instance{};
 
 ReloadManager::ReloadManager(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator } {
-	InitializeCriticalSection(&mutex);
-    GameManager::GetInstance()->RegisterGameStepListener(*this);
+	InitializeCriticalSection(&reloadRequestMutex);
+    GameManager::GetInstance()->AddGameStepListener(this);
 }
 
 ReloadManager::~ReloadManager() {
@@ -23,28 +25,67 @@ ReloadManager::~ReloadManager() {
 	}
 
     if (auto* gameManager = GameManager::GetInstance())
-        gameManager->UnregisterGameStepListener(*this);
+        gameManager->RemoveGameStepListener(this);
 
-	EnterCriticalSection(&mutex);
+	EnterCriticalSection(&reloadRequestMutex);
 	for (auto* ptr : reloadRequestsInFlight)
 		delete ptr;
 
 	reloadRequestsInFlight.clear();
-	LeaveCriticalSection(&mutex);
-	DeleteCriticalSection(&mutex);
+	LeaveCriticalSection(&reloadRequestMutex);
+
+	DeleteCriticalSection(&reloadRequestMutex);
 }
 
 void ReloadManager::QueueReload(const std::wstring& path, ManagedResource* resource)
 {
-	EnterCriticalSection(&mutex);
+	std::async([path, resource, this]() {
+		HANDLE file = CreateFileW(path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
+		if (file == INVALID_HANDLE_VALUE)
+			return;
+
+		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
+		DWORD fileSize = GetFileSize(file, NULL);
+		void* buffer = allocator.Alloc(fileSize, 64);
+		bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
+		CloseHandle(file);
+
+		if (!result) {
+			allocator.Free(buffer);
+			return;
+		}
+
+		QueueReload(buffer, fileSize, resource);
+	});
+}
+
+void ReloadManager::QueueReload(void* ptr, size_t size, ManagedResource* resource)
+{
+	EnterCriticalSection(&reloadRequestMutex);
 	for (auto* request : reloadRequestsInFlight) {
-		if (request->path == path) {
-			LeaveCriticalSection(&mutex);
+		if (request->ptr == ptr) {
+			LeaveCriticalSection(&reloadRequestMutex);
 			return;
 		}
 	}
-	reloadRequestsInFlight.push_back(new (GetAllocator()) ReloadRequest{ GetAllocator(), path, resource });
-	LeaveCriticalSection(&mutex);
+	reloadRequestsInFlight.push_back(new (GetAllocator()) ReloadRequest{ GetAllocator(), ptr, size, resource });
+	LeaveCriticalSection(&reloadRequestMutex);
+}
+
+void ReloadManager::QueueReload(hh::fnd::ManagedResource* resource)
+{
+	QueueReload(nullptr, 0, resource);
+}
+
+void ReloadManager::ReloadSync(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
+{
+	PerformReload(buffer, fileSize, resource);
+}
+
+void ReloadManager::ReloadSync(hh::fnd::ManagedResource* resource)
+{
+	PerformReload(nullptr, 0, resource);
 }
 
 void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::GameStepInfo& gameStepInfo)
@@ -54,94 +95,131 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 
 	csl::ut::MoveArray<ReloadRequest*> requestsToHandle{ GetTempAllocator() };
 
-	EnterCriticalSection(&mutex);
+	EnterCriticalSection(&reloadRequestMutex);
 	for (auto* request : reloadRequestsInFlight)
 		requestsToHandle.push_back(request);
 	reloadRequestsInFlight.clear();
-	LeaveCriticalSection(&mutex);
+	LeaveCriticalSection(&reloadRequestMutex);
 
 	for (auto* request : requestsToHandle) {
-		HANDLE file = CreateFileW(request->path.c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, NULL);
-		if (file == INVALID_HANDLE_VALUE) {
-			delete request;
-			continue;
-		}
-
-		DWORD fileSize = GetFileSize(file, NULL);
-		void* buffer = request->resource->GetResourceAllocator()->Alloc(fileSize, 64);
-		bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
-		CloseHandle(file);
-
-		if (!result) {
-			request->resource->GetResourceAllocator()->Free(buffer);
-			delete request;
-			continue;
-		}
-
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		if (gameManager) {
-			gameManager->PreResourceReloadCallback(request->resource);
-			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-				trrMgr->reloaderListener->PreResourceReloadCallback(request->resource);
-		}
-#endif
-		if (&request->resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
-#ifndef DEVTOOLS_TARGET_SDK_miller
-			Reload(buffer, fileSize, static_cast<ResObjectWorld*>(&*request->resource));
-#else
-			;
-#endif
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		else if (&request->resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo())
-			ReloadByLoad(buffer, fileSize, request->resource);
-#endif
-		else
-			Reload(buffer, fileSize, request->resource);
-
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		if (gameManager) {
-			gameManager->PostResourceReloadCallback(request->resource);
-			if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-				trrMgr->reloaderListener->PostResourceReloadCallback(request->resource);
-		}
-
-		if (&request->resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo()
-			|| &request->resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
-			|| &request->resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
-			if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
-				for (auto& module : resMan->modules) {
-					if (module->GetNameHash() == 0x74DA1FC3) {
-						module->UnkFunc7();
-						module->Load();
-					}
-				}
-			}
-		}
-#endif
-
+		PerformReload(request->ptr, request->size, request->resource);
 		delete request;
     }
 }
 
+void ReloadManager::PerformReload(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
+{
+	auto* gameManager = hh::game::GameManager::GetInstance();
+
+	gameManager->PreResourceReloadCallback(resource);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+		trrMgr->reloaderListener->PreResourceReloadCallback(resource);
+#endif
+
+	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
+#ifndef DEVTOOLS_TARGET_SDK_miller
+		ReloadObjectWorld(buffer, fileSize, static_cast<ResObjectWorld*>(&*resource));
+#else
+		;
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	else if (&resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo())
+		ReloadByLoad(buffer, fileSize, resource);
+#endif
+	else if (buffer == nullptr)
+		ReloadSelf(resource);
+	else
+		Reload(buffer, fileSize, resource);
+
+	gameManager->PostResourceReloadCallback(resource);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+		trrMgr->reloaderListener->PostResourceReloadCallback(resource);
+
+	if (&resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo()
+		|| &resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
+		|| &resource->GetClass() == hh::gfx::ResMaterial::GetTypeInfo()) {
+		if (auto* resMan = gameManager->GetService<app::game::GameModeResourceManager>()) {
+			for (auto& module : resMan->modules) {
+				if (module->GetNameHash() == 0x74DA1FC3) {
+					module->UnkFunc7();
+					module->Load();
+				}
+			}
+		}
+	}
+#endif
+}
+
 void ReloadManager::Reload(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
 {
+	auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
 	hh::fnd::ResourceManagerResolver resolver{};
 	resource->Reload(buffer, fileSize);
 	resource->Resolve(resolver);
-	resource->GetResourceAllocator()->Free(buffer);
+
+	allocator.Free(buffer);
 }
 
 void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
 {
+	auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
 	hh::fnd::ResourceManagerResolver resolver{};
 	resource->Unload();
+
+	if (resource->resourceTypeInfo->isInBinaContainer) {
+		hh::ut::BinaryFile bfile{ buffer };
+
+		if (!bfile.IsValid()) {
+			allocator.Free(buffer);
+			return;
+		}
+
+		if (auto* prevData = reloadedData.GetValueOrFallback(resource, nullptr))
+			allocator.Free(prevData);
+
+		reloadedData.Insert(resource, buffer);
+
+#ifndef DEVTOOLS_TARGET_SDK_miller
+		resource->originalBinaryData = buffer;
+#endif
+		resource->unpackedBinaryData = bfile.GetDataAddress(-1);
+		resource->size = fileSize;
+	}
+	else {
+		if (auto* prevData = reloadedData.GetValueOrFallback(resource, nullptr))
+			allocator.Free(prevData);
+
+		reloadedData.Insert(resource, buffer);
+
+#ifndef DEVTOOLS_TARGET_SDK_miller
+		resource->originalBinaryData = nullptr;
+#endif
+		resource->unpackedBinaryData = buffer;
+		resource->size = fileSize;
+	}
+
 	resource->Load(buffer, fileSize);
 	resource->Resolve(resolver);
-	resource->GetResourceAllocator()->Free(buffer);
+}
+
+void ReloadManager::ReloadSelf(hh::fnd::ManagedResource* resource)
+{
+	hh::fnd::ResourceManagerResolver resolver{};
+	resource->Unload();
+#ifdef DEVTOOLS_TARGET_SDK_miller
+	resource->Load(resource->unpackedBinaryData, resource->size);
+#else
+	resource->Load(resource->resourceTypeInfo->isInBinaContainer ? resource->originalBinaryData : resource->unpackedBinaryData, resource->size);
+#endif
+	resource->Resolve(resolver);
 }
 
 #ifndef DEVTOOLS_TARGET_SDK_miller
-void ReloadManager::Reload(void* buffer, size_t fileSize, hh::game::ResObjectWorld* resource)
+void ReloadManager::ReloadObjectWorld(void* buffer, size_t fileSize, hh::game::ResObjectWorld* resource)
 {
 	bool success{ false };
 
@@ -244,8 +322,7 @@ void ReloadManager::WatchDirectory(const std::string& path) {
 	});
 }
 
-
-ReloadManager::ReloadRequest::ReloadRequest(csl::fnd::IAllocator* allocator, const std::wstring& path, hh::fnd::ManagedResource* resource)
-	: CompatibleObject{ allocator }, path{ path }, resource{ resource }
+ReloadManager::ReloadRequest::ReloadRequest(csl::fnd::IAllocator* allocator, void* ptr, size_t size, hh::fnd::ManagedResource* resource)
+	: CompatibleObject{ allocator }, ptr{ ptr }, size{ size }, resource{ resource }
 {
 }

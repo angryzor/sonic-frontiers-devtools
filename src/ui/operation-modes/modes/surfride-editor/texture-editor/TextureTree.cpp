@@ -35,7 +35,7 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 
 		const ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 
-		ImGui::PushID(&textureList);
+		ImGui::PushID(textureList);
 
 		bool isOpen = ImGui::TreeNodeEx("TreeItem", nodeFlags | (selection.find(textureListRef) != -1 ? ImGuiTreeNodeFlags_Selected : ImGuiTreeNodeFlags_None), "%s", textureList->textureListData->name);
 

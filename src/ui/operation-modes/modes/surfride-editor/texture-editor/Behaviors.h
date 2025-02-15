@@ -18,13 +18,13 @@ namespace ui::operation_modes::modes::surfride_editor::texture_editor {
 
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
 
-		static bool IsPositionInCrop(const ucsl::resources::swif::v6::SRS_TEXTURE& texture, const ucsl::resources::swif::v6::SRS_CROP& crop, const ImVec2& position) {
+		static bool IsPositionInCrop(const ucsl::resources::swif::swif_version::SRS_TEXTURE& texture, const ucsl::resources::swif::swif_version::SRS_CROP& crop, const ImVec2& position) {
 			ImVec2 scaledPos{ position.x / texture.width, position.y / texture.height };
 
 			return crop.left <= scaledPos.x && crop.right >= scaledPos.x && crop.top <= scaledPos.y && crop.bottom >= scaledPos.y;
 		}
 
-		static bool IsCropInRectangle(const ucsl::resources::swif::v6::SRS_TEXTURE& texture, const ImVec2& start, const ImVec2 end, const ucsl::resources::swif::v6::SRS_CROP& crop) {
+		static bool IsCropInRectangle(const ucsl::resources::swif::swif_version::SRS_TEXTURE& texture, const ImVec2& start, const ImVec2 end, const ucsl::resources::swif::swif_version::SRS_CROP& crop) {
 			ImVec2 scaledStart{ start.x / texture.width, start.y / texture.height };
 			ImVec2 scaledEnd{ end.x / texture.width, end.y / texture.height };
 

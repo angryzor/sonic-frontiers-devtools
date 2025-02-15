@@ -1,7 +1,7 @@
 #include "References.h"
 
 namespace ui::operation_modes::modes::surfride_editor::texture_editor {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 	bool TextureListRef::operator==(const TextureListRef& other) const { return project == other.project && textureListIndex == other.textureListIndex; }
 	SRS_TEXTURELIST& TextureListRef::GetTextureList() const { return project->projectData->textureLists[textureListIndex]; }

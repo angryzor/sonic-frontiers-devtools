@@ -10,5 +10,6 @@ namespace ui::operation_modes::modes::object_inspection {
 
         virtual void RenderPanel() override;
         virtual PanelTraits GetPanelTraits() const override;
+        static const char* GetIcon(hh::game::GOComponent& component);
     };
 }

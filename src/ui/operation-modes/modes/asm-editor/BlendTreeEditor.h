@@ -1,5 +1,6 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
+#include <imtimeline.h>
 #include "NodeEditor.h"
 
 namespace ui::operation_modes::modes::asm_editor {
@@ -11,8 +12,10 @@ namespace ui::operation_modes::modes::asm_editor {
 		NodeEditor nodeEditor{ GetAllocator(), gocAnimator->asmResourceManager->animatorResource, gocAnimator };
 		bool collapseBlendSpaceNodes{ true };
 		const char* errMsg{};
+		ImTimeline::ImTimelineContext* timelineCtx;
 
 		BlendTreeEditor(csl::fnd::IAllocator* allocator, hh::anim::GOCAnimator* gocAnimator, hh::anim::BlendNodeBase* focusedRootBlendNode, short focusedRootBlendNodeIndex);
+		virtual ~BlendTreeEditor();
 		virtual void RenderContents() override;
 		void RenderVariable(short variableId);
 		void RenderBlendMask(short blendMaskId);

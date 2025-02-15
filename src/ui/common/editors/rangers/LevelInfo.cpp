@@ -88,6 +88,8 @@ bool Editor(const char* label, app::level::StageData& data) {
 		ImGui::TreePop();
 	}
 
+	edited |= Editor("Static sectors", data.staticSectors);
+	edited |= Editor("Dynamic sectors", data.dynamicSectors);
 	edited |= ComboEnum("Chunk type", data.chunkType, chunkTypeNames);
 	edited |= Editor("Time limit", data.timeLimit);
 	edited |= Editor("Death plane height", data.deathPlaneHeight);
