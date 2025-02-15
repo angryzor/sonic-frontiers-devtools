@@ -168,7 +168,7 @@ namespace ui::operation_modes::modes::surfride_editor
 
 			Eigen::Projective3f parentSelectionSpaceTransform = parentCast == nullptr ? Eigen::Projective3f::Identity() : context.GetFullCastTransform(parentCast);
 			csl::math::Vector3 newPos = (parentSelectionSpaceTransform.inverse() * transform * Eigen::Vector3f::Zero().homogeneous()).hnormalized();
-			
+
 			if (layer.Is3D())
 				layer.transforms.transforms3d[castIndex].position = newPos;
 			else

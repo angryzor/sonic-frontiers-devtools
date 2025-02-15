@@ -100,7 +100,7 @@ void ReloadManager::UpdateCallback(GameManager* gameManager, const hh::game::Gam
 		requestsToHandle.push_back(request);
 	reloadRequestsInFlight.clear();
 	LeaveCriticalSection(&reloadRequestMutex);
-	
+
 	for (auto* request : requestsToHandle) {
 		PerformReload(request->ptr, request->size, request->resource);
 		delete request;
@@ -182,7 +182,7 @@ void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::Managed
 			allocator.Free(prevData);
 
 		reloadedData.Insert(resource, buffer);
-		
+
 #ifndef DEVTOOLS_TARGET_SDK_miller
 		resource->originalBinaryData = buffer;
 #endif

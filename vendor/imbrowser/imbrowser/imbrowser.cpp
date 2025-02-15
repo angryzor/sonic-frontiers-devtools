@@ -252,7 +252,7 @@ namespace ImBrowser {
 		auto cursor = ImGui::GetCursorPos();
 
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(1.0f, 0.5f));
-		
+
 		bool res = ImGui::Selectable("", selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(height + 200.0f, height));
 
 		ImGui::SetCursorPos(cursor);
@@ -271,7 +271,7 @@ namespace ImBrowser {
 	void Tooltip(void* id, const char* name, PropertyValue* propertyValues, size_t propertyCount, Image icon, Image thumbnail) {
 		if (ImGui::BeginItemTooltip()) {
 			ImGui::PushTextWrapPos(previewThumbnailSize);
-			
+
 			for (size_t i = 0; i < propertyCount; i++)
 				ImGui::Text("%s: %s", propertyValues[i].key, propertyValues[i].value);
 
@@ -304,7 +304,7 @@ namespace ImBrowser {
 		}
 
 		Tooltip(id, name, propertyValues, propertyCount, icon, thumbnail);
-		
+
 		return clicked;
 	}
 }

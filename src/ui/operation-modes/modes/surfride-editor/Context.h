@@ -19,7 +19,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		csl::math::Matrix44 GetFocusedSceneCameraMatrix() const;
 		static csl::math::Matrix44 GetSceneCameraMatrix(const SurfRide::Scene* scene);
 		static csl::math::Matrix44 GetFullCastTransform(const SurfRide::Cast* cast);
-		
+
 		void SetResource(hh::ui::GOCSprite* resource);
 		static hh::ui::ResSurfRideProject* GetResourceForComponent(hh::ui::GOCSprite* goc);
 		void AddCast(ucsl::resources::swif::swif_version::SRS_LAYER& layer, ucsl::resources::swif::swif_version::SRS_CASTNODE::Type type);
@@ -37,7 +37,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		void SetTrackInterpolationType(ucsl::resources::swif::swif_version::SRS_TRACK& track, ucsl::resources::swif::swif_version::EInterpolationType interpolationType);
 
 		ucsl::resources::swif::swif_version::SRS_CASTNODE* FindCast(ucsl::resources::swif::swif_version::SRS_LAYER& layer, unsigned int id) const;
-		
+
 		ucsl::resources::swif::swif_version::SRS_SCENE* ResolveScene(const SurfRideElement& element) const;
 		ucsl::resources::swif::swif_version::SRS_CAMERA* ResolveCamera(const SurfRideElement& element) const;
 		ucsl::resources::swif::swif_version::SRS_LAYER* ResolveLayer(const SurfRideElement& element) const;
@@ -46,11 +46,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 		SurfRide::Camera* ResolveRuntimeCamera(const SurfRideElement& element) const;
 		SurfRide::Layer* ResolveRuntimeLayer(const SurfRideElement& element) const;
 		SurfRide::Cast* ResolveRuntimeCast(const SurfRideElement& element) const;
-		
+
 		ucsl::resources::swif::swif_version::SRS_LAYER* FindCastLayer(unsigned int castId) const;
 		ucsl::resources::swif::swif_version::SRS_CASTNODE* FindCastParent(unsigned int castId) const;
 		ucsl::resources::swif::swif_version::SRS_CASTNODE& FindLastSibling(const ucsl::resources::swif::swif_version::SRS_LAYER& layer, int sibling) const;
-		
+
 		template<typename F>
 		static void ForEachSibling(const ucsl::resources::swif::swif_version::SRS_LAYER& layer, int siblingIndex, F f) {
 			while (siblingIndex != -1) {

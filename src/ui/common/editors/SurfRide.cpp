@@ -439,7 +439,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_SLICECAST
 	}
 
 	edited |= CheckboxFlags("Use crop 0 alpha", sliceCastData.flags, 0x20000000u);
-	
+
 	//edited |= Editor("Crop Index 0", sliceCastData.cropIndex0);
 
 	resources::ManagedCArray cropRefs0{ resource, sliceCastData.cropRefs0, sliceCastData.cropRef0Count };
@@ -540,7 +540,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA&
 bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*& userData)
 {
 	bool edited{};
-	
+
 	ImGui::SeparatorText(label);
 	if (userData != nullptr) {
 		edited |= Editor(label, resource, *userData);

@@ -291,20 +291,24 @@ namespace ui::operation_modes::modes::object_inspection {
 			return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
 		else if (component.pStaticClass == hh::gfx::GOCVisualTransformed::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
-		//else if (component.pStaticClass == hh::gfx::GOCVisualModel::GetClass())
-		//	return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
-		//else if (component.pStaticClass == hh::game::GOCInput::GetClass())
-		//	return GetIconGlyph(IconId::COMPONENT_INPUT);
-		//else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass())
-		//	return GetIconGlyph(IconId::COMPONENT_CAMERA);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		else if (component.pStaticClass == hh::gfx::GOCVisualModel::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_GEOMETRY);
+		else if (component.pStaticClass == hh::game::GOCInput::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_INPUT);
+		else if (component.pStaticClass == app_cmn::camera::GOCCamera::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_CAMERA);
+#endif
 		else if (component.pStaticClass == app::player::GOCPlayerParameter::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_PARAMETER);
 		else if (component.pStaticClass == hh::path::PathComponent::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_PATH);
 		else if (component.pStaticClass == hh::game::GOCTransform::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
-		//else if (component.pStaticClass == app::player::GOCPlayerHsm::GetClass())
-		//	return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+#ifndef DEVTOOLS_TARGET_SDK_wars
+		else if (component.pStaticClass == app::player::GOCPlayerHsm::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+#endif
 		//else if (component.pStaticClass == app_cmn::fsm::GOCHsm2::GetClass())
 		//	return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
 		//else if (component.pStaticClass == app_cmn::fsm::GOCTinyFsm2::GetClass())
@@ -321,10 +325,14 @@ namespace ui::operation_modes::modes::object_inspection {
 			return GetIconGlyph(IconId::COMPONENT_COLLISION);
 		else if (component.pStaticClass == hh::ui::GOCSprite::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_UI);
-		//else if (component.pStaticClass == hh::snd::GOCSound::GetClass())
-		//	return GetIconGlyph(IconId::COMPONENT_SOUND);
-		//else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass())
-		//	return GetIconGlyph(IconId::COMPONENT_ANIMATION);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		else if (component.pStaticClass == hh::snd::GOCSound::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_SOUND);
+#endif
+#ifndef DEVTOOLS_TARGET_SDK_wars
+		else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass())
+			return GetIconGlyph(IconId::COMPONENT_ANIMATION);
+#endif
 		else return GetIconGlyph(IconId::COMPONENT_OBJECT);
 	}
 }

@@ -18,7 +18,7 @@ bool Editor(const char* label, ucsl::resources::svcol::v1::SectorFilterData& fil
 
 bool Editor(const char* label, ShapeData& shape, app::ResSvCol2* resource) {
 	bool edited{};
-	
+
 	unsigned char minSector{ 0 };
 	unsigned char maxSector{ 127 };
 

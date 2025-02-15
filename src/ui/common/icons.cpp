@@ -45,7 +45,7 @@ void AddIconTextures() {
     unsigned char* pixels = nullptr;
     int texW, texH;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &texW, &texH);
-    
+
     for (size_t i = 0; i < sizeof(icons) / sizeof(IconMap); i++) {
         if (const ImFontAtlasCustomRect* rect = io.Fonts->GetCustomRectByIndex(rectIds[i])) {
             int w, h, channels;

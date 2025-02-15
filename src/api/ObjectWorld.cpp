@@ -199,7 +199,7 @@ namespace devtools::api::object_world {
 				auto* chunk = getObjectWorldChunk(objWorld, chunkId);
 				auto* layer = getObjectWorldChunkLayer(chunk, layerId);
 				auto* object = getObjectData(layer, objectId);
-			
+
 				return buildObjectData(object);
 			});
 		});

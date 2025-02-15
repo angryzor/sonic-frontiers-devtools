@@ -153,7 +153,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	void Context::AddCast(SRS_LAYER& layer, SRS_CASTNODE::Type type) {
-		switch (type) { 
+		switch (type) {
 		case SRS_CASTNODE::Type::NORMAL: CreateCast(layer, 0); break;
 		case SRS_CASTNODE::Type::IMAGE: CreateImageCast(layer, 0); break;
 		case SRS_CASTNODE::Type::SLICE: CreateSliceCast(layer, 0); break;
@@ -164,7 +164,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	void Context::AddCast(SRS_CASTNODE& parent, SRS_CASTNODE::Type type) {
-		switch (type) { 
+		switch (type) {
 		case SRS_CASTNODE::Type::NORMAL: CreateCast(*FindCastLayer(parent.id), parent.childIndex); break;
 		case SRS_CASTNODE::Type::IMAGE: CreateImageCast(*FindCastLayer(parent.id), parent.childIndex); break;
 		case SRS_CASTNODE::Type::SLICE: CreateSliceCast(*FindCastLayer(parent.id), parent.childIndex); break;
@@ -216,7 +216,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (cast.childIndex == castIndex)
 				cast.childIndex = siblingIndex;
 		}
-		
+
 		for (auto& cast : casts) {
 			if (cast.siblingIndex != -1 && cast.siblingIndex > castIndex)
 				cast.siblingIndex--;
@@ -231,7 +231,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			resources::ManagedCArray<SRS_TRS3D, int>{ projectResource, layer.transforms.transforms3d, tempCount }.remove(castIndex);
 		else
 			resources::ManagedCArray<SRS_TRS2D, int>{ projectResource, layer.transforms.transforms2d, tempCount }.remove(castIndex);
-		
+
 		ReloadResource();
 	}
 
@@ -782,7 +782,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				runtimeCast.transform->materialColor = transform.materialColor;
 				runtimeCast.transform->illuminationColor = transform.illuminationColor;
 				runtimeCast.transform->display = transform.display;
-				
+
 				runtimeCast.transform->dirtyFlag.SetCellAll();
 				runtimeCast.transform->dirtyFlag.SetTransformAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars
@@ -807,7 +807,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				runtimeCast.transform->materialColor = transform.materialColor;
 				runtimeCast.transform->illuminationColor = transform.illuminationColor;
 				runtimeCast.transform->display = transform.display;
-				
+
 				runtimeCast.transform->dirtyFlag.SetCellAll();
 				runtimeCast.transform->dirtyFlag.SetTransformAll();
 #ifdef DEVTOOLS_TARGET_SDK_wars

@@ -1,17 +1,23 @@
 # v0.1.68
 * Added SvCol editor.
 * Added animation editing to SurfRide editor.
-* Added adding/removal of casts in SurfRide editor.
+* Added adding/removal of casts in SurfRide editor (still kind of broken in Forces, may need manual reload of the UI before it takes effect).
 * Added crop library in SurfRide editor.
-* Added support for various flags and settings in SurfRide editor.
-* Added icons to object inspector.
+* Added support for various flags and settings in SurfRide editor element inspector.
 * Added multiple view modes to resource browser.
+* Added icons to object inspector.
+* Added experimental triggers tab to ASM editor.
+* Fixed SurfRide export.
 * Fixed SurfRide editor crashing when the chosen GOCSprite unloads (except in Forces).
 * Fixed bug where critical debug visuals were no longer rendering when debug rendering is turned off.
 * Fixed a bug where "managed" memory was unaligned.
+* Improved ObjectWorld API endpoint.
 * Improved icon system.
 * Improved timeline.
 * Further improved reload queue.
+
+## Sonic Frontiers
+* Added static & dynamic sectors in StageData inspector.
 
 ## Shadow Generations
 * Ported SurfRide editor.
