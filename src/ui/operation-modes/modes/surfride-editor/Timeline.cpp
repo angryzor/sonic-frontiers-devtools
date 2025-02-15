@@ -7,7 +7,7 @@
 #include <ui/common/editors/SurfRide.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } {}
 
@@ -65,7 +65,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 				if (ImGui::BeginPopupContextItem()) {
 					if (focusedRuntimeLayer && ImGui::MenuItem("Switch to"))
-						context.StartAnimationByIndex(focusedRuntimeLayer, i);
+						context.StartAnimation(focusedRuntimeLayer, animation.id);
 					if (ImGui::BeginMenu("Add motion")) {
 						for (auto& cast : std::span(focusedLayer->casts, focusedLayer->castCount)) {
 							bool anyFound{};
@@ -92,7 +92,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 					animationIdx = i;
 
 					if (focusedRuntimeLayer && ImGui::IsKeyDown(ImGuiKey_ModCtrl))
-						context.StartAnimationByIndex(focusedRuntimeLayer, i);
+						context.StartAnimation(focusedRuntimeLayer, animation.id);
 				}
 
 				if (animationIdx == i)
@@ -110,7 +110,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImGui::SeparatorText("Animation");
 			if (Editor("Properties", context.projectResource, animation))
 				if (animationIsCurrentRuntimeAnimation)
-					focusedRuntimeLayer->ApplyAnimationByIndex(animationIdx);
+					context.StartAnimation(focusedRuntimeLayer, animation.id);
 		}
 		ImGui::EndChild();
 
@@ -221,7 +221,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 						ImPlot::SetupAxisLimits(ImAxis_X1, track.firstFrame, track.lastFrame, ImPlotCond_Always);
 
 						RenderPlotLines(track);
-						
+
 						thisClickpos = ImPlot::GetPlotMousePos(ImAxis_X1, ImAxis_Y1);
 
 						ImPlot::EndPlot();

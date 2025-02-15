@@ -10,16 +10,42 @@ namespace ui::operation_modes::modes::svcol_editor {
 
 	void ShapeList::RenderPanel() {
 		auto& context = GetContext();
-		
+
 		if (ImGui::BeginCombo("Resources", context.resource == nullptr ? "<none>" : context.resource->GetName())) {
+#ifdef DEVTOOLS_TARGET_SDK_miller
+			for (auto* resource : hh::fnd::ResourceManager::GetInstance()->unpackedResourceContainer.GetResourcesByTypeInfo(app::ResSvCol2::GetTypeInfo())) {
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 			for (auto* resource : hh::fnd::ResourceManager::GetInstance()->GetResourcesByTypeInfo(app::ResSvCol2::GetTypeInfo())) {
-				auto* svColResource = (app::ResSvCol2*)resource;
-				if (ImGui::Selectable(resource->GetName(), context.resource == svColResource)) {
-					GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
-					context.resource = svColResource;
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_wars
+			auto* packfileContainer = hh::fnd::ResourceManager::GetInstance()->GetResourceContainer(hh::fnd::Packfile::GetTypeInfo());
+
+			auto numPackfiles = packfileContainer->GetNumResources();
+
+			for (int i = 0; i < numPackfiles; i++) {
+				auto* packfile = (hh::fnd::Packfile*)packfileContainer->GetResourceByIndex(i);
+
+				auto* resContainer = packfile->GetResourceContainer(app::ResSvCol2::GetTypeInfo());
+
+				if (!resContainer)
+					continue;
+
+				auto numResources = resContainer->GetNumResources();
+
+				for (int j = 0; j < numResources; j++) {
+					auto* resource = resContainer->GetResourceByIndex(j);
+#endif
+					auto* svColResource = (app::ResSvCol2*)resource;
+					if (ImGui::Selectable(resource->GetName(), context.resource == svColResource)) {
+						GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
+						context.resource = svColResource;
+					}
+					if (context.resource == svColResource)
+						ImGui::SetItemDefaultFocus();
+#ifdef DEVTOOLS_TARGET_SDK_wars
 				}
-				if (context.resource == svColResource)
-					ImGui::SetItemDefaultFocus();
+#endif
 			}
 			ImGui::EndCombo();
 		}

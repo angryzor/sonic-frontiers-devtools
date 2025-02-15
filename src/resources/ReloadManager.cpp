@@ -6,6 +6,7 @@
 #include <codecvt>
 #include <filesystem>
 #include <future>
+#include "ManagedMemoryRegistry.h"
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -14,7 +15,7 @@ ReloadManager* ReloadManager::instance{};
 
 ReloadManager::ReloadManager(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator } {
 	InitializeCriticalSection(&reloadRequestMutex);
-    GameManager::GetInstance()->RegisterGameStepListener(*this);
+    GameManager::GetInstance()->AddGameStepListener(this);
 }
 
 ReloadManager::~ReloadManager() {
@@ -24,7 +25,7 @@ ReloadManager::~ReloadManager() {
 	}
 
     if (auto* gameManager = GameManager::GetInstance())
-        gameManager->UnregisterGameStepListener(*this);
+        gameManager->RemoveGameStepListener(this);
 
 	EnterCriticalSection(&reloadRequestMutex);
 	for (auto* ptr : reloadRequestsInFlight)
@@ -43,13 +44,15 @@ void ReloadManager::QueueReload(const std::wstring& path, ManagedResource* resou
 		if (file == INVALID_HANDLE_VALUE)
 			return;
 
+		auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
 		DWORD fileSize = GetFileSize(file, NULL);
-		void* buffer = resource->GetResourceAllocator()->Alloc(fileSize, 64);
+		void* buffer = allocator.Alloc(fileSize, 64);
 		bool result = ReadFile(file, buffer, fileSize, NULL, NULL);
 		CloseHandle(file);
 
 		if (!result) {
-			resource->GetResourceAllocator()->Free(buffer);
+			allocator.Free(buffer);
 			return;
 		}
 
@@ -108,12 +111,10 @@ void ReloadManager::PerformReload(void* buffer, size_t fileSize, hh::fnd::Manage
 {
 	auto* gameManager = hh::game::GameManager::GetInstance();
 
+	gameManager->PreResourceReloadCallback(resource);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-	if (gameManager) {
-		gameManager->PreResourceReloadCallback(resource);
-		if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-			trrMgr->reloaderListener->PreResourceReloadCallback(resource);
-	}
+	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+		trrMgr->reloaderListener->PreResourceReloadCallback(resource);
 #endif
 
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo())
@@ -131,12 +132,10 @@ void ReloadManager::PerformReload(void* buffer, size_t fileSize, hh::fnd::Manage
 	else
 		Reload(buffer, fileSize, resource);
 
+	gameManager->PostResourceReloadCallback(resource);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-	if (gameManager) {
-		gameManager->PostResourceReloadCallback(resource);
-		if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
-			trrMgr->reloaderListener->PostResourceReloadCallback(resource);
-	}
+	if (auto* trrMgr = gameManager->GetService<app::trr::TerrainManager>())
+		trrMgr->reloaderListener->PostResourceReloadCallback(resource);
 
 	if (&resource->GetClass() == hh::gfx::ResTerrainModel::GetTypeInfo()
 		|| &resource->GetClass() == app::gfx::ResPointcloudModel::GetTypeInfo()
@@ -155,15 +154,19 @@ void ReloadManager::PerformReload(void* buffer, size_t fileSize, hh::fnd::Manage
 
 void ReloadManager::Reload(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
 {
+	auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
 	hh::fnd::ResourceManagerResolver resolver{};
 	resource->Reload(buffer, fileSize);
 	resource->Resolve(resolver);
-	resource->GetResourceAllocator()->Free(buffer);
+
+	allocator.Free(buffer);
 }
 
 void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::ManagedResource* resource)
 {
-#ifndef DEVTOOLS_TARGET_SDK_miller
+	auto allocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(resource);
+
 	hh::fnd::ResourceManagerResolver resolver{};
 	resource->Unload();
 
@@ -171,25 +174,36 @@ void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::Managed
 		hh::ut::BinaryFile bfile{ buffer };
 
 		if (!bfile.IsValid()) {
-			resource->GetResourceAllocator()->Free(buffer);
+			allocator.Free(buffer);
 			return;
 		}
 
-		resource->GetResourceAllocator()->Free(resource->originalBinaryData);
+		if (auto* prevData = reloadedData.GetValueOrFallback(resource, nullptr))
+			allocator.Free(prevData);
+
+		reloadedData.Insert(resource, buffer);
+		
+#ifndef DEVTOOLS_TARGET_SDK_miller
 		resource->originalBinaryData = buffer;
+#endif
 		resource->unpackedBinaryData = bfile.GetDataAddress(-1);
 		resource->size = fileSize;
 	}
 	else {
-		resource->GetResourceAllocator()->Free(resource->unpackedBinaryData);
+		if (auto* prevData = reloadedData.GetValueOrFallback(resource, nullptr))
+			allocator.Free(prevData);
+
+		reloadedData.Insert(resource, buffer);
+
+#ifndef DEVTOOLS_TARGET_SDK_miller
 		resource->originalBinaryData = nullptr;
+#endif
 		resource->unpackedBinaryData = buffer;
 		resource->size = fileSize;
 	}
 
 	resource->Load(buffer, fileSize);
 	resource->Resolve(resolver);
-#endif
 }
 
 void ReloadManager::ReloadSelf(hh::fnd::ManagedResource* resource)

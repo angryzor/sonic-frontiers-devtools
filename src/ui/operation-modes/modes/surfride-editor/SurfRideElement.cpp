@@ -2,7 +2,7 @@
 #include <span>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 	SurfRideElement::SurfRideElement(const SRS_SCENE& scene, const SurfRide::Scene* runtimeScene)
 		: type{ Type::SCENE }, path{ BuildScenePath(scene) }, runtimePath{ runtimeScene == nullptr ? std::nullopt : std::make_optional(BuildRuntimeScenePath(*runtimeScene)) } {}
@@ -29,7 +29,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return type == other.type && path == other.path && runtimePath == other.runtimePath;
 	}
 
-	ucsl::resources::swif::v6::SRS_SCENE* ResolveScenePathFragment(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPathFragment& path) {
+	SRS_SCENE* ResolveScenePathFragment(SRS_PROJECT& project, const SurfRideElementPathFragment& path) {
 		for (auto& scene : std::span(project.scenes, project.sceneCount))
 			if (path == scene.id)
 				return &scene;
@@ -37,7 +37,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	ucsl::resources::swif::v6::SRS_CAMERA* ResolveCameraPathFragment(ucsl::resources::swif::v6::SRS_SCENE& scene, const SurfRideElementPathFragment& path) {
+	SRS_CAMERA* ResolveCameraPathFragment(SRS_SCENE& scene, const SurfRideElementPathFragment& path) {
 		for (auto& camera : std::span(scene.cameras, scene.cameraCount))
 			if (path == camera.id)
 				return &camera;
@@ -45,7 +45,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	ucsl::resources::swif::v6::SRS_LAYER* ResolveLayerPathFragment(ucsl::resources::swif::v6::SRS_SCENE& scene, const SurfRideElementPathFragment& path) {
+	SRS_LAYER* ResolveLayerPathFragment(SRS_SCENE& scene, const SurfRideElementPathFragment& path) {
 		for (auto& layer : std::span(scene.layers, scene.layerCount))
 			if (path == layer.id)
 				return &layer;
@@ -53,7 +53,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return nullptr;
 	}
 
-	ucsl::resources::swif::v6::SRS_CASTNODE* ResolveCastPathFragment(ucsl::resources::swif::v6::SRS_LAYER& layer, const SurfRideElementPathFragment& path) {
+	SRS_CASTNODE* ResolveCastPathFragment(SRS_LAYER& layer, const SurfRideElementPathFragment& path) {
 		for (auto& cast : std::span(layer.casts, layer.castCount))
 			if (path == cast.id)
 				return &cast;
@@ -85,19 +85,19 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return layer.GetCast(path);
 	}
 
-	SurfRideElementPathFragment BuildScenePathFragment(const ucsl::resources::swif::v6::SRS_SCENE& scene) {
+	SurfRideElementPathFragment BuildScenePathFragment(const SRS_SCENE& scene) {
 		return scene.id;
 	}
 
-	SurfRideElementPathFragment BuildCameraPathFragment(const ucsl::resources::swif::v6::SRS_CAMERA& camera) {
+	SurfRideElementPathFragment BuildCameraPathFragment(const SRS_CAMERA& camera) {
 		return camera.id;
 	}
 
-	SurfRideElementPathFragment BuildLayerPathFragment(const ucsl::resources::swif::v6::SRS_LAYER& layer) {
+	SurfRideElementPathFragment BuildLayerPathFragment(const SRS_LAYER& layer) {
 		return layer.id;
 	}
 
-	SurfRideElementPathFragment BuildCastPathFragment(const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
+	SurfRideElementPathFragment BuildCastPathFragment(const SRS_CASTNODE& cast) {
 		return cast.id;
 	}
 
@@ -106,7 +106,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	}
 
 	SurfRideElementPathFragment BuildRuntimeCameraPathFragment(const SurfRide::Camera& camera) {
-		return camera.camera.id;
+		return const_cast<SurfRide::Camera&>(camera).GetCameraData().id;
 	}
 
 	SurfRideElementPathFragment BuildRuntimeLayerPathFragment(const SurfRide::Layer& layer) {
@@ -117,38 +117,38 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return cast.castData->id;
 	}
 
-	ucsl::resources::swif::v6::SRS_SCENE* ResolveScenePath(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPath& path) {
+	SRS_SCENE* ResolveScenePath(SRS_PROJECT& project, const SurfRideElementPath& path) {
 		if (path.size() != 1)
 			return nullptr;
 
 		return ResolveScenePathFragment(project, path[0]);
 	}
 
-	ucsl::resources::swif::v6::SRS_CAMERA* ResolveCameraPath(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPath& path) {
+	SRS_CAMERA* ResolveCameraPath(SRS_PROJECT& project, const SurfRideElementPath& path) {
 		if (path.size() != 2)
 			return nullptr;
 
 		auto* scene = ResolveScenePathFragment(project, path[0]);
-		
+
 		return scene == nullptr ? nullptr : ResolveCameraPathFragment(*scene, path[1]);
 	}
 
-	ucsl::resources::swif::v6::SRS_LAYER* ResolveLayerPath(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPath& path) {
+	SRS_LAYER* ResolveLayerPath(SRS_PROJECT& project, const SurfRideElementPath& path) {
 		if (path.size() != 2)
 			return nullptr;
 
 		auto* scene = ResolveScenePathFragment(project, path[0]);
-		
+
 		return scene == nullptr ? nullptr : ResolveLayerPathFragment(*scene, path[1]);
 	}
 
-	ucsl::resources::swif::v6::SRS_CASTNODE* ResolveCastPath(ucsl::resources::swif::v6::SRS_PROJECT& project, const SurfRideElementPath& path) {
+	SRS_CASTNODE* ResolveCastPath(SRS_PROJECT& project, const SurfRideElementPath& path) {
 		if (path.size() != 3)
 			return nullptr;
 
 		auto* scene = ResolveScenePathFragment(project, path[0]);
 		auto* layer = ResolveLayerPathFragment(*scene, path[1]);
-		
+
 		return layer == nullptr ? nullptr : ResolveCastPathFragment(*layer, path[2]);
 	}
 
@@ -164,7 +164,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			return nullptr;
 
 		auto* scene = ResolveRuntimeScenePathFragment(project, path[0]);
-		
+
 		return scene == nullptr ? nullptr : ResolveRuntimeCameraPathFragment(*scene, path[1]);
 	}
 
@@ -179,7 +179,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		while (layer != nullptr && i < path.size()) {
 			auto* cast = ResolveRuntimeCastPathFragment(*layer, path[i++]);
 
-			if (cast == nullptr || i >= path.size() || cast->castData->GetType() != ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE)
+			if (cast == nullptr || i >= path.size() || cast->castData->GetType() != SRS_CASTNODE::Type::REFERENCE)
 				return nullptr;
 
 			layer = ResolveRuntimeLayerPathFragment(*static_cast<SurfRide::ReferenceCast*>(cast), path[i++]);
@@ -198,7 +198,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		auto* cast = layer == nullptr ? nullptr : ResolveRuntimeCastPathFragment(*layer, path[i++]);
 
 		while (cast != nullptr && i < path.size()) {
-			if (cast->castData->GetType() != ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE)
+			if (cast->castData->GetType() != SRS_CASTNODE::Type::REFERENCE)
 				return nullptr;
 
 			layer = ResolveRuntimeLayerPathFragment(*static_cast<SurfRide::ReferenceCast*>(cast), path[i++]);
@@ -212,27 +212,27 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return cast;
 	}
 
-	SurfRideElementPath BuildScenePath(const ucsl::resources::swif::v6::SRS_SCENE& scene) {
+	SurfRideElementPath BuildScenePath(const SRS_SCENE& scene) {
 		SurfRideElementPath res{};
 		res.push_back(BuildScenePathFragment(scene));
 		return res;
 	}
 
-	SurfRideElementPath BuildCameraPath(const ucsl::resources::swif::v6::SRS_SCENE& scene, const ucsl::resources::swif::v6::SRS_CAMERA& camera) {
+	SurfRideElementPath BuildCameraPath(const SRS_SCENE& scene, const SRS_CAMERA& camera) {
 		SurfRideElementPath res{};
 		res.push_back(BuildScenePathFragment(scene));
 		res.push_back(BuildCameraPathFragment(camera));
 		return res;
 	}
 
-	SurfRideElementPath BuildLayerPath(const ucsl::resources::swif::v6::SRS_SCENE& scene, const ucsl::resources::swif::v6::SRS_LAYER& layer) {
+	SurfRideElementPath BuildLayerPath(const SRS_SCENE& scene, const SRS_LAYER& layer) {
 		SurfRideElementPath res{};
 		res.push_back(BuildScenePathFragment(scene));
 		res.push_back(BuildLayerPathFragment(layer));
 		return res;
 	}
 
-	SurfRideElementPath BuildCastPath(const ucsl::resources::swif::v6::SRS_SCENE& scene, const ucsl::resources::swif::v6::SRS_LAYER& layer, const ucsl::resources::swif::v6::SRS_CASTNODE& cast) {
+	SurfRideElementPath BuildCastPath(const SRS_SCENE& scene, const SRS_LAYER& layer, const SRS_CASTNODE& cast) {
 		SurfRideElementPath res{};
 		res.push_back(BuildScenePathFragment(scene));
 		res.push_back(BuildLayerPathFragment(layer));

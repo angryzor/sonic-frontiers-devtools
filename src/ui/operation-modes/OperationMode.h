@@ -12,11 +12,13 @@ class OperationModeBase : public CompatibleObject {
 
 protected:
 	csl::ut::MoveArray<hh::fnd::Reference<OperationModeBehavior>> behaviors{ GetAllocator() };
+	csl::ut::MoveArray<hh::fnd::Reference<AsyncActionBase>> actionsInFlight{ GetAllocator() };
 
 public:
 	OperationModeBase(csl::fnd::IAllocator* allocator, OperationModeHost& host) : CompatibleObject{ allocator }, host{ host } {}
 
 	void Dispatch(const ActionBase& action);
+	//void Dispatch(ActionBase&& action);
 	virtual void ProcessAction(const ActionBase& action);
 	virtual void Render();
 	virtual void RenderScene();

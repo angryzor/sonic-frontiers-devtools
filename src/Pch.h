@@ -17,16 +17,19 @@
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include <wars-sdk.h>
 #define he2sdk warssdk
+#define swif_version v5
 #endif
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 #include <rangers-sdk.h>
 #define he2sdk rangerssdk
+#define swif_version v6
 #endif
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
 #include <miller-sdk.h>
 #define he2sdk millersdk
+#define swif_version v6
 #endif
 
 #include <imgui.h>

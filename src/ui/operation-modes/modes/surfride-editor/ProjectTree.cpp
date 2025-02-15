@@ -5,7 +5,7 @@
 #include <span>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 	void ProjectTree::RenderPanel() {
 		char spriteName[400];
@@ -58,7 +58,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		if (!context.focusedScene)
 			return;
 
-		RenderElement(*context.focusedScene, context.gocSprite->project->GetScene(context.focusedScene->name));
+		RenderElement(*context.focusedScene, context.gocSprite->GetProject()->GetScene(context.focusedScene->name));
 	}
 
 	PanelTraits ProjectTree::GetPanelTraits() const {
@@ -100,7 +100,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	void ProjectTree::RenderElement(SRS_LAYER& layer, SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast) {
 		bool hasChildren = cast.childIndex != -1;
 		bool hasRefLayer = cast.GetType() == SRS_CASTNODE::Type::REFERENCE && cast.data.reference->layer != nullptr;
-		
+
 		if (BeginElement(cast, runtimeCast, hasChildren || hasRefLayer, *GetContext().focusedScene, layer)) {
 			if (hasRefLayer) {
 				if (auto* refLayer = cast.data.reference->layer) {
@@ -132,7 +132,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 	bool ProjectTree::HasContextMenu(SRS_CAMERA& camera) { return false; }
 	bool ProjectTree::HasContextMenu(SRS_LAYER& layer) { return true; }
 	bool ProjectTree::HasContextMenu(SRS_CASTNODE& cast) { return true; }
-	
+
 
 	void ProjectTree::RenderContextMenu(SRS_SCENE& scene) {}
 	void ProjectTree::RenderContextMenu(SRS_CAMERA& camera) {}
@@ -163,7 +163,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				Dispatch(AddCastToCastAction{ { cast, SRS_CASTNODE::Type::REFERENCE } });
 			ImGui::EndMenu();
 		}
-		//if (ImGui::MenuItem("Remove"))
-		//	Dispatch(RemoveCastAction{ cast });
+		if (ImGui::MenuItem("Remove"))
+			Dispatch(RemoveCastAction{ cast });
 	}
 }

@@ -12,6 +12,7 @@ class ReloadManager : public CompatibleObject, public hh::game::GameStepListener
     };
 
     csl::ut::MoveArray<ReloadRequest*> reloadRequestsInFlight{ GetAllocator() };
+    csl::ut::PointerMap<hh::fnd::ManagedResource*, void*> reloadedData{ GetAllocator() };
     CRITICAL_SECTION reloadRequestMutex{};
 
     filewatch::FileWatch<std::string>* fileWatcher{};

@@ -14,6 +14,7 @@ namespace ui::operation_modes::modes::svcol_editor {
 		AddBehavior<SelectionBehavior>();
 		AddBehavior<SelectionAabbBehavior>();
 		AddBehavior<SelectionTransformationBehavior>();
+		AddBehavior<SelectionVisual3DBehavior>();
 		AddBehavior<GizmoBehavior>();
 		AddBehavior<MousePickingBehavior>();
 		AddBehavior<SelectionMousePickingBehavior>();

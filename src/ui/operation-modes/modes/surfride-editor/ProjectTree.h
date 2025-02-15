@@ -5,18 +5,18 @@
 
 namespace ui::operation_modes::modes::surfride_editor {
 	class ProjectTree : public Panel<Context> {
-		void RenderElement(ucsl::resources::swif::v6::SRS_SCENE& scene, SurfRide::Scene* runtimeScene);
-		void RenderElement(ucsl::resources::swif::v6::SRS_CAMERA& camera, SurfRide::Camera* runtimeCamera);
-		void RenderElement(ucsl::resources::swif::v6::SRS_LAYER& layer, SurfRide::Layer* runtimeLayer);
-		void RenderElement(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast);
-		bool HasContextMenu(ucsl::resources::swif::v6::SRS_SCENE& scene);
-		bool HasContextMenu(ucsl::resources::swif::v6::SRS_CAMERA& camera);
-		bool HasContextMenu(ucsl::resources::swif::v6::SRS_LAYER& layer);
-		bool HasContextMenu(ucsl::resources::swif::v6::SRS_CASTNODE& cast);
-		void RenderContextMenu(ucsl::resources::swif::v6::SRS_SCENE& scene);
-		void RenderContextMenu(ucsl::resources::swif::v6::SRS_CAMERA& camera);
-		void RenderContextMenu(ucsl::resources::swif::v6::SRS_LAYER& layer);
-		void RenderContextMenu(ucsl::resources::swif::v6::SRS_CASTNODE& cast);
+		void RenderElement(ucsl::resources::swif::swif_version::SRS_SCENE& scene, SurfRide::Scene* runtimeScene);
+		void RenderElement(ucsl::resources::swif::swif_version::SRS_CAMERA& camera, SurfRide::Camera* runtimeCamera);
+		void RenderElement(ucsl::resources::swif::swif_version::SRS_LAYER& layer, SurfRide::Layer* runtimeLayer);
+		void RenderElement(ucsl::resources::swif::swif_version::SRS_LAYER& layer, ucsl::resources::swif::swif_version::SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast);
+		bool HasContextMenu(ucsl::resources::swif::swif_version::SRS_SCENE& scene);
+		bool HasContextMenu(ucsl::resources::swif::swif_version::SRS_CAMERA& camera);
+		bool HasContextMenu(ucsl::resources::swif::swif_version::SRS_LAYER& layer);
+		bool HasContextMenu(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast);
+		void RenderContextMenu(ucsl::resources::swif::swif_version::SRS_SCENE& scene);
+		void RenderContextMenu(ucsl::resources::swif::swif_version::SRS_CAMERA& camera);
+		void RenderContextMenu(ucsl::resources::swif::swif_version::SRS_LAYER& layer);
+		void RenderContextMenu(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast);
 	public:
 		using Panel::Panel;
 

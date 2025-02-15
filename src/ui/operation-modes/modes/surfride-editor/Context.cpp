@@ -3,7 +3,7 @@
 #include <resources/ReloadManager.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 	csl::math::Matrix44 Context::GetSceneCameraMatrix(const SurfRide::Scene* scene) {
@@ -28,6 +28,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	csl::math::Matrix44 Context::GetFullCastTransform(const SurfRide::Cast* cast) {
 		return GetSceneCameraMatrix(cast->layer->scene) * cast->transform->transformationMatrix;
+	}
+
+	void Context::ReloadResource() {
+		ReloadManager::instance->ReloadSync(projectResource);
+		//project = gocSprite == nullptr ? nullptr : gocSprite->GetProject()->projectData;
 	}
 
 	SRS_CASTNODE* Context::CreateCast(SRS_LAYER& layer, int sibling)
@@ -116,12 +121,35 @@ namespace ui::operation_modes::modes::surfride_editor {
 		return cast;
 	}
 
-	void Context::SetResource(hh::ui::GOCSprite* goc)
-	{
+	void Context::SetResource(hh::ui::GOCSprite* goc) {
 		gocSprite = static_cast<hh::ui::GOCSprite*>(goc);
-		projectResource = gocSprite->projectResource;
-		project = gocSprite->project->projectData;
+		projectResource = GetResourceForComponent(goc);
+		project = goc == nullptr ? nullptr : gocSprite->GetProject()->projectData;
 		focusedScene = nullptr;
+	}
+
+	hh::ui::ResSurfRideProject* Context::GetResourceForComponent(hh::ui::GOCSprite* goc) {
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		if (!goc || goc->projectContexts.size() == 0)
+			return nullptr;
+
+		auto* resourceManager = hh::fnd::ResourceManager::GetInstance();
+
+		if (auto* res = resourceManager->GetResource<hh::ui::ResSurfRideProject>(goc->projectContexts[0].name.c_str()))
+			return res;
+
+		auto* packFileContainer = resourceManager->GetResourceContainer(hh::fnd::Packfile::GetTypeInfo());
+			
+		auto packFileCount = packFileContainer->GetNumResources();
+			
+		for (int i = 0; i < packFileCount; i++)
+			if (auto* packFileRes = static_cast<hh::fnd::Packfile*>(packFileContainer->GetResourceByIndex(i))->GetResourceByName<hh::ui::ResSurfRideProject>(goc->projectContexts[0].name.c_str()))
+				return packFileRes;
+
+		return nullptr;
+#else
+		return goc == nullptr ? nullptr : goc->projectResource;
+#endif
 	}
 
 	void Context::AddCast(SRS_LAYER& layer, SRS_CASTNODE::Type type) {
@@ -132,7 +160,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		case SRS_CASTNODE::Type::REFERENCE: CreateReferenceCast(layer, 0); break;
 		}
 
-		ReloadManager::instance->ReloadSync(projectResource);
+		ReloadResource();
 	}
 
 	void Context::AddCast(SRS_CASTNODE& parent, SRS_CASTNODE::Type type) {
@@ -143,15 +171,20 @@ namespace ui::operation_modes::modes::surfride_editor {
 		case SRS_CASTNODE::Type::REFERENCE: CreateReferenceCast(*FindCastLayer(parent.id), parent.childIndex); break;
 		}
 
-		ReloadManager::instance->ReloadSync(projectResource);
+		ReloadResource();
 	}
 
-	void Context::RemoveCast(SRS_CASTNODE& cast)
+	void Context::RemoveCast(SRS_CASTNODE& cast_)
 	{
-		auto& layer = *FindCastLayer(cast.id);
-		size_t castIndex = &cast - layer.casts;
+		auto castId = cast_.id;
 
-		ForEachChild(layer, cast, [this](auto& child) { RemoveCast(child); });
+		auto& layer = *FindCastLayer(castId);
+
+		ForEachChild(layer, cast_, [this](auto& child) { RemoveCast(child); });
+
+		// Removing children could have shifted the cast. Look it up again by ID.
+		auto& cast = *FindCast(layer, castId);
+		size_t castIndex = &cast - layer.casts;
 
 		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(projectResource);
 
@@ -172,6 +205,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		auto siblingIndex = cast.siblingIndex;
 
+		auto tempCount = layer.castCount;
+
 		resources::ManagedCArray<SRS_CASTNODE, int> casts{ projectResource, layer.casts, layer.castCount };
 
 		for (auto& cast : casts) {
@@ -191,8 +226,13 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		casts.remove(castIndex);
+
+		if (layer.Is3D())
+			resources::ManagedCArray<SRS_TRS3D, int>{ projectResource, layer.transforms.transforms3d, tempCount }.remove(castIndex);
+		else
+			resources::ManagedCArray<SRS_TRS2D, int>{ projectResource, layer.transforms.transforms2d, tempCount }.remove(castIndex);
 		
-		ReloadManager::instance->ReloadSync(projectResource);
+		ReloadResource();
 	}
 
 	void Context::AddMotion(SRS_ANIMATION& animation, SRS_CASTNODE& cast) {
@@ -205,7 +245,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		motion.tracks = nullptr;
 		motion.trackCount = 0;
 
-		ReloadManager::instance->ReloadSync(projectResource);
+		ReloadResource();
 	}
 
 	void Context::AddTrack(SRS_MOTION& motion, ECurveType type, unsigned int firstFrame, unsigned int lastFrame) {
@@ -274,7 +314,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		size_t motionIndex = &motion - animation.motions;
 		motions.remove(motionIndex);
 
-		ReloadManager::instance->ReloadSync(projectResource);
+		ReloadResource();
 	}
 
 	void Context::RemoveTrack(SRS_MOTION& motion, SRS_TRACK& track) {
@@ -346,7 +386,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		});
 	}
 
-	void Context::SetTrackInterpolationType(ucsl::resources::swif::v6::SRS_TRACK& track, ucsl::resources::swif::v6::EInterpolationType interpolationType) {
+	void Context::SetTrackInterpolationType(ucsl::resources::swif::swif_version::SRS_TRACK& track, ucsl::resources::swif::swif_version::EInterpolationType interpolationType) {
 		VisitKeyFrames(track, [this, &track, interpolationType](auto*& kf1){
 			using KeyFrameType1 = std::remove_pointer_t<std::remove_reference_t<decltype(kf1)>>;
 			using ValueType1 = typename KeyFrameType1::ValueType;
@@ -445,36 +485,36 @@ namespace ui::operation_modes::modes::surfride_editor {
 	//	return nullptr;
 	//}
 
-	ucsl::resources::swif::v6::SRS_SCENE* Context::ResolveScene(const SurfRideElement& element) const {
+	ucsl::resources::swif::swif_version::SRS_SCENE* Context::ResolveScene(const SurfRideElement& element) const {
 		return ResolveScenePath(*project, element.path);
 	}
 
-	ucsl::resources::swif::v6::SRS_CAMERA* Context::ResolveCamera(const SurfRideElement& element) const {
+	ucsl::resources::swif::swif_version::SRS_CAMERA* Context::ResolveCamera(const SurfRideElement& element) const {
 		return ResolveCameraPath(*project, element.path);
 	}
 
-	ucsl::resources::swif::v6::SRS_LAYER* Context::ResolveLayer(const SurfRideElement& element) const {
+	ucsl::resources::swif::swif_version::SRS_LAYER* Context::ResolveLayer(const SurfRideElement& element) const {
 		return ResolveLayerPath(*project, element.path);
 	}
 
-	ucsl::resources::swif::v6::SRS_CASTNODE* Context::ResolveCast(const SurfRideElement& element) const {
+	ucsl::resources::swif::swif_version::SRS_CASTNODE* Context::ResolveCast(const SurfRideElement& element) const {
 		return ResolveCastPath(*project, element.path);
 	}
 
 	SurfRide::Scene* Context::ResolveRuntimeScene(const SurfRideElement& element) const {
-		return !element.runtimePath ? nullptr : ResolveRuntimeScenePath(*gocSprite->project, *element.runtimePath);
+		return !element.runtimePath ? nullptr : ResolveRuntimeScenePath(*gocSprite->GetProject(), *element.runtimePath);
 	}
 
 	SurfRide::Camera* Context::ResolveRuntimeCamera(const SurfRideElement& element) const {
-		return !element.runtimePath ? nullptr : ResolveRuntimeCameraPath(*gocSprite->project, *element.runtimePath);
+		return !element.runtimePath ? nullptr : ResolveRuntimeCameraPath(*gocSprite->GetProject(), *element.runtimePath);
 	}
 
 	SurfRide::Layer* Context::ResolveRuntimeLayer(const SurfRideElement& element) const {
-		return !element.runtimePath ? nullptr : ResolveRuntimeLayerPath(*gocSprite->project, *element.runtimePath);
+		return !element.runtimePath ? nullptr : ResolveRuntimeLayerPath(*gocSprite->GetProject(), *element.runtimePath);
 	}
 
 	SurfRide::Cast* Context::ResolveRuntimeCast(const SurfRideElement& element) const {
-		return !element.runtimePath ? nullptr : ResolveRuntimeCastPath(*gocSprite->project, *element.runtimePath);
+		return !element.runtimePath ? nullptr : ResolveRuntimeCastPath(*gocSprite->GetProject(), *element.runtimePath);
 	}
 
 	SRS_LAYER* Context::FindCastLayer(unsigned int castId) const {
@@ -552,8 +592,8 @@ namespace ui::operation_modes::modes::surfride_editor {
 	//	return runtimeLayer->GetCast(id);
 	//}
 
-	void Context::StartAnimationByIndex(SurfRide::Layer* runtimeLayer, int animationIndex) {
-		runtimeLayer->ApplyAnimationByIndex(animationIndex);
+	void Context::StartAnimation(SurfRide::Layer* runtimeLayer, int animationId) {
+		runtimeLayer->ApplyAnimation(animationId);
 	}
 
 	float Context::GetAnimationFrame(SurfRide::Layer* runtimeLayer) const {
@@ -732,7 +772,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				castTransform->position = transform.position;
 				castTransform->rotation = transform.rotation;
 				castTransform->scale = transform.scale;
-				static_cast<SurfRide::Cast3D&>(cast).position = transform.position;
+				static_cast<SurfRide::Cast3D&>(runtimeCast).position = transform.position;
 #else
 				runtimeCast.transform->position = transform.position;
 				runtimeCast.transform->rotation = transform.rotation;
@@ -757,7 +797,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 				castTransform->position = { transform.position.x(), transform.position.y(), 0.0f };
 				castTransform->rotation = { 0, 0, transform.rotation };
 				castTransform->scale = { transform.scale.x(), transform.scale.y(), 0.0f };
-				static_cast<SurfRide::Cast3D&>(cast).position = { transform.position.x(), transform.position.y(), 0.0f };
+				static_cast<SurfRide::Cast3D&>(runtimeCast).position = { transform.position.x(), transform.position.y(), 0.0f };
 #else
 				runtimeCast.transform->position = { transform.position.x(), transform.position.y(), 0.0f };
 				runtimeCast.transform->rotation = { 0, 0, transform.rotation };

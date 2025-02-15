@@ -66,7 +66,7 @@ namespace ImBrowser {
 			}
 
 			ImGui::TableSetupColumn("Name", ImGuiTableColumnFlags_NoHide);
-				
+
 			for (auto* prop : gCtx->rank1Properties)
 				ImGui::TableSetupColumn(prop);
 
@@ -149,7 +149,7 @@ namespace ImBrowser {
 		ImGui::SetCursorPos(cursor);
 		ImGui::Dummy(ImVec2(size, size));
 	}
-	
+
 	bool ThumbnailsItem(void* id, const char* name, bool selected, PropertyValue* propertyValues, size_t propertyCount, Image icon, Image thumbnail) {
 		ImGui::PushID(id);
 		ImGui::BeginGroup();
@@ -158,7 +158,7 @@ namespace ImBrowser {
 		auto standardThumbnailSize = std::max(largeThumbIconSize, 100.0f * ImGui::GetFontSize() / 14.0f);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_SelectableTextAlign, ImVec2(0.5f, 1.0f));
-		
+
 		bool res = ImGui::Selectable(name, selected, ImGuiSelectableFlags_AllowDoubleClick, ImVec2(standardThumbnailSize, standardThumbnailSize + ImGui::GetFontSize()));
 
 		ImGui::SetCursorPos(cursor);
@@ -167,7 +167,7 @@ namespace ImBrowser {
 		ImGui::PopStyleVar();
 		ImGui::EndGroup();
 		ImGui::PopID();
-		
+
 		float lastButtonX = ImGui::GetItemRectMax().x;
 		float nextButtonX = lastButtonX + ImGui::GetStyle().ItemSpacing.x + standardThumbnailSize;
 
@@ -184,7 +184,7 @@ namespace ImBrowser {
 		ImGui::TableNextColumn();
 
 		auto beforeCursor = ImGui::GetCursorPos();
-		
+
 		//bool isOpen = ImGui::TreeNodeEx(id, ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_SpanAllColumns | (selected ? ImGuiTreeNodeFlags_Selected : 0), "%s", name);
 		bool res = ImGui::Selectable("", selected, ImGuiSelectableFlags_AllowDoubleClick | ImGuiSelectableFlags_SpanAllColumns, ImVec2(0.0f, smallThumbIconSize));
 
@@ -198,7 +198,7 @@ namespace ImBrowser {
 
 		for (auto* prop : gCtx->rank1Properties) {
 			ImGui::TableNextColumn();
-			
+
 			if (auto* propVal = FindProp(prop, propertyValues, propertyCount))
 				ImGui::Text("%s", propVal);
 		}
@@ -218,7 +218,7 @@ namespace ImBrowser {
 		}
 
 		auto textSize = ImGui::CalcTextSize(name);
-		
+
 		ImGui::PushID(id);
 		ImGui::BeginGroup();
 
@@ -232,7 +232,7 @@ namespace ImBrowser {
 		ImGui::Text("%s", name);
 		ImGui::EndGroup();
 		ImGui::PopID();
-		
+
 		return res;
 	}
 
@@ -245,7 +245,7 @@ namespace ImBrowser {
 			ImGui::SameLine();
 			ImGui::BeginGroup();
 		}
-		
+
 		ImGui::PushID(id);
 		ImGui::BeginGroup();
 

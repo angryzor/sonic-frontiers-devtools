@@ -38,7 +38,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			for (auto* child : cast->GetChildren())
 				children.push_back(*child);
 
-			//if (cast->castData->GetType() == ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE && static_cast<SurfRide::ReferenceCast*>(cast)->refLayer)
+			//if (cast->castData->GetType() == ucsl::resources::swif::swif_version::SRS_CASTNODE::Type::REFERENCE && static_cast<SurfRide::ReferenceCast*>(cast)->refLayer)
 			//	for (auto* child : static_cast<SurfRide::ReferenceCast*>(cast)->refLayer->GetCasts())
 			//		children.push_back(*child->castData);
 		}
@@ -58,7 +58,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (cast->transform->display && frustum.Test(cast->transform->transformationMatrix * context.GetPivotTranslation(cast) * Eigen::Vector3f::Zero()))
 				results.push_back(*cast);
 
-			//if (cast->castData->GetType() == ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE && static_cast<SurfRide::ReferenceCast*>(cast)->refLayer)
+			//if (cast->castData->GetType() == ucsl::resources::swif::swif_version::SRS_CASTNODE::Type::REFERENCE && static_cast<SurfRide::ReferenceCast*>(cast)->refLayer)
 			//	GetFrustumResultsForLayer(static_cast<SurfRide::ReferenceCast*>(cast)->refLayer, frustum, results);
 
 			for (auto* child : cast->GetChildren())
@@ -66,17 +66,17 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		bool Intersects(const SurfRide::Cast& cast, const Ray3f& ray) {
-			switch (static_cast<ucsl::resources::swif::v6::SRS_CASTNODE::Type>(cast.flags & 0xF)) {
-			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::IMAGE: return Intersects(*cast.transform, context.GetPivotTranslation(&cast), static_cast<const SurfRide::ImageCast&>(cast).size, ray);
-			case ucsl::resources::swif::v6::SRS_CASTNODE::Type::SLICE: return Intersects(*cast.transform, context.GetPivotTranslation(&cast), static_cast<const SurfRide::SliceCast&>(cast).size, ray);
+			switch (static_cast<ucsl::resources::swif::swif_version::SRS_CASTNODE::Type>(cast.flags & 0xF)) {
+			case ucsl::resources::swif::swif_version::SRS_CASTNODE::Type::IMAGE: return Intersects(*cast.transform, context.GetPivotTranslation(&cast), static_cast<const SurfRide::ImageCast&>(cast).size, ray);
+			case ucsl::resources::swif::swif_version::SRS_CASTNODE::Type::SLICE: return Intersects(*cast.transform, context.GetPivotTranslation(&cast), static_cast<const SurfRide::SliceCast&>(cast).size, ray);
 			default: return false;
 			}
 		}
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
-		bool Intersects(const SurfRide::Transform3D& transform, const Eigen::Translation3f& pivotTranslation, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
+		bool Intersects(const SurfRide::Transform3D& transform, const Eigen::Translation3f& pivotTranslation, const ucsl::resources::swif::swif_version::Vector2& size, const Ray3f& ray) {
 #else
-		bool Intersects(const SurfRide::Transform& transform, const Eigen::Translation3f& pivotTranslation, const ucsl::resources::swif::v6::Vector2& size, const Ray3f& ray) {
+		bool Intersects(const SurfRide::Transform& transform, const Eigen::Translation3f& pivotTranslation, const ucsl::resources::swif::swif_version::Vector2& size, const Ray3f& ray) {
 #endif
 			auto halfSize = size / 2.0f;
 
@@ -143,7 +143,7 @@ namespace ui::operation_modes::modes::surfride_editor
 					continue;
 
 				if (el.runtimePath)
-				if (auto* runtimeCast = ResolveRuntimeCastPath(*context.gocSprite->project, el.runtimePath.value()))
+				if (auto* runtimeCast = ResolveRuntimeCastPath(*context.gocSprite->GetProject(), el.runtimePath.value()))
 					updated |= context.UpdateAabb(runtimeCast, aabb);
 			}
 
@@ -159,23 +159,22 @@ namespace ui::operation_modes::modes::surfride_editor
 		SurfRideElement GetParent(SurfRideElement element) { return *context.ResolveRuntimeCast(element)->parentCast; }
 		Eigen::Projective3f GetSelectionSpaceTransform(SurfRideElement element) const { return context.GetFullCastTransform(context.ResolveRuntimeCast(element)); }
 		void SetSelectionSpaceTransform(SurfRideElement element, const Eigen::Projective3f& transform) {
-#ifdef DEVTOOLS_TARGET_SDK_wars
-			auto* cast = static_cast<SurfRide::Cast3D*>(context.ResolveRuntimeCast(element));
-#else
-			auto* cast = context.ResolveRuntimeCast(element);
-#endif
+			auto& cast = *context.ResolveCast(element);
+			auto& layer = *context.FindCastLayer(cast.id);
 
-			Eigen::Projective3f parentSelectionSpaceTransform = cast->parentCast == nullptr ? Eigen::Projective3f::Identity() : context.GetFullCastTransform(cast->parentCast);
+			size_t castIndex = &cast - layer.casts;
+
+			auto* parentCast = context.ResolveRuntimeCast(element)->parentCast;
+
+			Eigen::Projective3f parentSelectionSpaceTransform = parentCast == nullptr ? Eigen::Projective3f::Identity() : context.GetFullCastTransform(parentCast);
 			csl::math::Vector3 newPos = (parentSelectionSpaceTransform.inverse() * transform * Eigen::Vector3f::Zero().homogeneous()).hnormalized();
-
-			size_t castIndex = (ucsl::resources::swif::v6::SRS_CASTNODE*)cast->castData - cast->layer->layerData->casts;
-
-			if (cast->layer->flags.test(SurfRide::Layer::Flag::IS_3D))
-				cast->layer->layerData->transforms.transforms3d[castIndex].position = newPos;
+			
+			if (layer.Is3D())
+				layer.transforms.transforms3d[castIndex].position = newPos;
 			else
-				cast->layer->layerData->transforms.transforms2d[castIndex].position = { newPos.x(), newPos.y() };
+				layer.transforms.transforms2d[castIndex].position = { newPos.x(), newPos.y() };
 
-			context.ApplyTransformChange(*cast->castData);
+			context.ApplyTransformChange(cast);
 		}
 	};
 

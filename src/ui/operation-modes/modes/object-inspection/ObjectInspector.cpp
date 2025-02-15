@@ -303,8 +303,8 @@ namespace ui::operation_modes::modes::object_inspection {
 			return GetIconGlyph(IconId::COMPONENT_PATH);
 		else if (component.pStaticClass == hh::game::GOCTransform::GetClass())
 			return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
-		else if (component.pStaticClass == app::player::GOCPlayerHsm::GetClass())
-			return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
+		//else if (component.pStaticClass == app::player::GOCPlayerHsm::GetClass())
+		//	return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
 		//else if (component.pStaticClass == app_cmn::fsm::GOCHsm2::GetClass())
 		//	return GetIconGlyph(IconId::COMPONENT_STATE_MACHINE);
 		//else if (component.pStaticClass == app_cmn::fsm::GOCTinyFsm2::GetClass())
@@ -323,8 +323,8 @@ namespace ui::operation_modes::modes::object_inspection {
 			return GetIconGlyph(IconId::COMPONENT_UI);
 		//else if (component.pStaticClass == hh::snd::GOCSound::GetClass())
 		//	return GetIconGlyph(IconId::COMPONENT_SOUND);
-		else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass())
-			return GetIconGlyph(IconId::COMPONENT_ANIMATION);
+		//else if (component.pStaticClass == hh::anim::GOCAnimator::GetClass())
+		//	return GetIconGlyph(IconId::COMPONENT_ANIMATION);
 		else return GetIconGlyph(IconId::COMPONENT_OBJECT);
 	}
 }

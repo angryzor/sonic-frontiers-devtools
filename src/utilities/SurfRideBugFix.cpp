@@ -1,3 +1,4 @@
+#ifndef DEVTOOLS_TARGET_SDK_wars
 #include "SurfRideBugFix.h"
 #include "Helpers.h"
 
@@ -6,16 +7,19 @@ constexpr size_t surfRideCastHandlePreReloadAddr = 0x140BB5ED0;
 constexpr size_t surfRideCastHandlePostReloadAddr = 0x140BB5C20;
 constexpr size_t surfRideLayerHandlePreReloadAddr = 0x140BB64A0;
 constexpr size_t surfRideLayerHandlePostReloadAddr = 0x140BB6210;
+constexpr size_t unnecessaryTextureListReloadThatTrashesReloadedTextures = 0x140B942A6;
+constexpr size_t storeLayerState = 0x140BC6530;
+constexpr size_t loadLayerState = 0x140BC6410;
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_miller
 constexpr size_t surfRideCastHandlePreReloadAddr = 0x14087C700;
 constexpr size_t surfRideCastHandlePostReloadAddr = 0x14087C510;
 constexpr size_t surfRideLayerHandlePreReloadAddr = 0x14087CD10;
 constexpr size_t surfRideLayerHandlePostReloadAddr = 0x14087CB40;
+constexpr size_t unnecessaryTextureListReloadThatTrashesReloadedTextures = 0x140858D4C;
+constexpr size_t storeLayerState = 0x14088D980;
+constexpr size_t loadLayerState = 0x14088D860;
 #endif
-//str.copyFrom("/");
-//	str.copyFrom(cast->castData->name, strlen(cast->castData->name));
-//	if (cast->castData->GetType() == ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE)
 
 void AddFrag(const char* name, csl::ut::String& path) {
 	if (path.size() != 0)
@@ -62,7 +66,7 @@ SurfRide::Cast* ResolveCast(SurfRide::Project* project, const char* path) {
 
 	if (scene == nullptr || path == nullptr)
 		return nullptr;
-	
+
 	path = ReadFrag(path, frag);
 	SurfRide::Layer* layer = scene->GetLayer(frag.c_str());
 
@@ -73,7 +77,7 @@ SurfRide::Cast* ResolveCast(SurfRide::Project* project, const char* path) {
 	SurfRide::Cast* cast = layer->GetCast(frag.c_str());
 
 	while (cast != nullptr && path != nullptr) {
-		if (cast->castData->GetType() != ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE)
+		if (cast->castData->GetType() != ucsl::resources::swif::swif_version::SRS_CASTNODE::Type::REFERENCE)
 			return nullptr;
 
 		path = ReadFrag(path, frag);
@@ -100,7 +104,7 @@ SurfRide::Layer* ResolveLayer(SurfRide::Project* project, const char* path) {
 
 	if (scene == nullptr || path == nullptr)
 		return nullptr;
-	
+
 	path = ReadFrag(path, frag);
 	SurfRide::Layer* layer = scene->GetLayer(frag.c_str());
 
@@ -108,7 +112,7 @@ SurfRide::Layer* ResolveLayer(SurfRide::Project* project, const char* path) {
 		path = ReadFrag(path, frag);
 		SurfRide::Cast* cast = layer->GetCast(frag.c_str());
 
-		if (cast == nullptr || path == nullptr || cast->castData->GetType() != ucsl::resources::swif::v6::SRS_CASTNODE::Type::REFERENCE)
+		if (cast == nullptr || path == nullptr || cast->castData->GetType() != ucsl::resources::swif::swif_version::SRS_CASTNODE::Type::REFERENCE)
 			return nullptr;
 
 		path = ReadFrag(path, frag);
@@ -151,11 +155,31 @@ HOOK(void, __fastcall, SurfRideLayerHandle_PostReload, surfRideLayerHandlePostRe
 	self->SetLayer(ResolveLayer(project, self->key.c_str()));
 }
 
+HOOK(void, __fastcall, SurfRideStoreLayerState, storeLayerState, void* state, SurfRide::Layer* layer, csl::fnd::IAllocator* allocator) {
+	if (layer == nullptr)
+		return;
+
+	originalSurfRideStoreLayerState(state, layer, allocator);
+}
+
+HOOK(void, __fastcall, SurfRideLoadLayerState, loadLayerState, SurfRide::Layer* layer, void* state) {
+	if (layer == nullptr)
+		return;
+
+	originalSurfRideLoadLayerState(layer, state);
+}
+
 void InstallSurfRideBugFixHooks() {
 	INSTALL_HOOK(SurfRideCastHandle_PreReload);
 	INSTALL_HOOK(SurfRideLayerHandle_PreReload);
 	INSTALL_HOOK(SurfRideCastHandle_PostReload);
 	INSTALL_HOOK(SurfRideLayerHandle_PostReload);
+	INSTALL_HOOK(SurfRideStoreLayerState);
+	INSTALL_HOOK(SurfRideLoadLayerState);
 
-	WRITE_MEMORY(0x140B942A6, uint8_t, 0xEB);
+	WRITE_MEMORY(unnecessaryTextureListReloadThatTrashesReloadedTextures, uint8_t, 0xEB);
+
 }
+#else
+void InstallSurfRideBugFixHooks() {}
+#endif

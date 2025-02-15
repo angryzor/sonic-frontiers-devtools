@@ -10,6 +10,7 @@ namespace ui::operation_modes::modes::fxcol_editor {
 		AddBehavior<SelectionBehavior>();
 		AddBehavior<SelectionAabbBehavior>();
 		AddBehavior<SelectionTransformationBehavior>();
+		AddBehavior<SelectionVisual3DBehavior>();
 		AddBehavior<GizmoBehavior>();
 		AddBehavior<MousePickingBehavior>();
 		AddBehavior<SelectionMousePickingBehavior>();

@@ -64,7 +64,6 @@ namespace devtools::debug_rendering {
 	}
 
 	void DebugRenderer::Renderable::Render(const hh::gfnd::RenderableParameter* renderableParameter) {
-		if (renderer->enabled)
 		if (auto* gameManager = hh::game::GameManager::GetInstance())
 		if (auto* cameraManager = gameManager->GetService<hh::game::CameraManager>())
 		if (auto* camera = cameraManager->GetTopComponent(0)) {
@@ -77,7 +76,8 @@ namespace devtools::debug_rendering {
 			renderer->drawContext->SetCullingMode(1);
 
 			for (auto* debugRenderable : renderer->debugRenderables)
-				debugRenderable->RenderIngameDebugVisuals(*renderer->drawContext);
+				if (renderer->enabled || debugRenderable->always)
+					debugRenderable->RenderIngameDebugVisuals(*renderer->drawContext);
 
 			renderer->drawContext->EndDraw();
 			renderer->drawContext->EndScene();

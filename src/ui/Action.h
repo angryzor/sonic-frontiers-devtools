@@ -53,8 +53,32 @@ enum class ActionId {
 	SURFRIDE_EDITOR_OPEN_TEXTURE_EDITOR,
 };
 
+struct ActionBase;
+struct AsyncActionBase : CompatibleObject {
+	using CompatibleObject::CompatibleObject;
+
+	virtual ~AsyncActionBase() = default;
+	virtual ActionBase& GetAction() = 0;
+};
+
+template<typename A>
+struct AsyncAction : AsyncActionBase {
+	A action;
+
+	AsyncAction(csl::fnd::IAllocator* allocator, const A& action) : AsyncActionBase{ allocator }, action{ action.payload } {}
+
+	//AsyncAction(csl::fnd::IAllocator* allocator, A&& action) : AsyncActionBase{ allocator }, action{ std::move(action.payload) } {}
+
+	virtual ActionBase& GetAction() override { return action; }
+};
+
 struct ActionBase {
 	ActionId id;
+
+	ActionBase(ActionId id);
+	virtual ~ActionBase() = default;
+	virtual AsyncActionBase* CreateAsync(csl::fnd::IAllocator* allocator) const &;
+	//virtual AsyncActionBase* CreateAsync(csl::fnd::IAllocator* allocator) &&;
 };
 
 struct EmptyActionPayload {};
@@ -69,7 +93,16 @@ struct Action : ActionBase {
 
 	explicit Action() : ActionBase{ actionId }, payload{} {}
 	explicit Action(const std::remove_reference_t<Payload>& payload) : ActionBase{ actionId }, payload{ payload } {}
+	explicit Action(std::remove_reference_t<Payload>& payload) : ActionBase{ actionId }, payload{ payload } {}
 	explicit Action(std::remove_reference_t<Payload>&& payload) : ActionBase{ actionId }, payload{ std::move(payload) } {}
+
+	virtual AsyncActionBase* CreateAsync(csl::fnd::IAllocator* allocator) const & override {
+		return new (allocator) AsyncAction<Action<actionId, Payload>>{ allocator, *this };
+	}
+
+	//virtual AsyncActionBase* CreateAsync(csl::fnd::IAllocator* allocator) && override {
+	//	return new (allocator) AsyncAction<Action<actionId, Payload>>{ allocator, std::move(*this) };
+	//}
 };
 
 class ActionDispatcher {

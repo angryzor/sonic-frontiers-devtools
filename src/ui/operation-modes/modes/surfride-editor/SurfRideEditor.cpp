@@ -6,9 +6,11 @@
 #include "Behaviors.h"
 #include "Actions.h"
 #include "texture-editor/TextureEditor.h"
+#ifdef DEVTOOLS_TARGET_SDK_wars
+#include <ucsl-reflection/reflections/resources/swif/v5.h>
+#else
 #include <ucsl-reflection/reflections/resources/swif/v6.h>
-#include <rip/util/byteswap.h>
-#include <rip/binary/stream.h>
+#endif
 #include <rip/binary/containers/swif/SWIF.h>
 #include <ui/common/editors/Reflection.h>
 #include <ui/common/StandaloneOperationModeHost.h>
@@ -19,7 +21,7 @@
 
 namespace ui::operation_modes::modes::surfride_editor
 {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 	SurfRideEditor::SurfRideEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host) : OperationMode{ allocator, host }
 	{
@@ -34,6 +36,12 @@ namespace ui::operation_modes::modes::surfride_editor
 		AddBehavior<ScreenSpaceManipulationBehavior>();
 		AddBehavior<MousePickingBehavior>();
 		AddBehavior<SelectionMousePickingBehavior>();
+
+		hh::game::GameManager::GetInstance()->AddComponentListener(this);
+	}
+
+	SurfRideEditor::~SurfRideEditor() {
+		hh::game::GameManager::GetInstance()->RemoveComponentListener(this);
 	}
 
 	void SurfRideEditor::ProcessAction(const ActionBase& action) {
@@ -94,7 +102,11 @@ namespace ui::operation_modes::modes::surfride_editor
 	}
 
 	std::optional<csl::geom::Aabb> SurfRideEditor::RenderCasts(SurfRide::Cast& cast) {
+#ifdef DEVTOOLS_TARGET_SDK_wars
+		if (cast.flags & 0x1000 || !cast.transform->display)
+#else
 		if (cast.flags & 0x1000 || !cast.transform->fullDisplay)
+#endif
 			return std::nullopt;
 
 		csl::geom::Aabb aabb{};
@@ -129,7 +141,7 @@ namespace ui::operation_modes::modes::surfride_editor
 	void SurfRideEditor::RenderCasts(SurfRide::Layer& layer) {
 		if (layer.flags & 0x100)
 			return;
-		
+
 		for (auto cast : layer.GetCasts())
 			RenderCasts(*cast);
 	}
@@ -159,10 +171,15 @@ namespace ui::operation_modes::modes::surfride_editor
 				auto* exportProjectData = static_cast<SRS_PROJECT*>(ImGuiFileDialog::Instance()->GetUserDatas());
 
 				std::ofstream ofs{ ImGuiFileDialog::Instance()->GetFilePathName(), std::ios::trunc | std::ios::binary };
-				rip::binary::containers::swif::v6::SWIFSerializer serializer{ ofs };
+				rip::binary::containers::swif::v1::SWIFSerializer serializer{ ofs };
 				serializer.serialize<he2sdk::ucsl::GameInterface>(*exportProjectData);
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
+	}
+
+	void SurfRideEditor::ComponentRemovedCallback(hh::game::GOComponent* component) {
+		if (GetContext().gocSprite == component)
+			Dispatch(SetResourceAction{ nullptr });
 	}
 }

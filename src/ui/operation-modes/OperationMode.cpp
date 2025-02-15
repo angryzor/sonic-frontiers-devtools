@@ -10,6 +10,11 @@ void OperationModeBase::Render() {
 			behavior->Render();
 	}
 	host.EndSceneWindow();
+
+	while (actionsInFlight.size() > 0) {
+		host.Dispatch(actionsInFlight[0]->GetAction());
+		actionsInFlight.remove(0);
+	}
 }
 
 void OperationModeBase::RenderScene()
@@ -17,8 +22,12 @@ void OperationModeBase::RenderScene()
 }
 
 void OperationModeBase::Dispatch(const ActionBase& action) {
-	host.Dispatch(action);
+	actionsInFlight.push_back(action.CreateAsync(GetAllocator()));
 }
+
+//void OperationModeBase::Dispatch(ActionBase&& action) {
+//	actionsInFlight.push_back(std::move(action).CreateAsync(GetAllocator()));
+//}
 
 void OperationModeBase::ProcessAction(const ActionBase& action) {
 	for (auto& behavior : behaviors)

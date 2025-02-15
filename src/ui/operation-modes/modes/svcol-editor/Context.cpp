@@ -23,7 +23,7 @@ namespace ui::operation_modes::modes::svcol_editor {
 
 		return &shape;
 	}
-	
+
 	void Context::RemoveShape(ucsl::resources::svcol::v1::ShapeData& shape) {
 		auto& svColData = *resource->svColData;
 

@@ -85,7 +85,7 @@ void ResourceBrowser::RenderContents() {
 			cfg.flags = ImGuiFileDialogFlags_Modal;
 			ImGuiFileDialog::Instance()->OpenDialog("ResourceBrowserWatchDirectory", "Choose directory", nullptr, cfg);
 		}
-		
+
 		if (ImGui::BeginMenu("View")) {
 			if (ImGui::MenuItem("Thumbnails", nullptr, currentView == ImBrowser::ViewType::THUMBNAILS))
 				currentView = ImBrowser::ViewType::THUMBNAILS;
@@ -133,7 +133,9 @@ void ResourceBrowser::RenderMainArea() {
 			auto* resourceManager = ResourceManager::GetInstance();
 
 #ifdef DEVTOOLS_TARGET_SDK_miller
-			RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
+			for (auto* container : resourceManager->unpackedResourceContainer.uniqueResourceContainers)
+				RenderContainerContents(container);
+			//RenderContainerContents(resourceManager->unpackedResourceContainer.uniqueResourceContainersByTypeInfo.GetValueOrFallback(hh::fnd::Packfile::GetTypeInfo(), nullptr));
 #else
 			for (auto* container : resourceManager->GetResourceContainers())
 				RenderContainerContents(container);
@@ -151,7 +153,7 @@ void ResourceBrowser::RenderMainArea() {
 
 void ResourceBrowser::RenderContainerContents(const ResourceContainer* container) {
 	auto resourceCount = container->GetNumResources();
-	
+
 	ImGui::PushID(container);
 	for (int i = 0; i < resourceCount; i++)
 		RenderResource(container->GetResourceByIndex(i));
@@ -162,6 +164,8 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 	const ResourceTypeInfo* typeInfo = &resource->GetClass();
 	bool isSelected{};
 	bool isOpened{};
+
+	ImGui::PushID(resource);
 
 	auto icon = GetIconAsImage(ResourceTypeToIconId(typeInfo));
 	ImBrowser::Image browserImage{ icon.texId, icon.uv1, icon.uv2, icon.size };
@@ -175,13 +179,20 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 
 	ImBrowser::Item(resource, resource->GetName(), selectedResource == resource, &isSelected, &isOpened, propVals.begin(), propVals.size(), browserImage, GetImage(resource));
 
-//		if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
-//			if (ImGui::MenuItem("Load from file"))
-//				ShowLoadResourceDialog(resource);
-//
-//			ImGui::EndPopup();
-//		}
-//
+	if (ImGui::IsItemActive()) {
+		if (ImGui::BeginDragDropSource()) {
+			ImGui::SetDragDropPayload("Resource", &resource, sizeof(resource));
+			ImGui::EndDragDropSource();
+		}
+	}
+
+	if (ImGui::BeginPopupContextItem("Resource Context Menu")) {
+		if (ImGui::MenuItem("Load from file"))
+			ShowLoadResourceDialog(resource);
+
+		ImGui::EndPopup();
+	}
+
 	if (isSelected)
 		selectedResource = resource;
 
@@ -201,6 +212,8 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			ResMaterialEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMaterial*>(resource));
 #endif
 	}
+
+	ImGui::PopID();
 }
 
 ImBrowser::Image ResourceBrowser::GetImage(hh::fnd::ManagedResource* resource)
@@ -297,31 +310,6 @@ void ResourceBrowser::RenderExportDialog() {
 	}
 }
 
-void ResourceBrowser::RenderPreview(const hh::fnd::ManagedResource* resource, float size)
-{
-	auto cursor = ImGui::GetCursorPos();
-	
-	//if (&resource->GetClass() == hh::gfnd::ResTexture::GetTypeInfo()) {
-	//	auto* texture = static_cast<const hh::gfnd::ResTexture*>(resource);
-	//	if (auto* textureId = GetTextureIDFromResTexture(texture)) {
-	//		ImGui::Image(textureId, ImVec2(size, size));
-	//		ImGui::SetCursorPos(cursor + ImVec2(0, size - 32));
-	//		RenderIcon(assetIcons, ResourceTypeToIconId(&resource->GetClass()), ImVec2(32, 32));
-	//	}
-	//	else {
-	//		ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
-	//		RenderIcon(assetIcons, ResourceTypeToIconId(&resource->GetClass()));
-	//	}
-	//}
-	//else {
-	//	ImGui::SetCursorPos(cursor + ImVec2((size - 64) / 2, (size - 64) / 2));
-	//	RenderIcon(assetIcons, ResourceTypeToIconId(&resource->GetClass()));
-	//}
-
-	ImGui::SetCursorPos(cursor);
-	ImGui::Dummy(ImVec2(size, size));
-}
-
 void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* resource) {
 	if (&resource->GetClass() == hh::game::ResObjectWorld::GetTypeInfo()) {
 		std::ofstream ofs{ filePath, std::ios::trunc | std::ios::binary };
@@ -332,7 +320,4 @@ void ResourceBrowser::ExportResource(const wchar_t* filePath, ManagedResource* r
 		serializer.serialize<he2sdk::ucsl::GameInterface>(*(ucsl::resources::object_world::v3::ObjectWorldData<he2sdk::ucsl::GameInterface::AllocatorSystem>*)static_cast<hh::game::ResObjectWorld*>(resource)->binaryData);
 #endif
 	}
-}
-
-void ResourceBrowser::RenderDetails(const hh::fnd::ManagedResource* resource) {
 }

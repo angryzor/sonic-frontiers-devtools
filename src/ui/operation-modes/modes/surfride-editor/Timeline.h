@@ -16,30 +16,30 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
-		void RenderMotion(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion);
-		void RenderTrack(ucsl::resources::swif::v6::SRS_LAYER& layer, ucsl::resources::swif::v6::SRS_ANIMATION& animation, ucsl::resources::swif::v6::SRS_MOTION& motion, ucsl::resources::swif::v6::SRS_TRACK& track);
-		static void RenderPlotLines(ucsl::resources::swif::v6::SRS_TRACK& track);
-		static const char* TrackName(ucsl::resources::swif::v6::ECurveType curveType);
-		static const char* TrackName(ucsl::resources::swif::v6::SRS_TRACK& track);
+		void RenderMotion(ucsl::resources::swif::swif_version::SRS_LAYER& layer, ucsl::resources::swif::swif_version::SRS_ANIMATION& animation, ucsl::resources::swif::swif_version::SRS_MOTION& motion);
+		void RenderTrack(ucsl::resources::swif::swif_version::SRS_LAYER& layer, ucsl::resources::swif::swif_version::SRS_ANIMATION& animation, ucsl::resources::swif::swif_version::SRS_MOTION& motion, ucsl::resources::swif::swif_version::SRS_TRACK& track);
+		static void RenderPlotLines(ucsl::resources::swif::swif_version::SRS_TRACK& track);
+		static const char* TrackName(ucsl::resources::swif::swif_version::ECurveType curveType);
+		static const char* TrackName(ucsl::resources::swif::swif_version::SRS_TRACK& track);
 
 		static constexpr int POINTS_PER_SEGMENT = 20;
 		static const char* interpolationTypes[3];
 		static const char* interpolationTypesExtended[4];
 
 		template<typename T>
-		static inline ucsl::resources::swif::v6::Key<T>& GetKeyFrame(ucsl::resources::swif::v6::SRS_TRACK& track, size_t i) {
+		static inline ucsl::resources::swif::swif_version::Key<T>& GetKeyFrame(ucsl::resources::swif::swif_version::SRS_TRACK& track, size_t i) {
 			switch (track.GetInterpolationType()) {
-			case ucsl::resources::swif::v6::EInterpolationType::CONSTANT:
-				return reinterpret_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames.constantFloat)[i];
-			case ucsl::resources::swif::v6::EInterpolationType::LINEAR:
-				return reinterpret_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames.linearFloat)[i];
-			case ucsl::resources::swif::v6::EInterpolationType::HERMITE:
-				return reinterpret_cast<ucsl::resources::swif::v6::KeyHermite<T>*>(track.keyFrames.hermiteFloat)[i];
-			case ucsl::resources::swif::v6::EInterpolationType::INDIVIDUAL:
-				return reinterpret_cast<ucsl::resources::swif::v6::KeyIndividual<T>*>(track.keyFrames.individualFloat)[i];
+			case ucsl::resources::swif::swif_version::EInterpolationType::CONSTANT:
+				return reinterpret_cast<ucsl::resources::swif::swif_version::KeyLinear<T>*>(track.keyFrames.constantFloat)[i];
+			case ucsl::resources::swif::swif_version::EInterpolationType::LINEAR:
+				return reinterpret_cast<ucsl::resources::swif::swif_version::KeyLinear<T>*>(track.keyFrames.linearFloat)[i];
+			case ucsl::resources::swif::swif_version::EInterpolationType::HERMITE:
+				return reinterpret_cast<ucsl::resources::swif::swif_version::KeyHermite<T>*>(track.keyFrames.hermiteFloat)[i];
+			case ucsl::resources::swif::swif_version::EInterpolationType::INDIVIDUAL:
+				return reinterpret_cast<ucsl::resources::swif::swif_version::KeyIndividual<T>*>(track.keyFrames.individualFloat)[i];
 			default:
 				assert(false);
-				return reinterpret_cast<ucsl::resources::swif::v6::KeyLinear<T>*>(track.keyFrames.linearFloat)[i];
+				return reinterpret_cast<ucsl::resources::swif::swif_version::KeyLinear<T>*>(track.keyFrames.linearFloat)[i];
 			}
 		}
 
@@ -55,14 +55,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		template<typename T, double (*Selector)(const T& x) = DefaultSelector>
 		static ImPlotPoint GeneratePlotLine(int i, void* userData) {
-			auto& track = *static_cast<ucsl::resources::swif::v6::SRS_TRACK*>(userData);
+			auto& track = *static_cast<ucsl::resources::swif::swif_version::SRS_TRACK*>(userData);
 
 			if (i-- == 0)
 				return ImPlotPoint(track.firstFrame, Selector(GetKeyFrame<T>(track, 0).value));
 
 			auto segment = i / POINTS_PER_SEGMENT;
 			auto point = i % POINTS_PER_SEGMENT;
-			auto interpType = track.GetInterpolationType() == ucsl::resources::swif::v6::EInterpolationType::INDIVIDUAL ? static_cast<ucsl::resources::swif::v6::KeyIndividual<T>&>(GetKeyFrame<T>(track, segment)).interpolationType : static_cast<ucsl::resources::swif::v6::EInterpolationType>(track.GetInterpolationType());
+			auto interpType = track.GetInterpolationType() == ucsl::resources::swif::swif_version::EInterpolationType::INDIVIDUAL ? static_cast<ucsl::resources::swif::swif_version::KeyIndividual<T>&>(GetKeyFrame<T>(track, segment)).interpolationType : static_cast<ucsl::resources::swif::swif_version::EInterpolationType>(track.GetInterpolationType());
 			auto& kf = GetKeyFrame<T>(track, segment);
 
 			if (segment == track.keyCount - 1)
@@ -74,18 +74,18 @@ namespace ui::operation_modes::modes::surfride_editor {
 			auto dx = static_cast<double>(nextKf.frame - kf.frame);
 
 			switch (interpType) {
-			case ucsl::resources::swif::v6::EInterpolationType::CONSTANT:
+			case ucsl::resources::swif::swif_version::EInterpolationType::CONSTANT:
 				return ImPlotPoint(kf.frame + dx * t, Selector(kf.value));
-			case ucsl::resources::swif::v6::EInterpolationType::LINEAR:
+			case ucsl::resources::swif::swif_version::EInterpolationType::LINEAR:
 				return ImPlotPoint(kf.frame + dx * t, Selector(kf.value) + (Selector(nextKf.value) - Selector(kf.value)) * t);
-			case ucsl::resources::swif::v6::EInterpolationType::HERMITE:
-				if constexpr (!std::is_same_v<ucsl::resources::swif::v6::Color, T>)
+			case ucsl::resources::swif::swif_version::EInterpolationType::HERMITE:
+				if constexpr (!std::is_same_v<ucsl::resources::swif::swif_version::Color, T>)
 					return ImPlotPoint(
 						kf.frame + dx * t,
 						Selector(kf.value) * (1.0 + 2.0 * t) * (1.0 - t) * (1.0 - t) +
-						Selector(static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(kf).derivativeOut) * (dx * t) * (1.0 - t) * (1.0 - t) +
+						Selector(static_cast<ucsl::resources::swif::swif_version::KeyHermite<T>&>(kf).derivativeOut) * (dx * t) * (1.0 - t) * (1.0 - t) +
 						Selector(nextKf.value) * (1.0 + 2.0 * (1.0 - t)) * t * t +
-						Selector(static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(nextKf).derivativeIn) * (dx * (t - 1.0)) * t * t
+						Selector(static_cast<ucsl::resources::swif::swif_version::KeyHermite<T>&>(nextKf).derivativeIn) * (dx * (t - 1.0)) * t * t
 					);
 			default:
 				assert(false);
@@ -104,7 +104,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<>
-		void RenderValueEditor<ucsl::resources::swif::v6::Color>(const char* name, ucsl::resources::swif::v6::Color& value, float step) {
+		void RenderValueEditor<ucsl::resources::swif::swif_version::Color>(const char* name, ucsl::resources::swif::swif_version::Color& value, float step) {
 			float colorAsFloat[]{
 				static_cast<float>(value.r) / 255,
 				static_cast<float>(value.g) / 255,
@@ -122,19 +122,19 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<typename T>
-		static void RenderKeyFrameEditor(ucsl::resources::swif::v6::SRS_TRACK& track, ucsl::resources::swif::v6::SRS_KEYFRAME& keyFrame)
+		static void RenderKeyFrameEditor(ucsl::resources::swif::swif_version::SRS_TRACK& track, ucsl::resources::swif::swif_version::SRS_KEYFRAME& keyFrame)
 		{
 			auto trackInterpType = track.GetInterpolationType();
 
-			RenderValueEditor("Value", static_cast<ucsl::resources::swif::v6::Key<T>&>(keyFrame).value, 0.01f);
+			RenderValueEditor("Value", static_cast<ucsl::resources::swif::swif_version::Key<T>&>(keyFrame).value, 0.01f);
 
-			if (trackInterpType != ucsl::resources::swif::v6::EInterpolationType::CONSTANT && trackInterpType != ucsl::resources::swif::v6::EInterpolationType::LINEAR) {
+			if (trackInterpType != ucsl::resources::swif::swif_version::EInterpolationType::CONSTANT && trackInterpType != ucsl::resources::swif::swif_version::EInterpolationType::LINEAR) {
 				ImGui::SeparatorText("Interpolation");
-				if (trackInterpType == ucsl::resources::swif::v6::EInterpolationType::INDIVIDUAL)
-					ComboEnum("Interpolation type", static_cast<ucsl::resources::swif::v6::KeyIndividual<float>&>(keyFrame).interpolationType, interpolationTypes);
+				if (trackInterpType == ucsl::resources::swif::swif_version::EInterpolationType::INDIVIDUAL)
+					ComboEnum("Interpolation type", static_cast<ucsl::resources::swif::swif_version::KeyIndividual<float>&>(keyFrame).interpolationType, interpolationTypes);
 
-				RenderValueEditor("Left derivative", static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(keyFrame).derivativeIn, 0.01f);
-				RenderValueEditor("Right derivative", static_cast<ucsl::resources::swif::v6::KeyHermite<T>&>(keyFrame).derivativeOut, 0.01f);
+				RenderValueEditor("Left derivative", static_cast<ucsl::resources::swif::swif_version::KeyHermite<T>&>(keyFrame).derivativeIn, 0.01f);
+				RenderValueEditor("Right derivative", static_cast<ucsl::resources::swif::swif_version::KeyHermite<T>&>(keyFrame).derivativeOut, 0.01f);
 			}
 		}
 
@@ -143,7 +143,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<typename T>
-		static void SetupFloatingYAxis(ucsl::resources::swif::v6::SRS_TRACK& track) {
+		static void SetupFloatingYAxis(ucsl::resources::swif::swif_version::SRS_TRACK& track) {
 			T min = std::numeric_limits<T>::max(), max = std::numeric_limits<T>::lowest();
 
 			for (size_t i = 0; i < track.keyCount; i++) {
@@ -156,7 +156,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<typename T, double (*Selector)(const T& x) = DefaultSelector, void (*Setter)(T& x, double y) = DefaultSetter>
-		static void RenderDragPoints(ucsl::resources::swif::v6::SRS_TRACK& track, double min, double max, const char* id = "Points", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f)) {
+		static void RenderDragPoints(ucsl::resources::swif::swif_version::SRS_TRACK& track, double min, double max, const char* id = "Points", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f)) {
 			ImGui::PushID(id);
 			for (unsigned short i = 0; i < track.keyCount; i++) {
 				auto& kf = GetKeyFrame<T>(track, i);
@@ -193,12 +193,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 		}
 
 		template<typename T, double (*Selector)(const T& x) = DefaultSelector, void (*Setter)(T& x, double y) = DefaultSetter>
-		static void RenderDragPoints(ucsl::resources::swif::v6::SRS_TRACK& track, const char* id = "Points", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f)) {
+		static void RenderDragPoints(ucsl::resources::swif::swif_version::SRS_TRACK& track, const char* id = "Points", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f)) {
 			RenderDragPoints<T, Selector, Setter>(track, static_cast<double>(std::numeric_limits<T>::lowest()), static_cast<double>(std::numeric_limits<T>::max()), id, color);
 		}
 
 		template<typename T, double (*Selector)(const T& x) = DefaultSelector>
-		static void RenderPlotLine(ucsl::resources::swif::v6::SRS_TRACK& track, const char* name = "Value", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f), bool shaded = true) {
+		static void RenderPlotLine(ucsl::resources::swif::swif_version::SRS_TRACK& track, const char* name = "Value", ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f), bool shaded = true) {
 			ImPlot::SetNextLineStyle(color);
 			if (shaded)
 				ImPlot::SetNextFillStyle(color, 0.3f);

@@ -1,5 +1,5 @@
-bool Editor(const char* label, ucsl::resources::swif::v6::SRS_CROPREF& cropRef);
-bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_DATA& data);
+bool Editor(const char* label, ucsl::resources::swif::swif_version::SRS_CROPREF& cropRef);
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::swif_version::SRS_DATA& data);
 
 #include <ui/common/inputs/Basic.h>
 #include <ui/common/editors/Basic.h>
@@ -8,7 +8,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resourc
 #include <ui/operation-modes/modes/surfride-editor/texture-editor/References.h>
 #include "SurfRide.h"
 
-using namespace ucsl::resources::swif::v6;
+using namespace ucsl::resources::swif::swif_version;
 
 const char* blendModeNames[]{ "Mix", "Add", "Subtract", "Multiply", "Mix - Premultiplied Alpha", "Override" };
 const char* pivotTypeNames[]{ "Top Left", "Top Center", "Top Right", "Center Left", "Center Center", "Center Right", "Bottom Left", "Bottom Center", "Bottom Right", "Custom" };
@@ -74,7 +74,7 @@ bool Editor(const char* label, SRS_TRS3D& transformData) {
 	return edited;
 }
 
-bool Editor(const char* label, ucsl::resources::swif::v6::SRS_CASTNODE& castData) {
+bool Editor(const char* label, ucsl::resources::swif::swif_version::SRS_CASTNODE& castData) {
 	bool edited{};
 	edited |= CheckboxFlags("Disable position", castData.flags, 0x100u);
 	edited |= CheckboxFlags("Disable rotation", castData.flags, 0x200u);
@@ -570,7 +570,7 @@ bool Editor(const char* label, hh::fnd::ManagedResource* resource, SRS_USERDATA*
 	return edited;
 }
 
-bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::v6::SRS_ANIMATION& animation) {
+bool Editor(const char* label, hh::fnd::ManagedResource* resource, ucsl::resources::swif::swif_version::SRS_ANIMATION& animation) {
 	bool edited{};
 	ImGui::PushID(label);
 	edited |= InputText("Name", animation.name, resource);

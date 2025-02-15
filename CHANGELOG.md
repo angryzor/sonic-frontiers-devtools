@@ -1,3 +1,22 @@
+# v0.1.68
+* Added SvCol editor.
+* Added animation editing to SurfRide editor.
+* Added adding/removal of casts in SurfRide editor.
+* Added crop library in SurfRide editor.
+* Added support for various flags and settings in SurfRide editor.
+* Added icons to object inspector.
+* Added multiple view modes to resource browser.
+* Fixed SurfRide editor crashing when the chosen GOCSprite unloads (except in Forces).
+* Fixed bug where critical debug visuals were no longer rendering when debug rendering is turned off.
+* Fixed a bug where "managed" memory was unaligned.
+* Improved icon system.
+* Improved timeline.
+* Further improved reload queue.
+
+## Shadow Generations
+* Ported SurfRide editor.
+
+
 # v0.1.67
 * Added API query endpoint for objects.
 

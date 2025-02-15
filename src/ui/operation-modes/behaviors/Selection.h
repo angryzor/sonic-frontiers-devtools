@@ -23,10 +23,10 @@ public:
 	using DeselectAllAction = Action<ActionId::DESELECT_ALL>;
 
 	struct SelectionChangedPayload {
-		const csl::ut::MoveArray<ObjectType>& previousSelection;
-		const csl::ut::MoveArray<ObjectType>& currentSelection;
-		const csl::ut::MoveArray<ObjectType>& selected;
-		const csl::ut::MoveArray<ObjectType>& deselected;
+		const csl::ut::MoveArray<ObjectType> previousSelection;
+		const csl::ut::MoveArray<ObjectType> currentSelection;
+		const csl::ut::MoveArray<ObjectType> selected;
+		const csl::ut::MoveArray<ObjectType> deselected;
 	};
 	using SelectionChangedAction = Action<ActionId::SELECTION_CHANGED, SelectionChangedPayload>;
 
@@ -97,7 +97,7 @@ public:
 	}
 
 	void AddToSelection(ObjectType object) {
-		csl::ut::MoveArray<ObjectType> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		csl::ut::MoveArray<ObjectType> objects{ GetAllocator() };
 		objects.push_back(object);
 		AddToSelection(objects);
 	}
@@ -107,7 +107,7 @@ public:
 	}
 
 	void Deselect(ObjectType object) {
-		csl::ut::MoveArray<ObjectType> objects{ hh::fnd::MemoryRouter::GetTempAllocator() };
+		csl::ut::MoveArray<ObjectType> objects{ GetAllocator() };
 		objects.push_back(object);
 		Deselect(objects);
 	}

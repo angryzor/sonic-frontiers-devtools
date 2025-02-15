@@ -41,13 +41,10 @@ public:
     ImBrowser::Image GetImage(hh::fnd::ManagedResource* resource);
     void GetProps(hh::fnd::ManagedResource* resource, PropSet& props);
     void RenderContainerContents(const hh::fnd::ResourceContainer * container);
-    static void RenderPreview(const hh::fnd::ManagedResource* resource, float size);
     static void ExportResource(const wchar_t* filePath, hh::fnd::ManagedResource* resource);
     static void ShowLoadResourceDialog(hh::fnd::ManagedResource* resource);
     static void ShowExportResourceDialog(hh::fnd::ManagedResource* resource);
     static void RenderLoadDialog();
     static void RenderExportDialog();
     static void RenderDialogs();
-    static void RenderDetails(const hh::fnd::ManagedResource* resource);
 };
-

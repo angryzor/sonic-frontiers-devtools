@@ -7,7 +7,7 @@
 #include <ui/common/viewers/Basic.h>
 
 namespace ui::operation_modes::modes::surfride_editor {
-	using namespace ucsl::resources::swif::v6;
+	using namespace ucsl::resources::swif::swif_version;
 
 	void ElementInspector::RenderPanel()
 	{
@@ -42,7 +42,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ImGui::Text("Name: %s", scene.name);
 		ImGui::DragFloat2("Resolution", scene.resolution.data());
 		Editor("Background color", *reinterpret_cast<csl::ut::Color8*>(&scene.backgroundColor));
-		
+
 		if (ImGui::BeginCombo("Camera", scene.cameras[scene.currentCameraIndex].name)) {
 			for (unsigned short i = 0; i < scene.cameraCount; i++) {
 				auto& camera = scene.cameras[i];
@@ -72,7 +72,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 			ImGui::SeparatorText("Active layer instance");
 			Editor("Paused", runtimeLayer->pause);
 			ImGui::Text("Current animation: %s (%d)", animation.name, animation.id);
-			
+
 			float currentFrame = GetContext().GetAnimationFrame(runtimeLayer);
 			if (ImGui::SliderFloat("Current frame", &currentFrame, runtimeLayer->startFrame, runtimeLayer->endFrame))
 				GetContext().SetAnimationFrame(runtimeLayer, currentFrame);
@@ -94,30 +94,6 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 		ImGui::Separator();
 		Editor("User data", GetContext().projectResource, layer.userData);
-
-//		ImGui::Separator();
-//		ImGui::SliderFloat("currentFrame", &runtimeLayer.currentFrame, runtimeLayer.startFrame, runtimeLayer.endFrame);
-//		ImGui::SliderFloat("currentFrame2", &runtimeLayer.currentFrame2, runtimeLayer.startFrame, runtimeLayer.endFrame);
-//		ImGui::DragFloat("startFrame", &runtimeLayer.startFrame, 0.01f);
-//		ImGui::DragFloat("endFrame", &runtimeLayer.endFrame, 0.01f);
-//		ImGui::DragFloat("unk11a", &runtimeLayer.unk11a, 0.01f);
-//		ImGui::SliderFloat("currentFrame3", &runtimeLayer.currentFrame3, runtimeLayer.startFrame, runtimeLayer.endFrame);
-//		ImGui::Text("unk13: %x", runtimeLayer.unk13);
-//		ImGui::Text("flags: %x", runtimeLayer.flags);
-//		ImGui::Checkbox("atAnimationStart", &runtimeLayer.atAnimationStart);
-//		ImGui::Checkbox("unk14b", &runtimeLayer.unk14b);
-//		ImGui::Checkbox("isLooping", &runtimeLayer.isLooping);
-//		ImGui::Checkbox("dontLoop", &runtimeLayer.dontLoop);
-//		ImGui::Checkbox("atAnimationEnd", &runtimeLayer.atAnimationEnd);
-//		ImGui::Checkbox("playInReverse", &runtimeLayer.playInReverse);
-//		ImGui::Checkbox("unk16", &runtimeLayer.unk16);
-//#ifndef DEVTOOLS_TARGET_SDK_wars
-//		ImGui::Text("unk17: %x", runtimeLayer.unk17);
-//		ImGui::Text("unk18: %x", runtimeLayer.unk18);
-//		ImGui::Text("unk19: %x", runtimeLayer.unk19);
-//
-//		//Editor("Transform", layer.rootTransform);
-//#endif
 	}
 
 	void ElementInspector::RenderCastInspector(SRS_CASTNODE& cast, SurfRide::Cast* runtimeCast)

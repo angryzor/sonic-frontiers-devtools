@@ -1,6 +1,6 @@
 cmake_minimum_required(VERSION 3.28)
 # DevTools
-project(devtools VERSION 0.1.67
+project(devtools VERSION 0.1.68
                  DESCRIPTION "Hedgehog Engine 2 DevTools"
                  LANGUAGES CXX)
 
@@ -18,7 +18,7 @@ set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAn
 set(OGDF_DEBUG_MODE NONE)
 include(FetchContent)
 FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 7d2a71816f2c12ad858ecc805cbe421b45935c42 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
-FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.23 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.23)
+FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.26 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.26)
 FetchContent_MakeAvailable(ogdf rip)
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
@@ -54,7 +54,7 @@ if(DEVTOOLS_INSTALL_TO_UPDATE_SERVER)
 endif()
 
 # The main target
-foreach(DEVTOOLS_TARGET_SDK rangers miller) #miller rangers wars)
+foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
     set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
     set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
