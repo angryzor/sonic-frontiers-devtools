@@ -44,15 +44,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 					if(render)
 						render(this, node);
 				}
+
 				ImTimeline::EndTimeline();
 			}
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
 
-			if (!playing)
-				SetTimescale(0);
-			else
-				SetTimescale(1);
+			SetTimescale(playing ? 1 : 0);
 			context.goDVSC->timeline->currentFrame0 = static_cast<int>(playHeadFrame * 100);
 			context.goDVSC->timeline->currentFrame1 = static_cast<int>(playHeadFrame * 100);
 		}
