@@ -3,6 +3,7 @@
 #include "SceneSettings.h"
 #include "node-inspector/NodeInspector.h"
 #include "timeline/Timeline.h"
+#include "PageEditor.h"
 
 #include "Behaviors.h"
 #include <ui/common/editors/Reflection.h>
@@ -16,6 +17,7 @@ namespace ui::operation_modes::modes::dvscene_editor
         AddPanel<SceneSettings>();
         AddPanel<NodeInspector>();
         AddPanel<Timeline>();
+        AddPanel<PageEditor>();
 		AddBehavior<SelectionBehavior>();
 		AddBehavior<SelectionAabbBehavior>();
 		AddBehavior<SelectionTransformationBehavior>();

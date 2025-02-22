@@ -3,7 +3,11 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
+#ifdef DEVTOOLS_TARGET_SDK_rangers
     void RenderElementInspector<1033>(hh::dv::DvElementBase* element) {
+#elif DEVTOOLS_TARGET_SDK_miller
+    void RenderElementInspector<1035>(hh::dv::DvElementBase* element) {
+#endif
         auto* elem = reinterpret_cast<app::dv::DvElementCrossFade*>(element);
         auto* data = elem->GetData();
         Editor("Curve Enabled", data->curveEnabled);

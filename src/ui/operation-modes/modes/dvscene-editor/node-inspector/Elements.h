@@ -2,7 +2,6 @@
 #include "NodeInspector.h"
 #include <ui/common/viewers/Basic.h>
 #include <ui/common/editors/Basic.h>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 #include <ui/common/editors/DvScene.h>
 
 #include "elements/CameraParams.h"
@@ -26,11 +25,20 @@
 #include "elements/Spotlight.h"
 //#include "elements/ControllerVibration.h"
 //#include "elements/SpotlightModel.h"
+#ifdef DEVTOOLS_TARGET_SDK_miller
+#include "elements/ControllerVibration.h"
+#include "elements/TexturePatternAnim.h"
+#include "elements/MaterialParam.h"
+#endif
 #include "elements/BloomParam.h"
 #include "elements/DOFParam.h"
 #include "elements/ColorContrast.h"
 #include "elements/CameraControlParam.h"
 #include "elements/ShadowResolution.h"
+#ifdef DEVTOOLS_TARGET_SDK_miller
+#include "elements/SSAOParam.h"
+#include "elements/OcclusionCapsuleParam.h"
+#endif
 #include "elements/GodrayParam.h"
 #include "elements/AtmosphereGodrayParam.h"
 //#include "elements/AtmosphereHeightFogParam.h"
@@ -58,16 +66,26 @@
 #include "elements/ShadowMapParam.h"
 #include "elements/VariablePointLight.h"
 #include "elements/DensitySectorPoint.h"
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 #include "elements/VAT.h"
 #include "elements/QTEAccel.h"
 #include "elements/TheEndCableObject.h"
 #endif
+#ifdef DEVTOOLS_TARGET_SDK_miller
+#include "elements/BulletTime.h"
+#include "elements/TimeStop.h"
+#include "elements/ObjectTimeStop.h"
+#include "elements/ShadowShape.h"
+#include "elements/Falloff.h"
+#include "elements/Fog.h"
+#include "elements/DOF.h"
+#endif
+
 
 namespace ui::operation_modes::modes::dvscene_editor {
     using ElementFuncType = void(*)(hh::dv::DvElementBase*);
 
     constexpr std::pair<int, ElementFuncType> RenderElementInspectors[] = {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
         {1, RenderElementInspector<1>},
         {5, RenderElementInspector<5>},
         {6, RenderElementInspector<6>},
@@ -86,6 +104,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {21, RenderElementInspector<21>},
         {23, RenderElementInspector<23>},
         {24, RenderElementInspector<24>},
+#ifdef DEVTOOLS_TARGET_SDK_miller
+        {22, RenderElementInspector<22>},
+        {25, RenderElementInspector<25>},
+        {26, RenderElementInspector<26>},
+        {27, RenderElementInspector<27>},
+#endif
         {1000, RenderElementInspector<1000>},
         {1001, RenderElementInspector<1001>},
         {1002, RenderElementInspector<1002>},
@@ -118,7 +142,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {1038, RenderElementInspector<1038>},
         {1040, RenderElementInspector<1040>},
         {1041, RenderElementInspector<1041>},
-        {1042, RenderElementInspector<1042>}
+        {1042, RenderElementInspector<1042>},
+#ifdef DEVTOOLS_TARGET_SDK_miller
+        {1043, RenderElementInspector<1043>},
+        {1044, RenderElementInspector<1044>},
+        {1045, RenderElementInspector<1045>},
+        {1046, RenderElementInspector<1046>},
+        {1047, RenderElementInspector<1047>}
 #endif
     };
 

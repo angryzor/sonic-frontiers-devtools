@@ -2,7 +2,6 @@
 #include "Timeline.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
     using ElementTimelineFuncType = void(*)(Timeline*, hh::dv::DvNodeElement*);
 
     template<>
@@ -61,6 +60,23 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		timeline->RenderTimeline(element->start, element->end, elemData.curveData, 64);
     }
 
+#ifdef DEVTOOLS_TARGET_SDK_miller
+    template<>
+    void RenderElementTimeline<22>(Timeline* timeline, hh::dv::DvNodeElement* element) {
+        auto* elem = reinterpret_cast<hh::dv::DvElementPointLight*>(element->element);
+        auto& elemData = elem->binaryData;
+        timeline->RenderTimeline(element->start, element->end, elemData.curveData, 128);
+    }
+
+    template<>
+    void RenderElementTimeline<27>(Timeline* timeline, hh::dv::DvNodeElement* element) {
+        auto* elem = reinterpret_cast<hh::dv::DvElementMaterialParam*>(element->element);
+        auto& elemData = elem->binaryData;
+        timeline->RenderTimeline(element->start, element->end, elemData.curveData, 32);
+    }
+#endif
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
     template<>
     void RenderElementTimeline<1000>(Timeline* timeline, hh::dv::DvNodeElement* element) {
         auto* elem = reinterpret_cast<app::dv::DvElementBloomParam*>(element->element);
@@ -200,6 +216,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto* elemData = elem->GetData();
 		timeline->RenderTimeline(element->start, element->end, elemData->curveData, 1024);
     }
+#endif
 
     constexpr std::pair<int, ElementTimelineFuncType> RenderTimelineElements[] = {
         {1, RenderElementTimeline<1>},
@@ -210,6 +227,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {18, RenderElementTimeline<18>},
         {20, RenderElementTimeline<20>},
         {24, RenderElementTimeline<24>},
+#ifdef DEVTOOLS_TARGET_SDK_miller
+        {22, RenderElementTimeline<22>},
+        {27, RenderElementTimeline<27>}
+#endif
+#ifdef DEVTOOLS_TARGET_SDK_rangers
         {1000, RenderElementTimeline<1000>},
         {1001, RenderElementTimeline<1001>},
         {1002, RenderElementTimeline<1002>},
@@ -230,6 +252,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {1034, RenderElementTimeline<1034>},
         {1036, RenderElementTimeline<1036>},
         {1042, RenderElementTimeline<1042>}
+#endif
     };
 
     constexpr ElementTimelineFuncType GetElementTimelineRender(int type) {
@@ -238,5 +261,4 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         return nullptr;
     }
-#endif
 }

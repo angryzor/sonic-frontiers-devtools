@@ -45,7 +45,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
+#ifdef DEVTOOLS_TARGET_SDK_rangers
     void RenderElementInspector<1035>(hh::dv::DvElementBase* element) {
+#elif DEVTOOLS_TARGET_SDK_miller
+    void RenderElementInspector<1037>(hh::dv::DvElementBase* element) {
+#endif
         auto* elem = reinterpret_cast<app::dv::DvElementShadowMapParam*>(element);
         auto* data = elem->GetData();
 		int curShadowFilter = static_cast<int>(data->shadowFilter);

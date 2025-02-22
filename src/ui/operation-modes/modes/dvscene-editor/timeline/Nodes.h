@@ -5,7 +5,6 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     using NodeTimelineFuncType = void(*)(Timeline*, hh::dv::DvNodeBase*);
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
     template<>
 	void RenderNodeTimeline<4>(Timeline* timeline, hh::dv::DvNodeBase* node) {
 		auto* camMot = reinterpret_cast<hh::dv::DvNodeCameraMotion*>(node);
@@ -40,18 +39,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
         else
             timeline->RenderTimeline(element->start, element->end);
 	}
-#endif
 
     constexpr std::pair<int, NodeTimelineFuncType> RenderTimelineNodes[] = {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
         {4, RenderNodeTimeline<4>},
         {6, RenderNodeTimeline<6>},
         {10, RenderNodeTimeline<10>},
         {12, RenderNodeTimeline<12>}
-#endif
-#ifdef DEVTOOLS_TARGET_SDK_miller
-        {}
-#endif
     };
 
     constexpr NodeTimelineFuncType GetNodeTimelineRender(int type) {

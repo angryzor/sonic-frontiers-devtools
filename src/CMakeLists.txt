@@ -526,6 +526,7 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/Context.cpp
             ui/operation-modes/modes/dvscene-editor/DvSceneEditor.cpp
             ui/operation-modes/modes/dvscene-editor/Tree.cpp
+            ui/operation-modes/modes/dvscene-editor/PageEditor.cpp
             ui/operation-modes/modes/dvscene-editor/DvNode.cpp
             ui/operation-modes/modes/dvscene-editor/SceneSettings.cpp
             ui/operation-modes/modes/dvscene-editor/node-inspector/NodeInspector.cpp
@@ -535,6 +536,7 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/Context.h
             ui/operation-modes/modes/dvscene-editor/DvSceneEditor.h
             ui/operation-modes/modes/dvscene-editor/Tree.h
+            ui/operation-modes/modes/dvscene-editor/PageEditor.h
             ui/operation-modes/modes/dvscene-editor/Behaviors.h
             ui/operation-modes/modes/dvscene-editor/DvNode.h
             ui/operation-modes/modes/dvscene-editor/SceneSettings.h
@@ -564,12 +566,17 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraHedgehog.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraInGame.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Spotlight.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ControllerVibration.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VertexAnimationTexture.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/TexturePatternAnim.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/MaterialParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/BloomParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DOFParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ColorContrast.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraControlParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ShadowResolution.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/SSAOParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/OcclusionCapsuleParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/GodrayParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/AtmosphereGodrayParam.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ChromaticAberrationFilterParam.h
@@ -596,6 +603,13 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VAT.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/QTEAccel.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/TheEndCableObject.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/BulletTime.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/TimeStop.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ObjectTimeStop.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ShadowShape.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Falloff.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Fog.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DOF.h
             ui/operation-modes/modes/dvscene-editor/timeline/Timeline.h
             ui/operation-modes/modes/dvscene-editor/timeline/Nodes.h
             ui/operation-modes/modes/dvscene-editor/timeline/Elements.h

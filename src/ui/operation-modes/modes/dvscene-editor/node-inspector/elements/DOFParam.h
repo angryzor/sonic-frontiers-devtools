@@ -9,7 +9,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		CheckboxFlags("Use Focus Look At", data->flags, app::dv::DvElementDOFParam::Data::Flags::USE_FOCUS_LOOK_AT);
 		CheckboxFlags("Enable Circle Dof", data->flags, app::dv::DvElementDOFParam::Data::Flags::ENABLE_CIRCLE_DOF);
 		CheckboxFlags("Draw Focal Plane", data->flags, app::dv::DvElementDOFParam::Data::Flags::DRAW_FOCAL_PLANE);
-		CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementDOFParam::Data::Flags::UNK0);
+		CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementDOFParam::Data::Flags::CURVE_ENABLED);
         Editor("Parameters", data->param);
         Editor("Finish Parameters", data->finishParam);
         Editor("COC Max Radius", data->cocMaxRadius);

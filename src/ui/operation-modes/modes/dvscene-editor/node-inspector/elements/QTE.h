@@ -31,7 +31,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
+#ifdef DEVTOOLS_TARGET_SDK_rangers
     void RenderElementInspector<1024>(hh::dv::DvElementBase* element) {
+#elif DEVTOOLS_TARGET_SDK_miller
+    void RenderElementInspector<1026>(hh::dv::DvElementBase* element) {
+#endif
         auto* elem = reinterpret_cast<app::dv::DvElementQTE*>(element);
         auto* data = elem->GetData();
 		int curQteType = static_cast<int>(data->qteType);
@@ -58,7 +62,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
         Editor("Unk0", data->unk0);
         Editor("Unk1", data->unk1);
         Editor("Unk2", data->unk2);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
         Editor("Unk5", data->unk5);
+#elif DEVTOOLS_TARGET_SDK_miller
+        Editor("Unk3", data->unk3);
+        Editor("Unk4", data->unk4);
+#endif
         Editor("Position", data->offset);
         Editor("Sound Cue Name", data->soundCueName);
     }

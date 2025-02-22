@@ -23,7 +23,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		{sizeof(hh::dv::DvNodeModelNode::Data), offsetof(hh::dv::DvNodeModelNode, binaryData)},
 		{}
 	};
-
 	constexpr std::pair<size_t, size_t> ElementDataInfo[] = {
 		{},
 		{sizeof(hh::dv::DvElementCameraParams::Data), offsetof(hh::dv::DvElementCameraParams, binaryData)},
@@ -51,7 +50,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		{sizeof(hh::dv::DvElementVertexAnimationTexture::Data), offsetof(hh::dv::DvElementVertexAnimationTexture, binaryData)},
 		{sizeof(hh::dv::DvElementSpotlight::Data), offsetof(hh::dv::DvElementSpotlight, binaryData)},
 		{sizeof(hh::dv::DvElementControllerVibration::Data), offsetof(hh::dv::DvElementControllerVibration, binaryData)},
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 		{sizeof(hh::dv::DvElementSpotlightModel::Data), offsetof(hh::dv::DvElementSpotlightModel, binaryData)}
+#elif DEVTOOLS_TARGET_SDK_miller
+		{sizeof(hh::dv::DvElementTexturePatternAnim::Data), offsetof(hh::dv::DvElementTexturePatternAnim, binaryData)},
+		{sizeof(hh::dv::DvElementMaterialParam::Data), offsetof(hh::dv::DvElementMaterialParam, binaryData)},
+#endif
 	};
 
 	static dv::Resource* ConvertGameResourceToFileResource(hh::dv::DvResource* resource) {
@@ -61,7 +65,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dvResource->flags0 = 0;
 		dvResource->flags1 = 1;
 		memset(&dvResource->filename, 0, 192);
-		strcpy(dvResource->filename, resource->resource->name.c_str());
+		strcpy(dvResource->filename, resource->resource->GetName());
 		memset(&dvResource->unkData, 0, 596);
 		return dvResource;
 	}
@@ -108,7 +112,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dvNode->category = (unsigned int)node->nodeType;
 		dvNode->nodeFlags = 0;
 		dvNode->priority = 0;
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT) {
 			auto* element = reinterpret_cast<hh::dv::DvNodeElement*>(node);
 			auto* nodeElementData = reinterpret_cast<char*>(&element->binaryData);
@@ -145,8 +148,42 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			dvNode->childNodes.push_back(*ConvertGameNodeToFileNode(x));
 		for (auto* x : node->childrenMotion)
 			dvNode->childNodes.push_back(*ConvertGameNodeToFileNode(x));
-#endif
 		return dvNode;
+	}
+
+	static dv::DvCondition* ConvertGameConditionToFileCondition(hh::dv::DvPageConditionBase* condition) {
+		dv::DvCondition* dvCondition = new dv::DvCondition;
+		if (dynamic_cast<hh::dv::DvPageConditionEnd*>(condition)) {
+			dvCondition->type = static_cast<dv::DvCondition::ConditionType>(4);
+			dvCondition->dataSize = 0;
+			dvCondition->data = new char[0];
+		}
+		else if (auto* x = dynamic_cast<app::dv::DvPageConditionQTE*>(condition)) {
+			dvCondition->type = static_cast<dv::DvCondition::ConditionType>(1000);
+			dvCondition->dataSize = sizeof(app::dv::DvPageConditionQTE::Data);
+			dvCondition->data = reinterpret_cast<char*>(&x->binaryData);
+		}
+		return dvCondition;
+	}
+
+	static dv::DvTransition* ConvertGameTransitionToFileTransition(hh::dv::DvPageTransition* transition) {
+		dv::DvTransition* dvTransition = new dv::DvTransition;
+		dvTransition->destinationPageID = transition->binaryData.destinationPageID;
+		dvTransition->conditions.push_back(*ConvertGameConditionToFileCondition(transition->condition));
+		return dvTransition;
+	}
+
+	static dv::DvPage* ConvertGamePageToFilePage(hh::dv::DvPage* page) {
+		dv::DvPage* dvPage = new dv::DvPage;
+		dvPage->frameStart = page->binaryData.start;
+		dvPage->frameEnd = page->binaryData.end;
+		dvPage->index = page->binaryData.pageIndex;
+		dvPage->skipFrame = page->binaryData.skipFrame;
+		memset(&dvPage->name, 0, 32);
+		strcpy(dvPage->name, page->binaryData.pageName);
+		for (auto* x : page->transitions)
+			dvPage->transition.push_back(*ConvertGameTransitionToFileTransition(x));
+		return dvPage;
 	}
 
 	static dv::DvScene* ConvertGameDvSceneToFileDvScene(hh::dv::DvSceneControl* dvsc) {
@@ -164,6 +201,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dv->dvCommon->cuts.resize(timeline->cuts.size());
 		memcpy(dv->dvCommon->cuts.data(), timeline->cuts.begin(), sizeof(float) * timeline->cuts.size());
 		dv->dvCommon->resourceCutInfo.push_back(dv->dvCommon->frameEnd);
+		for (auto* x : timeline->pages)
+			dv->dvCommon->pages.push_back(*ConvertGamePageToFilePage(x));
 		dv->dvCommon->node = ConvertGameNodeToFileNode(dvsc->nodeTree->mainNode);
 		std::vector<hh::dv::DvResource*> resources{};
 		GetResources(resources, dvsc->nodeTree->mainNode);
@@ -223,7 +262,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 			ImGuiFileDialog::Instance()->Close();
 		}
-        
+
 		auto* timeline = context.goDVSC->timeline;
         ImGui::SeparatorText("DvCommon Settings");
 		int start = static_cast<int>(timeline->frameStart / 100);
@@ -232,20 +271,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		int end = static_cast<int>(timeline->frameEnd / 100);
 		if (Editor("End", end));
 			timeline->frameEnd = static_cast<float>(end) * 100;
-		if(timeline->authPages.size() > 0){
-			if(ImGui::TreeNode("Pages")){
-				for(auto* x : timeline->authPages)
-					if(ImGui::TreeNode(x->binaryData.pageName)){
-						Editor("Page Name", x->binaryData.pageName);
-						Editor("Start", x->binaryData.start);
-						Editor("End", x->binaryData.end);
-						Editor("Skip Frame", x->binaryData.skipFrame);
-						Editor("Page Index", x->binaryData.pageIndex);
-						ImGui::TreePop();
-					}
-				ImGui::TreePop();
-			}
-		}
 	}
 
 	PanelTraits SceneSettings::GetPanelTraits() const

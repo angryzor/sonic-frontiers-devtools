@@ -29,7 +29,7 @@ void RenderGameServiceInspector(app::evt::EventPlayer& service)
     if (service.IsntPlaying()) {
         if (ImGui::Button("TestPlay")) {
             app::evt::EventSetupData setupData{};
-            setupData.Setup("ev6020_mov");
+            setupData.Setup("zev_rfl_shoot01");
             service.PlayEvent(&setupData);
         }
     }

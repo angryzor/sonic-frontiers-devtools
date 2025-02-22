@@ -9,7 +9,6 @@
 #include <ui/GlobalSettings.h>
 
 namespace ui::operation_modes::modes::dvscene_editor {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 	const char* nodeTypeNames0[] = {
 		"",
 		"Path",
@@ -25,25 +24,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		"ModelNode",
 		"Element"
 	};
-#endif
-
-#ifdef DEVTOOLS_TARGET_SDK_miller
-	const char* nodeTypeNames0[] = {
-		"",
-		"Path",
-		"PathMotion",
-		"Camera",
-		"CameraMotion",
-		"Character",
-		"CharacterMotion",
-		"CharacterBehavior",
-		"Model",
-		"",
-		"ModelMotion",
-		"ModelNode",
-		"Element"
-	};
-#endif
 
 	void NodeInspector::RenderPanel()
 	{
@@ -60,6 +40,40 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			Editor("Node Name", node->nodeName);
 			int type = static_cast<int>(node->nodeType);
 			Viewer("Node Type", nodeTypeNames0[type]);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+			if (node->nodeType == hh::dv::DvNodeBase::NodeType::CHARACTER ||
+				node->nodeType == hh::dv::DvNodeBase::NodeType::CAMERA_MOTION || 
+				node->nodeType == hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION) {
+				char buffer[400];
+				const char* curRes = "NULL";
+				if (auto* dvres = node->dvResource)
+					if (auto* res = dvres->resource)
+						curRes = res->GetName();
+				sprintf(buffer, "Current Resource: %s (Drag and drop a resource to change)", curRes);
+				ImGui::Text(buffer);
+				if (ImGui::BeginDragDropTarget()) {
+					if (auto* payload = ImGui::AcceptDragDropPayload("Resource")) {
+						auto* resource = *static_cast<hh::fnd::ManagedResource**>(payload->Data);
+						const hh::fnd::ResourceTypeInfo* resInfo;
+						switch (node->nodeType) {
+						case hh::dv::DvNodeBase::NodeType::CHARACTER:
+							resInfo = hh::anim::ResAnimator::GetTypeInfo();
+							break;
+						case hh::dv::DvNodeBase::NodeType::CAMERA_MOTION:
+							resInfo = hh::gfx::ResAnimCameraContainer::GetTypeInfo();
+							break;
+						case hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION:
+							resInfo = hh::anim::ResAnimationPxd::GetTypeInfo();
+							break;
+						}
+						if (resource->resourceTypeInfo == resInfo)
+							if (auto* res = node->dvResource)
+								res->resource = resource;
+					}
+					ImGui::EndDragDropTarget();
+				}
+			}
+#endif
 			NodeFuncType render = GetNodeInspectorRender(type);
 			if(render){
 				ImGui::SeparatorText("Properties");

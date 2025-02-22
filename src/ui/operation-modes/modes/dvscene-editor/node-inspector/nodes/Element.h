@@ -3,6 +3,7 @@
 #include "../Elements.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 	const char* dvElementIDStrings[] = {
 		"",
 		"CameraParams",
@@ -77,6 +78,88 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		"TheEndCableObject",
 		"RifleBeastLighting"
 	};
+#elif DEVTOOLS_TARGET_SDK_miller
+    const char* dvElementIDStrings[] = {
+		"",
+		"CameraParams",
+		"",
+		"DrawOff",
+		"",
+		"PathOffset",
+		"CameraShake",
+		"CameraShakeLoop",
+		"Effect",
+		"DirectionalLight",
+		"PathInterpolation",
+		"CullingDisable",
+		"CameraNearFar",
+		"UVAnim",
+		"VisibilityAnim",
+		"MaterialAnim",
+		"MultipleAnim",
+		"CameraOffset",
+		"ModelFade",
+		"DebugMotion",
+		"CameraHedgehog",
+		"CameraInGame",
+		"PointLight",
+		"VertexAnimationTexture",
+		"Spotlight",
+		"ControllerVibration",
+		"TexturePatternAnim",
+		"MaterialParam",
+
+		"BloomParam",
+		"DOFParam",
+		"ColorContrast",
+		"CameraControlParam",
+		"ShadowResolution",
+		"SSAOParam",
+		"OcclusionCapsuleParam",
+		"GodrayParam",
+		"AtmosphereGodrayParam",
+		"AtmosphereHeightFogParam",
+		"ChromaticAberrationFilterParam",
+		"VignetteParam",
+		"Fade",
+		"LetterBox",
+		"ModelClipping",
+		"PbaReset",
+		"BossName",
+		"Caption",
+		"Sound",
+		"Time",
+		"Sun",
+		"LookAtIK",
+		"CameraBlurParam",
+		"GeneralTrigger",
+		"FootIk",
+		"DitherParam",
+		"QTE",
+		"FacialAnimation",
+		"OverrideASM",
+		"Aura",
+		"ChangeTimeScale",
+		"CyberSpaceNoise",
+		"LipAnimation",
+		"AuraRoad",
+		"MovieView",
+		"CrossFade",
+		"Weather",
+		"ShadowMapParam",
+		"VariablePointLight",
+		"OpeningLogo",
+		"DensitySectorPoint",
+		"BulletTime",
+		"TimeStop",
+		"ObjectTimeStop",
+		"ShadowShape",
+		"Falloff",
+		"Fog",
+		"DOF",
+		"FxColUpdate"
+    };
+#endif
 
     const char* elemPlayTypes[] = {
 		"NORMAL",
@@ -104,7 +187,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
         auto& data = elemNode->binaryData;
         int type = static_cast<int>(data.elementId);
 		if(type >= 1000)
-			Viewer("Element ID", dvElementIDStrings[type-1000+27]);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+			Viewer("Element ID", dvElementIDStrings[type - 1000 + 27]);
+#elif DEVTOOLS_TARGET_SDK_miller
+			Viewer("Element ID", dvElementIDStrings[type - 1000 + 28]);
+#endif
 		else
 			Viewer("Element ID", dvElementIDStrings[type]);
 		int curPlayType = static_cast<int>(data.playType);

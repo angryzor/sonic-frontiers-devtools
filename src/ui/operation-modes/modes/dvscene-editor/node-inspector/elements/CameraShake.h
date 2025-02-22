@@ -7,7 +7,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         auto* elem = reinterpret_cast<hh::dv::DvElementCameraShake*>(element);
         auto& data = elem->binaryData;
 		Editor("Unk0", data.unk0);
-		Editor("Enabled", data.enabled);
+		CheckboxFlags("Enabled", data.flags, hh::dv::DvElementCameraShake::Data::Flags::ENABLED);
 		Editor("Intensity", data.intensity);
 		Editor("Frequency", data.frequency);
 		Editor("Unk2", data.unk2);

@@ -10,7 +10,7 @@
 #include "Nodes.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
-	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } { playing = GetTimescale() != 0; }
+	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } { }
 
 	Timeline::~Timeline() {
 		ImTimeline::DestroyContext(timelineCtx);
@@ -36,7 +36,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0);
 			ImTimeline::Begin(timelineCtx);
-			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(context.goDVSC->timeline->frameEnd/100), 60.0, &playing, &currentTimeChanged)) {
+			ImGui::SameLine();
+			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(context.goDVSC->timeline->frameEnd/100), 60.0, &context.goDVSC->play, &currentTimeChanged)) {
 				if (selected.size() > 0) {
 					hh::dv::DvNodeBase* node = selected[0].node;
 					int type = static_cast<int>(node->nodeType);
@@ -49,8 +50,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
-
-			SetTimescale(playing ? 1 : 0);
 			context.goDVSC->timeline->currentFrame0 = static_cast<int>(playHeadFrame * 100);
 			context.goDVSC->timeline->currentFrame1 = static_cast<int>(playHeadFrame * 100);
 		}
@@ -60,45 +59,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	PanelTraits Timeline::GetPanelTraits() const
 	{
 		return { "Timeline", ImVec2(250, 500), ImVec2(500, 250) };
-	}
-
-	void Timeline::SetTimescale(float scale) {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
-		if (!seqExt)
-			return;
-
-		auto* gameMode = seqExt->GetCurrentGameMode();
-		if (!gameMode)
-			return;
-
-		for (auto* extension : gameMode->extensions) {
-			if (extension->GetNameHash() == 0x42983F51) {
-				auto* ext = static_cast<app::game::GameModeLayerStatusExtension*>(extension);
-				ext->timeScaleInterpolators[25].unk1[0].timeScale = scale;
-			}
-		}
-#endif
-	}
-
-	float Timeline::GetTimescale() {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-		auto* seqExt = static_cast<app::MyApplication*>(app::MyApplication::GetInstance())->GetExtension<app::game::ApplicationSequenceExtension>();
-		if (!seqExt)
-			return 1.0f;
-
-		auto* gameMode = seqExt->GetCurrentGameMode();
-		if (!gameMode)
-			return 1.0f;
-
-		for (auto* extension : gameMode->extensions) {
-			if (extension->GetNameHash() == 0x42983F51) {
-				auto* ext = static_cast<app::game::GameModeLayerStatusExtension*>(extension);
-				return ext->timeScaleInterpolators[25].unk1[0].timeScale;
-			}
-		}
-		return 1.0f;
-#endif
 	}
 
 	void Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
