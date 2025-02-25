@@ -33,7 +33,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         int type = static_cast<int>(data.elementId);
         const std::pair<size_t, size_t> render = GetElementTimelineRender(type);
         
-        if (render == std::pair<size_t, size_t>{})
+        if (render != std::pair<size_t, size_t>{})
         {
             float* curveData;
             if (type >= 1000) {
