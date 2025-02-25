@@ -3,6 +3,7 @@
 #include <ui/common/NodeEditor.h>
 #include "Context.h"
 #include <ui/common/editors/Basic.h>
+#include <ui/common/viewers/Basic.h>
 
 namespace ui::operation_modes::modes::dvscene_editor
 {
@@ -71,6 +72,7 @@ namespace ui::operation_modes::modes::dvscene_editor
 
         virtual void RenderPanel() override;
         void RenderPage(int pageIdx);
+		void RenderTransition(int pageIdx, hh::dv::DvPageTransition* trans);
         virtual PanelTraits GetPanelTraits() const override;
 
 		ax::NodeEditor::LinkId GetLinkId(ax::NodeEditor::PinId fromPinId, ax::NodeEditor::PinId toPinId);

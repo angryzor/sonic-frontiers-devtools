@@ -121,6 +121,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				auto* appDvElement = reinterpret_cast<app::dv::AppDvElementBase*>(element->element);
 				elementData = static_cast<char*>(appDvElement->elementBinaryData);
 				elementSize = appDvElement->elementBinaryDataSize;
+#ifdef DEVTOOLS_TARGET_SDK_miller
+				if (static_cast<unsigned int>(element->binaryData.elementId) == 1000)
+					elementSize = 172; // i dunno why, but the variable isn't accurate -_-
+#endif
 			}
 			else {
 				auto* dvElement = reinterpret_cast<hh::dv::DvElementBase*>(element->element);
@@ -175,10 +179,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 	static dv::DvPage* ConvertGamePageToFilePage(hh::dv::DvPage* page) {
 		dv::DvPage* dvPage = new dv::DvPage;
-		dvPage->frameStart = page->binaryData.start;
-		dvPage->frameEnd = page->binaryData.end;
+		dvPage->frameStart = static_cast<float>(page->binaryData.start);
+		dvPage->frameEnd = static_cast<float>(page->binaryData.end);
 		dvPage->index = page->binaryData.pageIndex;
-		dvPage->skipFrame = page->binaryData.skipFrame;
+		dvPage->skipFrame = static_cast<float>(page->binaryData.skipFrame);
 		memset(&dvPage->name, 0, 32);
 		strcpy(dvPage->name, page->binaryData.pageName);
 		for (auto* x : page->transitions)
@@ -190,8 +194,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dv::DvScene* dv = new dv::DvScene;
 		auto* timeline = dvsc->timeline;
 		dv->dvCommon = new dv::DvCommon;
-		dv->dvCommon->frameStart = timeline->frameStart/100;
-		dv->dvCommon->frameEnd = timeline->frameEnd/100;
+		dv->dvCommon->frameStart = static_cast<float>(timeline->frameStart/100);
+		dv->dvCommon->frameEnd = static_cast<float>(timeline->frameEnd/100);
 		dv->dvCommon->drawNodeNumber = 0;
 		GetDrawNodeNum(dv->dvCommon->drawNodeNumber, dvsc->nodeTree->mainNode);
 		dv->dvCommon->chainCameraIn = -1;
@@ -265,12 +269,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		auto* timeline = context.goDVSC->timeline;
         ImGui::SeparatorText("DvCommon Settings");
-		int start = static_cast<int>(timeline->frameStart / 100);
-        if(Editor("Start", start));
-			timeline->frameStart = static_cast<float>(start) * 100;
-		int end = static_cast<int>(timeline->frameEnd / 100);
-		if (Editor("End", end));
-			timeline->frameEnd = static_cast<float>(end) * 100;
+		int start = timeline->frameStart / 100;
+        if(Editor("Start", start))
+			timeline->frameStart = start * 100;
+		int end = timeline->frameEnd / 100;
+		if (Editor("End", end))
+			timeline->frameEnd = end * 100;
 	}
 
 	PanelTraits SceneSettings::GetPanelTraits() const

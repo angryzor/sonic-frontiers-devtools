@@ -26,7 +26,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         auto* elem = reinterpret_cast<app::dv::DvElementVignetteParam*>(element);
         auto* data = elem->GetData();
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        CheckboxFlags("Unk0", data->flags, app::dv::DvElementVignetteParam::Data::Flags::UNK0);
+        CheckboxFlags("Enabled", data->flags, app::dv::DvElementVignetteParam::Data::Flags::ENABLED);
         CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementVignetteParam::Data::Flags::CURVE_ENABLED);
         Editor("Unk1", data->unk1);
         Editor("Center", data->center);

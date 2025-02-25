@@ -15,9 +15,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
         Editor("Unk2", data->unk2);
         Editor("Unk3", data->unk3);
         Editor("Unk4", data->unk4);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
         Editor("Unk5", data->unk5);
         Editor("Unk6", data->unk6);
         Editor("Unk7", data->unk7);
         Editor("Unk8", data->unk8);
+#endif
     }
 }

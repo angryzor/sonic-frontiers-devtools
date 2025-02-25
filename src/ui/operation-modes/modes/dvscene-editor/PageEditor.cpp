@@ -50,7 +50,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             RenderPage(page->binaryData.pageIndex);
 		for (auto* page : context.goDVSC->timeline->pages)
 			for (auto* trans : page->transitions)
-				Link({ { NodeType::PAGE, page->binaryData.pageIndex }, PinType::TRANSITION, 0 }, { { NodeType::PAGE, trans->binaryData.destinationPageID }, PinType::TRANSITION, 0 });
+				RenderTransition(page->binaryData.pageIndex, trans);
         nodeEditor.End();
     }
 
@@ -94,6 +94,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		ax::NodeEditor::PopStyleColor();
     }
+
+	void PageEditor::RenderTransition(int pageIdx, hh::dv::DvPageTransition* trans)
+	{
+		auto x = OutputPinId{ { NodeType::PAGE, pageIdx }, PinType::TRANSITION, 0 };
+		auto y = InputPinId{ { NodeType::PAGE, trans->binaryData.destinationPageID }, PinType::TRANSITION, 0 };
+		Link(x, y);
+	}
 
     PanelTraits PageEditor::GetPanelTraits() const
 	{

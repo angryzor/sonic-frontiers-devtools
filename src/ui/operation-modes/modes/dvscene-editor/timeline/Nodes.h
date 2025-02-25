@@ -31,11 +31,20 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto* element = reinterpret_cast<hh::dv::DvNodeElement*>(node);
         auto& data = element->binaryData;
         int type = static_cast<int>(data.elementId);
-        ElementTimelineFuncType render;
-        render = GetElementTimelineRender(type);
+        const std::pair<size_t, size_t> render = GetElementTimelineRender(type);
         
-        if(render)
-            render(timeline, element);
+        if (render == std::pair<size_t, size_t>{})
+        {
+            float* curveData;
+            if (type >= 1000) {
+                auto* elem = reinterpret_cast<app::dv::AppDvElementBase*>(element->element);
+                auto* elemData = reinterpret_cast<const float*>(elem->GetBinaryData());
+                curveData = const_cast<float*>(&elemData[render.first/4]);
+            }
+            else
+                curveData = &reinterpret_cast<float*>(element->element)[(render.first + sizeof(hh::dv::DvElementBase)) / 4];
+            timeline->RenderTimeline(element->start, element->end, curveData, render.second);
+        }
         else
             timeline->RenderTimeline(element->start, element->end);
 	}
