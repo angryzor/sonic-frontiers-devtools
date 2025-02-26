@@ -123,7 +123,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				elementSize = appDvElement->elementBinaryDataSize;
 #ifdef DEVTOOLS_TARGET_SDK_miller
 				if (static_cast<unsigned int>(element->binaryData.elementId) == 1000)
-					elementSize = 172; // i dunno why, but the variable isn't accurate -_-
+					elementSize = 172; // i dunno why, but in the create function it's wrong -_-
 #endif
 			}
 			else {

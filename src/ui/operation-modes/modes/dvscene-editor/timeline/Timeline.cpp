@@ -61,7 +61,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		return { "Timeline", ImVec2(250, 500), ImVec2(500, 250) };
 	}
 
-	void Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
+	bool Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
+		bool changed = false;
 		if (ImTimeline::BeginTrack("")) {
 			auto length = end / 100 - start / 100;
 
@@ -136,8 +137,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 				if (endTimeChanged)
 					end = static_cast<int>(endTime * 100);
+
+				changed |= startTimeChanged | endTimeChanged;
 			}
 			ImTimeline::EndTrack();
 		}
+		return changed;
 	}
 }

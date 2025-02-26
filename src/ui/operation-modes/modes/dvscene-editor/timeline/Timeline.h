@@ -17,12 +17,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
 
-		void RenderTimeline(int& start, int& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
+		bool RenderTimeline(int& start, int& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
 	};
 
 	template<int type>
 	void RenderNodeTimeline(Timeline* timeline, hh::dv::DvNodeBase* node) {}
-
-	template<int type>
-	void RenderElementTimeline(Timeline* timeline, hh::dv::DvNodeElement* element) {}
 }

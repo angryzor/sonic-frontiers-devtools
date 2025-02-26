@@ -43,10 +43,18 @@ namespace ui::operation_modes::modes::dvscene_editor {
             }
             else
                 curveData = &reinterpret_cast<float*>(element->element)[(render.first + sizeof(hh::dv::DvElementBase)) / 4];
-            timeline->RenderTimeline(element->start, element->end, curveData, render.second);
+            if (timeline->RenderTimeline(element->start, element->end, curveData, render.second))
+            {
+                element->binaryData.start = static_cast<float>(element->start) / 100;
+                element->binaryData.end = static_cast<float>(element->end) / 100;
+            }
         }
         else
-            timeline->RenderTimeline(element->start, element->end);
+            if (timeline->RenderTimeline(element->start, element->end))
+            {
+                element->binaryData.start = static_cast<float>(element->start) / 100;
+                element->binaryData.end = static_cast<float>(element->end) / 100;
+            }
 	}
 
     constexpr std::pair<int, NodeTimelineFuncType> RenderTimelineNodes[] = {
