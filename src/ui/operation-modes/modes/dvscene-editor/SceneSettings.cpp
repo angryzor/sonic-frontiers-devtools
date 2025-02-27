@@ -10,7 +10,7 @@
 namespace ui::operation_modes::modes::dvscene_editor {
 	constexpr std::pair<size_t, size_t> NodeDataInfo[] = {
 		{},
-		{80, offsetof(hh::dv::DvNodePath, binaryData)},
+		{sizeof(hh::dv::DvNodePath::Data), offsetof(hh::dv::DvNodePath, binaryData)},
 		{},
 		{sizeof(hh::dv::DvNodeCamera::Data), offsetof(hh::dv::DvNodeCamera, binaryData)},
 		{sizeof(hh::dv::DvNodeCameraMotion::Data), offsetof(hh::dv::DvNodeCameraMotion, binaryData)},
@@ -217,8 +217,21 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 	void SceneSettings::RenderPanel()
 	{
-		char sceneName[400];
 		auto& context = GetContext();
+		
+		if (auto* evtPlayer = hh::game::GameManager::GetInstance()->GetService<app::evt::EventPlayer>()) {
+			
+			Editor("Cutscene Name", context.cutsceneName);
+			ImGui::SameLine();
+			if (ImGui::Button("Play Cutscene")) {
+				app::evt::EventSetupData setupData{};
+				setupData.Setup(context.cutsceneName.c_str());
+				evtPlayer->PlayEvent(&setupData);
+			}
+			ImGui::SameLine();
+		}
+
+		char sceneName[400];
 
 		if (context.goDVSC != nullptr)
 			snprintf(sceneName, sizeof(sceneName), "%s - %zx", context.goDVSC->cutsceneName.c_str(), reinterpret_cast<size_t>(&*context.goDVSC));
@@ -233,6 +246,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 					if (ImGui::Selectable(sceneName, obj == context.goDVSC)) {
 						GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
 						context.goDVSC = dvsc;
+						for (auto* evtScn : hh::game::GameManager::GetInstance()->GetService<app::evt::EventPlayer>()->evtSceneMgr->evtScenes)
+							if (strcmp(evtScn->setupData.cutsceneName, dvsc->cutsceneName.c_str()) == 0)
+								context.evtScene = evtScn;
 					}
 					if (context.goDVSC == obj)
 						ImGui::SetItemDefaultFocus();
@@ -244,7 +260,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             ImGui::Text("No DvSceneControl selected");
 			return;
 		}
-
+		
 		if (ImGui::Button("Export")) {
 			IGFD::FileDialogConfig cfg{};
 			cfg.path = GlobalSettings::defaultFileDialogDirectory;
@@ -275,6 +291,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		int end = timeline->frameEnd / 100;
 		if (Editor("End", end))
 			timeline->frameEnd = end * 100;
+
+		Editor("Current Frame0", timeline->currentFrame0);
+		Editor("Current Frame1", timeline->currentFrame1);
 	}
 
 	PanelTraits SceneSettings::GetPanelTraits() const

@@ -32,12 +32,16 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImGui::Checkbox("Looping", &context.goDVSC->timeline->looping);
 			auto playHeadFrame = std::fminf(context.goDVSC->timeline->currentFrame0/100, static_cast<float>(context.goDVSC->timeline->frameEnd/100));
 			bool currentTimeChanged{};
+			bool* play = &context.goDVSC->play;
+			if (context.evtScene)
+				if ((context.evtScene->flags.bits & 0x80) != 0)
+					play = &context.evtScene->play;
 
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0);
 			ImTimeline::Begin(timelineCtx);
 			ImGui::SameLine();
-			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(context.goDVSC->timeline->frameEnd/100), 60.0, &context.goDVSC->play, &currentTimeChanged)) {
+			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(context.goDVSC->timeline->frameEnd/100), 60.0, play, &currentTimeChanged)) {
 				if (selected.size() > 0) {
 					hh::dv::DvNodeBase* node = selected[0].node;
 					int type = static_cast<int>(node->nodeType);
@@ -52,6 +56,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImPlot::PopStyleVar(2);
 			context.goDVSC->timeline->currentFrame0 = static_cast<int>(playHeadFrame * 100);
 			context.goDVSC->timeline->currentFrame1 = static_cast<int>(playHeadFrame * 100);
+#ifdef DEVTOOLS_TARGET_SDK_miller
+			context.goDVSC->timeline->currentFrame2 = static_cast<int>(playHeadFrame * 100);
+#endif
 		}
 		ImGui::EndChild();
 	}

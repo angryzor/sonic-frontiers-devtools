@@ -14,8 +14,6 @@ void RenderGameServiceInspector(app::evt::EventPlayer& service)
         }
         if (service.evtSceneMgr->evtScenes.size() > 0) {
             if (auto* x = service.evtSceneMgr->evtScenes[0]) {
-                Editor("unk0", x->unk0);
-                Editor("unk1", x->unk1);
                 Editor("unk2", x->unk2);
                 Editor("unk3", x->unk3);
             }

@@ -11,7 +11,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		using CompatibleObject::CompatibleObject;
 
 		hh::fnd::Reference<hh::dv::DvSceneControl> goDVSC{};
+		app::evt::EventScene* evtScene;
 
 		double timelineFalloff;
+		csl::ut::VariableString cutsceneName;
+
+		Context(csl::fnd::IAllocator* allocator);
 	};
 }

@@ -27,6 +27,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 	void NodeInspector::RenderPanel()
 	{
+		auto& context = GetContext();
+
+		if (context.goDVSC == nullptr) {
+			ImGui::Text("No DvSceneControl selected");
+			return;
+		}
+
 		auto& selection = GetBehavior<SelectionBehavior<Context>>()->GetSelection();
 
 		if (selection.size() == 0)
