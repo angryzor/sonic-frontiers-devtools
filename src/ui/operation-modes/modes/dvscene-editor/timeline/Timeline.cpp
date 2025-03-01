@@ -67,19 +67,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
 
 			if (context.ContainsElement(static_cast<unsigned int>(hh::dv::DvNodeElement::ElementID::MOVIE_VIEW)))
-				if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>()) {
+				if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
 					for (auto x : movieSrv->movies) {
 						if (changed) {
 							x->moviePlayer->SetPause(!*play);
-							x->moviePlayer->frameStr0->currentFrame = static_cast<int>(playHeadFrame);
-							x->moviePlayer->frameStr0->unk1 = static_cast<int>(playHeadFrame*100);
-							x->moviePlayer->frameStr1->currentFrame = static_cast<int>(playHeadFrame);
-							x->moviePlayer->frameStr1->unk1 = static_cast<int>(playHeadFrame * 100);
-							x->moviePlayer->frameStr2->currentFrame = static_cast<int>(playHeadFrame);
-							x->moviePlayer->frameStr2->unk1 = static_cast<int>(playHeadFrame * 100);
 						}
 					}
-				}
 		}
 		ImGui::EndChild();
 	}

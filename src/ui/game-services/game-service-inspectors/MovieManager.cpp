@@ -3,7 +3,9 @@
 #include <ui/common/viewers/Basic.h>
 
 void FrameStrEditor(const char* label, hh::fmv::MoviePlayerCri::FrameStr* str) {
-    if (ImGui::TreeNode(label)) {
+    char buffer[256];
+    snprintf(buffer, sizeof(buffer), "%s - 0x%zx", label, (size_t)str);
+    if (ImGui::TreeNode(buffer)) {
         Editor("framesRunning", str->framesRunning);
         Editor("current Frame", str->currentFrame);
         Editor("width0", str->width0);
