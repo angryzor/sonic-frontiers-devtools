@@ -29,6 +29,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto& selected = selectionBehavior->GetSelection();
 
         if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
+			bool changed = false;
 			ImGui::Checkbox("Looping", &context.goDVSC->timeline->looping);
 			auto playHeadFrame = std::fminf(context.goDVSC->timeline->currentFrame0/100, static_cast<float>(context.goDVSC->timeline->frameEnd/100));
 			bool currentTimeChanged{};
@@ -41,6 +42,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0);
 			ImTimeline::Begin(timelineCtx);
 			ImGui::SameLine();
+			bool beforePlay = *play;
+			float beforeTime = playHeadFrame;
 			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(context.goDVSC->timeline->frameEnd/100), 60.0, play, &currentTimeChanged)) {
 				if (selected.size() > 0) {
 					hh::dv::DvNodeBase* node = selected[0].node;
@@ -54,11 +57,29 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
+
+			changed |= beforePlay != *play;
+
 			context.goDVSC->timeline->currentFrame0 = static_cast<int>(playHeadFrame * 100);
 			context.goDVSC->timeline->currentFrame1 = static_cast<int>(playHeadFrame * 100);
 #ifdef DEVTOOLS_TARGET_SDK_miller
 			context.goDVSC->timeline->currentFrame2 = static_cast<int>(playHeadFrame * 100);
 #endif
+
+			if (context.ContainsElement(static_cast<unsigned int>(hh::dv::DvNodeElement::ElementID::MOVIE_VIEW)))
+				if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>()) {
+					for (auto x : movieSrv->movies) {
+						if (changed) {
+							x->moviePlayer->SetPause(!*play);
+							x->moviePlayer->frameStr0->currentFrame = static_cast<int>(playHeadFrame);
+							x->moviePlayer->frameStr0->unk1 = static_cast<int>(playHeadFrame*100);
+							x->moviePlayer->frameStr1->currentFrame = static_cast<int>(playHeadFrame);
+							x->moviePlayer->frameStr1->unk1 = static_cast<int>(playHeadFrame * 100);
+							x->moviePlayer->frameStr2->currentFrame = static_cast<int>(playHeadFrame);
+							x->moviePlayer->frameStr2->unk1 = static_cast<int>(playHeadFrame * 100);
+						}
+					}
+				}
 		}
 		ImGui::EndChild();
 	}

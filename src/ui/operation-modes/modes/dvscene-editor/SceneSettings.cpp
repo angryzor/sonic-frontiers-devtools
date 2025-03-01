@@ -228,7 +228,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				setupData.Setup(context.cutsceneName.c_str());
 				evtPlayer->PlayEvent(&setupData);
 			}
-			ImGui::SameLine();
 		}
 
 		char sceneName[400];

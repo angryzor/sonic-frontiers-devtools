@@ -7,6 +7,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
 	class Context : public CompatibleObject {
+		void ContainsElement(bool& contains, const unsigned int& elementId, hh::dv::DvNodeBase* node);
 	public:
 		using CompatibleObject::CompatibleObject;
 
@@ -15,6 +16,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		double timelineFalloff;
 		csl::ut::VariableString cutsceneName;
+
+		bool ContainsElement(const unsigned int& elementId);
 
 		Context(csl::fnd::IAllocator* allocator);
 	};

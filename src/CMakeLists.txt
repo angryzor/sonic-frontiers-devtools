@@ -275,6 +275,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         MonologueService
         DiEventManager
         EventPlayer
+        MovieManager
     )
 endif()
 
