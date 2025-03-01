@@ -2,6 +2,7 @@
 #include <ui/common/TreeView.h>
 #include <ui/operation-modes/Panel.h>
 #include "Context.h"
+#include "Behaviors.h"
 
 namespace ui::operation_modes::modes::level_editor {
 	class ObjectLibrary;

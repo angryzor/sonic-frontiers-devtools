@@ -32,6 +32,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
         ui/common/editors/Resources.cpp
+        ui/common/editors/HsmBase.cpp
         ui/common/viewers/Basic.cpp
         ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
@@ -100,6 +101,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/LevelInfo.h
         ui/common/editors/Needle.h
         ui/common/editors/Resources.h
+        ui/common/editors/HsmBase.h
         ui/common/viewers/Basic.h
         ui/common/viewers/RflDiff.h
         ui/common/inputs/Basic.h
@@ -228,6 +230,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         GOCCollider
         GOCSprite
         GOCPlayerParameter
+        GOCPlayerHsm
         GOCEvent
         GOCCamera
         GOCAnimator
@@ -298,6 +301,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
         GOCCollider
         GOCSprite
         GOCPlayerParameter
+        GOCPlayerHsm
         GOCAnimator
         GOCPlayerKinematicParams
     )
@@ -408,6 +412,7 @@ if(${DEVTOOLS_FEATURE_LEVEL_EDITOR})
             ui/operation-modes/modes/level-editor/ObjectDataInspector.cpp
             ui/operation-modes/modes/level-editor/ObjectLibrary.cpp
             ui/operation-modes/modes/level-editor/SetObjectList.cpp
+            ui/operation-modes/modes/level-editor/ArrayTool.cpp
             ui/resources/editors/ResObjectWorldEditor.cpp
         PRIVATE FILE_SET HEADERS FILES
             ui/common/editors/ObjectData.h
@@ -417,6 +422,7 @@ if(${DEVTOOLS_FEATURE_LEVEL_EDITOR})
             ui/operation-modes/modes/level-editor/ObjectDataInspector.h
             ui/operation-modes/modes/level-editor/ObjectLibrary.h
             ui/operation-modes/modes/level-editor/SetObjectList.h
+            ui/operation-modes/modes/level-editor/ArrayTool.h
             ui/resources/editors/ResObjectWorldEditor.h
     )
 endif()

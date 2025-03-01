@@ -48,6 +48,11 @@ public:
 	}
 	virtual void EndOverlayWindow() override {
 	}
+	virtual bool BeginMenuWindow() override {
+		return true;
+	}
+	virtual void EndMenuWindow() override {
+	}
 	virtual bool IsMouseOverSceneWindow() override {
 		bool isHovered{};
 		if (ImGui::Begin(title)) {

@@ -30,6 +30,8 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingRenderColliders == other.debugRenderingRenderColliders
 		&& debugRenderingRenderOcclusionCapsules == other.debugRenderingRenderOcclusionCapsules
 		&& debugRenderingRenderPaths == other.debugRenderingRenderPaths
+		&& debugRenderingRenderPathNormals == other.debugRenderingRenderPathNormals
+		&& debugRenderingRenderPathTangents == other.debugRenderingRenderPathTangents
 		&& debugRenderingGOCVisualDebugDrawOpacity == other.debugRenderingGOCVisualDebugDrawOpacity
 		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
@@ -218,6 +220,10 @@ void SettingsManager::Render() {
 							ImGui::Checkbox("Render colliders", &tempSettings.debugRenderingRenderColliders);
 							ImGui::Checkbox("Render occlusion capsules", &tempSettings.debugRenderingRenderOcclusionCapsules);
 							ImGui::Checkbox("Render paths", &tempSettings.debugRenderingRenderPaths);
+							ImGui::Indent();
+							ImGui::Checkbox("Render path normals", &tempSettings.debugRenderingRenderPathNormals);
+							ImGui::Checkbox("Render path tangents", &tempSettings.debugRenderingRenderPathTangents);
+							ImGui::Unindent();
 							ImGui::SliderScalar("GOCVisualDebugDraw opacity (requires stage restart)", ImGuiDataType_U8, &tempSettings.debugRenderingGOCVisualDebugDrawOpacity, &minAlpha, &maxAlpha);
 							ImGui::SeparatorText("Debug boxes");
 							ImGui::SetItemTooltip("Options for debug boxes (the purple boxes showing the position of invisible objects).");
@@ -361,6 +367,8 @@ void SettingsManager::ApplySettings() {
 	devtools::debug_rendering::DebugRenderingSystem::instance->collidersRenderable.enabled = settings.debugRenderingRenderColliders;
 	devtools::debug_rendering::DebugRenderingSystem::instance->occlusionCapsulesRenderable.enabled = settings.debugRenderingRenderOcclusionCapsules;
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.enabled = settings.debugRenderingRenderPaths;
+	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.normalsEnabled = settings.debugRenderingRenderPathNormals;
+	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.tangentsEnabled = settings.debugRenderingRenderPathTangents;
 	ObjectLocationVisual3DBehaviorBase::ApplySettings(settings.debugRenderingLevelEditorDebugBoxScale, settings.debugRenderingLevelEditorDebugBoxRenderLimit, settings.debugRenderingLevelEditorDebugBoxRenderDistance);
 	PhotoMode::enabled = settings.enablePhotoMode;
 	strcpy_s(GlobalSettings::defaultFileDialogDirectory, settings.defaultFileDialogDir);
@@ -429,6 +437,8 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingRenderColliders=%u", &u) == 1) { settings.debugRenderingRenderColliders = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderOcclusionCapsules=%u", &u) == 1) { settings.debugRenderingRenderOcclusionCapsules = u; return; }
 	if (sscanf_s(line, "DebugRenderingRenderPaths=%u", &u) == 1) { settings.debugRenderingRenderPaths = u; return; }
+	if (sscanf_s(line, "DebugRenderingRenderPathNormals=%u", &u) == 1) { settings.debugRenderingRenderPathNormals = u; return; }
+	if (sscanf_s(line, "DebugRenderingRenderPathTangents=%u", &u) == 1) { settings.debugRenderingRenderPathTangents = u; return; }
 	if (sscanf_s(line, "DebugRenderingGOCVisualDebugDrawOpacity=%u", &u) == 1) { settings.debugRenderingGOCVisualDebugDrawOpacity = static_cast<uint8_t>(u); return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
@@ -491,6 +501,8 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingRenderColliders=%u\n", settings.debugRenderingRenderColliders);
 	out_buf->appendf("DebugRenderingRenderOcclusionCapsules=%u\n", settings.debugRenderingRenderOcclusionCapsules);
 	out_buf->appendf("DebugRenderingRenderPaths=%u\n", settings.debugRenderingRenderPaths);
+	out_buf->appendf("DebugRenderingRenderPathNormals=%u\n", settings.debugRenderingRenderPathNormals);
+	out_buf->appendf("DebugRenderingRenderPathTangents=%u\n", settings.debugRenderingRenderPathTangents);
 	out_buf->appendf("DebugRenderingGOCVisualDebugDrawOpacity=%u\n", settings.debugRenderingGOCVisualDebugDrawOpacity);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);

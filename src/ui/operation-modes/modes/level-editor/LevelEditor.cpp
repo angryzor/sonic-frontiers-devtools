@@ -2,6 +2,7 @@
 #include "SetObjectList.h"
 #include "ObjectDataInspector.h"
 #include "ObjectLibrary.h"
+#include "ArrayTool.h"
 #include "Actions.h"
 #include "Behaviors.h"
 
@@ -13,6 +14,7 @@ namespace ui::operation_modes::modes::level_editor {
 		AddPanel<SetObjectList>();
 		AddPanel<ObjectDataInspector>();
 		AddPanel<ObjectLibrary>();
+		AddPanel<ArrayTool>();
 		AddBehavior<SelectionBehavior>();
 		AddBehavior<SelectionAabbBehavior>();
 		AddBehavior<SelectionTransformationBehavior>();
@@ -58,7 +60,8 @@ namespace ui::operation_modes::modes::level_editor {
 			if (selection.size() == 1)
 				context.NotifyUpdatedObject(selection[0]);
 
-			context.UpdateGrindRails();
+			context.UpdatePaths();
+			Dispatch(PathsUpdatedAction{});
 			break;
 		}
 		case SelectionBehavior<Context>::SelectionChangedAction::id: {
@@ -91,6 +94,10 @@ namespace ui::operation_modes::modes::level_editor {
 		case FocusObjectDataAction::id:
 			GetBehavior<SelectionBehavior<Context>>()->Select(static_cast<const FocusObjectDataAction&>(action).payload);
 			break;
+		case SetObjectClassToPlaceAction::id:
+			GetContext().SetObjectClassToPlace(static_cast<const SetObjectClassToPlaceAction&>(action).payload);
+			Dispatch(ObjectClassToPlaceChangedAction{});
+			break;
 		}
 	}
 
@@ -122,5 +129,6 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		GetBehavior<ClipboardBehavior<Context>>()->Clear();
 		GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
+		HandlePendingActions();
 	}
 }

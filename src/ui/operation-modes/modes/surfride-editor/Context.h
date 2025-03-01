@@ -26,7 +26,7 @@ namespace ui::operation_modes::modes::surfride_editor {
 		void AddCast(ucsl::resources::swif::swif_version::SRS_CASTNODE& parent, ucsl::resources::swif::swif_version::SRS_CASTNODE::Type type);
 		void RemoveCast(ucsl::resources::swif::swif_version::SRS_CASTNODE& cast);
 		void AddMotion(ucsl::resources::swif::swif_version::SRS_ANIMATION& animation, ucsl::resources::swif::swif_version::SRS_CASTNODE& cast);
-		void AddTrack(ucsl::resources::swif::swif_version::SRS_MOTION& motion, ucsl::resources::swif::swif_version::ECurveType type, unsigned int firstFrame, unsigned int lastFrame);
+		ucsl::resources::swif::swif_version::SRS_TRACK& AddTrack(ucsl::resources::swif::swif_version::SRS_MOTION& motion, ucsl::resources::swif::swif_version::ECurveType type, unsigned int firstFrame, unsigned int lastFrame, ucsl::resources::swif::swif_version::EInterpolationType interpolationType);
 		void AddKeyFrame(ucsl::resources::swif::swif_version::SRS_TRACK& track, unsigned int frame);
 		void RemoveMotion(ucsl::resources::swif::swif_version::SRS_ANIMATION& animation, ucsl::resources::swif::swif_version::SRS_MOTION& motion);
 		void RemoveTrack(ucsl::resources::swif::swif_version::SRS_MOTION& motion, ucsl::resources::swif::swif_version::SRS_TRACK& track);

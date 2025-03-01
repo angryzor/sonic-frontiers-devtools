@@ -28,10 +28,15 @@ protected:
 	template<typename T> T* GetBehavior() { return operationMode.GetBehavior<T>(); }
 
 public:
-	Panel(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : PanelBase{ allocator }, operationMode{ operationMode } { }
+	bool isOpen{ true };
+
+	Panel(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode, bool isOpen = true) : PanelBase{ allocator }, operationMode{ operationMode }, isOpen{ isOpen } { }
 
 	void Render()
 	{
+		if (!isOpen)
+			return;
+
 		const ImGuiWindowFlags windowFlags = 0;
 
 		auto traits = GetPanelTraits();
@@ -39,7 +44,7 @@ public:
 		ImGui::SetNextWindowPos(traits.position, ImGuiCond_FirstUseEver, traits.pivot);
 		ImGui::SetNextWindowSize(traits.size, ImGuiCond_FirstUseEver);
 
-		if (ImGui::Begin(traits.title, NULL, windowFlags)) {
+		if (ImGui::Begin(traits.title, &isOpen, windowFlags)) {
 			RenderPanel();
 		}
 

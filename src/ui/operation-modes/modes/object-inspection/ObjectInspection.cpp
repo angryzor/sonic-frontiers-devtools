@@ -44,7 +44,9 @@ namespace ui::operation_modes::modes::object_inspection {
 	{
 		auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 
-		if (selectionBehavior->IsSelected(gameObject))
+		if (selectionBehavior->IsSelected(gameObject)) {
 			selectionBehavior->Deselect(gameObject);
+			HandlePendingActions();
+		}
 	}
 }

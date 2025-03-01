@@ -53,5 +53,7 @@ public:
     void EndSceneWindow() override;
     bool BeginOverlayWindow() override;
     void EndOverlayWindow() override;
+    bool BeginMenuWindow() override;
+    void EndMenuWindow() override;
     bool IsMouseOverSceneWindow() override;
 };

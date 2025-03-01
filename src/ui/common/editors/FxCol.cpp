@@ -119,8 +119,8 @@ bool Editor(const char* label, FxColCollisionShapeData::HeatHazeParameters& para
 
 bool Editor(const char* label, FxColCollisionShapeData::Type type, FxColCollisionShapeData::Parameters& parameters) {
 	switch (type) {
-	case FxColCollisionShapeData::Type::SCENE_PARAMETER_INDEX: return Editor(label, parameters.sceneParameterIndex.sceneParameterIndex);
-	case FxColCollisionShapeData::Type::LIGHT_PARAMETER_INDEX: return Editor(label, parameters.lightParameterIndex.lightParameterIndex);
+	case FxColCollisionShapeData::Type::SCENE_PARAMETER_INDEX: return Editor(label, parameters.sceneParameterIndex);
+	case FxColCollisionShapeData::Type::LIGHT_PARAMETER_INDEX: return Editor(label, parameters.lightParameterIndex);
 	case FxColCollisionShapeData::Type::CAMERA: return Editor(label, parameters.camera);
 	case FxColCollisionShapeData::Type::HEAT_HAZE: return Editor(label, parameters.heatHaze);
 	default: assert(false); return false;
@@ -145,10 +145,13 @@ bool Editor(const char* label, FxColCollisionShapeData& shape, ResFxColFile2* re
 		ImGui::SeparatorText("Parameters");
 		edited |= Editor("Priority", shape.priority);
 		edited |= Editor("Unk1", shape.unk1);
-		if (resource == nullptr)
-			Viewer("Name", shape.unk2);
-		else
-			edited |= InputText("Name", shape.unk2, resource);
+
+		if (shape.unk2 != nullptr) {
+			if (resource == nullptr)
+				Viewer("Name", shape.unk2);
+			else
+				edited |= InputText("Name", shape.unk2, resource);
+		}
 
 		edited |= ComboEnum("Type", shape.type, collisionShapeTypeNames);
 		edited |= Editor("Parameters", shape.type, shape.parameters);

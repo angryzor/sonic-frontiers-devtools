@@ -22,6 +22,7 @@ typedef std::tuple<
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::physics::GOCMeshCollider,
 	hh::ui::GOCSprite,
 	app::player::GOCPlayerParameter
 > InspectableComponents;
@@ -40,6 +41,7 @@ typedef std::tuple<
 #include "component-inspectors/GOCPlayerKinematicParams.h"
 #include "component-inspectors/GOCCamera.h"
 #include "component-inspectors/GOCPlayerParameter.h"
+#include "component-inspectors/GOCPlayerHsm.h"
 #include "component-inspectors/GOCPlayerCollider.h"
 #include "component-inspectors/GOCColliderQuery.h"
 
@@ -50,6 +52,7 @@ typedef std::tuple<
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::physics::GOCMeshCollider,
 	hh::ui::GOCSprite,
 	hh::gfx::GOCVisual,
 	hh::gfx::GOCVisualTransformed,
@@ -61,6 +64,7 @@ typedef std::tuple<
 	app::player::GOCPlayerKinematicParams,
 	app::player::GOCPlayerBlackboard,
 	app::player::GOCPlayerParameter,
+	app::player::GOCPlayerHsm,
 	app::player::GOCPlayerCollider,
 	app::physics::GOCMoveSphereColliderQuery
 > InspectableComponents;
@@ -72,6 +76,7 @@ typedef std::tuple<
 #include "component-inspectors/GOCSprite.h"
 #include "component-inspectors/GOCAnimator.h"
 #include "component-inspectors/GOCPlayerParameter.h"
+#include "component-inspectors/GOCPlayerHsm.h"
 #include "component-inspectors/GOCPlayerKinematicParams.h"
 
 typedef std::tuple<
@@ -80,8 +85,10 @@ typedef std::tuple<
 	hh::physics::GOCBoxCollider,
 	hh::physics::GOCCapsuleCollider,
 	hh::physics::GOCCylinderCollider,
+	hh::physics::GOCMeshCollider,
 	hh::ui::GOCSprite,
 	app::player::GOCPlayerParameter,
+	app::player::GOCPlayerHsm,
 	app::player::GOCPlayerKinematicParams,
 	hh::anim::GOCAnimator
 > InspectableComponents;

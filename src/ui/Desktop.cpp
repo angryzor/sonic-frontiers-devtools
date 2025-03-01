@@ -236,6 +236,16 @@ void Desktop::EndOverlayWindow()
 	ImGui::End();
 }
 
+bool Desktop::BeginMenuWindow()
+{
+	return ImGui::Begin("Main menu");
+}
+
+void Desktop::EndMenuWindow()
+{
+	ImGui::End();
+}
+
 bool Desktop::IsMouseOverSceneWindow()
 {
 	return !ImGui::GetIO().WantCaptureMouse && !ImGui::IsAnyItemHovered();

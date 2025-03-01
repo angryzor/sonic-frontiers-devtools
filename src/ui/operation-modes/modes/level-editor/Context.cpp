@@ -2,12 +2,14 @@
 #include <utilities/ObjectDataUtils.h>
 #include <utilities/BoundingBoxes.h>
 
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-namespace app::game {
-	class GOCGrind : public hh::game::GOComponent {
-		GOCOMPONENT_CLASS_DECLARATION(GOCGrind)
-	};
-}
+#ifdef DEVTOOLS_TARGET_SDK_wars
+#define CreateComponentData CreateComponentDataV2
+#define CreateObjectData CreateObjectDataV2
+#define CopyObjectData CopyObjectDataV2
+#else
+#define CreateComponentData CreateComponentDataV3
+#define CreateObjectData CreateObjectDataV3
+#define CopyObjectData CopyObjectDataV3
 #endif
 
 namespace ui::operation_modes::modes::level_editor {
@@ -42,11 +44,9 @@ namespace ui::operation_modes::modes::level_editor {
 			isUnique = true;
 			result = GenerateRandomObjectId();
 
-			for (auto& status : focusedChunk->GetObjectStatuses()) {
-				if (status.objectData->id == result) {
+			for (auto& status : focusedChunk->GetObjectStatuses())
+				if (status.objectData->id == result)
 					isUnique = false;
-				}
-			}
 		} while (!result.IsNonNull() || !isUnique);
 
 		return result;
@@ -88,20 +88,20 @@ namespace ui::operation_modes::modes::level_editor {
 			obj->SendMessageImm(msg);
 	}
 
-	void Context::UpdateGrindRails()
+	void Context::UpdatePaths()
 	{
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		// Live update grind rails
 		for (auto* obj : GameManager::GetInstance()->objects) {
-			if (auto* grind = obj->GetComponent<app::game::GOCGrind>()) {
+			if (obj->GetComponent<hh::path::PathComponent>()) {
 				hh::dbg::MsgUpdateActiveObjectInEditor msg;
 				obj->SendMessageImm(msg);
-				void* updater = *reinterpret_cast<void**>(reinterpret_cast<size_t>(grind) + 168);
-				uint8_t* flag = reinterpret_cast<uint8_t*>(reinterpret_cast<size_t>(updater) + 172);
-				*flag |= 2;
 			}
-		}
+			
+#ifndef DEVTOOLS_TARGET_SDK_wars
+			if (auto* grind = obj->GetComponent<app::game::GOCGrind>())
+				grind->updater->flags.set(app::game::GrindModelUpdater::Flag::UPDATE);
 #endif
+		}
 	}
 
 	void Context::ReloadActiveObjectParameters(hh::game::ObjectData* objectData)
@@ -152,24 +152,24 @@ namespace ui::operation_modes::modes::level_editor {
 		snprintf(name, 100, "%s_%zd", gameObjectClass->GetName(), mt() % 0x1000000);
 #endif
 
-		auto* objData = new (allocator) ObjectData{
+		auto* objData = CreateObjectData(
 			allocator,
 			gameObjectClass,
 			GenerateUniqueRandomObjectId(),
 			name,
 			parentObject,
-			transform,
-		};
+			transform
+		);
 
-		auto* rangeSpawning = ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
-		auto* rangeSpawningData = rangeSpawning->GetData<GOCActivatorSpawner>();
+		auto* rangeSpawning = CreateComponentData<GOCActivatorSpawner>(allocator, "RangeSpawning");
+		auto* rangeSpawningData = static_cast<GOCActivatorSpawner*>(rangeSpawning->data);
 
 		rangeSpawningData->m_range = 500.0f;
 		rangeSpawningData->m_distance = 200.0f;
 
 		objData->componentData.push_back(rangeSpawning);
 
-		return objData;
+		return (ObjectData*)objData;
 	}
 
 	ObjectData* Context::CopyObject(csl::fnd::IAllocator* allocator, ObjectData* otherObject) {
@@ -182,20 +182,20 @@ namespace ui::operation_modes::modes::level_editor {
 		snprintf(name, 100, "%s_%zd", otherObject->gameObjectClass, mt() % 0x1000000);
 #endif
 
-		auto* objData = new (allocator) ObjectData{
+		auto* objData = CopyObjectData(
 			allocator,
 			GenerateUniqueRandomObjectId(),
 			name,
-			*otherObject,
-		};
+			otherObject
+		);
 
-		auto* otherRangeSpawning = otherObject->GetComponentDataByType("RangeSpawning");
-		auto* newRangeSpawning = ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
+		auto* otherRangeSpawning = *std::find_if(otherObject->componentData.begin(), otherObject->componentData.end(), [](const auto* c) { return !strcmp(c->type, "RangeSpawning"); });
+		auto* newRangeSpawning = CreateComponentData<GOCActivatorSpawner>(allocator, "RangeSpawning");
 
-		auto* newRangeSpawningData = newRangeSpawning->GetData<GOCActivatorSpawner>();
+		auto* newRangeSpawningData = static_cast<GOCActivatorSpawner*>(newRangeSpawning->data);
 		
 		if (otherRangeSpawning) {
-			auto* otherRangeSpawningData = otherRangeSpawning->GetData<GOCActivatorSpawner>();
+			auto* otherRangeSpawningData = static_cast<GOCActivatorSpawner*>(otherRangeSpawning->data);
 			*newRangeSpawningData = *otherRangeSpawningData;
 		}
 		else {
@@ -205,7 +205,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 		objData->componentData.push_back(newRangeSpawning);
 
-		return objData;
+		return (ObjectData*)objData;
 	}
 
 	hh::game::ObjectData* Context::CopyObjectForPlacement(hh::game::ObjectData* otherObject)
@@ -238,7 +238,7 @@ namespace ui::operation_modes::modes::level_editor {
 	}
 
 	hh::game::ObjectData* Context::SpawnObject(const csl::math::Vector3& position) {
-		auto* result = CreateObject(placementTargetLayer->GetAllocator(), objectClassToPlace, { position, { 0.0f, 0.0f, 0.0f } }, nullptr);
+		auto* result = CreateObject(placementTargetLayer->GetAllocator(), objectClassToPlace, { { position, { 0.0f, 0.0f, 0.0f } } }, nullptr);
 		SpawnObject(result);
 		return result;
 	}
@@ -308,5 +308,9 @@ namespace ui::operation_modes::modes::level_editor {
 
 		focusedChunk->Despawn(child);
 		focusedChunk->Restart(focusedChunk->GetObjectIndexByObjectData(child), true);
+	}
+
+	void Context::SetObjectClassToPlace(const hh::game::GameObjectClass* gameObjectClass) {
+		objectClassToPlace = gameObjectClass;
 	}
 }

@@ -23,10 +23,14 @@ public:
 	virtual void Render();
 	virtual void RenderScene();
 
+	void HandlePendingActions();
+
 	void InitBehaviors();
 	void DeinitBehaviors();
 	bool BeginOverlayWindow();
 	void EndOverlayWindow();
+	bool BeginMenuWindow();
+	void EndMenuWindow();
 	bool IsMouseOverSceneWindow();
 	bool CanTakeMouseControl(OperationModeBehavior* behavior);
 	void ToggleDragging(OperationModeBehavior* behavior, bool canStart = true);
@@ -79,6 +83,18 @@ public:
 
 		for (auto& panel : panels)
 			panel->Render();
+
+		if (BeginMenuWindow()) {
+			if (ImGui::BeginMenuBar()) {
+				if (ImGui::BeginMenu("Window")) {
+					for (auto& panel : panels)
+						ImGui::MenuItem(panel->GetPanelTraits().title, nullptr, &panel->isOpen);
+					ImGui::EndMenu();
+				}
+				ImGui::EndMenuBar();
+			}
+		}
+		EndMenuWindow();
 	}
 
 	//template<typename Behavior>

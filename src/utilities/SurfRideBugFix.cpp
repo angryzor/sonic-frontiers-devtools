@@ -1,7 +1,9 @@
-#ifndef DEVTOOLS_TARGET_SDK_wars
 #include "SurfRideBugFix.h"
 #include "Helpers.h"
 
+#ifdef DEVTOOLS_TARGET_SDK_wars
+constexpr size_t unnecessaryTextureListReloadThatTrashesReloadedTextures = 0x1405DF2FA;
+#endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 constexpr size_t surfRideCastHandlePreReloadAddr = 0x140BB5ED0;
 constexpr size_t surfRideCastHandlePostReloadAddr = 0x140BB5C20;
@@ -21,6 +23,7 @@ constexpr size_t storeLayerState = 0x14088D980;
 constexpr size_t loadLayerState = 0x14088D860;
 #endif
 
+#ifndef DEVTOOLS_TARGET_SDK_wars
 void AddFrag(const char* name, csl::ut::String& path) {
 	if (path.size() != 0)
 		path.copyFrom("/", 1, 0, path.size());
@@ -178,8 +181,9 @@ void InstallSurfRideBugFixHooks() {
 	INSTALL_HOOK(SurfRideLoadLayerState);
 
 	WRITE_MEMORY(unnecessaryTextureListReloadThatTrashesReloadedTextures, uint8_t, 0xEB);
-
 }
 #else
-void InstallSurfRideBugFixHooks() {}
+void InstallSurfRideBugFixHooks() {
+	WRITE_MEMORY(unnecessaryTextureListReloadThatTrashesReloadedTextures, uint8_t, 0xEB);
+}
 #endif

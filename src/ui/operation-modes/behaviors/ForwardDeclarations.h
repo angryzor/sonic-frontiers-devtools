@@ -1,6 +1,6 @@
 #pragma once
 
-template<typename OpModeContext> struct ClipboardEntry;
+template<typename OpModeContext> struct ClipboardTraits;
 template<typename OpModeContext> struct ClipboardBehaviorTraits;
 template<typename OpModeContext> struct DeleteBehaviorTraits;
 template<typename OpModeContext> struct GizmoBehaviorTraits;
