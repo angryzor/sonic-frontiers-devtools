@@ -1,5 +1,7 @@
 #include "ObjectWorld.h"
 #include "Common.h"
+#include <ucsl/resources/object-world/v2.h>
+#include <ucsl/resources/object-world/v3.h>
 
 namespace devtools::api::object_world {
 	struct ObjectWorldChunk {
@@ -68,7 +70,7 @@ namespace devtools::api::object_world {
 		auto objId = rip::util::fromGUID<hh::game::ObjectId>(objectId.c_str());
 
 		auto& objects = layer->GetResource()->GetObjects();
-		auto object_it = std::find_if(objects.begin(), objects.end(), [objId](auto* obj) { return obj->id == objId; });
+		auto object_it = std::find_if(objects.begin(), objects.end(), [objId](auto* obj) { return hh::game::ObjectId{ obj->id } == objId; });
 
 		if (object_it == objects.end()) {
 			throw ErrorResponse{
@@ -107,7 +109,14 @@ namespace devtools::api::object_world {
 		};
 	}
 
-	ComponentData buildComponentData(hh::game::ComponentData* component) {
+	ComponentData buildComponentData(ucsl::resources::object_world::v2::ComponentData* component) {
+		return {
+			.type = component->type,
+			.parameters = getRflClassSerialization(component->data, hh::game::GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(component->type)->GetSpawnerDataClass()),
+		};
+	}
+
+	ComponentData buildComponentData(ucsl::resources::object_world::v3::ComponentData* component) {
 		return {
 			.type = component->type,
 			.parameters = getRflClassSerialization(component->data, hh::game::GameObjectSystem::GetInstance()->goComponentRegistry->GetComponentInformationByName(component->type)->GetSpawnerDataClass()),

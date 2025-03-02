@@ -248,18 +248,20 @@ namespace ui::operation_modes::modes::surfride_editor {
 		ReloadResource();
 	}
 
-	void Context::AddTrack(SRS_MOTION& motion, ECurveType type, unsigned int firstFrame, unsigned int lastFrame) {
+	SRS_TRACK& Context::AddTrack(SRS_MOTION& motion, ECurveType type, unsigned int firstFrame, unsigned int lastFrame, ucsl::resources::swif::swif_version::EInterpolationType interpolationType) {
 		auto managedAllocator = resources::ManagedMemoryRegistry::instance->GetManagedAllocator(gocSprite->projectResource);
 
 		resources::ManagedCArray<SRS_TRACK, unsigned short> tracks{ gocSprite->projectResource, motion.tracks, motion.trackCount };
 
 		auto& track = tracks.emplace_back();
 		track.trackType = type;
-		track.flags = static_cast<unsigned int>(EInterpolationType::LINEAR) | (static_cast<unsigned int>(GetTrackDataTypeForCurveType(type)) << 4);
+		track.flags = static_cast<unsigned int>(interpolationType) | (static_cast<unsigned int>(GetTrackDataTypeForCurveType(type)) << 4);
 		track.firstFrame = firstFrame;
 		track.lastFrame = lastFrame;
 		track.keyFrames.constantBool = nullptr;
 		track.keyCount = 0;
+
+		return track;
 	}
 
 	void Context::AddKeyFrame(SRS_TRACK& track, unsigned int frame) {
@@ -558,6 +560,11 @@ namespace ui::operation_modes::modes::surfride_editor {
 
 	SurfRide::Scene* Context::FindRuntimeScene(unsigned int id) const {
 		if (gocSprite == nullptr)
+			return nullptr;
+
+		auto* runtimeProject = gocSprite->GetProject();
+
+		if (runtimeProject == nullptr)
 			return nullptr;
 
 		for (auto scene : gocSprite->GetProject()->GetScenes())

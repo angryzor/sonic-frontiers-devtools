@@ -165,7 +165,16 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (ImGui::BeginMenu("Add track")) {
 				for (unsigned int i = 0; i < static_cast<unsigned int>(ECurveType::IlluminationColorA); i++)
 					if (ImGui::MenuItem(TrackName(static_cast<ECurveType>(i))))
-						context.AddTrack(motion, static_cast<ECurveType>(i), 0, std::min(animation.frameCount, 10u));
+						context.AddTrack(motion, static_cast<ECurveType>(i), 0, animation.frameCount, EInterpolationType::LINEAR);
+				ImGui::EndMenu();
+			}
+			if (ImGui::BeginMenu("Add event")) {
+				for (unsigned int i = 0; i < static_cast<unsigned int>(ECurveType::IlluminationColorA); i++) {
+					if (ImGui::MenuItem(TrackName(static_cast<ECurveType>(i)))) {
+						auto& track = context.AddTrack(motion, static_cast<ECurveType>(i), 0, 0, EInterpolationType::CONSTANT);
+						context.AddKeyFrame(track, 0);
+					}
+				}
 				ImGui::EndMenu();
 			}
 			if (ImGui::MenuItem("Remove")) {
@@ -196,6 +205,12 @@ namespace ui::operation_modes::modes::surfride_editor {
 			if (ImGui::MenuItem("Remove")) {
 				context.RemoveTrack(motion, track);
 			}
+
+			bool repeat = track.GetRepeatType() == ETrackRepeatType::REPEAT;
+
+			if (ImGui::MenuItem("Repeat", nullptr, &repeat))
+				track.SetRepeatType(repeat ? ETrackRepeatType::REPEAT : ETrackRepeatType::ONCE);
+
 			ImGui::EndPopup();
 		}
 
@@ -203,8 +218,43 @@ namespace ui::operation_modes::modes::surfride_editor {
 			auto length = (track.lastFrame - track.firstFrame);
 
 			if (length == 0) {
-				float time{ 0.0f };
-				ImTimeline::Event(TrackName(track), &time);
+				float time{ static_cast<float>(track.firstFrame) };
+
+				bool changed = ImTimeline::Event(TrackName(track), &time);
+
+				if (ImGui::IsItemHovered() && ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left))
+					ImGui::OpenPopup("Editor");
+
+				assert(track.keyCount == 1);
+
+				if (ImGui::BeginPopup("Editor")) {
+					context.VisitKeyFrames(track, [&track](auto* kfs) {
+						using KeyFrameType = std::remove_pointer_t<std::remove_reference_t<decltype(kfs)>>;
+						using ValueType = typename KeyFrameType::ValueType;
+
+						unsigned int frame = kfs[0].frame;
+
+						if (Editor("Frame", frame)) {
+							track.firstFrame = frame;
+							track.lastFrame = frame;
+							kfs[0].frame = frame;
+						}
+
+						RenderKeyFrameEditor<ValueType>(track, kfs[0]);
+					});
+					ImGui::EndPopup();
+				}
+
+				if (changed) {
+					auto newFrame = static_cast<unsigned int>(time);
+
+					track.firstFrame = newFrame;
+					track.lastFrame = newFrame;
+
+					context.VisitKeyFrames(track, [newFrame](auto* kfs) {
+						kfs[0].frame = newFrame;
+					});
+				}
 			}
 			else {
 				float startTime = static_cast<float>(track.firstFrame);

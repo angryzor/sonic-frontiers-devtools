@@ -11,14 +11,18 @@ void OperationModeBase::Render() {
 	}
 	host.EndSceneWindow();
 
-	while (actionsInFlight.size() > 0) {
-		host.Dispatch(actionsInFlight[0]->GetAction());
-		actionsInFlight.remove(0);
-	}
+	HandlePendingActions();
 }
 
-void OperationModeBase::RenderScene()
-{
+void OperationModeBase::RenderScene() {
+}
+
+void OperationModeBase::HandlePendingActions() {
+	while (actionsInFlight.size() > 0) {
+		hh::fnd::Reference<AsyncActionBase> action = actionsInFlight[0];
+		actionsInFlight.remove(0);
+		host.Dispatch(action->GetAction());
+	}
 }
 
 void OperationModeBase::Dispatch(const ActionBase& action) {
@@ -50,6 +54,14 @@ bool OperationModeBase::BeginOverlayWindow() {
 
 void OperationModeBase::EndOverlayWindow() {
 	return host.EndOverlayWindow();
+}
+
+bool OperationModeBase::BeginMenuWindow() {
+	return host.BeginMenuWindow();
+}
+
+void OperationModeBase::EndMenuWindow() {
+	return host.EndMenuWindow();
 }
 
 bool OperationModeBase::IsMouseOverSceneWindow() {

@@ -106,6 +106,23 @@ public:
 		Dispatch(SelectAction{ objects });
 	}
 
+	void ToggleSelection(ObjectType object) {
+		csl::ut::MoveArray<ObjectType> objects{ GetAllocator() };
+		objects.push_back(object);
+		ToggleSelection(objects);
+	}
+
+	void ToggleSelection(const csl::ut::MoveArray<ObjectType>& objects) {
+		csl::ut::MoveArray<ObjectType> objectsToSelect{ GetAllocator() };
+		csl::ut::MoveArray<ObjectType> objectsToDeselect{ GetAllocator() };
+
+		for (auto object : objects)
+			(selection.find(object) == -1 ? objectsToSelect : objectsToDeselect).push_back(object);
+
+		Dispatch(DeselectAction{ objectsToDeselect });
+		Dispatch(SelectAction{ objectsToSelect });
+	}
+
 	void Deselect(ObjectType object) {
 		csl::ut::MoveArray<ObjectType> objects{ GetAllocator() };
 		objects.push_back(object);

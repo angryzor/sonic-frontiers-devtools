@@ -43,7 +43,7 @@ namespace ImTimeline {
 		auto screenPos = ImGui::GetCursorScreenPos();
 
 		ImGui::PushID(id);
-		ImGui::InvisibleButton("button", size);
+		bool clicked = ImGui::InvisibleButton("button", size);
 
 		auto* s = ImGui::GetStateStorage();
 
@@ -68,7 +68,7 @@ namespace ImTimeline {
 
 	bool TimeDrag(const char* id, float* time, ImVec2 size, float min = 0.0f, float max = gCtx->length) {
 		ImGui::PushID(id);
-		ImGui::InvisibleButton("button", size);
+		bool clicked = ImGui::InvisibleButton("button", size);
 
 		auto* s = ImGui::GetStateStorage();
 
@@ -283,7 +283,7 @@ namespace ImTimeline {
 		ImGui::EndChild();
 	}
 
-	bool Event(const char* id, float* time)
+	bool Event(const char* id, float* time, bool* clicked)
 	{
 		static constexpr float radius = 5.0f;
 		static constexpr float spacing = 5.0f;

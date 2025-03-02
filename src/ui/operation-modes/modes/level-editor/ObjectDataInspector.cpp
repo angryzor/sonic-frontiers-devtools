@@ -20,7 +20,7 @@ namespace ui::operation_modes::modes::level_editor {
 		else if (selection.size() > 1) {
 			ImGui::Text("%zd objects selected", selection.size());
 			for (auto obj : selection)
-				ImGui::Text("%s", obj->GetName());
+				ImGui::Text("%s", GetObjectName(obj));
 			ImGui::SeparatorText("Align / Distribute");
 			ImGui::PushID("Align / Distribute");
 			Editor("##AlignX", alignX);

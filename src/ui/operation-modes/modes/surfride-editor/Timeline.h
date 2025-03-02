@@ -1,6 +1,7 @@
 #pragma once
 #include <ui/operation-modes/Panel.h>
 #include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Basic.h>
 #include <imtimeline.h>
 #include "Context.h"
 
@@ -175,15 +176,14 @@ namespace ui::operation_modes::modes::surfride_editor {
 					Setter(kf.value, value);
 				}
 
-				if (hovered || held) {
+				if (hovered || held)
 					ImGui::SetTooltip("Frame: %d\nValue: %f", kf.frame, value);
-				}
 
-				if (clicked && !held) {
+				if (clicked && !held)
 					ImGui::OpenPopup("Editor");
-				}
 
 				if (ImGui::BeginPopup("Editor")) {
+					Editor("Frame", static_cast<ucsl::resources::swif::swif_version::Key<T>&>(kf).frame);
 					RenderKeyFrameEditor<T>(track, kf);
 					ImGui::EndPopup();
 				}

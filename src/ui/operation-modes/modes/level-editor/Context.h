@@ -47,8 +47,10 @@ namespace ui::operation_modes::modes::level_editor {
 		void ReloadActiveObjectParameters(hh::game::ObjectData* objectData);
 		void RespawnActiveObject(hh::game::ObjectData* objectData);
 
-		void UpdateGrindRails();
+		void UpdatePaths();
 
 		void SetObjectParent(hh::game::ObjectData* child, hh::game::ObjectData* parent);
+
+		void SetObjectClassToPlace(const hh::game::GameObjectClass* gameObjectClass);
 	};
 }

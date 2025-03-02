@@ -32,7 +32,7 @@ namespace ui::operation_modes::modes::level_editor {
 
 	const char* SetObjectListTreeViewNode::GetLabel() const {
 		switch (type) {
-		case SetObjectListTreeViewNode::Type::OBJECT: return object.object->GetName();
+		case SetObjectListTreeViewNode::Type::OBJECT: return GetObjectName(object.object);
 		case SetObjectListTreeViewNode::Type::LAYER: return layer.layer->GetName();
 		case SetObjectListTreeViewNode::Type::GROUP: return group.label;
 		default: return nullptr;
@@ -107,8 +107,7 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		switch (action.id) {
 		case FocusedChunkChangedAction::id:
-		case PlacementBehavior<Context>::ObjectPlacedAction::id:
-		case DeleteBehavior<Context>::DeleteAction::id:
+		case SceneChangedAction::id:
 			InvalidateTree();
 			break;
 		}

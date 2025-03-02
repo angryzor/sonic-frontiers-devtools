@@ -39,6 +39,7 @@ public:
 
 			selectionBehavior->DeselectAll();
 			traits.DeleteObjects(tmpArr);
+			Dispatch(SceneChangedAction{});
 		}
 		}
 	}

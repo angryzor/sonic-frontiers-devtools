@@ -23,6 +23,7 @@ private:
 			selection->Select(obj);
 
 		Dispatch(ObjectPlacedAction{ obj });
+		Dispatch(SceneChangedAction{});
 	}
 
 public:

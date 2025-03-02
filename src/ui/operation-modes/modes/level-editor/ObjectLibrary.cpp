@@ -1,8 +1,13 @@
 #include "ObjectLibrary.h"
 #include "Behaviors.h"
 #include "Context.h"
+#include "Actions.h"
+#include <ui/common/inputs/Basic.h>
+#include <ui/common/editors/Basic.h>
 #include <ui/common/Icons.h>
 #include <ui/operation-modes/behaviors/Placement.h>
+#include <utilities/ObjectDataUtils.h>
+#include <utilities/math/MathUtils.h>
 
 namespace ui::operation_modes::modes::level_editor {
 	using namespace hh::fnd;
@@ -46,6 +51,10 @@ namespace ui::operation_modes::modes::level_editor {
 
 			if (!placement->CanPlace())
 				ImGui::EndDisabled();
+
+			ImGui::SameLine();
+			if (ImGui::Button("Array tool..."))
+				Dispatch(OpenArrayToolAction{});
 		}
 
 		if (ImGui::BeginChild("List of objects"))
@@ -148,7 +157,7 @@ namespace ui::operation_modes::modes::level_editor {
 				ImGui::EndDragDropSource();
 			}
 			else if (ImGui::IsItemClicked())
-				library.GetContext().objectClassToPlace = objectClass;
+				library.Dispatch(SetObjectClassToPlaceAction{ objectClass });
 		}
 	}
 }

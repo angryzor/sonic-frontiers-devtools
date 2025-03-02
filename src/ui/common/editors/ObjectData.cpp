@@ -10,11 +10,11 @@
 using namespace hh::game;
 
 #ifndef DEVTOOLS_TARGET_SDK_wars
-ComponentData* CreateComponentData(csl::fnd::IAllocator* allocator, const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
-	if (!strcmp(gocRegItem->GetName(), "Model")) return hh::game::ComponentData::Create<hh::gfx::GOCVisualModelSpawner>(allocator, "Model");
-	else if (!strcmp(gocRegItem->GetName(), "SimpleAnimation")) hh::game::ComponentData::Create<hh::anim::GOCSimpleAnimationSpawner>(allocator, "SimpleAnimation");
-	else if (!strcmp(gocRegItem->GetName(), "RangeSpawning")) hh::game::ComponentData::Create<GOCActivatorSpawner>(allocator, "RangeSpawning");
-	else hh::game::ComponentData::Create(allocator, gocRegItem);
+ucsl::resources::object_world::v3::ComponentData* CreateComponentData(csl::fnd::IAllocator* allocator, const GOComponentRegistry::GOComponentRegistryItem* gocRegItem) {
+	if (!strcmp(gocRegItem->GetName(), "Model")) return CreateComponentDataV3<hh::gfx::GOCVisualModelSpawner>(allocator, "Model");
+	else if (!strcmp(gocRegItem->GetName(), "SimpleAnimation")) return CreateComponentDataV3<hh::anim::GOCSimpleAnimationSpawner>(allocator, "SimpleAnimation");
+	else if (!strcmp(gocRegItem->GetName(), "RangeSpawning")) return CreateComponentDataV3<GOCActivatorSpawner>(allocator, "RangeSpawning");
+	else CreateComponentDataV3(allocator, gocRegItem);
 }
 #endif
 
@@ -67,18 +67,20 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 		}
 	}
 #else
-	for (size_t i = 0; i < obj.componentData.size(); i++) {
-		ImGui::PushID(obj.componentData[i]);
-		auto* gocInfo = objSystem->goComponentRegistry->GetComponentInformationByName(obj.componentData[i]->type);
+	for (auto it = obj.componentData.begin(); it != obj.componentData.end(); it++) {
+		auto* componentData = *it;
+
+		ImGui::PushID(componentData);
+		auto* gocInfo = objSystem->goComponentRegistry->GetComponentInformationByName(componentData->type);
 		if (ImGui::CollapsingHeader(gocInfo->GetName())) {
 			ImGui::Text("Component type: %s", gocInfo->GetComponentClass()->category);
 			ImGui::Text("Configuration:");
-			edited |= ReflectionEditor("Component properties", obj.componentData[i]->data, gocInfo->GetSpawnerDataClass(), true);
+			edited |= ReflectionEditor("Component properties", componentData->data, gocInfo->GetSpawnerDataClass(), true);
 
 			if (ImGui::Button("Remove component")) {
 				auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 
-				//if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
+				//if (!obj.flags.test(ObjectData::Flag::DEALLOCATE)) {
 				//	csl::ut::MoveArray<ComponentData*> componentDatas{ allocator };
 
 				//	for (auto* origCData : obj.componentData) {
@@ -89,12 +91,12 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 				//	}
 
 				//	obj.componentData = std::move(componentDatas);
-				//	obj.flags.set(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION);
+				//	obj.flags.set(ObjectData::Flag::DEALLOCATE);
 				//}
 
-				if (obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION))
-					allocator->Free(obj.componentData[i]);
-				obj.componentData.remove(i);
+				if (obj.flags.test(ObjectData::Flag::DEALLOCATE))
+					allocator->Free(componentData);
+				obj.componentData.erase(it);
 				edited = true;
 			}
 		}
@@ -110,7 +112,7 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 			if (ImGui::Selectable(gocRegItem->GetName())) {
 				auto* allocator = hh::fnd::MemoryRouter::GetModuleAllocator();
 
-				//if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION)) {
+				//if (!obj.flags.test(ObjectData::Flag::DEALLOCATE)) {
 				//	csl::ut::MoveArray<ComponentData*> componentDatas{ allocator };
 
 				//	for (auto* origCData : obj.componentData) {
@@ -121,11 +123,11 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 				//	}
 
 				//	obj.componentData = std::move(componentDatas);
-				//	obj.flags.set(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION);
+				//	obj.flags.set(ObjectData::Flag::DEALLOCATE);
 				//}
 
 				// TODO: Currently leaks some memory, because we would have to copy the whole object when doing that and currently we are not.
-				if (!obj.flags.test(ObjectData::Flag::COMPONENT_DATA_NEEDS_TERMINATION))
+				if (!obj.flags.test(ObjectData::Flag::DEALLOCATE))
 					obj.componentData.change_allocator(allocator);
 				obj.componentData.push_back(CreateComponentData(allocator, gocRegItem));
 				edited = true;

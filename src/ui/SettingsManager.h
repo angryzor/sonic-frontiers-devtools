@@ -177,6 +177,8 @@ class SettingsManager
         bool debugRenderingRenderColliders{ true };
         bool debugRenderingRenderOcclusionCapsules{ true };
         bool debugRenderingRenderPaths{ true };
+        bool debugRenderingRenderPathNormals{ true };
+        bool debugRenderingRenderPathTangents{ true };
         uint8_t debugRenderingGOCVisualDebugDrawOpacity{ 80 };
         float debugRenderingLevelEditorDebugBoxScale{ 0.3f };
         unsigned int debugRenderingLevelEditorDebugBoxRenderLimit{ 500 };

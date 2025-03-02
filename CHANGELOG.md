@@ -1,3 +1,19 @@
+# v0.1.70
+* Added array tool.
+* Added live update of set paths that are not grind rails.
+* Added rendering of path normals and tangents.
+* Added ability to add/edit event tracks in SurfRide editor.
+* Made it possible to close operation mode panels. They can be re-opened from the new `Window` menu.
+* Copy/Paste now remembers the tree structure of the copied objects.
+* Fixed a crash when deselecting an `ObjectWorld` chunk.
+
+## Sonic Frontiers & Shadow Generations
+* Added `GOCPlayerHsm` inspector.
+
+## Sonic Forces
+* Fixed a crash on startup.
+
+
 # v0.1.69
 * Fixed a crash when not installed in default Steam library location.
 * Fixed broken SWIF export.

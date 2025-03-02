@@ -76,7 +76,7 @@ namespace app::gfx {
 namespace ui::operation_modes::modes::level_editor {
 	using namespace hh::game;
 
-	template<> struct ClipboardEntry<Context> {
+	struct ClipboardEntry {
 		Context& context;
 		ObjectData* proto;
 
@@ -115,16 +115,25 @@ namespace ui::operation_modes::modes::level_editor {
 		void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) { context.DeleteObjects(objects); }
 	};
 
-	template<> struct ClipboardBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+	template<> struct ClipboardTraits<Context> : BehaviorTraitsImpl<Context> {
 		using BehaviorTraitsImpl::BehaviorTraitsImpl;
-		bool CanPlace() { return context.placementTargetLayer != nullptr; }
-		ClipboardEntry<Context> CreateClipboardEntry(ObjectData* objData) { return { context, objData }; }
-		void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) { context.DeleteObjects(objects); }
-		ObjectData* CreateObject(const ClipboardEntry<Context>& entry) {
+		using Entry = ClipboardEntry;
+		bool IsRoot(ObjectData* obj) { return !obj->parentID.IsNonNull(); }
+		ObjectData* GetParent(ObjectData* obj) { return context.GetFocusedChunk()->GetWorldObjectStatusByObjectId(obj->parentID).objectData; }
+		ClipboardEntry CreateClipboardEntry(ObjectData* objData) { return { context, objData }; }
+		ObjectData* CreateObject(const ClipboardEntry& entry, std::optional<ObjectData*> parent) {
 			auto* obj = context.CopyObjectForPlacement(entry.proto);
+			if (parent)
+				obj->parentID = parent.value()->id;
 			context.SpawnObject(obj);
 			return obj;
 		}
+	};
+
+	template<> struct ClipboardBehaviorTraits<Context> : BehaviorTraitsImpl<Context> {
+		using BehaviorTraitsImpl::BehaviorTraitsImpl;
+		bool CanPlace() { return context.placementTargetLayer != nullptr; }
+		void DeleteObjects(const csl::ut::MoveArray<ObjectData*>& objects) { context.DeleteObjects(objects); }
 	};
 }
 

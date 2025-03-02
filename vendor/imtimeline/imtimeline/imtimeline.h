@@ -21,7 +21,7 @@ namespace ImTimeline {
 	bool BeginClip(const char* id, float* startTime, float* endTime, float height = 0.0f, bool* startTimeChanged = nullptr, bool* endTimeChanged = nullptr, bool* moved = nullptr);
 	void EndClip();
 
-	bool Event(const char* id, float* time);
+	bool Event(const char* id, float* time, bool* clicked = nullptr);
 
 	bool IsNameColumnHovered();
 	bool IsTimelineColumnHovered();
