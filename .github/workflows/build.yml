@@ -20,4 +20,7 @@ jobs:
         run: cmake --preset x64-release
       - name: build
         shell: pwsh
-        run: cmake --build --preset ci
+        run: cmake --build --preset ci --target install
+      - uses: actions/upload-artifact@v4
+        with:
+          path: out/build/x64-release/archives/devtools-*.zip
