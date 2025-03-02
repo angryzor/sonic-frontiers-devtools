@@ -15,6 +15,6 @@ jobs:
           submodules: recursive
       - uses: lukka/get-cmake@latest
       - uses: ilammy/msvc-dev-cmd@v1
-      - name: build
+      - name: configure
         shell: pwsh
-        run: cmake --preset x64-release
+        run: cmake --build --preset x64-release
