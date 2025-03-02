@@ -66,5 +66,11 @@
         "DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW": false
       }
     }
+  ],
+  "buildPresets": [
+    {
+      "name": "ci",
+      "configurePreset": "x64-release"
+    }
   ]
 }

@@ -10,6 +10,7 @@ set(PROJECT_DOWNLOAD_SIZE "2.42 MB")
 string(TIMESTAMP PROJECT_BUILD_DATE "%Y-%m-%d")
 option(DEVTOOLS_ENABLE_IMGUI_DEMO_WINDOW "Enable ImGui demo window" OFF)
 option(DEVTOOLS_ENABLE_IMPLOT_DEMO_WINDOW "Enable ImPlot demo window" OFF)
+option(DEVTOOLS_INSTALL_TO_GAME_FOLDER "Install to game folder" OFF)
 option(DEVTOOLS_INSTALL_TO_UPDATE_SERVER "Install to update server" OFF)
 set(DEVTOOLS_UPDATE_SERVER_PATH "" CACHE PATH "Path to update server")
 
@@ -17,8 +18,8 @@ set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAn
 
 set(OGDF_DEBUG_MODE NONE)
 include(FetchContent)
-FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 7d2a71816f2c12ad858ecc805cbe421b45935c42 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
-FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.30 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.30)
+FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 8a7b22712929f1cd48c4ed701c52b0c0a69c01c8 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
+FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.32 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.32)
 FetchContent_Declare(dieventlib GIT_REPOSITORY https://github.com/Ashrindy/DiEventLibCPP.git)
 FetchContent_MakeAvailable(ogdf rip dieventlib)
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
@@ -59,6 +60,7 @@ foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     set(PROJECT_DESCRIPTION "${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} DevTools")
     set(PROJECT_LONG_DESCRIPTION "In-engine development kit for ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}}")
     set(GAME_FOLDER_${DEVTOOLS_TARGET_SDK} ${GAME_FOLDER_DEFAULT_${DEVTOOLS_TARGET_SDK}} CACHE STRING "The location of your ${DEVTOOLS_TARGET_SDK} game folder.")
+    option(DEVTOOLS_INSTALL_TO_GAME_FOLDER_${DEVTOOLS_TARGET_SDK} "Install to ${FRIENDLY_GAME_NAME_${DEVTOOLS_TARGET_SDK}} game folder" ON)
     set(DEVTOOLS_TARGET devtools-${DEVTOOLS_TARGET_SDK})
     set(UPDATE_SERVER_NAMESPACE ${UPDATE_SERVER_NAMESPACE_${DEVTOOLS_TARGET_SDK}})
     set(MODS_SUBFOLDER ${MODS_SUBFOLDER_${DEVTOOLS_TARGET_SDK}})
@@ -120,16 +122,24 @@ foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     configure_file(mod.ini.in ${DEVTOOLS_TARGET}/mod.ini)
     configure_file(mod_version.ini.in ${DEVTOOLS_TARGET}/mod_version.ini)
 
-    install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${MOD_FOLDER}")
-    install(DIRECTORY resources/common/ DESTINATION "${MOD_FOLDER}")
-    install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${MOD_FOLDER}")
+    install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}")
+    install(DIRECTORY resources/common/ DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}")
+    install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}")
 
     install(CODE "
         execute_process(
             COMMAND \$\{CMAKE_COMMAND} \"-E\" \"tar\" \"cvf\" \"${CMAKE_CURRENT_BINARY_DIR}/archives/devtools-${DEVTOOLS_TARGET_SDK}-v${PROJECT_VERSION}.zip\" \"--format=zip\" \"devtools\"
-            WORKING_DIRECTORY \"${MODS_FOLDER}\"
+            WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}/artifacts\"
         )
     ")
+
+    if(DEVTOOLS_INSTALL_TO_GAME_FOLDER)
+        if(DEVTOOLS_INSTALL_TO_GAME_FOLDER_${DEVTOOLS_TARGET_SDK})
+            install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${MOD_FOLDER}")
+            install(DIRECTORY resources/common/ DESTINATION "${MOD_FOLDER}")
+            install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${MOD_FOLDER}")
+        endif()
+    endif()
 
     if(DEFINED UPDATE_SERVER_PATH_NORMALIZED)
         cmake_path(APPEND UPDATE_SERVER_PATH_NORMALIZED "${UPDATE_SERVER_NAMESPACE}/devtools" OUTPUT_VARIABLE UPDATE_SERVER_MOD_FOLDER)

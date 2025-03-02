@@ -1,0 +1,23 @@
+name: build
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build-win32:
+    name: build-windows
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: lukka/get-cmake@latest
+      - uses: ilammy/msvc-dev-cmd@v1
+      - name: configure
+        shell: pwsh
+        run: cmake --preset x64-release
+      - name: build
+        shell: pwsh
+        run: cmake --build --preset ci
