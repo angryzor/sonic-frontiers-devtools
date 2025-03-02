@@ -121,9 +121,9 @@ foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     configure_file(mod.ini.in ${DEVTOOLS_TARGET}/mod.ini)
     configure_file(mod_version.ini.in ${DEVTOOLS_TARGET}/mod_version.ini)
 
-    install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}")
-    install(DIRECTORY resources/common/ DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}")
-    install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}")
+    install(TARGETS ${DEVTOOLS_TARGET} RUNTIME DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}/devtools")
+    install(DIRECTORY resources/common/ DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}/devtools")
+    install(FILES LICENSE.txt CHANGELOG.md "${CMAKE_CURRENT_BINARY_DIR}/${DEVTOOLS_TARGET}/mod.ini" DESTINATION "${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}/devtools")
 
     install(CODE "
         execute_process(
