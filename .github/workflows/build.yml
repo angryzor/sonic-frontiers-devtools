@@ -13,6 +13,6 @@ jobs:
       - uses: actions/checkout@v4
       - uses: lukka/get-cmake@latest
       - uses: ilammy/msvc-dev-cmd@v1
-      - uses: lukka/run-cmake@v10
-        with:
-          configurePreset: x64-release
+      - name: build
+        shell: pwsh
+        run: cmake --preset x64-release
