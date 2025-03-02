@@ -20,4 +20,4 @@ jobs:
         run: cmake --preset x64-release
       - name: build
         shell: pwsh
-        run: cmake --build
+        run: cmake --build --preset ci

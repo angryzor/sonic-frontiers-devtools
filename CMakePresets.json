@@ -67,4 +67,10 @@
       }
     }
   ]
+  "buildPresets": [
+    {
+      "name": "ci",
+      "configurePreset": "x64-release"
+    }
+  ]
 }
