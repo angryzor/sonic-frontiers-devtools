@@ -11,6 +11,7 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Build
-        shell: pwsh
-        run: cmake --preset x64-release
+      - uses: lukka/get-cmake@latest
+      - uses: lukka/run-cmake@v10
+        with:
+          buildPreset: x64-release
