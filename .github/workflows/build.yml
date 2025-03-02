@@ -13,4 +13,4 @@ jobs:
       - uses: actions/checkout@v4
       - name: Build
         shell: pwsh
-        run: cmake --preset=x64-release --build
+        run: cmake --preset x64-release
