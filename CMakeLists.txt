@@ -128,7 +128,7 @@ foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     install(CODE "
         execute_process(
             COMMAND \$\{CMAKE_COMMAND} \"-E\" \"tar\" \"cvf\" \"${CMAKE_CURRENT_BINARY_DIR}/archives/devtools-${DEVTOOLS_TARGET_SDK}-v${PROJECT_VERSION}.zip\" \"--format=zip\" \"devtools\"
-            WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}/artifacts\"
+            WORKING_DIRECTORY \"${CMAKE_CURRENT_BINARY_DIR}/artifacts/${DEVTOOLS_TARGET}\"
         )
     ")
 

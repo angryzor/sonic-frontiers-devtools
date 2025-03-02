@@ -23,4 +23,5 @@ jobs:
         run: cmake --build --preset ci --target install
       - uses: actions/upload-artifact@v4
         with:
+          name: archives
           path: out/build/x64-release/archives/devtools-*.zip
