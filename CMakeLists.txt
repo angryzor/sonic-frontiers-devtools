@@ -18,7 +18,7 @@ set(CMAKE_MSVC_DEBUG_INFORMATION_FORMAT "$<$<CONFIG:Debug,RelWithDebInfo>:EditAn
 set(OGDF_DEBUG_MODE NONE)
 include(FetchContent)
 FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 7d2a71816f2c12ad858ecc805cbe421b45935c42 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
-FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.30 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.30)
+FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.31 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.31)
 FetchContent_MakeAvailable(ogdf rip)
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
