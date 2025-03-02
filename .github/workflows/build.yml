@@ -14,4 +14,4 @@ jobs:
       - uses: lukka/get-cmake@latest
       - uses: lukka/run-cmake@v10
         with:
-          buildPreset: x64-release
+          configurePreset: x64-release
