@@ -65,14 +65,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #ifdef DEVTOOLS_TARGET_SDK_miller
 			context.goDVSC->timeline->currentFrame2 = static_cast<int>(playHeadFrame * 100);
 #endif
-
-			if (context.ContainsElement(static_cast<unsigned int>(hh::dv::DvNodeElement::ElementID::MOVIE_VIEW)))
-				if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
-					for (auto x : movieSrv->movies) {
-						if (changed) {
-							x->moviePlayer->SetPause(!*play);
-						}
+			if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
+				for (auto x : movieSrv->movies) {
+					if (changed) {
+						x->moviePlayer->SetPause(!*play);
 					}
+				}
 		}
 		ImGui::EndChild();
 	}

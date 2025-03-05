@@ -1,4 +1,32 @@
 #include <ui/common/editors/Basic.h>
+#include <ui/operation-modes/modes/dvscene-editor/Context.h>
+#include "DvScene.h"
+
+bool Editor(const char* label, char* guid, hh::dv::DvSceneNodeTree* nodeTree)
+{
+    csl::ut::MoveArray32<hh::dv::DvNodeBase*> value{ nodeTree->GetAllocator() };
+    ui::operation_modes::modes::dvscene_editor::Context::GetNodes(nodeTree, value, false);
+    hh::dv::DvNodeBase* selectedNode;
+    for (auto* x : value)
+        if (strcmp(x->GetGUID(), guid) == 0) {
+            selectedNode = x;
+            break;
+        }
+    if (ImGui::BeginCombo(label, value.empty() ? "None" : selectedNode->nodeName.c_str())) {
+        for (auto* x : value) {
+            bool isSelected = x == selectedNode;
+            if (ImGui::Selectable(x->nodeName.c_str(), isSelected))
+                selectedNode = x;
+            if (isSelected)
+                ImGui::SetItemDefaultFocus();
+        }
+        ImGui::EndCombo();
+        value.~MoveArray32();
+        return true;
+    }
+    value.~MoveArray32();
+    return false;
+}
 
 bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data) {
     if (ImGui::TreeNode(label)) {
@@ -12,7 +40,7 @@ bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data
     return false;
 }
 
-bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data, csl::ut::Bitset<hh::dv::DvElementCameraParams::Data::Flags>& flags, bool finishParams = false) {
+bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data, csl::ut::Bitset<hh::dv::DvElementCameraParams::Data::Flags>& flags, bool finishParams) {
     if (ImGui::TreeNode(label)) {
         if(flags.test(finishParams ? hh::dv::DvElementCameraParams::Data::Flags::FINISH_POSITION : hh::dv::DvElementCameraParams::Data::Flags::POSITION))
             Editor("Position", data.position);
@@ -78,10 +106,10 @@ bool Editor(const char* label, app::dv::DvElementChromaticAberrationFilterParam:
     return false;
 }
 
-bool Editor(const char* label, app::dv::DvElementLookAtIK::Data::Object& obj) {
+bool Editor(const char* label, app::dv::DvElementLookAtIK::Data::Object& obj, hh::dv::DvSceneNodeTree* nodeTree) {
     if(ImGui::TreeNode(label)){
         Editor("Unk0", obj.unk1);
-        Editor("GUID", obj.guid);
+        Editor("GUID", obj.guid, nodeTree);
         Editor("Offset", obj.offset);
         ImGui::TreePop();
         return true;

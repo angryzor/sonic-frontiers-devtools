@@ -279,6 +279,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         DiEventManager
         EventPlayer
         MovieManager
+        SoundManagerCri
     )
 endif()
 

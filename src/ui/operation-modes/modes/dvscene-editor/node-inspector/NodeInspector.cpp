@@ -9,22 +9,6 @@
 #include <ui/GlobalSettings.h>
 
 namespace ui::operation_modes::modes::dvscene_editor {
-	const char* nodeTypeNames0[] = {
-		"",
-		"Path",
-		"PathMotion",
-		"Camera",
-		"CameraMotion",
-		"Character",
-		"CharacterMotion",
-		"CharacterBehavior",
-		"Model",
-		"",
-		"ModelMotion",
-		"ModelNode",
-		"Element"
-	};
-
 	void NodeInspector::RenderPanel()
 	{
 		auto& context = GetContext();
@@ -43,21 +27,29 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		else {
 			auto& focusedNode = selection[0];
 			hh::dv::DvNodeBase* node = focusedNode.node;
-			Viewer("ID", node->guid);
+			char guidBuffer[37];
+			unsigned char guid[16];
+			memcpy(guid, node->guid, 16);
+			sprintf(guidBuffer,
+				"%02X%02X%02X%02X-%02X%02X-%02X%02X-%02X%02X-%02X%02X%02X%02X%02X%02X",
+				guid[0], guid[1], guid[2], guid[3],
+				guid[4], guid[5],
+				guid[6], guid[7],
+				guid[8], guid[9],
+				guid[10], guid[11], guid[12], guid[13], guid[14], guid[15]);
+			ImGui::Text("GUID: {%s}", guidBuffer);
 			Editor("Node Name", node->nodeName);
 			int type = static_cast<int>(node->nodeType);
-			Viewer("Node Type", nodeTypeNames0[type]);
+			Viewer("Node Type", nodeTypeNames[type]);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (node->nodeType == hh::dv::DvNodeBase::NodeType::CHARACTER ||
 				node->nodeType == hh::dv::DvNodeBase::NodeType::CAMERA_MOTION || 
 				node->nodeType == hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION) {
-				char buffer[400];
 				const char* curRes = "NULL";
 				if (auto* dvres = node->dvResource)
 					if (auto* res = dvres->resource)
 						curRes = res->GetName();
-				sprintf(buffer, "Current Resource: %s (Drag and drop a resource to change)", curRes);
-				ImGui::Text(buffer);
+				ImGui::Text("Current Resource: %s (Drag and drop a resource to change)", curRes);
 				if (ImGui::BeginDragDropTarget()) {
 					if (auto* payload = ImGui::AcceptDragDropPayload("Resource")) {
 						auto* resource = *static_cast<hh::fnd::ManagedResource**>(payload->Data);

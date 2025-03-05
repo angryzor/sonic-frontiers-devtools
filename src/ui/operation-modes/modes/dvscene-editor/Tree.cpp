@@ -2,46 +2,13 @@
 #include "Behaviors.h"
 #include <ui/common/StandaloneOperationModeHost.h>
 #include <ui/common/viewers/Basic.h>
+#include <ui/common/editors/Basic.h>
 #include <ui/GlobalSettings.h>
 
 namespace ui::operation_modes::modes::dvscene_editor {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-	const char* nodeTypeNames1[] = {
-		"",
-		"Path",
-		"PathMotion",
-		"Camera",
-		"CameraMotion",
-		"Character",
-		"CharacterMotion",
-		"CharacterBehavior",
-		"Model",
-		"",
-		"ModelMotion",
-		"ModelNode",
-		"Element"
-	};
-#endif
-
-#ifdef DEVTOOLS_TARGET_SDK_miller
-	const char* nodeTypeNames1[] = {
-		"",
-		"Path",
-		"PathMotion",
-		"Camera",
-		"CameraMotion",
-		"Character",
-		"CharacterMotion",
-		"CharacterBehavior",
-		"Model",
-		"",
-		"ModelMotion",
-		"ModelNode",
-		"Element"
-	};
-#endif
-
     void Tree::RenderNode(hh::dv::DvNodeBase* node){
+		ImGui::PushID(node);
+
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
 		DvNode selection{ node };
 
@@ -52,7 +19,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 		char nodeName[256];
-		snprintf(nodeName, sizeof(nodeName), "%s (%s) - %zx##%s", node->nodeName.c_str(), nodeTypeNames1[static_cast<int>(node->nodeType)], (size_t)node, node->guid);
+		const char* type = nodeTypeNames[static_cast<int>(node->nodeType)];
+		if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT) {
+			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement*>(node)->binaryData.elementId);
+			if (elemId >= 1000)
+				type = elementIDStrings[elemId - 1000 + hhElementCount];
+			else
+				type = elementIDStrings[elemId];
+		}
+		snprintf(nodeName, sizeof(nodeName), "%s (%s) - %zx##%s", node->nodeName.c_str(), type, (size_t)node, node->guid);
 
 		bool isOpen = false;
 
@@ -64,36 +39,40 @@ namespace ui::operation_modes::modes::dvscene_editor {
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 			selectionBehavior->Select(selection);
         
-        if(isOpen){
-			#ifdef DEVTOOLS_TARGET_SDK_rangers
-			if (ImGui::BeginPopupContextItem("Options")) {
-				if (ImGui::Selectable("Add Element")) {
-					char* setupInfoBuffer = new char[sizeof(hh::dv::DvNodeElement::Data) + sizeof(hh::dv::DvElementEffect::Data)];
-					memset(setupInfoBuffer, 0x00, sizeof(hh::dv::DvNodeElement::Data) + sizeof(hh::dv::DvElementEffect::Data));
-					auto* elementInfo = reinterpret_cast<hh::dv::DvNodeElement::Data*>(setupInfoBuffer);
-					elementInfo->start = 0.0f;
-					elementInfo->end = 100.0f;
-					elementInfo->elementId = hh::dv::DvNodeElement::ElementID::EFFECT;
-					auto* effectInfo = reinterpret_cast<hh::dv::DvElementEffect::Data*>(&setupInfoBuffer[32]);
-					strcpy(effectInfo->effectName, "eff_bo4110_ge01");
-					effectInfo->effectMatrix = csl::math::Matrix44::Identity();
-					void* rawMem = malloc(sizeof(hh::dv::DvNodeElement));
-					hh::dv::DvNodeElement* dvNodeElement = new (rawMem) hh::dv::DvNodeElement(hh::fnd::MemoryRouter::GetModuleAllocator());
-					dvNodeElement->dvsceneNodeTree = node->dvsceneNodeTree;
-					dvNodeElement->nodeType = hh::dv::DvNodeBase::NodeType::ELEMENT;
-					dvNodeElement->parent = node;
-					strcpy(dvNodeElement->guid, "\xe8\xbe\x49\x56\x04\x97\x4b\xd4\x97\xe0\x70\xb9\x4e\x75\x98\x84");
-					dvNodeElement->nodeName.push_back('l');
-					dvNodeElement->nodeName.push_back('o');
-					dvNodeElement->nodeName.push_back('l');
-					dvNodeElement->nodeName.push_back('\0');
-					dvNodeElement->Setup(setupInfoBuffer);
-					node->childrenElements0.push_back(dvNodeElement);
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+		if (ImGui::BeginPopupContextItem("Options")) {
+			auto& ctx = GetContext();
+			ImGui::BeginGroup();
+			for (auto& category : categorizedNodes) {
+				if (ImGui::TreeNode(category.name)) {
+					for (auto& cnode : category.items) {
+						if (cnode != std::pair<unsigned int, bool>{}) {
+							const char* nodeName = nodeTypeNames[cnode.first];
+							unsigned int nodeType = cnode.first;
+							unsigned int elementId = 0;
+							if (cnode.second) {
+								nodeType = static_cast<unsigned int>(hh::dv::DvNodeBase::NodeType::ELEMENT);
+								elementId = cnode.first;
+								if (cnode.first >= 1000)
+									nodeName = elementIDStrings[cnode.first - 1000 + hhElementCount];
+								else
+									nodeName = elementIDStrings[cnode.first];
+							}
+							if (ImGui::Selectable(nodeName)) {
+								auto* newNode = ctx.CreateNode(nodeName, nodeType, elementId, node);
+								ctx.ParentNode(node, newNode);
+							}
+						}
+					}
+					ImGui::TreePop();
 				}
-				ImGui::EndPopup();
 			}
-			#endif
+			ImGui::EndGroup();
+			ImGui::EndPopup();
+		}
+#endif
 
+        if(isOpen){
             for(auto* x : node->childrenElements0)
                 RenderNode(x);
 			for (auto* x : node->childrenPath)
@@ -108,6 +87,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				RenderNode(x);
             ImGui::TreePop();
         }
+
+		ImGui::PopID();
     }
 
 	void Tree::RenderPanel()

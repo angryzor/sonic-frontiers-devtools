@@ -12,7 +12,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
     void RenderElementInspector<8>(hh::dv::DvElementBase* element) {
         auto* elem = reinterpret_cast<hh::dv::DvElementEffect*>(element);
         auto& data = elem->binaryData;
-		Editor("Effect Matrix", data.effectMatrix);
+        csl::math::Transform transform = Affine3fToTransform(Eigen::Affine3f(data.effectMatrix.matrix()));
+        if (Editor("Effect Transform", transform))
+            data.effectMatrix = Eigen::Affine3f(TransformToAffine3f(transform));
         Editor("Effect Name", data.effectName);
         CheckboxFlags("Unk0", data.flags, hh::dv::DvElementEffect::Data::Flags::UNK0);
         CheckboxFlags("Quaternion", data.flags, hh::dv::DvElementEffect::Data::Flags::QUATERNION);

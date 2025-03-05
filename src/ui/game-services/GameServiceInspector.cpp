@@ -35,6 +35,7 @@ typedef std::tuple<
 #include "game-service-inspectors/DiEventManager.h"
 #include "game-service-inspectors/EventPlayer.h"
 #include "game-service-inspectors/MovieManager.h"
+#include "game-service-inspectors/SoundManagerCri.h"
 
 typedef std::tuple<
 	app::gfx::FxParamManager,
@@ -53,7 +54,8 @@ typedef std::tuple<
 	app::game::MonologueService,
 	hh::dv::DiEventManager,
 	app::evt::EventPlayer,
-	hh::fmv::MovieManager
+	hh::fmv::MovieManager,
+	hh::snd::SoundManagerCri
 > InspectableServices;
 
 #endif

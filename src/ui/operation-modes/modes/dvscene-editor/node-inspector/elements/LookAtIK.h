@@ -11,7 +11,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         auto* elem = reinterpret_cast<app::dv::DvElementLookAtIK*>(element);
         auto* data = elem->GetData();
 		Editor("Curve Enabled", data->curveEnabled);
-        Editor("Object", data->obj);
-        Editor("Finish Object", data->finishObj);
+        Editor("Object", data->obj, element->baseNode->dvsceneNodeTree);
+        Editor("Finish Object", data->finishObj, element->baseNode->dvsceneNodeTree);
     }
 }
