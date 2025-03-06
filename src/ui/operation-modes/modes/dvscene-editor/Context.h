@@ -209,7 +209,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		app::evt::EventScene* evtScene;
 		std::mt19937 mt{ std::random_device{}() };
 
-		double timelineFalloff;
 		csl::ut::VariableString cutsceneName;
 		csl::ut::VariableString nodeName;
 		int nodeType;

@@ -12,7 +12,6 @@ namespace ui::operation_modes::modes::dvscene_editor
 {
 	DvSceneEditor::DvSceneEditor(csl::fnd::IAllocator* allocator, OperationModeHost& host) : OperationMode{ allocator, host }
 	{
-		GetContext().timelineFalloff = 3.0;
 		AddPanel<Tree>();
         AddPanel<SceneSettings>();
         AddPanel<NodeInspector>();
@@ -36,7 +35,9 @@ namespace ui::operation_modes::modes::dvscene_editor
 	{
 		auto& ctx = GetContext();
 		if (gameObject->objectClass == hh::dv::DvSceneControl::GetClass())
-			if (gameObject == ctx.goDVSC)
+			if (gameObject == ctx.goDVSC) {
 				ctx.goDVSC = nullptr;
+				GetBehavior<SelectionBehavior<Context>>()->DeselectAll();
+			}
 	}
 }

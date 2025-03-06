@@ -8,6 +8,7 @@
 #include <algorithm>
 #include <numeric>
 #include "Nodes.h"
+#include <numbers>
 
 namespace ui::operation_modes::modes::dvscene_editor {
 	Timeline::Timeline(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode) : Panel{ allocator, operationMode }, timelineCtx{ ImTimeline::CreateContext() } { }
@@ -60,11 +61,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 			changed |= beforePlay != *play;
 
-			context.goDVSC->timeline->currentFrame0 = static_cast<int>(playHeadFrame * 100);
-			context.goDVSC->timeline->currentFrame1 = static_cast<int>(playHeadFrame * 100);
-#ifdef DEVTOOLS_TARGET_SDK_miller
-			context.goDVSC->timeline->currentFrame2 = static_cast<int>(playHeadFrame * 100);
-#endif
+			SetFrame(playHeadFrame * 100);
+
 			if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
 				for (auto x : movieSrv->movies) {
 					if (changed) {
@@ -78,6 +76,16 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	PanelTraits Timeline::GetPanelTraits() const
 	{
 		return { "Timeline", ImVec2(250, 500), ImVec2(500, 250) };
+	}
+
+	void Timeline::SetFrame(float time)
+	{
+		auto& context = GetContext();
+		context.goDVSC->timeline->currentFrame0 = static_cast<int>(time);
+		context.goDVSC->timeline->currentFrame1 = static_cast<int>(time);
+#ifdef DEVTOOLS_TARGET_SDK_miller
+		context.goDVSC->timeline->currentFrame2 = static_cast<int>(time);
+#endif
 	}
 
 	bool Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
@@ -102,7 +110,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				if (ImTimeline::BeginClip("", &startTime, &endTime, 80.0f, &startTimeChanged, &endTimeChanged, &moved)) {
 					if (curve && ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
 						if (ImGui::BeginPopupContextItem("Controls")) {
-							Editor("Falloff", GetContext().timelineFalloff);
+							ImGui::SeparatorText("Curve Editing Settings");
+							Editor("Falloff", timelineFalloff);
+							ImGui::SeparatorText("Custom Curve");
+							Editor("Decreasing", decreasing);
+							ImGui::SameLine();
+							ImGui::Combo("Curve Type", &curveType, curveTypeNames, 7);
+							if (ImGui::Selectable("Generate Curve")) {
+								GenerateCurve(curve, size, curveType, decreasing);
+							}
 							ImGui::EndPopup();
 						}
 
@@ -128,7 +144,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 								if (axisLimit)
 									value = std::clamp(value, 0.0, static_cast<double>(maxValue));
 
-								double sigma = GetContext().timelineFalloff;
+								double sigma = timelineFalloff;
 								double delta = value - curve[x];
 
 								for (int i = 0; i < size; i++) {
@@ -162,5 +178,61 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImTimeline::EndTrack();
 		}
 		return changed;
+	}
+
+	void Timeline::GenerateCurve(float* curve, int size, int type, bool decreasing)
+	{
+		for (int x = 0; x < size; x++) {
+			switch (type) {
+			case 0:
+				curve[x] = static_cast<float>(x) / static_cast<float>(size - 1);
+				if (decreasing)
+					curve[x] = 1 - curve[x];
+				break;
+			case 1: {
+				float sqr = static_cast<float>(x) / static_cast<float>(size - 1);
+				if (decreasing)
+					curve[x] = (1 - sqr) * (1 - sqr);
+				else
+					curve[x] = sqr * sqr;
+				break;
+			}
+			case 2: {
+				float sqr = static_cast<float>(x) / static_cast<float>(size - 1);
+				if (decreasing)
+					curve[x] = 1 - sqr * sqr;
+				else
+					curve[x] = 1 - (1 - sqr) * (1 - sqr);
+				break;
+			}
+			case 3: {
+				float t = static_cast<float>(x) / static_cast<float>(size - 1);
+				curve[x] = t < 0.5f ? 4 * t * t * t : 1 - pow(-2 * t + 2, 3) / 2;
+				if (decreasing)
+					curve[x] = 1 - curve[x];
+				break;
+			}
+			case 4: {
+				curve[x] = 0.5f * (1 - cos(static_cast<float>(x) / static_cast<float>(size - 1) * std::numbers::pi));
+				if (decreasing)
+					curve[x] = 1 - curve[x];
+				break;
+			}
+			case 5: {
+				float t = static_cast<float>(x) / static_cast<float>(size - 1);
+				if (!decreasing)
+					t = 1 - t;
+				curve[x] = 1 - log1p(t * 9) / log1p(9);
+				break;
+			}
+			case 6: {
+				float t = static_cast<float>(x) / static_cast<float>(size - 1);
+				if (decreasing)
+					t = 1 - t;
+				curve[x] = log1p(t * 9) / log1p(9);
+				break;
+			}
+			}
+		}
 	}
 }

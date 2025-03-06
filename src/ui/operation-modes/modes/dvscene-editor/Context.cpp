@@ -1,4 +1,5 @@
 #include "Context.h"
+#include "timeline/Elements.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
     constexpr std::pair<size_t, size_t> NodeDataSize[] = {
@@ -152,7 +153,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         switch (static_cast<hh::dv::DvNodeBase::NodeType>(nodeType)) {
         case hh::dv::DvNodeBase::NodeType::PATH:
             node = new (rawMem) hh::dv::DvNodePath(allocator);
-            reinterpret_cast<hh::dv::DvNodePath::Data*>(setup)->matrix = csl::math::Matrix44();
+            reinterpret_cast<hh::dv::DvNodePath::Data*>(setup)->matrix = csl::math::Matrix44::Identity();
             break;
         case hh::dv::DvNodeBase::NodeType::CAMERA:
             node = new (rawMem) hh::dv::DvNodeCamera(allocator);
@@ -212,6 +213,45 @@ namespace ui::operation_modes::modes::dvscene_editor {
             setupData->playType = hh::dv::DvNodeElement::PlayType::NORMAL;
             setupData->updateTiming = hh::dv::DvNodeElement::UpdateTiming::ON_EXEC_PATH;
             setupData->elementId = static_cast<hh::dv::DvNodeElement::ElementID>(elementId);
+            switch (setupData->elementId) {
+            case hh::dv::DvNodeElement::ElementID::PATH_OFFSET: {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->offsetMatrix = csl::math::Matrix44::Identity();
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::PATH_INTERPOLATION: {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementPathInterpolation::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->interpolation.scale = { 1,1,1 };
+                elementData->finishInterpolation.scale = { 1,1,1 };
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::EFFECT: {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementEffect::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->r = 255;
+                elementData->g = 255;
+                elementData->b = 255;
+                elementData->a = 255;
+                elementData->effectMatrix = csl::math::Matrix44::Identity();
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::FADE: {
+                auto* elementData = reinterpret_cast<app::dv::DvElementFade::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->enabled = true;
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::UV_ANIM: 
+            case hh::dv::DvNodeElement::ElementID::VISIBILITY_ANIM: 
+            case hh::dv::DvNodeElement::ElementID::MATERIAL_ANIM: 
+            case hh::dv::DvNodeElement::ElementID::VERTEX_ANIMATION_TEXTURE: 
+            {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementUVAnim::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->speed = 1.0f;
+                break;
+            }
+            }
+            auto curveDataInfo = GetElementTimelineRender(elementId);
+            if (curveDataInfo != std::pair<size_t, size_t>{})
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second, 0, false);
             break;
         }
         }

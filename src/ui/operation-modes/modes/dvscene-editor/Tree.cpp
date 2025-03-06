@@ -42,32 +42,33 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 		if (ImGui::BeginPopupContextItem("Options")) {
 			auto& ctx = GetContext();
-			ImGui::BeginGroup();
-			for (auto& category : categorizedNodes) {
-				if (ImGui::TreeNode(category.name)) {
-					for (auto& cnode : category.items) {
-						if (cnode != std::pair<unsigned int, bool>{}) {
-							const char* nodeName = nodeTypeNames[cnode.first];
-							unsigned int nodeType = cnode.first;
-							unsigned int elementId = 0;
-							if (cnode.second) {
-								nodeType = static_cast<unsigned int>(hh::dv::DvNodeBase::NodeType::ELEMENT);
-								elementId = cnode.first;
-								if (cnode.first >= 1000)
-									nodeName = elementIDStrings[cnode.first - 1000 + hhElementCount];
-								else
-									nodeName = elementIDStrings[cnode.first];
-							}
-							if (ImGui::Selectable(nodeName)) {
-								auto* newNode = ctx.CreateNode(nodeName, nodeType, elementId, node);
-								ctx.ParentNode(node, newNode);
+			if (ImGui::TreeNode("Add Node")) {
+				for (auto& category : categorizedNodes) {
+					if (ImGui::TreeNode(category.name)) {
+						for (auto& cnode : category.items) {
+							if (cnode != std::pair<unsigned int, bool>{}) {
+								const char* nodeName = nodeTypeNames[cnode.first];
+								unsigned int nodeType = cnode.first;
+								unsigned int elementId = 0;
+								if (cnode.second) {
+									nodeType = static_cast<unsigned int>(hh::dv::DvNodeBase::NodeType::ELEMENT);
+									elementId = cnode.first;
+									if (cnode.first >= 1000)
+										nodeName = elementIDStrings[cnode.first - 1000 + hhElementCount];
+									else
+										nodeName = elementIDStrings[cnode.first];
+								}
+								if (ImGui::Selectable(nodeName)) {
+									auto* newNode = ctx.CreateNode(nodeName, nodeType, elementId, node);
+									ctx.ParentNode(node, newNode);
+								}
 							}
 						}
+						ImGui::TreePop();
 					}
-					ImGui::TreePop();
 				}
+				ImGui::TreePop();
 			}
-			ImGui::EndGroup();
 			ImGui::EndPopup();
 		}
 #endif

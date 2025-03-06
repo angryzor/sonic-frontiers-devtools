@@ -6,6 +6,16 @@
 #include <optional>
 
 namespace ui::operation_modes::modes::dvscene_editor {
+	inline constexpr const char* curveTypeNames[] = {
+		"LINEAR",
+		"QUADRATIC IN",
+		"QUADRATIC OUT",
+		"CUBIC",
+		"SINE",
+		"LOGARITHMIC IN",
+		"LOGARITHMIC OUT"
+	};
+
 	class Timeline : public Panel<Context> {
     private:
         ImTimeline::ImTimelineContext* timelineCtx;
@@ -17,7 +27,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
 
+		void SetFrame(float time);
 		bool RenderTimeline(int& start, int& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
+		static void GenerateCurve(float* curve, int size, int type, bool decreasing);
+
+		double timelineFalloff = 3.0f;
+		bool decreasing = false;
+		int curveType = 0;
 	};
 
 	template<int type>
