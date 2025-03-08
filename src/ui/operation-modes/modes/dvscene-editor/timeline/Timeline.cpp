@@ -32,7 +32,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
 			bool changed = false;
 			ImGui::Checkbox("Looping", &context.goDVSC->timeline->looping);
-			auto playHeadFrame = std::fminf(context.goDVSC->timeline->currentFrame0/100, static_cast<float>(context.goDVSC->timeline->frameEnd/100));
+			auto playHeadFrame = std::fminf(context.goDVSC->timeline->postCurrentFrame/100, static_cast<float>(context.goDVSC->timeline->frameEnd/100));
 			bool currentTimeChanged{};
 			bool* play = &context.goDVSC->play;
 			if (context.evtScene)
@@ -64,12 +64,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			SetFrame(playHeadFrame * 100);
 
 			if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
-				for (auto x : movieSrv->movies) {
-					if (changed) {
+				for (auto x : movieSrv->movies)
+					if (changed)
 						x->moviePlayer->SetPause(!*play);
-						x->moviePlayer->frameInfo->time = playHeadFrame * 100;
-					}
-				}
 		}
 		ImGui::EndChild();
 	}
@@ -82,8 +79,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	void Timeline::SetFrame(float time)
 	{
 		auto& context = GetContext();
-		context.goDVSC->timeline->currentFrame0 = static_cast<int>(time);
-		context.goDVSC->timeline->currentFrame1 = static_cast<int>(time);
+		context.goDVSC->timeline->preCurrentFrame = static_cast<int>(time);
+		context.goDVSC->timeline->postCurrentFrame = static_cast<int>(time);
 #ifdef DEVTOOLS_TARGET_SDK_miller
 		context.goDVSC->timeline->currentFrame2 = static_cast<int>(time);
 #endif

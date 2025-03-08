@@ -13,8 +13,7 @@ void RenderGameServiceInspector(hh::dv::DiEventManager& service)
                 Viewer("Cutscene Name", dvSceneControl->cutsceneName);
                 Viewer("Cut Count", dvSceneControl->timeline->cuts.size());
                 Viewer("Current Cut", dvSceneControl->timeline->currentCut);
-                Editor("Current Frame0", dvSceneControl->timeline->currentFrame0);
-                Editor("Current Frame1", dvSceneControl->timeline->currentFrame1);
+                Editor("Current Frame", dvSceneControl->timeline->preCurrentFrame);
                 ImGui::TreePop();
             }
         }

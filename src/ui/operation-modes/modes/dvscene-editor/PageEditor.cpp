@@ -69,7 +69,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		nodeEditor.EndInputPins();
 
 		nodeEditor.BeginControls();
-		float progress = (static_cast<float>(context.goDVSC->timeline->currentFrame0) - page->binaryData.start) / (page->binaryData.end - page->binaryData.start);
+		float progress = (static_cast<float>(context.goDVSC->timeline->preCurrentFrame) - page->binaryData.start) / (page->binaryData.end - page->binaryData.start);
 		if (context.goDVSC->timeline->currentPage == pageIdx)
 			ImGui::ProgressBar(progress, {150, 0});
 		int start = page->binaryData.start / 100;
