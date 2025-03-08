@@ -290,8 +290,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		int end = timeline->frameEnd / 100;
 		if (Editor("End", end))
 			timeline->frameEnd = end * 100;
-
-		Editor("Current Frame", timeline->preCurrentFrame);
 	}
 
 	PanelTraits SceneSettings::GetPanelTraits() const

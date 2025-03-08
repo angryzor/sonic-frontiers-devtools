@@ -27,7 +27,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
 
-		void SetFrame(float time);
+		void SetFrame(float time, bool playing);
 		bool RenderTimeline(int& start, int& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
 		static void GenerateCurve(float* curve, int size, int type, bool decreasing);
 

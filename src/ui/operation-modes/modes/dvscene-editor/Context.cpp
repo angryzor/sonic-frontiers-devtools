@@ -18,6 +18,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {sizeof(hh::dv::DvNodeElement), sizeof(hh::dv::DvNodeElement::Data)}
     };
 
+#ifdef DEVTOOLS_TARGET_SDK_rangers
     constexpr size_t ElementDataSize[] = {
         0, // 0
         sizeof(hh::dv::DvElementCameraParams::Data), // CAMERA_PARAMS
@@ -79,6 +80,88 @@ namespace ui::operation_modes::modes::dvscene_editor {
         sizeof(app::dv::DvElementCyberSpaceNoise::Data), // CYBER_SPACE_NOISE
         sizeof(app::dv::DvElementLipAnimation::Data), // LIP_ANIMATION
     };
+#elif DEVTOOLS_TARGET_SDK_miller
+    constexpr size_t ElementDataSize[] = {
+        0, // 0 (Unused)
+        sizeof(hh::dv::DvElementCameraParams::Data), // CAMERA_PARAMS
+        0, // 2 (Empty)
+        sizeof(hh::dv::DvElementDrawOff::Data), // DRAW_OFF
+        0, // 4 (Empty)
+        sizeof(hh::dv::DvElementPathOffset::Data), // PATH_OFFSET
+        sizeof(hh::dv::DvElementCameraShake::Data), // CAMERA_SHAKE
+        sizeof(hh::dv::DvElementCameraShakeLoop::Data), // CAMERA_SHAKE_LOOP
+        sizeof(hh::dv::DvElementEffect::Data), // EFFECT
+        sizeof(hh::dv::DvElementDirectionalLight::Data), // DIRECTIONAL_LIGHT
+        sizeof(hh::dv::DvElementPathInterpolation::Data), // PATH_INTERPOLATION
+        0, // CULLING_DISABLE
+        sizeof(hh::dv::DvElementCameraNearFar::Data), // CAMERA_NEAR_FAR
+        sizeof(hh::dv::DvElementUVAnim::Data), // UV_ANIM
+        sizeof(hh::dv::DvElementVisibilityAnim::Data), // VISIBILITY_ANIM
+        sizeof(hh::dv::DvElementMaterialAnim::Data), // MATERIAL_ANIM
+        sizeof(hh::dv::DvElementMultipleAnim::Data), // MULTIPLE_ANIM
+        sizeof(hh::dv::DvElementCameraOffset::Data), // CAMERA_OFFSET
+        sizeof(hh::dv::DvElementModelFade::Data), // MODEL_FADE
+        sizeof(hh::dv::DvElementDebugMotion::Data), // DEBUG_MOTION
+        sizeof(hh::dv::DvElementCameraHedgehog::Data), // CAMERA_HEDGEHOG
+        sizeof(hh::dv::DvElementCameraInGame::Data), // CAMERA_IN_GAME
+        sizeof(hh::dv::DvElementPointLight::Data), // POINT_LIGHT
+        sizeof(hh::dv::DvElementVertexAnimationTexture::Data), // VERTEX_ANIMATION_TEXTURE
+        sizeof(hh::dv::DvElementSpotlight::Data), // SPOTLIGHT
+        sizeof(hh::dv::DvElementControllerVibration::Data), // CONTROLLER_VIBRATION
+        sizeof(hh::dv::DvElementTexturePatternAnim::Data), // TEXTURE_PATTERN_ANIM
+        sizeof(hh::dv::DvElementMaterialParam::Data), // MATERIAL_PARAM
+
+        sizeof(app::dv::DvElementBloomParam::Data), // BLOOM_PARAM
+        sizeof(app::dv::DvElementDOFParam::Data), // DOF_PARAM
+        sizeof(app::dv::DvElementColorContrast::Data), // COLOR_CONTRAST
+        sizeof(app::dv::DvElementCameraControlParam::Data), // CAMERA_CONTROL
+        sizeof(app::dv::DvElementShadowResolution::Data), // SHADOW_RESOLUTION
+        sizeof(app::dv::DvElementSSAOParam::Data), // SSAO_PARAM
+        sizeof(app::dv::DvElementOcclusionCapsuleParam::Data), // OCCLUSION_CAPSULE_PARAM
+        sizeof(app::dv::DvElementGodrayParam::Data), // GODRAY_PARAM
+        sizeof(app::dv::DvElementAtmosphereGodrayParam::Data), // ATMOSPHERE_GODRAY_PARAM
+        sizeof(app::dv::DvElementAtmosphereHeightFogParam::Data), // ATMOSPHERE_HEIGHT_FOG_PARAM
+        sizeof(app::dv::DvElementChromaticAberrationFilterParam::Data), // CHROMATIC_ABERRATION_FILTER_PARAM
+        sizeof(app::dv::DvElementVignetteParam::Data), // VIGNETTE_PARAM
+        sizeof(app::dv::DvElementFade::Data), // FADE
+        sizeof(app::dv::DvElementLetterBox::Data), // LETTER_BOX
+        sizeof(app::dv::DvElementModelClipping::Data), // MODEL_CLIPPING
+        sizeof(app::dv::DvElementPbaReset::Data), // PBA_RESET
+        sizeof(app::dv::DvElementBossName::Data), // BOSS_NAME
+        sizeof(app::dv::DvElementCaption::Data), // CAPTION
+        sizeof(app::dv::DvElementSound::Data), // SOUND
+        sizeof(app::dv::DvElementTime::Data), // TIME
+        sizeof(app::dv::DvElementSun::Data), // SUN
+        sizeof(app::dv::DvElementLookAtIK::Data), // LOOK_AT_IK
+        sizeof(app::dv::DvElementCameraBlurParam::Data), // CAMERA_BLUR_PARAM
+        sizeof(app::dv::DvElementGeneralTrigger::Data), // GENERAL_TRIGGER
+        sizeof(app::dv::DvElementFootIk::Data), // FOOT_IK
+        sizeof(app::dv::DvElementDitherParam::Data), // DITHER_PARAM
+        sizeof(app::dv::DvElementQTE::Data), // QTE
+        sizeof(app::dv::DvElementFacialAnimation::Data), // FACIAL_ANIMATION
+        sizeof(app::dv::DvElementOverrideASM::Data), // OVERRIDE_ASM
+        sizeof(app::dv::DvElementAura::Data), // AURA
+        sizeof(app::dv::DvElementChangeTimeScale::Data), // CHANGE_TIME_SCALE
+        sizeof(app::dv::DvElementCyberSpaceNoise::Data), // CYBER_SPACE_NOISE
+        sizeof(app::dv::DvElementLipAnimation::Data), // LIP_ANIMATION
+        sizeof(app::dv::DvElementAuraRoad::Data), // AURA_ROAD
+        sizeof(app::dv::DvElementMovieView::Data), // MOVIE_VIEW
+        sizeof(app::dv::DvElementCrossFade::Data), // CROSS_FADE
+        sizeof(app::dv::DvElementWeather::Data), // WEATHER
+        sizeof(app::dv::DvElementShadowMapParam::Data), // SHADOW_MAP_PARAM
+        sizeof(app::dv::DvElementVariablePointLight::Data), // VARIABLE_POINT_LIGHT
+        sizeof(app::dv::DvElementOpeningLogo::Data), // OPENING_LOGO
+        sizeof(app::dv::DvElementDensitySectorPoint::Data), // DENSITY_SECTOR_POINT
+        sizeof(app::dv::DvElementBulletTime::Data), // BULLET_TIME
+        sizeof(app::dv::DvElementTimeStop::Data), // TIME_STOP
+        sizeof(app::dv::DvElementObjectTimeStop::Data), // OBJECT_TIME_STOP
+        sizeof(app::dv::DvElementShadowShape::Data), // SHADOW_SHAPE
+        sizeof(app::dv::DvElementFalloff::Data), // FALLOFF
+        sizeof(app::dv::DvElementFog::Data), // FOG
+        sizeof(app::dv::DvElementDOF::Data), // DOF
+        sizeof(app::dv::DvElementFxColUpdate::Data), // FX_COL_UPDATE
+    };
+#endif
 
 
     void Context::ContainsElement(bool& contains, const unsigned int& elementId, hh::dv::DvNodeBase* node)

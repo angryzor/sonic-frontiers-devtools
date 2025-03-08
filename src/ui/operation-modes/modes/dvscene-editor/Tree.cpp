@@ -39,7 +39,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
         if (ImGui::IsItemClicked(ImGuiMouseButton_Left))
 			selectionBehavior->Select(selection);
         
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if (ImGui::BeginPopupContextItem("Options")) {
 			auto& ctx = GetContext();
 			if (ImGui::TreeNode("Add Node")) {
@@ -71,7 +70,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 			ImGui::EndPopup();
 		}
-#endif
 
         if(isOpen){
             for(auto* x : node->childrenElements0)

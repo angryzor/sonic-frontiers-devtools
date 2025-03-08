@@ -31,8 +31,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
         if (ImGui::BeginChild("Timeline", ImVec2(0,0), 0, ImGuiWindowFlags_HorizontalScrollbar)) {
 			bool changed = false;
-			ImGui::Checkbox("Looping", &context.goDVSC->timeline->looping);
-			auto playHeadFrame = std::fminf(context.goDVSC->timeline->postCurrentFrame/100, static_cast<float>(context.goDVSC->timeline->frameEnd/100));
+			auto* dvTimeline = context.goDVSC->timeline;
+			Viewer("Current Frame", dvTimeline->preCurrentFrame/100);
+			ImGui::Checkbox("Looping", &dvTimeline->looping);
+			auto playHeadFrame = std::fminf(dvTimeline->postCurrentFrame/100, static_cast<float>(dvTimeline->frameEnd/100));
 			bool currentTimeChanged{};
 			bool* play = &context.goDVSC->play;
 			if (context.evtScene)
@@ -45,7 +47,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImGui::SameLine();
 			bool beforePlay = *play;
 			float beforeTime = playHeadFrame;
-			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(context.goDVSC->timeline->frameEnd/100), 60.0, play, &currentTimeChanged)) {
+			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(dvTimeline->frameEnd/100), 60.0, play, &currentTimeChanged)) {
 				if (selected.size() > 0) {
 					hh::dv::DvNodeBase* node = selected[0].node;
 					int type = static_cast<int>(node->nodeType);
@@ -61,7 +63,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 			changed |= beforePlay != *play;
 
-			SetFrame(playHeadFrame * 100);
+			SetFrame(playHeadFrame * 100, *play);
 
 			if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
 				for (auto x : movieSrv->movies)
@@ -76,13 +78,14 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		return { "Timeline", ImVec2(250, 500), ImVec2(500, 250) };
 	}
 
-	void Timeline::SetFrame(float time)
+	void Timeline::SetFrame(float time, bool playing)
 	{
 		auto& context = GetContext();
 		context.goDVSC->timeline->preCurrentFrame = static_cast<int>(time);
 		context.goDVSC->timeline->postCurrentFrame = static_cast<int>(time);
 #ifdef DEVTOOLS_TARGET_SDK_miller
-		context.goDVSC->timeline->currentFrame2 = static_cast<int>(time);
+		if(!playing)
+			context.goDVSC->timeline->currentFrame2 = static_cast<int>(time);
 #endif
 	}
 
