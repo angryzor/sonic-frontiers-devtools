@@ -2,21 +2,28 @@
 #include <ui/common/editors/Basic.h>
 #include <ui/common/viewers/Basic.h>
 
-void FrameStrEditor(const char* label, hh::fmv::MoviePlayerCri::FrameStr* str) {
-    char buffer[256];
-    snprintf(buffer, sizeof(buffer), "%s - 0x%zx", label, (size_t)str);
-    if (ImGui::TreeNode(buffer)) {
-        Editor("framesRunning", str->framesRunning);
-        Editor("current Frame", str->currentFrame);
-        Editor("width0", str->width0);
-        Editor("height0", str->height0);
-        Editor("width1", str->width1);
-        Editor("height1", str->height1);
-        Editor("raw fps", str->rawFps);
+void FrameStrEditor(const char* label, hh::fmv::MoviePlayerCri::FrameInfo* str) {
+    if (ImGui::TreeNode(label)) {
+        Editor("framesNum", str->framesNum);
+        Editor("framesNumPerFile", str->framesNumPerFile);
+        Editor("width", str->width);
+        Editor("height", str->height);
+        Editor("displayWidth", str->displayWidth);
+        Editor("displayHeight", str->displayHeight);
+        Editor("framerate", str->framerate);
         Editor("framerateN", str->framerateN);
         Editor("framerateD", str->framerateD);
-        Editor("total Frames", str->totalFrames);
-        Editor("unk1", str->unk1);
+        Editor("totalFrames", str->totalFrames);
+        Editor("time", str->time);
+        Editor("timePerFile", str->timePerFile);
+        Editor("tunit", str->tunit);
+        Editor("numConcatenatedMovie", str->numConcatenatedMovie);
+        Editor("numImages", str->numImages);
+        Editor("flag", str->flag);
+        Editor("alphaType", str->alphaType);
+        Editor("refResult", str->refResult);
+        Editor("colorConversionType", str->colorConversionType);
+        Editor("cntSkippedFrames", str->cntSkippedFrames);
         ImGui::TreePop();
     }
 }
@@ -33,12 +40,12 @@ void RenderGameServiceInspector(hh::fmv::MovieManager& service)
                 Viewer("Progress", movPly->secondsRunning);
                 Viewer("Frames Running", movPly->framesRunning);
                 Editor("qword30", movPly->qword30);
-                Editor("dword8c", movPly->dword8C);
-                Editor("word90", movPly->word90);
-                Editor("word92", movPly->word92);
-                Editor("dwordA0", movPly->dwordA0);
-                Editor("unk4[0]", movPly->unk4[0]);
-                Editor("unk4[1]", movPly->unk4[1]);
+                Editor("renderPass", movPly->renderPass);
+                Editor("renderPriority", movPly->renderPriority);
+                Editor("flags", movPly->flags);
+                Editor("setupDataUnk3", movPly->setupDataUnk3);
+                Editor("setupDataUnk4", movPly->setupDataUnk4);
+                Editor("criManaPlayerStatus", movPly->criManaPlayerStatus);
                 if (ImGui::TreeNode("Texture Infos")) {
                     for (auto& y : movPly->textureInfos) {
                         char xbuffer[128];
@@ -46,30 +53,22 @@ void RenderGameServiceInspector(hh::fmv::MovieManager& service)
                         if (ImGui::TreeNode(xbuffer)) {
                             Editor("width", y.width);
                             Editor("height", y.height);
-                            Viewer("unk0", y.unk0);
-                            Editor("unk1", y.unk1);
-                            Viewer("unk2", y.unk2);
-                            Editor("unk3", y.unk3);
                             Editor("unk4", y.unk4);
-                            Editor("unk5", y.unk5);
+                            Editor("linePitch", y.linePitch);
                             ImGui::TreePop();
                         }
                     }
                     ImGui::TreePop();
                 }
-                FrameStrEditor("Frame Str0", movPly->frameStr0);
-                FrameStrEditor("Frame Str1", movPly->frameStr1);
-                FrameStrEditor("Frame Str2", movPly->frameStr2);
-                Viewer("isPlaying", movPly->isPlaying);
-                Viewer("unk9", movPly->unk9);
-                Editor("unk9b", movPly->unk95);
+                FrameStrEditor("Frame Info", movPly->frameInfo);
+                FrameStrEditor("Temp Frame Info 0", movPly->tempFrameInfo0);
+                FrameStrEditor("Temp Frame Info 1", movPly->tempFrameInfo1);
+                Viewer("loadingFrame", movPly->loadingFrame);
                 Viewer("unk10", movPly->unk10);
                 Viewer("unk11", movPly->unk11);
                 Viewer("unk12", movPly->unk12);
                 Viewer("unk13", movPly->unk13);
                 Viewer("unk14", movPly->unk14);
-                Viewer("unk15", movPly->unk15);
-                Viewer("unk16", movPly->unk16);
                 Viewer("unk17", movPly->unk17);
                 Viewer("unk18", movPly->unk18);
                 Viewer("unk19", movPly->unk19);
@@ -77,8 +76,8 @@ void RenderGameServiceInspector(hh::fmv::MovieManager& service)
                 Viewer("unk21", movPly->unk21);
                 Viewer("unk22", movPly->unk22);
                 Viewer("unk23", movPly->unk23);
-                Viewer("unk24", movPly->unk24);
-                Viewer("unk25", movPly->unk25);
+                Viewer("hasAudio", movPly->hasAudio);
+                Viewer("isCriManaLoaded", movPly->isCriManaLoaded);
                 Viewer("unk26", movPly->unk26);
                 Viewer("unk27", movPly->unk27);
                 Viewer("unk28", movPly->unk28);
@@ -88,5 +87,5 @@ void RenderGameServiceInspector(hh::fmv::MovieManager& service)
         ImGui::TreePop();
     }
     Editor("paused", service.paused);
-    Viewer("shader name", service.shaderName);
+    //Viewer("shader name", service.shaderName);
 }

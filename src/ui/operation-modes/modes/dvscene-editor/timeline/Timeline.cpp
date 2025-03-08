@@ -67,6 +67,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				for (auto x : movieSrv->movies) {
 					if (changed) {
 						x->moviePlayer->SetPause(!*play);
+						x->moviePlayer->frameInfo->time = playHeadFrame * 100;
 					}
 				}
 		}
