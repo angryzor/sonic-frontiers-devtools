@@ -11,5 +11,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		Editor("Use Internal Name", data.useName3);
 		if (data.useName3)
 			Editor("Internal Name", data.name3);
+
+        if(ImGui::Button("Reload Model"))
+            charNode->Setup(&data);
     }
 }

@@ -570,7 +570,6 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/MaterialAnim.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/MultipleAnim.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraOffset.h
-            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ModelFade.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraHedgehog.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraInGame.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Spotlight.h

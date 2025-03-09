@@ -16,7 +16,6 @@
 #include "elements/MaterialAnim.h"
 #include "elements/MultipleAnim.h"
 #include "elements/CameraOffset.h"
-#include "elements/ModelFade.h"
 //#include "elements/DebugMotion.h"
 #include "elements/CameraHedgehog.h"
 #include "elements/CameraInGame.h"
@@ -98,7 +97,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {15, RenderElementInspector<15>},
         {16, RenderElementInspector<16>},
         {17, RenderElementInspector<17>},
-        {18, RenderElementInspector<18>},
         {19, RenderElementInspector<16>},
         {20, RenderElementInspector<20>},
         {21, RenderElementInspector<21>},
