@@ -559,6 +559,7 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/ModelNode.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/Element.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraParams.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DrawOff.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/PathOffset.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraShake.h
             ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraShakeLoop.h

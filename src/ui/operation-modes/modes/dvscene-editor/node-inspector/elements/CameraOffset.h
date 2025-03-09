@@ -8,7 +8,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
         auto& data = elem->binaryData;
 		Editor("Enabled", data.enabled);
 		Editor("Offset Position", data.offsetPosition);
-		Editor("Offset Unk", data.offsetUnk);
-		Editor("Unk1", data.unk1);
+		Editor("Finish Offset Position", data.finishOffsetPosition);
     }
 }

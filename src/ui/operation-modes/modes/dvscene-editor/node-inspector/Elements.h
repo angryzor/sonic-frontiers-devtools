@@ -5,6 +5,7 @@
 #include <ui/common/editors/DvScene.h>
 
 #include "elements/CameraParams.h"
+#include "elements/DrawOff.h"
 #include "elements/PathOffset.h"
 #include "elements/CameraShake.h"
 #include "elements/CameraShakeLoop.h"
@@ -22,10 +23,9 @@
 //#include "elements/PointLight.h"
 #include "elements/VertexAnimationTexture.h"
 #include "elements/Spotlight.h"
-//#include "elements/ControllerVibration.h"
+#include "elements/ControllerVibration.h"
 //#include "elements/SpotlightModel.h"
 #ifdef DEVTOOLS_TARGET_SDK_miller
-#include "elements/ControllerVibration.h"
 #include "elements/TexturePatternAnim.h"
 #include "elements/MaterialParam.h"
 #endif
@@ -86,6 +86,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     constexpr std::pair<int, ElementFuncType> RenderElementInspectors[] = {
         {1, RenderElementInspector<1>},
+        {3, RenderElementInspector<3>},
         {5, RenderElementInspector<5>},
         {6, RenderElementInspector<6>},
         {7, RenderElementInspector<7>},
@@ -102,9 +103,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {21, RenderElementInspector<21>},
         {23, RenderElementInspector<23>},
         {24, RenderElementInspector<24>},
+        {25, RenderElementInspector<25>},
 #ifdef DEVTOOLS_TARGET_SDK_miller
         {22, RenderElementInspector<22>},
-        {25, RenderElementInspector<25>},
         {26, RenderElementInspector<26>},
         {27, RenderElementInspector<27>},
 #endif
