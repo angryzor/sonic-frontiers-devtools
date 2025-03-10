@@ -6,9 +6,21 @@ namespace ui::operation_modes::modes::dvscene_editor {
     void RenderElementInspector<25>(hh::dv::DvElementBase* element) {
         auto* elem = reinterpret_cast<hh::dv::DvElementControllerVibration*>(element);
         auto& data = elem->binaryData;
-#ifdef DEVTOOLS_TARGET_SDK_miller
+        auto* vibMgr = hh::hid::DeviceManagerWin32::GetInstance()->vibrationManager;
+        csl::ut::MoveArray32<const char*> vibNames{ element->GetAllocator() };
+        int selected = 0;
+        int y = 0;
+        for (auto x : vibMgr->vibrations) {
+            vibNames.push_back(x->name);
+            if (strcmp(x->name, data.vibrationName) == 0)
+                selected = y;
+            y++;
+        }
+
+        CheckboxFlags("Ignore End", data.flags, hh::dv::DvElementControllerVibration::Data::Flags::IGNORE_END);
         Editor("Group Name", data.groupName);
-#endif
-        Editor("Vibration Name", data.vibrationName);
+        if (ImGui::Combo("Vibration", &selected, vibNames.begin(), vibNames.size()))
+            strcpy(data.vibrationName, vibNames[selected]);
+        vibNames.clear();
     }
 }

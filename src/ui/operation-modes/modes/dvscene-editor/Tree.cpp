@@ -58,8 +58,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
 										nodeName = elementIDStrings[cnode.first];
 								}
 								if (ImGui::Selectable(nodeName)) {
-									auto* newNode = ctx.CreateNode(nodeName, nodeType, elementId, node);
+									char* name = new char[strlen(nodeName) + 6];
+									strcpy(name, nodeName);
+									srand(time(nullptr));
+									for (int i = 0; i < 5; ++i)
+										name[strlen(nodeName) + i] = '0' + (rand() % 10);
+									name[strlen(nodeName) + 5] = '\0';
+									auto* newNode = ctx.CreateNode(name, nodeType, elementId, node);
 									ctx.ParentNode(node, newNode);
+									delete[] name;
 								}
 							}
 						}

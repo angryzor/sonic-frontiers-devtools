@@ -344,7 +344,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         node->dvsceneNodeTree = parent->dvsceneNodeTree;
         node->parent = parent;
         node->nodeType = static_cast<hh::dv::DvNodeBase::NodeType>(nodeType);
-        for (int x = 0; x < std::strlen(nodeName); x++)
+        for (int x = 0; x < strlen(nodeName) + 1; x++)
             node->nodeName.push_back(nodeName[x]);
         node->Setup(setup);
         return node;
