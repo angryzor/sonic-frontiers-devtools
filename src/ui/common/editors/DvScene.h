@@ -2,6 +2,8 @@
 
 bool Editor(const char* label, char* guid, hh::dv::DvSceneNodeTree* nodeTree);
 
+bool SearchableCombo(const char* label, int* current_item, const char* const* items, int item_count, int searchBufSize);
+
 bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data);
 bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data, csl::ut::Bitset<hh::dv::DvElementCameraParams::Data::Flags>& flags, bool finishParams = false);
 bool Editor(const char* label, hh::dv::DvElementPathInterpolation::Data::Interpolation& data);

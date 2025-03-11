@@ -28,6 +28,34 @@ bool Editor(const char* label, char* guid, hh::dv::DvSceneNodeTree* nodeTree)
     return false;
 }
 
+bool SearchableCombo(const char* label, int* current_item, const char*const* items, int item_count, int searchBufSize) 
+{
+    static char search_buf[128] = "";
+    bool value_changed = false;
+
+    ImGui::PushID(label);
+
+    ImGui::SetNextItemWidth(ImGui::CalcTextSize("e").x * searchBufSize);
+    ImGui::InputText("##search", search_buf, searchBufSize);
+    ImGui::SameLine();
+    ImGui::SetNextItemWidth(ImGui::CalcTextSize("e").x * searchBufSize);
+    if (ImGui::BeginCombo("##combo", items[*current_item])) {
+        for (int i = 0; i < item_count; ++i) 
+            if (strstr(items[i], search_buf)) 
+                if (ImGui::Selectable(items[i], *current_item == i)) {
+                    *current_item = i;
+                    value_changed = true;
+                }
+        ImGui::EndCombo();
+    }
+    ImGui::SameLine();
+    ImGui::Text(label);
+
+    ImGui::PopID();
+    return value_changed;
+}
+
+
 bool Editor(const char* label, hh::dv::DvElementCameraParams::Data::Camera& data) {
     if (ImGui::TreeNode(label)) {
         Editor("Position", data.position);

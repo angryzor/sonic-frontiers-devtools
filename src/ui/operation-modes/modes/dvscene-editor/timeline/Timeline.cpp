@@ -63,7 +63,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 			changed |= beforePlay != *play;
 
-			SetFrame(playHeadFrame * 100, *play);
+			if(currentTimeChanged)
+				SetFrame(playHeadFrame * 100);
 
 			if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
 				for (auto x : movieSrv->movies)
@@ -78,14 +79,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		return { "Timeline", ImVec2(250, 500), ImVec2(500, 250) };
 	}
 
-	void Timeline::SetFrame(float time, bool playing)
+	void Timeline::SetFrame(float time)
 	{
 		auto& context = GetContext();
 		context.goDVSC->timeline->preCurrentFrame = static_cast<int>(time);
 		context.goDVSC->timeline->postCurrentFrame = static_cast<int>(time);
 #ifdef DEVTOOLS_TARGET_SDK_miller
-		if(!playing)
-			context.goDVSC->timeline->currentFrame2 = static_cast<int>(time);
+		context.goDVSC->timeline->currentFrame2 = static_cast<int>(time);
 #endif
 	}
 
