@@ -14,7 +14,9 @@ namespace devtools::api {
 		debug_camera::RegisterRoutes(context);
 		game_manager::RegisterRoutes(context);
 		object_world::RegisterRoutes(context);
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		render_manager::RegisterRoutes(context);
+#endif
 
 		app.listen(host, port, [&running](auto* socket) {
 			running = socket != nullptr;

@@ -29,6 +29,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		void SetFrame(float time);
 		bool RenderTimeline(int& start, int& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
+		bool RenderTimeline(float& start, float& end, float* curve = nullptr, int size = 0, bool axisLimit = true, float maxValue = 1.0f);
 		static void GenerateCurve(float* curve, int size, int type, bool decreasing);
 
 		double timelineFalloff = 3.0f;
@@ -37,5 +38,5 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	};
 
 	template<int type>
-	void RenderNodeTimeline(Timeline* timeline, hh::dv::DvNodeBase* node) {}
+	bool RenderNodeTimeline(Timeline* timeline, char* node) {}
 }

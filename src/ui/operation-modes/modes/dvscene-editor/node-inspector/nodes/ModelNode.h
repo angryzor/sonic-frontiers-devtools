@@ -3,9 +3,8 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderNodeInspector<11>(hh::dv::DvNodeBase* node) {
-        auto* mdlNode = reinterpret_cast<hh::dv::DvNodeModelNode*>(node);
-        auto& data = mdlNode->binaryData;
-        Editor("Model Node Name", data.nodeName);
+    bool RenderNodeInspector<11>(char* node) {
+        auto* data = reinterpret_cast<hh::dv::DvNodeModelNode::Data*>(node);
+        return Editor("Model Node Name", data->nodeName);
     }
 }

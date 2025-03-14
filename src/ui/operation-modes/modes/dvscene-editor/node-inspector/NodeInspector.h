@@ -12,8 +12,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	};
 
 	template<int type>
-	void RenderNodeInspector(hh::dv::DvNodeBase* node) {}
+	bool RenderNodeInspector(char* node) {}
 
 	template<int type>
-	void RenderElementInspector(hh::dv::DvElementBase* element) {}
+	bool RenderElementInspector(char* element) {}
 }

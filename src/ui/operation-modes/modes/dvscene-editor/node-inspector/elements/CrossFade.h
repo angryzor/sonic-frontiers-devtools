@@ -4,13 +4,14 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1033>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1033>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1035>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1035>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementCrossFade*>(element);
-        auto* data = elem->GetData();
-        Editor("Curve Enabled", data->curveEnabled);
-        Editor("Unk1", data->unk1);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementCrossFade::Data*>(element);
+        changed |= Editor("Curve Enabled", data->curveEnabled);
+        changed |= Editor("Unk1", data->unk1);
+        return changed;
     }
 }

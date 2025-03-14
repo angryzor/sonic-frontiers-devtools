@@ -3,58 +3,41 @@
 #include "Elements.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
-    using NodeTimelineFuncType = void(*)(Timeline*, hh::dv::DvNodeBase*);
+    using NodeTimelineFuncType = bool(*)(Timeline*, char*);
 
     template<>
-	void RenderNodeTimeline<4>(Timeline* timeline, hh::dv::DvNodeBase* node) {
-		auto* camMot = reinterpret_cast<hh::dv::DvNodeCameraMotion*>(node);
-        auto& data = camMot->binaryData;
-		timeline->RenderTimeline(data.start, data.end);
+	bool RenderNodeTimeline<4>(Timeline* timeline, char* node) {
+		auto* data = reinterpret_cast<hh::dv::DvNodeCameraMotion::Data*>(node);
+		return timeline->RenderTimeline(data->start, data->end);
 	}
 
 	template<>
-	void RenderNodeTimeline<6>(Timeline* timeline, hh::dv::DvNodeBase* node) {
-		auto* charMot = reinterpret_cast<hh::dv::DvNodeCharacterMotion*>(node);
-        auto& data = charMot->binaryData;
-		timeline->RenderTimeline(data.start, data.end);
+	bool RenderNodeTimeline<6>(Timeline* timeline, char* node) {
+		auto* data = reinterpret_cast<hh::dv::DvNodeCharacterMotion::Data*>(node);
+		return timeline->RenderTimeline(data->start, data->end);
 	}
 
 	template<>
-	void RenderNodeTimeline<10>(Timeline* timeline, hh::dv::DvNodeBase* node) {
-		auto* modelMot = reinterpret_cast<hh::dv::DvNodeModelMotion*>(node);
-        auto& data = modelMot->binaryData;
-		timeline->RenderTimeline(data.start, data.end);
+	bool RenderNodeTimeline<10>(Timeline* timeline, char* node) {
+		auto* data = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(node);
+		return timeline->RenderTimeline(data->start, data->end);
 	}
 
 	template<>
-	void RenderNodeTimeline<12>(Timeline* timeline, hh::dv::DvNodeBase* node) {
-		auto* element = reinterpret_cast<hh::dv::DvNodeElement*>(node);
-        auto& data = element->binaryData;
-        int type = static_cast<int>(data.elementId);
+	bool RenderNodeTimeline<12>(Timeline* timeline, char* node) {
+        bool changed = false;
+		auto* data = reinterpret_cast<hh::dv::DvNodeElement::Data*>(node);
+        int type = static_cast<int>(data->elementId);
         const std::pair<size_t, size_t> render = GetElementTimelineRender(type);
         
         if (render != std::pair<size_t, size_t>{})
         {
-            float* curveData;
-            if (type >= 1000) {
-                auto* elem = reinterpret_cast<app::dv::AppDvElementBase*>(element->element);
-                auto* elemData = reinterpret_cast<const float*>(elem->GetBinaryData());
-                curveData = const_cast<float*>(&elemData[render.first/4]);
-            }
-            else
-                curveData = &reinterpret_cast<float*>(element->element)[(render.first + sizeof(hh::dv::DvElementBase)) / 4];
-            if (timeline->RenderTimeline(element->start, element->end, curveData, render.second))
-            {
-                element->binaryData.start = static_cast<float>(element->start) / 100;
-                element->binaryData.end = static_cast<float>(element->end) / 100;
-            }
+            float* curveData = &reinterpret_cast<float*>(&node[sizeof(hh::dv::DvNodeElement::Data)])[render.first / 4];
+            changed |= timeline->RenderTimeline(data->start, data->end, curveData, render.second);
         }
         else
-            if (timeline->RenderTimeline(element->start, element->end))
-            {
-                element->binaryData.start = static_cast<float>(element->start) / 100;
-                element->binaryData.end = static_cast<float>(element->end) / 100;
-            }
+            changed |= timeline->RenderTimeline(data->start, data->end);
+        return changed;
 	}
 
     constexpr std::pair<int, NodeTimelineFuncType> RenderTimelineNodes[] = {

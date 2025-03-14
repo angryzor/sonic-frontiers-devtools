@@ -4,14 +4,16 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1008>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1008>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1010>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1010>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementChromaticAberrationFilterParam*>(element);
-        auto* data = elem->GetData();
-        Editor("Curve Enabled", data->curveEnabled);
-		Editor("Parameters", data->param);
-        Editor("Finish Parameters", data->finishParam);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementChromaticAberrationFilterParam::Data*>(element);
+        changed |= Editor("Curve Enabled", data->curveEnabled);
+		changed |= Editor("Parameters", data->param);
+        if(data->curveEnabled)
+            changed |= Editor("Finish Parameters", data->finishParam);
+        return changed;
     }
 }

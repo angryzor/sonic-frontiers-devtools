@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		ImGui::PushID(node);
 
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-		DvNode selection{ node };
+		DvNode selection{ node, GetContext() };
 
         auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 		auto& selected = selectionBehavior->GetSelection();
@@ -64,8 +64,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 									for (int i = 0; i < 5; ++i)
 										name[strlen(nodeName) + i] = '0' + (rand() % 10);
 									name[strlen(nodeName) + 5] = '\0';
+									auto newFileNode = ctx.CreateNode(name, nodeType, elementId);
 									auto* newNode = ctx.CreateNode(name, nodeType, elementId, node);
+									memcpy(newNode->guid, &newFileNode.guid, 16);
 									ctx.ParentNode(node, newNode);
+									ctx.ParentNode(*ctx.GetFileNode(node), newFileNode);
 									delete[] name;
 								}
 							}

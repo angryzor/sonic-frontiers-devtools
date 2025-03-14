@@ -4,12 +4,11 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1021>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1021>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1023>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1023>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementGeneralTrigger*>(element);
-        auto* data = elem->GetData();
-		Editor("Trigger Name", data->triggerName);
+        auto* data = reinterpret_cast<app::dv::DvElementGeneralTrigger::Data*>(element);
+		return Editor("Trigger Name", data->triggerName);
     }
 }

@@ -2,6 +2,7 @@
 #include <resources/ManagedMemoryRegistry.h>
 #include <resources/managed-memory/ManagedCArray.h>
 #include <utilities/CompatibleObject.h>
+#include <dieventlib/dvscene.h>
 
 namespace ui::operation_modes::modes::dvscene_editor {
 #ifdef DEVTOOLS_TARGET_SDK_rangers
@@ -200,14 +201,20 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	constexpr unsigned int hhElementCount = 28;
 #endif
 
+	struct DvPage;
+
 	class Context : public CompatibleObject {
 		void ContainsElement(bool& contains, const unsigned int& elementId, hh::dv::DvNodeBase* node);
+		void GetFileNode(dv::DvNode& curNode, hh::dv::DvNodeBase* node, dv::DvNode*& result);
+		void GetFilePage(dv::DvPage& curPage, hh::dv::DvPage* page, dv::DvPage*& result);
 	public:
 		using CompatibleObject::CompatibleObject;
 
 		hh::fnd::Reference<hh::dv::DvSceneControl> goDVSC{};
+		dv::DvScene* parsedScene;
 		app::evt::EventScene* evtScene;
 		std::mt19937 mt{ std::random_device{}() };
+		csl::ut::MoveArray32<DvPage*> dvPages;
 
 		csl::ut::VariableString cutsceneName;
 		csl::ut::VariableString nodeName;
@@ -218,8 +225,36 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		static void GetChildren(hh::dv::DvNodeBase* node, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool& includeElements);
 		static void GetNodes(hh::dv::DvSceneNodeTree* nodeTree, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool includeElements);
 		hh::dv::DvNodeBase* CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId, hh::dv::DvNodeBase* parent);
+		dv::DvNode CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId);
 		void ParentNode(hh::dv::DvNodeBase* parent, hh::dv::DvNodeBase* child);
+		void ParentNode(dv::DvNode& parent, dv::DvNode& child);
+		dv::DvNode* GetFileNode(hh::dv::DvNodeBase* node);
+		dv::DvPage* GetFilePage(hh::dv::DvPage* page);
+		hh::dv::DvNodeBase* GetRuntimeNode(dv::DvNode* node);
 
 		Context(csl::fnd::IAllocator* allocator);
+	};
+
+	struct DvPage {
+	public:
+		Context* ctx;
+		hh::dv::DvPage* page;
+		dv::DvPage* filePage;
+
+		DvPage();
+		DvPage(hh::dv::DvPage* page, Context& ctx) : page{ page }, ctx{ &ctx }
+		{
+			filePage = ctx.GetFilePage(page);
+		}
+
+		void UpdateRuntimePage() {
+			page->binaryData.start = filePage->frameStart;
+			page->binaryData.end = filePage->frameEnd;
+			page->binaryData.skipFrame = filePage->skipFrame;
+			page->binaryData.pageIndex = filePage->index;
+			memcpy(page->binaryData.pageName, filePage->name, 32);
+			page->binaryData.transitionCount = filePage->transition.size();
+			page->binaryData.dataSize = filePage->unkData.size();
+		}
 	};
 }

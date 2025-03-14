@@ -4,13 +4,14 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1026>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1026>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1028>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1028>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementOverrideASM*>(element);
-        auto* data = elem->GetData();
-		Editor("ASM Name", data->asmName);
-		Editor("Target ASM Name", data->asmNameTarget);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementOverrideASM::Data*>(element);
+		changed |= Editor("State Name", data->asmName);
+		changed |= Editor("Target State Name", data->asmNameTarget);
+        return changed;
     }
 }

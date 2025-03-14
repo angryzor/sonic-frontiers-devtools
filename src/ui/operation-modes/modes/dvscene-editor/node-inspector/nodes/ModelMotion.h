@@ -3,10 +3,11 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderNodeInspector<10>(hh::dv::DvNodeBase* node) {
-        auto* mdlMotNode = reinterpret_cast<hh::dv::DvNodeModelMotion*>(node);
-        auto& data = mdlMotNode->binaryData;
-		Editor("ASM State Name", data.asmState);
-		Editor("Speed", data.speed);
+    bool RenderNodeInspector<10>(char* node) {
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(node);
+		changed |= Editor("ASM State Name", data->asmState);
+		changed |= Editor("Speed", data->speed);
+        return changed;
     }
 }

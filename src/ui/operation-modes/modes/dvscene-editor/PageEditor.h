@@ -71,8 +71,8 @@ namespace ui::operation_modes::modes::dvscene_editor
         PageEditor(csl::fnd::IAllocator* allocator, OperationMode<Context>& operationMode);
 
         virtual void RenderPanel() override;
-        void RenderPage(int pageIdx);
-		void RenderTransition(int pageIdx, hh::dv::DvPageTransition* trans);
+        bool RenderPage(int pageIdx);
+		void RenderTransition(int pageIdx, dv::DvTransition& trans);
         virtual PanelTraits GetPanelTraits() const override;
 
 		ax::NodeEditor::LinkId GetLinkId(ax::NodeEditor::PinId fromPinId, ax::NodeEditor::PinId toPinId);

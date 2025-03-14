@@ -1,3 +1,4 @@
+#ifndef DEVTOOLS_TARGET_SDK_wars
 #include "RenderManager.h"
 #include "Common.h"
 
@@ -111,3 +112,4 @@ namespace devtools::api::render_manager {
 		});
 	}
 }
+#endif

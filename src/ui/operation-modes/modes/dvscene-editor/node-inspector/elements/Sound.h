@@ -10,15 +10,16 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1016>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1016>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1018>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1018>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementSound*>(element);
-        auto* data = elem->GetData();
-		Editor("Cue Name", data->cueName);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementSound::Data*>(element);
+		changed |= Editor("Cue Name", data->cueName);
         int curSoundId = static_cast<int>(data->soundId);
-		if (ImGui::Combo("Sound ID", &curSoundId, soundIdNames, 3))
+		if (changed |= ImGui::Combo("Sound ID", &curSoundId, soundIdNames, 3))
             data->soundId = static_cast<app::dv::DvElementSound::Data::SoundID>(curSoundId);
+        return changed;
     }
 }

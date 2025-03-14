@@ -3,13 +3,14 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderElementInspector<14>(hh::dv::DvElementBase* element) {
-        auto* elem = reinterpret_cast<hh::dv::DvElementVisibilityAnim*>(element);
-        auto& data = elem->binaryData;
-		Editor("Visibility Anim Name", data.visAnimName);
-		Editor("Unk1", data.unk1);
-		Editor("Speed", data.speed);
-		Editor("Unk3", data.unk3);
-		Editor("Unk4", data.unk4);
+    bool RenderElementInspector<14>(char* element) {
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvElementVisibilityAnim::Data*>(element);
+		changed |= Editor("Visibility Anim Name", data->visAnimName);
+		changed |= Editor("Unk1", data->unk1);
+		changed |= Editor("Speed", data->speed);
+		changed |= Editor("Unk3", data->unk3);
+		changed |= Editor("Unk4", data->unk4);
+        return changed;
     }
 }

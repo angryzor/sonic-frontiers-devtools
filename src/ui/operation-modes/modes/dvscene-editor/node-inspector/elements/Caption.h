@@ -22,33 +22,21 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1015>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1015>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1017>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1017>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementCaption*>(element);
-        auto* data = elem->GetData();
-        auto* converseDataColl = hh::fw::Application::GetInstance()->GetModule<hh::text::TextAppModule>()->textLanguageDataCollection->textLanguageData[1]->converseDataCollection;
-        csl::ut::MoveArray<const char*> tempNames{ element->GetAllocator() };
-        int selected = 0;
-        int y = 0;
-        for (auto* x : converseDataColl->converseDatas) {
-            if (strlen(x->data.key) < 16) {
-                tempNames.push_back(x->data.key);
-                if (strcmp(x->data.key, data->converseName) == 0)
-                    selected = y;
-                y++;
-            }
-        }
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementCaption::Data*>(element);
 #ifdef DEVTOOLS_TARGET_SDK_miller
-        Editor("Caption Enabled", data->captionEnabled);
-        Editor("Sound Enabled", data->soundEnabled);
+        changed |= Editor("Caption Enabled", data->captionEnabled);
+        changed |= Editor("Sound Enabled", data->soundEnabled);
+        if(data->captionEnabled)
 #endif
-        if (SearchableCombo("Converse Name", &selected, tempNames.begin(), tempNames.size(), 16))
-            strcpy(data->converseName, tempNames[selected]);
-        tempNames.clear();
+        changed |= Editor("Converse Name", data->converseName);
 #ifdef DEVTOOLS_TARGET_SDK_miller
-        Editor("Sound Name", data->soundName);
+        if(data->soundEnabled)
+            changed |= Editor("Sound Name", data->soundName);
 #endif
         int curLangId = static_cast<int>(data->languageId);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
@@ -56,6 +44,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #elif DEVTOOLS_TARGET_SDK_miller
         if (ImGui::Combo("Language", &curLangId, langNames, 13))
 #endif
-			data->languageId = static_cast<app::dv::DvElementCaption::Data::LanguageID>(curLangId);
+		{
+            changed |= true;
+            data->languageId = static_cast<app::dv::DvElementCaption::Data::LanguageID>(curLangId);
+        }
+        return changed;
     }
 }

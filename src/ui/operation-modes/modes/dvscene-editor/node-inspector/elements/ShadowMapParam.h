@@ -46,48 +46,49 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1035>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1035>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1037>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1037>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementShadowMapParam*>(element);
-        auto* data = elem->GetData();
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementShadowMapParam::Data*>(element);
 		int curShadowFilter = static_cast<int>(data->shadowFilter);
-        if (ImGui::Combo("Shadow Filter", &curShadowFilter, shadowFilterNames, 14))
+        if (changed |= ImGui::Combo("Shadow Filter", &curShadowFilter, shadowFilterNames, 14))
             data->shadowFilter = static_cast<app::dv::DvElementShadowMapParam::Data::ShadowFilter>(curShadowFilter);
         int curShadowRangeType = static_cast<int>(data->shadowRangeType);
-        if (ImGui::Combo("Shadow Range Type", &curShadowRangeType, shadowRangeTypeNames, 5))
+        if (changed |= ImGui::Combo("Shadow Range Type", &curShadowRangeType, shadowRangeTypeNames, 5))
             data->shadowRangeType = static_cast<app::dv::DvElementShadowMapParam::Data::ShadowRangeType>(curShadowRangeType);
         int curFitProjection = static_cast<int>(data->fitProjection);
-        if (ImGui::Combo("Fit Projection", &curFitProjection, fitProjectionNames, 5))
+        if (changed |= ImGui::Combo("Fit Projection", &curFitProjection, fitProjectionNames, 5))
             data->fitProjection = static_cast<app::dv::DvElementShadowMapParam::Data::FitProjection>(curFitProjection);
         int curFitNearFar = static_cast<int>(data->fitNearFar);
-        if (ImGui::Combo("Fit Near Far", &curFitNearFar, fitNearFarNames, 3))
+        if (changed |= ImGui::Combo("Fit Near Far", &curFitNearFar, fitNearFarNames, 3))
             data->fitNearFar = static_cast<app::dv::DvElementShadowMapParam::Data::FitNearFar>(curFitNearFar);
         int curPartitionType = static_cast<int>(data->partitionType);
-        if (ImGui::Combo("Partition Type", &curPartitionType, partitionTypeNames, 3))
+        if (changed |= ImGui::Combo("Partition Type", &curPartitionType, partitionTypeNames, 3))
             data->partitionType = static_cast<app::dv::DvElementShadowMapParam::Data::PartitionType>(curPartitionType);
-        Editor("Scene Range", data->sceneRange);
-        Editor("Scene Center", data->sceneCenter);
-        Editor("Manual Light Position", data->manualLightPos);
-        Editor("PSSM Lambda", data->pssmLambda);
-        Editor("Cascade Offset", data->cascadeOffset);
-        Editor("Cascade Level", data->cascadeLevel);
-        Editor("Cascade Splits", data->cascadeSplits);
-        Editor("Cascade Bias", data->cascadeBias);
-        Editor("Bias", data->bias);
-        Editor("Offset", data->offset);
-        Editor("Normal Bias", data->normalBias);
-        Editor("Blur Quality", data->blurQuality);
-        Editor("Blur Size", data->blurSize);
-        Editor("Fadeout Distance", data->fadeoutDistance);
-        Editor("Cascade Transition Fade Distance", data->cascadeTransitionFadeDistance);
-        CheckboxFlags("Enable Back Face Shadow", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_BACK_FACE_SHADOW);
-        CheckboxFlags("Enable Shadow Camera", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_SHADOW_CAMERA);
-        CheckboxFlags("Enable Draw Scene AABB", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_SCENE_AABB);
-        CheckboxFlags("Enable Draw Shadow Frustrum", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_SHADOW_FRUSTRUM);
-        CheckboxFlags("Enable Draw Cascade", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_CASCADE);
-        CheckboxFlags("Enable Draw Camera", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_CAMERA_FRUSTRUM);
-        CheckboxFlags("Enable Pause Camera", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_PAUSE_CAMERA);
+        changed |= Editor("Scene Range", data->sceneRange);
+        changed |= Editor("Scene Center", data->sceneCenter);
+        changed |= Editor("Manual Light Position", data->manualLightPos);
+        changed |= Editor("PSSM Lambda", data->pssmLambda);
+        changed |= Editor("Cascade Offset", data->cascadeOffset);
+        changed |= Editor("Cascade Level", data->cascadeLevel);
+        changed |= Editor("Cascade Splits", data->cascadeSplits);
+        changed |= Editor("Cascade Bias", data->cascadeBias);
+        changed |= Editor("Bias", data->bias);
+        changed |= Editor("Offset", data->offset);
+        changed |= Editor("Normal Bias", data->normalBias);
+        changed |= Editor("Blur Quality", data->blurQuality);
+        changed |= Editor("Blur Size", data->blurSize);
+        changed |= Editor("Fadeout Distance", data->fadeoutDistance);
+        changed |= Editor("Cascade Transition Fade Distance", data->cascadeTransitionFadeDistance);
+        changed |= CheckboxFlags("Enable Back Face Shadow", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_BACK_FACE_SHADOW);
+        changed |= CheckboxFlags("Enable Shadow Camera", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_SHADOW_CAMERA);
+        changed |= CheckboxFlags("Enable Draw Scene AABB", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_SCENE_AABB);
+        changed |= CheckboxFlags("Enable Draw Shadow Frustrum", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_SHADOW_FRUSTRUM);
+        changed |= CheckboxFlags("Enable Draw Cascade", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_CASCADE);
+        changed |= CheckboxFlags("Enable Draw Camera", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_DRAW_CAMERA_FRUSTRUM);
+        changed |= CheckboxFlags("Enable Pause Camera", data->flags, app::dv::DvElementShadowMapParam::Data::Flags::ENABLE_PAUSE_CAMERA);
+        return changed;
     }
 }

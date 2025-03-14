@@ -3,10 +3,11 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderElementInspector<3>(hh::dv::DvElementBase* element) {
-        auto* elem = reinterpret_cast<hh::dv::DvElementDrawOff*>(element);
-        auto& data = elem->binaryData;
-        CheckboxFlags("Visible", data.flags, hh::dv::DvElementDrawOff::Data::Flags::VISIBLE);
-        CheckboxFlags("Ignore End", data.flags, hh::dv::DvElementDrawOff::Data::Flags::IGNORE_END);
+    bool RenderElementInspector<3>(char* element) {
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvElementDrawOff::Data*>(element);
+        changed |= CheckboxFlags("Visible", data->flags, hh::dv::DvElementDrawOff::Data::Flags::VISIBLE);
+        changed |= CheckboxFlags("Ignore End", data->flags, hh::dv::DvElementDrawOff::Data::Flags::IGNORE_END);
+        return changed;
     }
 }

@@ -20,7 +20,7 @@
 //#include "elements/DebugMotion.h"
 #include "elements/CameraHedgehog.h"
 #include "elements/CameraInGame.h"
-//#include "elements/PointLight.h"
+#include "elements/PointLight.h"
 #include "elements/VertexAnimationTexture.h"
 #include "elements/Spotlight.h"
 #include "elements/ControllerVibration.h"
@@ -82,7 +82,7 @@
 
 
 namespace ui::operation_modes::modes::dvscene_editor {
-    using ElementFuncType = void(*)(hh::dv::DvElementBase*);
+    using ElementFuncType = bool(*)(char*);
 
     constexpr std::pair<int, ElementFuncType> RenderElementInspectors[] = {
         {1, RenderElementInspector<1>},
@@ -117,10 +117,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {1005, RenderElementInspector<1005>},
         {1006, RenderElementInspector<1006>},
         {1008, RenderElementInspector<1008>},
+#ifdef DEVTOOLS_TARGET_SDK_rangers
         {1009, RenderElementInspector<1009>},
-        {1010, RenderElementInspector<1010>},
         {1014, RenderElementInspector<1014>},
         {1015, RenderElementInspector<1015>},
+        {1024, RenderElementInspector<1024>},
+        {1033, RenderElementInspector<1033>},
+        {1034, RenderElementInspector<1034>},
+#endif
+        {1010, RenderElementInspector<1010>},
         {1016, RenderElementInspector<1016>},
         {1017, RenderElementInspector<1017>},
         {1018, RenderElementInspector<1018>},
@@ -128,14 +133,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {1020, RenderElementInspector<1020>},
         {1021, RenderElementInspector<1021>},
         {1023, RenderElementInspector<1023>},
-        {1024, RenderElementInspector<1024>},
         {1025, RenderElementInspector<1025>},
         {1026, RenderElementInspector<1026>},
         {1027, RenderElementInspector<1027>},
         {1028, RenderElementInspector<1028>},
         {1030, RenderElementInspector<1030>},
-        {1033, RenderElementInspector<1033>},
-        {1034, RenderElementInspector<1034>},
         {1035, RenderElementInspector<1035>},
         {1036, RenderElementInspector<1036>},
         {1038, RenderElementInspector<1038>},

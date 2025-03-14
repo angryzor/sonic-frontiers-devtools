@@ -23,18 +23,19 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1014>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1014>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1016>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1016>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementBossName*>(element);
-        auto* data = elem->GetData();
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementBossName::Data*>(element);
 		int curBossId = static_cast<int>(data->bossId);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        if (ImGui::Combo("Boss Name", &curBossId, bossNames, 6))
+        if (changed |= ImGui::Combo("Boss Name", &curBossId, bossNames, 6))
 #elif DEVTOOLS_TARGET_SDK_miller
-        if (ImGui::Combo("Boss Name", &curBossId, bossNames, 5))
+        if (changed |= ImGui::Combo("Boss Name", &curBossId, bossNames, 5))
 #endif
-			data->bossId = static_cast<app::dv::DvElementBossName::Data::BossID>(curBossId);
+            data->bossId = static_cast<app::dv::DvElementBossName::Data::BossID>(curBossId);
+        return changed;
     }
 }

@@ -4,14 +4,15 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1030>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1030>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1032>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1032>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementLipAnimation*>(element);
-        auto* data = elem->GetData();
-        Editor("Unk0", data->unk0);
-        Editor("Unk1", data->unk1);
-        Editor("Lip Animation Name", data->lipAnimName);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementLipAnimation::Data*>(element);
+        changed |= Editor("Unk0", data->unk0);
+        changed |= Editor("Unk1", data->unk1);
+        changed |= Editor("Lip Animation Name", data->lipAnimName);
+        return changed;
     }
 }

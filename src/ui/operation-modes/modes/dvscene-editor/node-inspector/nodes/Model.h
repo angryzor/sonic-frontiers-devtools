@@ -3,13 +3,14 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderNodeInspector<8>(hh::dv::DvNodeBase* node) {
-        auto* mdlNode = reinterpret_cast<hh::dv::DvNodeModel*>(node);
-        auto& data = mdlNode->binaryData;
-		Editor("Model Name", data.modelName);
-		Editor("Skeleton Name", data.skeletonName);
-		Editor("Use Internal Name", data.useName3);
-		if (data.useName3)
-			Editor("Internal Name", data.name3);
+    bool RenderNodeInspector<8>(char* node) {
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvNodeModel::Data*>(node);
+		changed |= Editor("Model Name", data->modelName);
+		changed |= Editor("Skeleton Name", data->skeletonName);
+		changed |= Editor("Use Internal Name", data->useName3);
+		if (data->useName3)
+            changed |= Editor("Internal Name", data->name3);
+        return changed;
     }
 }

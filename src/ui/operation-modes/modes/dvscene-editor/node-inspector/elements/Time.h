@@ -4,22 +4,23 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1017>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1017>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1019>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1019>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementTime*>(element);
-        auto* data = elem->GetData();
-		Editor("Curve Enabled", data->curveEnabled);
-        Editor("Unk1", data->unk1);
-        Editor("Unk2", data->unk2);
-        Editor("Unk3", data->unk3);
-        Editor("Unk4", data->unk4);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementTime::Data*>(element);
+		changed |= Editor("Curve Enabled", data->curveEnabled);
+        changed |= Editor("Unk1", data->unk1);
+        changed |= Editor("Unk2", data->unk2);
+        changed |= Editor("Unk3", data->unk3);
+        changed |= Editor("Unk4", data->unk4);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        Editor("Unk5", data->unk5);
-        Editor("Unk6", data->unk6);
-        Editor("Unk7", data->unk7);
-        Editor("Unk8", data->unk8);
+        changed |= Editor("Unk5", data->unk5);
+        changed |= Editor("Unk6", data->unk6);
+        changed |= Editor("Unk7", data->unk7);
+        changed |= Editor("Unk8", data->unk8);
 #endif
+        return changed;
     }
 }

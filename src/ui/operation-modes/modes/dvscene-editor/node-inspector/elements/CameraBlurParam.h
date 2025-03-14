@@ -12,25 +12,30 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1020>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1020>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1022>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1022>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementCameraBlurParam*>(element);
-        auto* data = elem->GetData();
-		CheckboxFlags("Enabled", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::ENABLED);
-		CheckboxFlags("Single Direction OPT", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::SINGLE_DIRECTION_OPT);
-		CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::CURVE_ENABLED);
-        Editor("Sample Amount", data->sampleAmount);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementCameraBlurParam::Data*>(element);
+		changed |= CheckboxFlags("Enabled", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::ENABLED);
+        if(data->flags.test(app::dv::DvElementCameraBlurParam::Data::Flags::ENABLED)){
+            changed |= CheckboxFlags("Single Direction OPT", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::SINGLE_DIRECTION_OPT);
+            changed |= CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::CURVE_ENABLED);
+            changed |= Editor("Sample Amount", data->sampleAmount);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        Editor("Blur Amount", data->blurAmount);
-        Editor("Finish Blur Amount", data->finishBlurAmount);
+            changed |= Editor("Blur Amount", data->blurAmount);
+            if(data->flags.test(app::dv::DvElementCameraBlurParam::Data::Flags::CURVE_ENABLED))
+                changed |= Editor("Finish Blur Amount", data->finishBlurAmount);
 #elif DEVTOOLS_TARGET_SDK_miller
-        Editor("Parameters", data->params);
-        Editor("Finish Parameters", data->finishParams);
-        int curBlurType = static_cast<int>(data->blurType);
-        if (ImGui::Combo("Blur Type", &curBlurType, camBlurTypeNames, 3))
-			data->blurType = static_cast<app::dv::DvElementCameraBlurParam::Data::BlurType>(curBlurType);
+            changed |= Editor("Parameters", data->params);
+            if(data->flags.test(app::dv::DvElementCameraBlurParam::Data::Flags::CURVE_ENABLED))
+                changed |= Editor("Finish Parameters", data->finishParams);
+            int curBlurType = static_cast<int>(data->blurType);
+            if (changed |= ImGui::Combo("Blur Type", &curBlurType, camBlurTypeNames, 3))
+                data->blurType = static_cast<app::dv::DvElementCameraBlurParam::Data::BlurType>(curBlurType);
 #endif
+        }
+        return changed;
     }
 }

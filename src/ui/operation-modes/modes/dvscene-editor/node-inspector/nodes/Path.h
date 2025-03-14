@@ -3,9 +3,12 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderNodeInspector<1>(hh::dv::DvNodeBase* node) {
-        auto* pathNode = reinterpret_cast<hh::dv::DvNodePath*>(node);
-        if (Editor("Transform", pathNode->transform))
-            pathNode->binaryData.matrix = Eigen::Affine3f(TransformToAffine3f(pathNode->transform));
+    bool RenderNodeInspector<1>(char* node) {
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvNodePath::Data*>(node);
+        csl::math::Transform transform = Affine3fToTransform(Eigen::Affine3f(data->matrix.matrix()));
+        if (changed |= Editor("Transform", transform))
+            data->matrix = Eigen::Affine3f(TransformToAffine3f(transform));
+        return changed;
     }
 }

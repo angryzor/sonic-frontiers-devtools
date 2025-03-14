@@ -32,43 +32,44 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1024>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1024>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1026>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1026>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementQTE*>(element);
-        auto* data = elem->GetData();
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementQTE::Data*>(element);
 		int curQteType = static_cast<int>(data->qteType);
-        if (ImGui::Combo("QTE Type", &curQteType, qteTypeNames, 5))
+        if (changed |= ImGui::Combo("QTE Type", &curQteType, qteTypeNames, 5))
 			data->qteType = static_cast<app::dv::DvElementQTE::Data::QTEType>(curQteType);
         int curQteBtn = static_cast<int>(data->qteButton);
-        if (ImGui::Combo("QTE Button", &curQteBtn, qteButtonNames, 17))
+        if (changed |= ImGui::Combo("QTE Button", &curQteBtn, qteButtonNames, 17))
             data->qteButton = static_cast<app::dv::DvElementQTE::Data::QTEButton>(curQteBtn);
         if(ImGui::TreeNode("Red Circle")){
-            Editor("Size", data->redCircleSize);
-            Editor("Thickness", data->redCircleThickness);
-            Editor("Outline Thickness", data->redCircleOutlineThickness);
+            changed |= Editor("Size", data->redCircleSize);
+            changed |= Editor("Thickness", data->redCircleThickness);
+            changed |= Editor("Outline Thickness", data->redCircleOutlineThickness);
             ImGui::TreePop();
         }
         if(ImGui::TreeNode("White Line")){
-            Editor("Speed", data->whiteLineSpeed);
-            Editor("Thickness", data->whiteLineThickness);
-            Editor("Outline Thickness", data->whiteLineOutlineThickness);
+            changed |= Editor("Speed", data->whiteLineSpeed);
+            changed |= Editor("Thickness", data->whiteLineThickness);
+            changed |= Editor("Outline Thickness", data->whiteLineOutlineThickness);
             ImGui::TreePop();
         }
-        Editor("Multiplier", data->multiplier);
-        Editor("Fail Count", data->failCount);
-        Editor("QTE Name", data->qteName);
-        Editor("Unk0", data->unk0);
-        Editor("Unk1", data->unk1);
-        Editor("Unk2", data->unk2);
+        changed |= Editor("Multiplier", data->multiplier);
+        changed |= Editor("Fail Count", data->failCount);
+        changed |= Editor("ASM Variable Name", data->asmVarName);
+        changed |= Editor("Mash Count", data->mashCount);
+        changed |= Editor("Start", data->start);
+        changed |= Editor("End", data->end);
+        changed |= Editor("Speed Multiplier", data->speedMultiplier);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        Editor("Unk5", data->unk5);
+        changed |= Editor("Unk5", data->unk5);
 #elif DEVTOOLS_TARGET_SDK_miller
-        Editor("Unk3", data->unk3);
-        Editor("Unk4", data->unk4);
+        changed |= Editor("Unk4", data->unk4);
 #endif
-        Editor("Position", data->offset);
-        Editor("Sound Cue Name", data->soundCueName);
+        changed |= Editor("Position", data->offset);
+        changed |= Editor("Sound Cue Name", data->soundCueName);
+        return changed;
     }
 }

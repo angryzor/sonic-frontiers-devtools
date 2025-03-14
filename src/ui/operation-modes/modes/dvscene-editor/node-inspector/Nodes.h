@@ -12,7 +12,7 @@
 #include "nodes/Element.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
-    using NodeFuncType = void(*)(hh::dv::DvNodeBase*);
+    using NodeFuncType = bool(*)(char*);
 
     constexpr std::pair<int, NodeFuncType> RenderNodeInspectors[] = {
         {1, RenderNodeInspector<1>},

@@ -11,12 +11,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1025>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1025>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1027>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1027>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementFacialAnimation*>(element);
-        auto* data = elem->GetData();
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementFacialAnimation::Data*>(element);
 		if(ImGui::TreeNode("Animations")) {
             char z = 0;
             for(auto i = 0; i < data->activeAnimationsCount; i++){
@@ -25,9 +25,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
                 snprintf(buffer, sizeof(buffer), "%s##%s", x.fileName, z);
                 if(ImGui::TreeNode(buffer)){
                     int curAnmType = static_cast<int>(x.animType)-1;
-                    if (ImGui::Combo("Animation Type", &curAnmType, fanimationTypeNames, 4))
+                    if (changed |= ImGui::Combo("Animation Type", &curAnmType, fanimationTypeNames, 4))
                         x.animType = static_cast<app::dv::DvElementFacialAnimation::Data::Animation::AnimationType>(curAnmType+1);
-                    Editor("Filename", x.fileName);
+                    changed |= Editor("Filename", x.fileName);
                     ImGui::TreePop();
                 }
                 z++;
@@ -35,10 +35,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
             ImGui::TreePop();
         }
         if(Editor("Active Animation Count", data->activeAnimationsCount)) {
+            changed |= true;
             if(data->activeAnimationsCount > 3)
                 data->activeAnimationsCount = 3;
             else if(data->activeAnimationsCount < 0)
                 data->activeAnimationsCount = 0;
         }
+        return changed;
     }
 }

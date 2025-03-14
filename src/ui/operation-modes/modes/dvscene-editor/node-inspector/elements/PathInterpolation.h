@@ -3,11 +3,12 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    void RenderElementInspector<10>(hh::dv::DvElementBase* element) {
-        auto* elem = reinterpret_cast<hh::dv::DvElementPathInterpolation*>(element);
-        auto& data = elem->binaryData;
-		Editor("Use Absolute Position", data.useAbsolutePosition);
-        Editor("Interpolation", data.interpolation);
-        Editor("Finish Interpolation", data.finishInterpolation);
+    bool RenderElementInspector<10>(char* element) {
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvElementPathInterpolation::Data*>(element);
+		changed |= Editor("Use Absolute Position", data->useAbsolutePosition);
+        changed |= Editor("Interpolation", data->interpolation);
+        changed |= Editor("Finish Interpolation", data->finishInterpolation);
+        return changed;
     }
 }

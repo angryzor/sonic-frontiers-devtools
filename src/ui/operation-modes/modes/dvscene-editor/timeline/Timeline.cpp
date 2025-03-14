@@ -49,11 +49,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			float beforeTime = playHeadFrame;
 			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(dvTimeline->frameEnd/100), 60.0, play, &currentTimeChanged)) {
 				if (selected.size() > 0) {
-					hh::dv::DvNodeBase* node = selected[0].node;
-					int type = static_cast<int>(node->nodeType);
-					NodeTimelineFuncType render = GetNodeTimelineRender(type);
+					DvNode focusedNode = selected[0];
+					dv::DvNode* node = focusedNode.fileNode;
+					NodeTimelineFuncType render = GetNodeTimelineRender(node->category);
 					if(render)
-						render(this, node);
+						if(render(this, node->data))
+							focusedNode.UpdateRuntimeNode();
 				}
 
 				ImTimeline::EndTimeline();
@@ -92,15 +93,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	bool Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
 		bool changed = false;
 		if (ImTimeline::BeginTrack("")) {
-			auto length = end / 100 - start / 100;
+			auto length = end - start;
 
 			if (length == 0) {
 				float time{ 0.0f };
 				ImTimeline::Event("", &time);
 			}
 			else {
-				float startTime = static_cast<float>(start / 100);
-				float endTime = static_cast<float>(end / 100);
+				float startTime = static_cast<float>(start);
+				float endTime = static_cast<float>(end);
 				bool startTimeChanged{};
 				bool endTimeChanged{};
 				bool moved{};
@@ -169,14 +170,25 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				}
 
 				if (startTimeChanged)
-					start = static_cast<int>(startTime * 100);
+					start = static_cast<int>(startTime);
 
 				if (endTimeChanged)
-					end = static_cast<int>(endTime * 100);
+					end = static_cast<int>(endTime);
 
 				changed |= startTimeChanged | endTimeChanged;
 			}
 			ImTimeline::EndTrack();
+		}
+		return changed;
+	}
+
+	bool Timeline::RenderTimeline(float& start, float& end, float* curve, int size, bool axisLimit, float maxValue) {
+		bool changed = false;
+		int startI = static_cast<int>(start);
+		int endI = static_cast<int>(end);
+		if (changed |= RenderTimeline(startI, endI, curve, size, axisLimit, maxValue)) {
+			start = static_cast<float>(startI);
+			end = static_cast<float>(endI);
 		}
 		return changed;
 	}

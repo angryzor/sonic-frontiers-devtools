@@ -46,21 +46,23 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		if (ImGui::Selectable("Auto Layout"))
 			nodeEditor.RunAutoLayout();
         nodeEditor.Begin();
-        for(auto* page : context.goDVSC->timeline->pages)
-            RenderPage(page->binaryData.pageIndex);
-		for (auto* page : context.goDVSC->timeline->pages)
-			for (auto* trans : page->transitions)
-				RenderTransition(page->binaryData.pageIndex, trans);
+		for (auto* page : context.dvPages)
+			if(RenderPage(page->filePage->index))
+				page->UpdateRuntimePage();
+		for (auto* page : context.dvPages)
+			for (auto& trans : page->filePage->transition)
+				RenderTransition(page->filePage->index, trans);
         nodeEditor.End();
     }
 
-    void PageEditor::RenderPage(int pageIdx) {
+    bool PageEditor::RenderPage(int pageIdx) {
+		bool changed = false;
 		auto& context = GetContext();
-		auto* page = context.goDVSC->timeline->pages[pageIdx];
+		auto* page = context.dvPages[pageIdx];
         ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, {0.5f, 0.5f, 0.5f, 1.0f});
 		NodeId nodeId{ NodeType::PAGE, pageIdx };
 
-		nodeEditor.BeginNode(nodeId, ImGui::CalcTextSize(page->binaryData.pageName).x);
+		nodeEditor.BeginNode(nodeId, ImGui::CalcTextSize(page->filePage->name).x);
 
 		nodeEditor.BeginInputPins();
 		InputPinId inpin{ nodeId, PinType::TRANSITION, 0 };
@@ -69,19 +71,19 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		nodeEditor.EndInputPins();
 
 		nodeEditor.BeginControls();
-		float progress = (static_cast<float>(context.goDVSC->timeline->preCurrentFrame) - page->binaryData.start) / (page->binaryData.end - page->binaryData.start);
+		float progress = (static_cast<float>(context.goDVSC->timeline->preCurrentFrame) - page->filePage->frameStart) / (page->filePage->frameEnd - page->filePage->frameStart);
 		if (context.goDVSC->timeline->currentPage == pageIdx)
 			ImGui::ProgressBar(progress, {150, 0});
-		int start = page->binaryData.start / 100;
-		if (Editor("Start", start))
-			page->binaryData.start = start * 100;
-		int end = page->binaryData.end / 100;
-		if (Editor("End", end))
-			page->binaryData.end = end * 100;
-		int skipFrame = page->binaryData.skipFrame / 100;
-		if (Editor("Skip Frame", skipFrame))
-			page->binaryData.skipFrame = skipFrame * 100;
-        Editor("Page Name", page->binaryData.pageName);
+		int start = static_cast<int>(page->filePage->frameStart);
+		if (changed |= Editor("Start", start))
+			page->filePage->frameStart = static_cast<float>(start);
+		int end = static_cast<int>(page->filePage->frameEnd);
+		if (changed |= Editor("End", end))
+			page->filePage->frameEnd = static_cast<float>(end);
+		int skipFrame = static_cast<int>(page->filePage->skipFrame);
+		if(changed |= Editor("Skip Frame", skipFrame))
+			page->filePage->skipFrame = static_cast<float>(skipFrame);
+        changed |= Editor("Page Name", page->filePage->name);
 		nodeEditor.EndControls();
 
 		nodeEditor.BeginOutputPins();
@@ -93,12 +95,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		nodeEditor.EndNode();
 
 		ax::NodeEditor::PopStyleColor();
+		return changed;
     }
 
-	void PageEditor::RenderTransition(int pageIdx, hh::dv::DvPageTransition* trans)
+	void PageEditor::RenderTransition(int pageIdx, dv::DvTransition& trans)
 	{
 		auto x = OutputPinId{ { NodeType::PAGE, pageIdx }, PinType::TRANSITION, 0 };
-		auto y = InputPinId{ { NodeType::PAGE, trans->binaryData.destinationPageID }, PinType::TRANSITION, 0 };
+		auto y = InputPinId{ { NodeType::PAGE, trans.destinationPageID }, PinType::TRANSITION, 0 };
 		Link(x, y);
 	}
 

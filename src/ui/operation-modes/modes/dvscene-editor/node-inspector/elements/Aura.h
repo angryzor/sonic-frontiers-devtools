@@ -4,15 +4,19 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-    void RenderElementInspector<1027>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1027>(char* element) {
 #elif DEVTOOLS_TARGET_SDK_miller
-    void RenderElementInspector<1029>(hh::dv::DvElementBase* element) {
+    bool RenderElementInspector<1029>(char* element) {
 #endif
-        auto* elem = reinterpret_cast<app::dv::DvElementAura*>(element);
-        auto* data = elem->GetData();
-		CheckboxFlags("Enabled", data->flags, app::dv::DvElementAura::Data::Flags::ENABLED);
-		CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementAura::Data::Flags::CURVE_ENABLED);
-        Editor("Node", data->node);
-        Editor("Finish Node", data->finishNode);
+        bool changed = false;
+        auto* data = reinterpret_cast<app::dv::DvElementAura::Data*>(element);
+		changed |= CheckboxFlags("Enabled", data->flags, app::dv::DvElementAura::Data::Flags::ENABLED);
+        if(data->flags.test(app::dv::DvElementAura::Data::Flags::ENABLED)){
+            changed |= CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementAura::Data::Flags::CURVE_ENABLED);
+            changed |= Editor("Node", data->node);
+            if(data->flags.test(app::dv::DvElementAura::Data::Flags::CURVE_ENABLED))
+                changed |= Editor("Finish Node", data->finishNode);
+        }
+        return changed;
     }
 }

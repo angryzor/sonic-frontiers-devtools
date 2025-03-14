@@ -191,6 +191,22 @@ namespace ui::operation_modes::modes::dvscene_editor {
             ContainsElement(contains, elementId, x);
     }
 
+    void Context::GetFileNode(dv::DvNode& curNode, hh::dv::DvNodeBase* node, dv::DvNode*& result)
+    {
+        if (strcmp(curNode.name, node->nodeName.c_str()) == 0 && memcmp(reinterpret_cast<char*>(&curNode.guid), node->guid, 16) == 0 && curNode.category == static_cast<int>(node->nodeType)) {
+            result = &curNode;
+            return;
+        }
+        for (auto& x : curNode.childNodes)
+            GetFileNode(x, node, result);
+    }
+
+    void Context::GetFilePage(dv::DvPage& curPage, hh::dv::DvPage* page, dv::DvPage*& result)
+    {
+        if (strcmp(curPage.name, page->binaryData.pageName) == 0 && curPage.index == page->binaryData.pageIndex)
+            result = &curPage;
+    }
+
     void Context::GetChildren(hh::dv::DvNodeBase* node, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool& includeElements)
     {
         if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT && !includeElements)
@@ -350,6 +366,118 @@ namespace ui::operation_modes::modes::dvscene_editor {
         return node;
     }
 
+    dv::DvNode Context::CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId)
+    {
+        dv::DvNode node{};
+        char* rawMem = new char[NodeDataSize[nodeType].first];
+        size_t setupSize = NodeDataSize[nodeType].second;        
+        char* setup = new char[setupSize];
+        memset(setup, 0x00, setupSize);
+        switch (static_cast<hh::dv::DvNodeBase::NodeType>(nodeType)) {
+        case hh::dv::DvNodeBase::NodeType::PATH:
+            reinterpret_cast<hh::dv::DvNodePath::Data*>(setup)->matrix = csl::math::Matrix44::Identity();
+            break;
+        case hh::dv::DvNodeBase::NodeType::CAMERA_MOTION:
+            reinterpret_cast<hh::dv::DvNodeCameraMotion::Data*>(setup)->end = 100;
+            break;
+        case hh::dv::DvNodeBase::NodeType::CHARACTER: {
+            auto* setupData = reinterpret_cast<hh::dv::DvNodeCharacter::Data*>(setup);
+            strcpy(setupData->modelName, "chr_sonic");
+            strcpy(setupData->skeletonName, "chr_sonic");
+            strcpy(setupData->name3, "sn");
+            setupData->useName3 = 1;
+            break;
+        }
+        case hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION: {
+            auto* setupData = reinterpret_cast<hh::dv::DvNodeCharacterMotion::Data*>(setup);
+            setupData->end = 100;
+            strcpy(setupData->asmState, "Dst0000");
+            setupData->speed = 1.0f;
+            break;
+        }
+        case hh::dv::DvNodeBase::NodeType::MODEL: {
+            auto* setupData = reinterpret_cast<hh::dv::DvNodeModel::Data*>(setup);
+            strcpy(setupData->modelName, "chr_sonic");
+            strcpy(setupData->skeletonName, "chr_sonic");
+            strcpy(setupData->name3, "sn");
+            setupData->useName3 = 1;
+            break;
+        }
+        case hh::dv::DvNodeBase::NodeType::MODEL_MOTION: {
+            auto* setupData = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(setup);
+            setupData->end = 100;
+            strcpy(setupData->asmState, "Dst0000");
+            setupData->speed = 1.0f;
+            break;
+        }
+        case hh::dv::DvNodeBase::NodeType::ELEMENT: {
+            size_t elementDataSize = 0;
+            if (elementId >= 1000)
+                elementDataSize = ElementDataSize[elementId + 27 - 1000];
+            else
+                elementDataSize = ElementDataSize[elementId];
+            setup = new char[setupSize + elementDataSize];
+            memset(setup, 0x00, setupSize + elementDataSize);
+            auto* setupData = reinterpret_cast<hh::dv::DvNodeElement::Data*>(setup);
+            setupData->end = 100.0f;
+            setupData->playType = hh::dv::DvNodeElement::PlayType::NORMAL;
+            setupData->updateTiming = hh::dv::DvNodeElement::UpdateTiming::ON_EXEC_PATH;
+            setupData->elementId = static_cast<hh::dv::DvNodeElement::ElementID>(elementId);
+            switch (setupData->elementId) {
+            case hh::dv::DvNodeElement::ElementID::PATH_OFFSET: {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->offsetMatrix = csl::math::Matrix44::Identity();
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::PATH_INTERPOLATION: {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementPathInterpolation::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->interpolation.scale = { 1,1,1 };
+                elementData->finishInterpolation.scale = { 1,1,1 };
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::EFFECT: {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementEffect::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->r = 255;
+                elementData->g = 255;
+                elementData->b = 255;
+                elementData->a = 255;
+                elementData->effectMatrix = csl::math::Matrix44::Identity();
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::FADE: {
+                auto* elementData = reinterpret_cast<app::dv::DvElementFade::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->enabled = true;
+                break;
+            }
+            case hh::dv::DvNodeElement::ElementID::UV_ANIM:
+            case hh::dv::DvNodeElement::ElementID::VISIBILITY_ANIM:
+            case hh::dv::DvNodeElement::ElementID::MATERIAL_ANIM:
+            case hh::dv::DvNodeElement::ElementID::VERTEX_ANIMATION_TEXTURE:
+            {
+                auto* elementData = reinterpret_cast<hh::dv::DvElementUVAnim::Data*>(reinterpret_cast<size_t>(setup) + setupSize);
+                elementData->speed = 1.0f;
+                break;
+            }
+            }
+            auto curveDataInfo = GetElementTimelineRender(elementId);
+            if (curveDataInfo != std::pair<size_t, size_t>{})
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second, 0, false);
+            setupSize += elementDataSize;
+            break;
+        }
+        }
+        std::uniform_int_distribution<int> dis(0, 255);
+        for (char x = 0; x < 16; x++)
+            reinterpret_cast<char*>(&node.guid)[x] = static_cast<char>(dis(mt));
+        node.category = nodeType;
+        strcpy(node.name, nodeName);
+        node.data = new char[setupSize];
+        memcpy(node.data, setup, setupSize);
+        delete[] setup;
+        node.dataSize = setupSize;
+        return node;
+    }
+
     void Context::ParentNode(hh::dv::DvNodeBase* parent, hh::dv::DvNodeBase* child)
     {
         switch (child->nodeType) {
@@ -370,5 +498,29 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
     }
 
-    Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator } {}
+    void Context::ParentNode(dv::DvNode& parent, dv::DvNode& child)
+    {
+        parent.childNodes.push_back(child);
+    }
+
+    dv::DvNode* Context::GetFileNode(hh::dv::DvNodeBase* node)
+    {
+        dv::DvNode* result;
+        GetFileNode(*parsedScene->dvCommon->node, node, result);
+        return result;
+    }
+
+    dv::DvPage* Context::GetFilePage(hh::dv::DvPage* page)
+    {
+        dv::DvPage* result{};
+        for (auto& x : parsedScene->dvCommon->pages) {
+            if (!result)
+                GetFilePage(x, page, result);
+            else
+                break;
+        }
+        return result;
+    }
+
+    Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator } {}
 }
