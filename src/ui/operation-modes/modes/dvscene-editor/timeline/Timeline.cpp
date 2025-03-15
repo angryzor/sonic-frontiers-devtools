@@ -110,6 +110,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				ImPlotPoint clickpos{};
 
 				if (ImTimeline::BeginClip("", &startTime, &endTime, 80.0f, &startTimeChanged, &endTimeChanged, &moved)) {
+					if (ImGui::BeginPopupContextItem("Properties")) {
+						Editor("Start", start);
+						Editor("End", end);
+						ImGui::EndPopup();
+					}
 					if (curve && ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
 						if (ImGui::BeginPopupContextItem("Controls")) {
 							ImGui::SeparatorText("Curve Editing Settings");

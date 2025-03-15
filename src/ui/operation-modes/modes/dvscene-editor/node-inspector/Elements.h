@@ -20,12 +20,12 @@
 //#include "elements/DebugMotion.h"
 #include "elements/CameraHedgehog.h"
 #include "elements/CameraInGame.h"
-#include "elements/PointLight.h"
 #include "elements/VertexAnimationTexture.h"
 #include "elements/Spotlight.h"
 #include "elements/ControllerVibration.h"
 //#include "elements/SpotlightModel.h"
 #ifdef DEVTOOLS_TARGET_SDK_miller
+#include "elements/PointLight.h"
 #include "elements/TexturePatternAnim.h"
 #include "elements/MaterialParam.h"
 #endif

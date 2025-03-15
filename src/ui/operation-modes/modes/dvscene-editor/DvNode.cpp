@@ -62,15 +62,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 	bool DvNode::operator==(const DvNode& other) const
 	{
-		if (strcmp(node->guid, other.node->guid) == 0)
-			return true;
-
-        return false;
+		return memcmp(&fileNode->guid, &other.fileNode->guid, 16) == 0 && strcmp(fileNode->name, other.fileNode->name) == 0;
 	}
 
 	const char* DvNode::GetName() const
 	{
-		return node->nodeName.c_str();
+		return fileNode->name;
 	}
 
 	bool DvNode::CanTransform() const 

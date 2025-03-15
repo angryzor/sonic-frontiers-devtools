@@ -255,6 +255,17 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			memcpy(page->binaryData.pageName, filePage->name, 32);
 			page->binaryData.transitionCount = filePage->transition.size();
 			page->binaryData.dataSize = filePage->unkData.size();
+			for (int trans = 0; trans < filePage->transition.size(); trans++) {
+				auto* transition = page->transitions[trans];
+				auto& fileTransition = filePage->transition[trans];
+				transition->binaryData.destinationPageID = fileTransition.destinationPageID;
+				transition->binaryData.conditionCount = fileTransition.conditions.size();
+				auto& fileCondition = fileTransition.conditions[0];
+				if (fileCondition.type == dv::DvCondition::ConditionType::QTE) {
+					auto* qteCond = reinterpret_cast<app::dv::DvPageConditionQTE*>(transition->condition);
+					memcpy(&qteCond->binaryData, fileCondition.data, fileCondition.dataSize);
+				}
+			}
 		}
 	};
 }

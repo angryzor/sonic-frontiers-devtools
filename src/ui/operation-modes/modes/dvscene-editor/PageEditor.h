@@ -8,7 +8,8 @@
 namespace ui::operation_modes::modes::dvscene_editor
 {
     enum class NodeType {
-		PAGE
+		PAGE,
+		CONDITION
 	};
 
 	enum class PinType {
@@ -72,7 +73,8 @@ namespace ui::operation_modes::modes::dvscene_editor
 
         virtual void RenderPanel() override;
         bool RenderPage(int pageIdx);
-		void RenderTransition(int pageIdx, dv::DvTransition& trans);
+		bool RenderCondition(int pageIdx, int transitionIdx, int conditionIdx);
+		void RenderTransition(int pageIdx, int transitionIdx);
         virtual PanelTraits GetPanelTraits() const override;
 
 		ax::NodeEditor::LinkId GetLinkId(ax::NodeEditor::PinId fromPinId, ax::NodeEditor::PinId toPinId);

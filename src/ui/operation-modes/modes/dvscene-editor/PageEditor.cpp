@@ -1,6 +1,7 @@
 #include "PageEditor.h"
 #include "Behaviors.h"
 #include <ui/common/StandaloneOperationModeHost.h>
+#include <utilities/NameHash.h>
 
 namespace ui::operation_modes::modes::dvscene_editor {
     namespace NodeEd = ax::NodeEditor;
@@ -49,8 +50,20 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		for (auto* page : context.dvPages)
 			if(RenderPage(page->filePage->index))
 				page->UpdateRuntimePage();
+		for (auto* page : context.dvPages) {
+			int transIdx = 0;
+			for (auto& trans : page->filePage->transition) {
+				int condIdx = 0;
+				for (auto& cond : trans.conditions) {
+					if(RenderCondition(page->filePage->index, transIdx, condIdx))
+						page->UpdateRuntimePage();
+					condIdx++;
+				}
+				transIdx++;
+			}
+		}
 		for (auto* page : context.dvPages)
-			for (auto& trans : page->filePage->transition)
+			for (int trans = 0; trans < page->filePage->transition.size(); trans++)
 				RenderTransition(page->filePage->index, trans);
         nodeEditor.End();
     }
@@ -64,6 +77,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		nodeEditor.BeginNode(nodeId, ImGui::CalcTextSize(page->filePage->name).x);
 
+		nodeEditor.BeginTitle();
+		ImGui::Text("Page");
+		nodeEditor.EndTitle();
+
 		nodeEditor.BeginInputPins();
 		InputPinId inpin{ nodeId, PinType::TRANSITION, 0 };
         nodeEditor.BeginInputPin(inpin, PinType::TRANSITION);
@@ -71,7 +88,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		nodeEditor.EndInputPins();
 
 		nodeEditor.BeginControls();
-		float progress = (static_cast<float>(context.goDVSC->timeline->preCurrentFrame) - page->filePage->frameStart) / (page->filePage->frameEnd - page->filePage->frameStart);
+		float progress = (static_cast<float>(context.goDVSC->timeline->preCurrentFrame/100) - page->filePage->frameStart) / (page->filePage->frameEnd - page->filePage->frameStart);
 		if (context.goDVSC->timeline->currentPage == pageIdx)
 			ImGui::ProgressBar(progress, {150, 0});
 		int start = static_cast<int>(page->filePage->frameStart);
@@ -98,11 +115,62 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		return changed;
     }
 
-	void PageEditor::RenderTransition(int pageIdx, dv::DvTransition& trans)
+	bool PageEditor::RenderCondition(int pageIdx, int transitionIdx, int conditionIdx)
 	{
-		auto x = OutputPinId{ { NodeType::PAGE, pageIdx }, PinType::TRANSITION, 0 };
-		auto y = InputPinId{ { NodeType::PAGE, trans.destinationPageID }, PinType::TRANSITION, 0 };
-		Link(x, y);
+		bool changed = false;
+		auto& context = GetContext();
+		auto* page = context.dvPages[pageIdx]->filePage;
+		auto& condition = page->transition[transitionIdx].conditions[conditionIdx];
+		ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, { 0.5f, 0.5f, 0.5f, 1.0f });
+		NodeId nodeId{ NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | reinterpret_cast<int>(&page->transition[transitionIdx]) | conditionIdx) };
+
+		nodeEditor.BeginNode(nodeId, ImGui::CalcTextSize("Condition").x);
+
+		nodeEditor.BeginTitle();
+		ImGui::Text("Condition");
+		nodeEditor.EndTitle();
+
+		nodeEditor.BeginInputPins();
+		InputPinId inpin{ nodeId, PinType::TRANSITION, 0 };
+		nodeEditor.BeginInputPin(inpin, PinType::TRANSITION);
+		nodeEditor.EndInputPin();
+		nodeEditor.EndInputPins();
+
+		nodeEditor.BeginControls();
+		Viewer("Type", static_cast<int>(condition.type) == 1000 ? "QTE" : "Page End");
+		switch (condition.type) {
+		case dv::DvCondition::ConditionType::QTE:
+			auto* qteCond = reinterpret_cast<app::dv::DvPageConditionQTE::Data*>(condition.data);
+			changed |= Editor("Failed", qteCond->failed);
+			break;
+		}
+		nodeEditor.EndControls();
+
+		nodeEditor.BeginOutputPins();
+		OutputPinId outpin{ nodeId, PinType::TRANSITION, 0 };
+		nodeEditor.BeginOutputPin(outpin, 0.0f, PinType::TRANSITION);
+		nodeEditor.EndOutputPin();
+		nodeEditor.EndOutputPins();
+
+		nodeEditor.EndNode();
+
+		ax::NodeEditor::PopStyleColor();
+		return changed;
+	}
+
+	void PageEditor::RenderTransition(int pageIdx, int transitionIdx)
+	{
+		auto& ctx = GetContext();
+		auto* page = ctx.dvPages[pageIdx]->filePage;
+		auto& trans = page->transition[transitionIdx];
+		for (int cond = 0; cond < trans.conditions.size(); cond++) {
+			auto x = OutputPinId{ { NodeType::PAGE, pageIdx }, PinType::TRANSITION, 0 };
+			auto y = InputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | reinterpret_cast<int>(&trans) | cond) }, PinType::TRANSITION, 0 };
+			Link(x, y);
+			x = OutputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | reinterpret_cast<int>(&trans) | cond) }, PinType::TRANSITION, 0 };
+			y = InputPinId{ { NodeType::PAGE, trans.destinationPageID }, PinType::TRANSITION, 0 };
+			Link(x, y);
+		}
 	}
 
     PanelTraits PageEditor::GetPanelTraits() const
