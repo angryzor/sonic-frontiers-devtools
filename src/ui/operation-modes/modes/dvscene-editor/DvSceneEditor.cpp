@@ -20,7 +20,7 @@ namespace ui::operation_modes::modes::dvscene_editor
 		AddBehavior<SelectionBehavior>();
 		AddBehavior<SelectionAabbBehavior>();
 		AddBehavior<SelectionTransformationBehavior>();
-		//AddBehavior<GizmoBehavior>();
+		AddBehavior<GizmoBehavior>();
 		AddBehavior<DeleteBehavior>();
 		auto* gameManager = hh::game::GameManager::GetInstance();
 		gameManager->AddListener(this);

@@ -354,9 +354,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             break;
         }
         }
-        std::uniform_int_distribution<int> dis(0, 255);
-        for (char x = 0; x < 16; x++)
-            node->guid[x] = static_cast<char>(dis(mt));
+        GenerateGUID(node->guid);
         node->dvsceneNodeTree = parent->dvsceneNodeTree;
         node->parent = parent;
         node->nodeType = static_cast<hh::dv::DvNodeBase::NodeType>(nodeType);
@@ -466,9 +464,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             break;
         }
         }
-        std::uniform_int_distribution<int> dis(0, 255);
-        for (char x = 0; x < 16; x++)
-            reinterpret_cast<char*>(&node.guid)[x] = static_cast<char>(dis(mt));
+        GenerateGUID(reinterpret_cast<char*>(&node.guid));
         node.category = nodeType;
         strcpy(node.name, nodeName);
         node.data = new char[setupSize];
@@ -520,6 +516,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
                 break;
         }
         return result;
+    }
+
+    void Context::GenerateGUID(char* guid)
+    {
+        std::uniform_int_distribution<int> dis(0, 255);
+        for (char x = 0; x < 16; x++)
+            guid[x] = static_cast<char>(dis(mt));
     }
 
     Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator } {}

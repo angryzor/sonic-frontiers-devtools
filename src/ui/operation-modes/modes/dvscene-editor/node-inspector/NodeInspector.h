@@ -9,6 +9,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		virtual void RenderPanel() override;
 		virtual PanelTraits GetPanelTraits() const override;
+
+		bool NodeEditor(dv::DvNode* node);
 	};
 
 	template<int type>

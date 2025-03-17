@@ -89,39 +89,39 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			Eigen::Affine3f transform = Eigen::Affine3f::Identity();
 			switch (node->nodeType) {
 			case hh::dv::DvNodeBase::NodeType::PATH:
-				transform = TransformToAffine3f(reinterpret_cast<hh::dv::DvNodePath*>(node)->transform);
+				transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix.matrix());
 				break;
 			case hh::dv::DvNodeBase::NodeType::ELEMENT:
 			{
-				auto* element = reinterpret_cast<hh::dv::DvNodeElement*>(node);
-				switch (element->binaryData.elementId) {
+				auto* element = &fileNode->data[sizeof(hh::dv::DvNodeElement::Data)];
+				switch (reinterpret_cast<hh::dv::DvNodeElement::Data*>(fileNode->data)->elementId) {
 				case hh::dv::DvNodeElement::ElementID::PATH_OFFSET:
-					transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvElementPathOffset*>(element->element)->binaryData.offsetMatrix.matrix());
+					transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element)->offsetMatrix.matrix());
 					break;
 				case hh::dv::DvNodeElement::ElementID::EFFECT:
-					transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvElementEffect*>(element->element)->binaryData.effectMatrix.matrix());
+					transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvElementEffect::Data*>(element)->effectMatrix.matrix());
 					break;
 				case hh::dv::DvNodeElement::ElementID::CAMERA_OFFSET:
-					transform.translation() = reinterpret_cast<hh::dv::DvElementCameraOffset*>(element->element)->binaryData.offsetPosition;
+					transform.translation() = reinterpret_cast<hh::dv::DvElementCameraOffset::Data*>(element)->offsetPosition;
 					break;
 				case hh::dv::DvNodeElement::ElementID::POINT_LIGHT:
-					transform.translation() = reinterpret_cast<hh::dv::DvElementPointLight*>(element->element)->binaryData.position;
+					transform.translation() = reinterpret_cast<hh::dv::DvElementPointLight::Data*>(element)->position;
 					break;
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT:
-					transform.translation() = reinterpret_cast<hh::dv::DvElementSpotlight*>(element->element)->binaryData.position;
+					transform.translation() = reinterpret_cast<hh::dv::DvElementSpotlight::Data*>(element)->position;
 					break;
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT_MODEL:
-					transform.translation() = reinterpret_cast<hh::dv::DvElementSpotlightModel*>(element->element)->binaryData.position;
+					transform.translation() = reinterpret_cast<hh::dv::DvElementSpotlightModel::Data*>(element)->position;
 					break;
 				case hh::dv::DvNodeElement::ElementID::VARIABLE_POINT_LIGHT:
-					transform.translation() = reinterpret_cast<app::dv::DvElementVariablePointLight*>(element->element)->GetData()->position;
+					transform.translation() = reinterpret_cast<app::dv::DvElementVariablePointLight::Data*>(element)->position;
 					break;
 				}
 				break;
 			}
 			}
 			if(auto* x = node->parent)
-				transform = transform * TransformToAffine3f(x->transform);
+				transform = TransformToAffine3f(x->transform) * transform;
 			return transform;
 		}
 		else
@@ -129,7 +129,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			return Eigen::Affine3f{};
 	}
 	
-    void DvNode::SetTransform(const Eigen::Affine3f &transform) const
+    void DvNode::SetTransform(const Eigen::Affine3f &transform)
     {
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 		if(CanTransform())
@@ -139,37 +139,38 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				trans = TransformToAffine3f(x->transform).inverse() * transform;
 			switch (node->nodeType) {
 			case hh::dv::DvNodeBase::NodeType::PATH:
-				reinterpret_cast<hh::dv::DvNodePath*>(node)->transform = Affine3fToTransform(trans);
+				reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix = Eigen::Projective3f(trans.matrix());
 				break;
 			case hh::dv::DvNodeBase::NodeType::ELEMENT:
 			{
-				auto* element = reinterpret_cast<hh::dv::DvNodeElement*>(node);
-				switch (element->binaryData.elementId) {
+				auto* element = &fileNode->data[sizeof(hh::dv::DvNodeElement::Data)];
+				switch (reinterpret_cast<hh::dv::DvNodeElement::Data*>(fileNode->data)->elementId) {
 				case hh::dv::DvNodeElement::ElementID::PATH_OFFSET:
-					reinterpret_cast<hh::dv::DvElementPathOffset*>(element->element)->binaryData.offsetMatrix = Eigen::Projective3f(trans.matrix());
+					reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element)->offsetMatrix = Eigen::Projective3f(trans.matrix());
 					break;
 				case hh::dv::DvNodeElement::ElementID::EFFECT:
-					reinterpret_cast<hh::dv::DvElementEffect*>(element->element)->binaryData.effectMatrix = Eigen::Projective3f(trans.matrix());
+					reinterpret_cast<hh::dv::DvElementEffect::Data*>(element)->effectMatrix = Eigen::Projective3f(trans.matrix());
 					break;
 				case hh::dv::DvNodeElement::ElementID::CAMERA_OFFSET:
-					reinterpret_cast<hh::dv::DvElementCameraOffset*>(element->element)->binaryData.offsetPosition = trans.translation();
+					reinterpret_cast<hh::dv::DvElementCameraOffset::Data*>(element)->offsetPosition = trans.translation();
 					break;
 				case hh::dv::DvNodeElement::ElementID::POINT_LIGHT:
-					reinterpret_cast<hh::dv::DvElementPointLight*>(element->element)->binaryData.position = trans.translation();
+					reinterpret_cast<hh::dv::DvElementPointLight::Data*>(element)->position = trans.translation();
 					break;
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT:
-					reinterpret_cast<hh::dv::DvElementSpotlight*>(element->element)->binaryData.position = trans.translation();
+					reinterpret_cast<hh::dv::DvElementSpotlight::Data*>(element)->position = trans.translation();
 					break;
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT_MODEL:
-					reinterpret_cast<hh::dv::DvElementSpotlightModel*>(element->element)->binaryData.position = trans.translation();
+					reinterpret_cast<hh::dv::DvElementSpotlightModel::Data*>(element)->position = trans.translation();
 					break;
 				case hh::dv::DvNodeElement::ElementID::VARIABLE_POINT_LIGHT:
-					reinterpret_cast<app::dv::DvElementVariablePointLight*>(element->element)->GetData()->position = trans.translation();
+					reinterpret_cast<app::dv::DvElementVariablePointLight::Data*>(element)->position = trans.translation();
 					break;
 				}
 				break;
 			}
 			}
+			UpdateRuntimeNode();
 		}
 #endif
     }
@@ -184,13 +185,20 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	}
 
 	void DvNode::UpdateRuntimeNode() {
+		memcpy(node->guid, &fileNode->guid, 16);
 		node->nodeName.clear();
 		for (char x = 0; x < strlen(fileNode->name) + 1; x++)
 			node->nodeName.push_back(fileNode->name[x]);
 		memcpy(&reinterpret_cast<char*>(node)[NodeDataInfo[fileNode->category].second], fileNode->data, NodeDataInfo[fileNode->category].first);
-		if (node->nodeType == hh::dv::DvNodeBase::NodeType::PATH)
+		switch (node->nodeType) {
+		case hh::dv::DvNodeBase::NodeType::PATH:
 			reinterpret_cast<hh::dv::DvNodePath*>(node)->transform = Affine3fToTransform(Eigen::Affine3f(reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix.matrix()));
-		else if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT) {
+			break;
+		/*case hh::dv::DvNodeBase::NodeType::MODEL:
+		case hh::dv::DvNodeBase::NodeType::CHARACTER:
+			node->Setup(fileNode->data);
+			break;*/
+		case hh::dv::DvNodeBase::NodeType::ELEMENT: {
 			auto* nodeElement = reinterpret_cast<hh::dv::DvNodeElement*>(node);
 			char* elementData;
 			size_t elementSize = 0;
@@ -209,6 +217,17 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				elementSize = ElementDataInfo[static_cast<unsigned int>(nodeElement->binaryData.elementId)].first;
 			}
 			memcpy(elementData, &fileNode->data[NodeDataInfo[fileNode->category].first], elementSize);
+			switch (nodeElement->binaryData.elementId) {
+			case hh::dv::DvNodeElement::ElementID::EFFECT:
+				nodeElement->element->DeleteData();
+				break;
+			case hh::dv::DvNodeElement::ElementID::QTE: {
+				nodeElement->element->AddCallback(ctx->goDVSC->timeline->preCurrentFrame, nodeElement->transform);
+				break;
+			}
+			}
+			break;
+		}
 		}
 	}
 }

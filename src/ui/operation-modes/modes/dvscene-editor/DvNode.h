@@ -73,7 +73,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		const char* GetName() const;
 		bool CanTransform() const;
 		Eigen::Affine3f GetTransform() const;
-		void SetTransform(const Eigen::Affine3f& transform) const;
+		void SetTransform(const Eigen::Affine3f& transform);
 		DvNode GetParent();
 		void DeleteNode();
 		void UpdateRuntimeNode();
