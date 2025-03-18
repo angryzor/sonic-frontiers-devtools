@@ -6,11 +6,12 @@
 #include <ui/GlobalSettings.h>
 
 namespace ui::operation_modes::modes::dvscene_editor {
-    void Tree::RenderNode(hh::dv::DvNodeBase* node){
+    void Tree::RenderNode(dv::DvNode* node){
+		auto& ctx = GetContext();
 		ImGui::PushID(node);
 
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-		DvNode selection{ node, GetContext() };
+		DvNode selection{ ctx.GetRuntimeNode(node), GetContext() };
 
         auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 		auto& selected = selectionBehavior->GetSelection();
@@ -19,19 +20,19 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
 		char nodeName[256];
-		const char* type = nodeTypeNames[static_cast<int>(node->nodeType)];
-		if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT) {
-			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement*>(node)->binaryData.elementId);
+		const char* type = nodeTypeNames[node->category];
+		if (static_cast<hh::dv::DvNodeBase::NodeType>(node->category) == hh::dv::DvNodeBase::NodeType::ELEMENT) {
+			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement::Data*>(node->data)->elementId);
 			if (elemId >= 1000)
 				type = elementIDStrings[elemId - 1000 + hhElementCount];
 			else
 				type = elementIDStrings[elemId];
 		}
-		snprintf(nodeName, sizeof(nodeName), "%s (%s) - %zx##%s", node->nodeName.c_str(), type, (size_t)node, node->guid);
+		snprintf(nodeName, sizeof(nodeName), "%s (%s) - %zx", node->name, type, (size_t)node);
 
 		bool isOpen = false;
 
-		if(node->childrenElements0.size() == 0 && node->childrenPath.size() == 0 && node->childrenCamera.size() == 0 && node->childrenMotion.size() == 0 && node->childrenElements1.size() == 0 && node->childrenElements2.size() == 0)
+		if(node->childNodes.size() == 0)
 			ImGui::TreeNodeEx(nodeName, nodeFlags | ImGuiTreeNodeFlags_Leaf | ImGuiTreeNodeFlags_NoTreePushOnOpen);
 		else
 			isOpen = ImGui::TreeNodeEx(nodeName, nodeFlags);;
@@ -40,7 +41,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			selectionBehavior->Select(selection);
         
 		if (ImGui::BeginPopupContextItem("Options")) {
-			auto& ctx = GetContext();
 			if (ImGui::TreeNode("Add Node")) {
 				for (auto& category : categorizedNodes) {
 					if (ImGui::TreeNode(category.name)) {
@@ -65,10 +65,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 										name[strlen(nodeName) + i] = '0' + (rand() % 10);
 									name[strlen(nodeName) + 5] = '\0';
 									auto newFileNode = ctx.CreateNode(name, nodeType, elementId);
-									auto* newNode = ctx.CreateNode(name, nodeType, elementId, node);
+									ctx.ParentNode(*node, newFileNode);
+									auto* runtimeParent = ctx.GetRuntimeNode(node);
+									auto* newNode = ctx.CreateNode(name, nodeType, elementId, runtimeParent);
 									memcpy(newNode->guid, &newFileNode.guid, 16);
-									ctx.ParentNode(node, newNode);
-									ctx.ParentNode(*ctx.GetFileNode(node), newFileNode);
+									ctx.ParentNode(runtimeParent, newNode);
 									delete[] name;
 								}
 							}
@@ -82,18 +83,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		}
 
         if(isOpen){
-            for(auto* x : node->childrenElements0)
-                RenderNode(x);
-			for (auto* x : node->childrenPath)
-				RenderNode(x);
-			for (auto* x : node->childrenCamera)
-				RenderNode(x);
-			for (auto* x : node->childrenMotion)
-				RenderNode(x);
-			for (auto* x : node->childrenElements1)
-				RenderNode(x);
-			for (auto* x : node->childrenElements2)
-				RenderNode(x);
+			for (auto& x : node->childNodes)
+				RenderNode(&x);
             ImGui::TreePop();
         }
 
@@ -109,7 +100,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			return;
 		}
         
-        RenderNode(context.goDVSC->nodeTree->mainNode);
+        RenderNode(context.parsedScene->dvCommon->node);
 	}
 
 	PanelTraits Tree::GetPanelTraits() const

@@ -207,6 +207,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		void ContainsElement(bool& contains, const unsigned int& elementId, hh::dv::DvNodeBase* node);
 		void GetFileNode(dv::DvNode& curNode, hh::dv::DvNodeBase* node, dv::DvNode*& result);
 		void GetFilePage(dv::DvPage& curPage, hh::dv::DvPage* page, dv::DvPage*& result);
+		void GetRuntimeNode(hh::dv::DvNodeBase* curNode, dv::DvNode* node, hh::dv::DvNodeBase*& result);
+		void GetParentNode(dv::DvNode& curNode, dv::DvNode* node, dv::DvNode*& result);
 	public:
 		using CompatibleObject::CompatibleObject;
 
@@ -232,6 +234,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dv::DvPage* GetFilePage(hh::dv::DvPage* page);
 		hh::dv::DvNodeBase* GetRuntimeNode(dv::DvNode* node);
 		void GenerateGUID(char* guid);
+		dv::DvNode* GetParentNode(dv::DvNode* node);
 
 		Context(csl::fnd::IAllocator* allocator);
 	};

@@ -126,6 +126,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {1034, RenderElementInspector<1034>},
 #endif
         {1010, RenderElementInspector<1010>},
+#ifdef DEVTOOLS_TARGET_SDK_miller
+        {1011, RenderElementInspector<1011>},
+        {1012, RenderElementInspector<1012>},
+#endif
         {1016, RenderElementInspector<1016>},
         {1017, RenderElementInspector<1017>},
         {1018, RenderElementInspector<1018>},

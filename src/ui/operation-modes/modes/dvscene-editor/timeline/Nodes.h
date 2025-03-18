@@ -7,20 +7,41 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     template<>
 	bool RenderNodeTimeline<4>(Timeline* timeline, char* node) {
+        bool changed = false;
 		auto* data = reinterpret_cast<hh::dv::DvNodeCameraMotion::Data*>(node);
-		return timeline->RenderTimeline(data->start, data->end);
+        int start = data->start / 100;
+        int end = data->end / 100;
+        if (changed |= timeline->RenderTimeline(start, end)) {
+            data->start = start * 100;
+            data->end = end * 100;
+        }
+        return changed;
 	}
 
 	template<>
 	bool RenderNodeTimeline<6>(Timeline* timeline, char* node) {
-		auto* data = reinterpret_cast<hh::dv::DvNodeCharacterMotion::Data*>(node);
-		return timeline->RenderTimeline(data->start, data->end);
+        bool changed = false;
+        auto* data = reinterpret_cast<hh::dv::DvNodeCharacterMotion::Data*>(node);
+        int start = data->start / 100;
+        int end = data->end / 100;
+        if (changed |= timeline->RenderTimeline(start, end)) {
+            data->start = start * 100;
+            data->end = end * 100;
+        }
+		return changed;
 	}
 
 	template<>
 	bool RenderNodeTimeline<10>(Timeline* timeline, char* node) {
+        bool changed = false;
 		auto* data = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(node);
-		return timeline->RenderTimeline(data->start, data->end);
+        int start = data->start / 100;
+        int end = data->end / 100;
+        if (changed |= timeline->RenderTimeline(start, end)) {
+            data->start = start * 100;
+            data->end = end * 100;
+        }
+        return changed;
 	}
 
 	template<>
@@ -37,6 +58,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         else
             changed |= timeline->RenderTimeline(data->start, data->end);
+
         return changed;
 	}
 

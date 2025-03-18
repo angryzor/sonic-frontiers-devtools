@@ -90,6 +90,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
         virtual void RenderPanel() override;
         virtual PanelTraits GetPanelTraits() const override;
 
-        void RenderNode(hh::dv::DvNodeBase* node);
+        void RenderNode(dv::DvNode* node);
     };
 }

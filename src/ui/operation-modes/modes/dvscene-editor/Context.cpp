@@ -207,6 +207,38 @@ namespace ui::operation_modes::modes::dvscene_editor {
             result = &curPage;
     }
 
+    void Context::GetRuntimeNode(hh::dv::DvNodeBase* curNode, dv::DvNode* node, hh::dv::DvNodeBase*& result)
+    {
+        if (strcmp(node->name, curNode->nodeName.c_str()) == 0 && memcmp(reinterpret_cast<char*>(&node->guid), curNode->guid, 16) == 0 && node->category == static_cast<int>(curNode->nodeType)) {
+            result = curNode;
+            return;
+        }
+        for (auto* x : curNode->childrenCamera)
+            GetRuntimeNode(x, node, result);
+        for (auto* x : curNode->childrenPath)
+            GetRuntimeNode(x, node, result);
+        for (auto* x : curNode->childrenMotion)
+            GetRuntimeNode(x, node, result);
+        for (auto* x : curNode->childrenElements0)
+            GetRuntimeNode(x, node, result);
+        for (auto* x : curNode->childrenElements1)
+            GetRuntimeNode(x, node, result);
+        for (auto* x : curNode->childrenElements2)
+            GetRuntimeNode(x, node, result);
+    }
+
+    void Context::GetParentNode(dv::DvNode& curNode, dv::DvNode* node, dv::DvNode*& result)
+    {
+        for(auto& x : curNode.childNodes) {
+            if (strcmp(x.name, node->name) == 0 && memcmp(reinterpret_cast<char*>(&x.guid), reinterpret_cast<char*>(&node->guid), 16) == 0)
+            {
+                result = &curNode;
+                return;
+            }
+            GetParentNode(x, node, result);
+        }
+    }
+
     void Context::GetChildren(hh::dv::DvNodeBase* node, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool& includeElements)
     {
         if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT && !includeElements)
@@ -368,8 +400,16 @@ namespace ui::operation_modes::modes::dvscene_editor {
     {
         dv::DvNode node{};
         char* rawMem = new char[NodeDataSize[nodeType].first];
-        size_t setupSize = NodeDataSize[nodeType].second;        
-        char* setup = new char[setupSize];
+        size_t setupSize = NodeDataSize[nodeType].second;       
+        if (static_cast<hh::dv::DvNodeBase::NodeType>(nodeType) == hh::dv::DvNodeBase::NodeType::ELEMENT) {
+            if (elementId >= 1000)
+                setupSize += ElementDataSize[elementId + hhElementCount - 1000];
+            else
+                setupSize += ElementDataSize[elementId];
+        }
+        node.data = new char[setupSize];
+        node.dataSize = setupSize;
+        char*& setup = node.data;
         memset(setup, 0x00, setupSize);
         switch (static_cast<hh::dv::DvNodeBase::NodeType>(nodeType)) {
         case hh::dv::DvNodeBase::NodeType::PATH:
@@ -409,13 +449,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             break;
         }
         case hh::dv::DvNodeBase::NodeType::ELEMENT: {
-            size_t elementDataSize = 0;
-            if (elementId >= 1000)
-                elementDataSize = ElementDataSize[elementId + 27 - 1000];
-            else
-                elementDataSize = ElementDataSize[elementId];
-            setup = new char[setupSize + elementDataSize];
-            memset(setup, 0x00, setupSize + elementDataSize);
+            
             auto* setupData = reinterpret_cast<hh::dv::DvNodeElement::Data*>(setup);
             setupData->end = 100.0f;
             setupData->playType = hh::dv::DvNodeElement::PlayType::NORMAL;
@@ -460,17 +494,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
             auto curveDataInfo = GetElementTimelineRender(elementId);
             if (curveDataInfo != std::pair<size_t, size_t>{})
                 Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second, 0, false);
-            setupSize += elementDataSize;
             break;
         }
         }
         GenerateGUID(reinterpret_cast<char*>(&node.guid));
         node.category = nodeType;
         strcpy(node.name, nodeName);
-        node.data = new char[setupSize];
-        memcpy(node.data, setup, setupSize);
-        delete[] setup;
-        node.dataSize = setupSize;
         return node;
     }
 
@@ -518,11 +547,25 @@ namespace ui::operation_modes::modes::dvscene_editor {
         return result;
     }
 
+    hh::dv::DvNodeBase* Context::GetRuntimeNode(dv::DvNode* node)
+    {
+        hh::dv::DvNodeBase* result;
+        GetRuntimeNode(goDVSC->nodeTree->mainNode, node, result);
+        return result;
+    }
+
     void Context::GenerateGUID(char* guid)
     {
         std::uniform_int_distribution<int> dis(0, 255);
         for (char x = 0; x < 16; x++)
             guid[x] = static_cast<char>(dis(mt));
+    }
+
+    dv::DvNode* Context::GetParentNode(dv::DvNode* node)
+    {
+        dv::DvNode* result;
+        GetParentNode(*parsedScene->dvCommon->node, node, result);
+        return result;
     }
 
     Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator } {}

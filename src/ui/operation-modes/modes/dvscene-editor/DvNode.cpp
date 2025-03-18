@@ -200,6 +200,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			break;*/
 		case hh::dv::DvNodeBase::NodeType::ELEMENT: {
 			auto* nodeElement = reinterpret_cast<hh::dv::DvNodeElement*>(node);
+			auto* nodeElementData = reinterpret_cast<hh::dv::DvNodeElement::Data*>(fileNode->data);
+			nodeElement->start = nodeElementData->start * 100;
+			nodeElement->end = nodeElementData->end * 100;
 			char* elementData;
 			size_t elementSize = 0;
 			if (static_cast<unsigned int>(nodeElement->binaryData.elementId) >= 1000) {

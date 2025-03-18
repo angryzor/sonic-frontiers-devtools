@@ -90,8 +90,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		else {
 			DvNode focusedNode = selection[0];
 			dv::DvNode* dvNode = focusedNode.fileNode;
-			if (NodeEditor(dvNode))
-				focusedNode.UpdateRuntimeNode();
+			if(memcmp(&dvNode->guid, focusedNode.node->guid, 16) == 0)
+				if (NodeEditor(dvNode))
+					focusedNode.UpdateRuntimeNode();
 		}
 	}
 
