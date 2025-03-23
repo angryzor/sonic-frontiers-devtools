@@ -7,25 +7,25 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	private:
 		DvNode LoopThroughParents(hh::dv::DvNodeBase* node) {
 			if(node->nodeType == hh::dv::DvNodeBase::NodeType::PATH)
-				return DvNode(node, *ctx);
+				return DvNode(ctx->GetFileNode(node), *ctx);
 			else
 				return LoopThroughParents(node->parent);
 		}
 
 		void Delete(dv::DvNode& node) {
 			auto parent = GetParent();
+			for (auto& x : node.childNodes)
+				Delete(x);
+			node.childNodes.clear();
 			int y = 0;
-			for(auto& x : parent.fileNode->childNodes){
-				if (memcmp(&x.guid, &fileNode->guid, 16) == 0)
+			for (auto& x : parent.fileNode->childNodes) {
+				if (memcmp(&x.guid, &node.guid, 16) == 0)
 				{
-					parent.fileNode->childNodes.erase(parent.fileNode->childNodes.begin() + y);
-					break;
+					parent.fileNode->childNodes.erase(std::next(parent.fileNode->childNodes.begin(), y));
+					return;
 				}
 				y++;
 			}
-			for (auto& x : node.childNodes)
-				Delete(node);
-			node.childNodes.clear();
 		}
 
 		void Delete(hh::dv::DvNodeBase* node){
@@ -68,7 +68,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dv::Resource* fileResource;
 
 		DvNode();
-		DvNode(hh::dv::DvNodeBase* node, Context& ctx);
+		DvNode(dv::DvNode* node, Context& ctx);
 
 		bool operator==(const DvNode& other) const;
 		const char* GetName() const;

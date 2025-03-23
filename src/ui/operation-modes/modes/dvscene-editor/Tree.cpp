@@ -8,10 +8,12 @@
 namespace ui::operation_modes::modes::dvscene_editor {
     void Tree::RenderNode(dv::DvNode* node){
 		auto& ctx = GetContext();
+		if (!ctx.GetRuntimeNode(node))
+			return;
 		ImGui::PushID(node);
 
 		ImGuiTreeNodeFlags nodeFlags = ImGuiTreeNodeFlags_OpenOnArrow | ImGuiTreeNodeFlags_OpenOnDoubleClick;
-		DvNode selection{ ctx.GetRuntimeNode(node), GetContext() };
+		DvNode selection{ node, GetContext() };
 
         auto* selectionBehavior = GetBehavior<SelectionBehavior<Context>>();
 		auto& selected = selectionBehavior->GetSelection();

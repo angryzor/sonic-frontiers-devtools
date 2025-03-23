@@ -55,10 +55,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	};
 
 	DvNode::DvNode() {}
-	DvNode::DvNode(hh::dv::DvNodeBase* node, Context& ctx) : node{ node }, ctx{ &ctx }
+	DvNode::DvNode(dv::DvNode* node, Context& ctx) : fileNode{ node }, ctx{ &ctx }
 	{
-		fileNode = ctx.GetFileNode(node);
-		fileResource = ctx.GetResourceByFileNode(fileNode);
+		this->node = ctx.GetRuntimeNode(node);
+		if(fileNode)
+			fileResource = ctx.GetResourceByFileNode(fileNode);
 	}
 
 	bool DvNode::operator==(const DvNode& other) const
