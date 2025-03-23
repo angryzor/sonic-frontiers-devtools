@@ -7,10 +7,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementUVAnim::Data*>(element);
 		changed |= Editor("UV Anim Name", data->uvAnimName);
-		changed |= Editor("Unk1", data->unk1);
 		changed |= Editor("Speed", data->speed);
-		changed |= Editor("Unk3", data->unk3);
-		changed |= Editor("Unk4", data->unk4);
         return changed;
     }
 }

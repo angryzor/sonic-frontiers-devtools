@@ -79,6 +79,18 @@ namespace ui::operation_modes::modes::dvscene_editor {
         sizeof(app::dv::DvElementChangeTimeScale::Data), // CHANGE_TIME_SCALE
         sizeof(app::dv::DvElementCyberSpaceNoise::Data), // CYBER_SPACE_NOISE
         sizeof(app::dv::DvElementLipAnimation::Data), // LIP_ANIMATION
+        sizeof(app::dv::DvElementAuraRoad::Data), // AURA_ROAD
+        0, // MOVIE_VIEW
+        sizeof(app::dv::DvElementCrossFade::Data), // CROSS_FADE
+        sizeof(app::dv::DvElementWeather::Data), // WEATHER
+        sizeof(app::dv::DvElementShadowMapParam::Data), // SHADOW_MAP_PARAM
+        sizeof(app::dv::DvElementVariablePointLight::Data), // VARIABLE_POINT_LIGHT
+        0, // OPENING_LOGO
+        sizeof(app::dv::DvElementDensitySectorPoint::Data), // DENSITY_SECTOR_POINT
+        0, // FX_COL_UPDATE
+        sizeof(app::dv::DvElementQTEAccel::Data), // QTE_ACCEL
+        sizeof(app::dv::DvElementTheEndCableObject::Data), // THE_END_CABLE_OBJECT
+        sizeof(app::dv::DvElementRifleBeastLighting::Data), // RIFLE_BEAST_LIGHTING
     };
 #elif DEVTOOLS_TARGET_SDK_miller
     constexpr size_t ElementDataSize[] = {

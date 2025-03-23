@@ -13,15 +13,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		}
 
 		void Delete(dv::DvNode& node) {
-			auto parent = GetParent();
+			auto parent = ctx->GetFileNode(this->node->parent);
 			for (auto& x : node.childNodes)
 				Delete(x);
 			node.childNodes.clear();
 			int y = 0;
-			for (auto& x : parent.fileNode->childNodes) {
+			for (auto& x : parent->childNodes) {
 				if (memcmp(&x.guid, &node.guid, 16) == 0)
 				{
-					parent.fileNode->childNodes.erase(std::next(parent.fileNode->childNodes.begin(), y));
+					parent->childNodes.erase(std::next(parent->childNodes.begin(), y));
 					return;
 				}
 				y++;
@@ -29,6 +29,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		}
 
 		void Delete(hh::dv::DvNodeBase* node){
+			if (node->nodeType == hh::dv::DvNodeBase::NodeType::ELEMENT)
+				reinterpret_cast<hh::dv::DvNodeElement*>(node)->element->RemoveCallback();
 			if(auto* y = node->parent){
 				y->childrenElements0.remove(y->childrenElements0.find(node));
 				y->childrenElements1.remove(y->childrenElements1.find(node));

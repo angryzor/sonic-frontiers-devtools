@@ -21,7 +21,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		if (selected.find(selection) != -1)
 			nodeFlags |= ImGuiTreeNodeFlags_Selected;
 
-		char nodeName[256];
+		char nodeName[150];
 		const char* type = nodeTypeNames[node->category];
 		if (static_cast<hh::dv::DvNodeBase::NodeType>(node->category) == hh::dv::DvNodeBase::NodeType::ELEMENT) {
 			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement::Data*>(node->data)->elementId);
@@ -82,8 +82,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				ImGui::TreePop();
 			}
 			if(selection.fileNode != ctx.parsedScene->dvCommon->node)
-				if (ImGui::Selectable("Delete Node"))
+				if (ImGui::Selectable("Delete Node")) {
 					selection.DeleteNode();
+					selectionBehavior->DeselectAll();
+				}
 			ImGui::EndPopup();
 		}
 

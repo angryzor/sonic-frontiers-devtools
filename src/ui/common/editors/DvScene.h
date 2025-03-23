@@ -30,3 +30,4 @@ bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::VignettePa
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::DepthParam& param);
 #endif
+bool Editor(const char* label, app::dv::DvElementTime::Data::Time& param);

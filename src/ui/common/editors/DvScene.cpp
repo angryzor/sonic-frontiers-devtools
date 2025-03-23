@@ -342,3 +342,14 @@ bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::DepthParam
     return changed;
 }
 #endif
+
+bool Editor(const char* label, app::dv::DvElementTime::Data::Time& param)
+{
+    bool changed = false;
+    if (ImGui::TreeNode(label)) {
+        changed |= Editor("Hour", param.hour);
+        changed |= Editor("Minute", param.minute);
+        ImGui::TreePop();
+    }
+    return changed;
+}
