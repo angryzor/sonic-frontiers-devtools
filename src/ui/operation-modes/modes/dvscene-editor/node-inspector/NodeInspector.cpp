@@ -11,6 +11,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
 	bool NodeInspector::NodeEditor(dv::DvNode* node){
+		auto& ctx = GetContext();
 		bool changed = false;
 		char guidBuffer[37];
 		unsigned char guid[16];
@@ -31,39 +32,49 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		changed |= Editor("Node Name", node->name);
 		auto type = static_cast<hh::dv::DvNodeBase::NodeType>(node->category);
 		Viewer("Node Type", nodeTypeNames[node->category]);
-		/*
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if (type == hh::dv::DvNodeBase::NodeType::CHARACTER        ||
+			type == hh::dv::DvNodeBase::NodeType::MODEL			   ||
 			type == hh::dv::DvNodeBase::NodeType::CAMERA_MOTION    ||
+			type == hh::dv::DvNodeBase::NodeType::MODEL_MOTION     ||
 			type == hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION) {
-			const char* curRes = "NULL";
-			if (auto* dvres = node->dvResource)
-				if (auto* res = dvres->resource)
-					curRes = res->GetName();
-			ImGui::Text("Current Resource: %s (Drag and drop a resource to change)", curRes);
-			if (ImGui::BeginDragDropTarget()) {
-				if (auto* payload = ImGui::AcceptDragDropPayload("Resource")) {
-					auto* resource = *static_cast<hh::fnd::ManagedResource**>(payload->Data);
-					const hh::fnd::ResourceTypeInfo* resInfo;
+			auto* resource = ctx.GetResourceByFileNode(node);
+			char curRes[192] = "NULL";
+			if (resource)
+				strcpy(curRes, resource->filename);
+			if (Editor("Resource filename", curRes))
+			{
+				if (!resource) {
+					dv::Resource res{};
+					memcpy(&res.guid, &node->guid, 16);
 					switch (type) {
 					case hh::dv::DvNodeBase::NodeType::CHARACTER:
-						resInfo = hh::anim::ResAnimator::GetTypeInfo();
+						res.type = dv::Resource::Type::Character;
 						break;
-					case hh::dv::DvNodeBase::NodeType::CAMERA_MOTION:
-						resInfo = hh::gfx::ResAnimCameraContainer::GetTypeInfo();
+					case hh::dv::DvNodeBase::NodeType::MODEL:
+						res.type = dv::Resource::Type::Model;
 						break;
 					case hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION:
-						resInfo = hh::anim::ResAnimationPxd::GetTypeInfo();
+					case hh::dv::DvNodeBase::NodeType::MODEL_MOTION:
+						res.type = dv::Resource::Type::CharacterMotion;
+						break;
+					case hh::dv::DvNodeBase::NodeType::CAMERA_MOTION:
+						res.type = dv::Resource::Type::CameraMotion;
 						break;
 					}
-					if (resource->resourceTypeInfo == resInfo)
-						if (auto* res = node->dvResource)
-							res->resource = resource;
+					res.flags0 = 0;
+					res.flags1 = 1;
+					memset(res.filename, 0, 192);
+					strcpy(curRes, res.filename);
+					memset(res.unkData, 0, 596);
+					ctx.parsedScene->dvResource.push_back(res);
+					resource = &res;
 				}
-				ImGui::EndDragDropTarget();
+				if (resource) {
+					memset(resource->filename, 0, 192);
+					strcpy(resource->filename, curRes);
+				}
 			}
 		}
-#endif*/
 		NodeFuncType render = GetNodeInspectorRender(node->category);
 		if(render){
 			ImGui::SeparatorText("Properties");

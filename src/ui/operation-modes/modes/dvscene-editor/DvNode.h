@@ -16,7 +16,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			auto parent = GetParent();
 			int y = 0;
 			for(auto& x : parent.fileNode->childNodes){
-				if (strcmp(reinterpret_cast<char*>(&x.guid), reinterpret_cast<char*>(&fileNode->guid)) == 0)
+				if (memcmp(&x.guid, &fileNode->guid, 16) == 0)
 				{
 					parent.fileNode->childNodes.erase(parent.fileNode->childNodes.begin() + y);
 					break;
@@ -65,6 +65,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		Context* ctx;
         hh::dv::DvNodeBase* node;
 		dv::DvNode* fileNode;
+		dv::Resource* fileResource;
 
 		DvNode();
 		DvNode(hh::dv::DvNodeBase* node, Context& ctx);

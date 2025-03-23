@@ -58,6 +58,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	DvNode::DvNode(hh::dv::DvNodeBase* node, Context& ctx) : node{ node }, ctx{ &ctx }
 	{
 		fileNode = ctx.GetFileNode(node);
+		fileResource = ctx.GetResourceByFileNode(fileNode);
 	}
 
 	bool DvNode::operator==(const DvNode& other) const

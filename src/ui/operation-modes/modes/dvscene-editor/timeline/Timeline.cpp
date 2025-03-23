@@ -147,7 +147,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 							bool hovered;
 							bool held;
 
-							if (ImPlot::DragPoint(x, &frame, &value, color, 4.0f, 0, &clicked, &hovered, &held)) {
+							if (changed |= ImPlot::DragPoint(x, &frame, &value, color, 4.0f, 0, &clicked, &hovered, &held)) {
 								if (axisLimit)
 									value = std::clamp(value, 0.0, static_cast<double>(maxValue));
 

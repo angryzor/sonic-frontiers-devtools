@@ -235,6 +235,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		hh::dv::DvNodeBase* GetRuntimeNode(dv::DvNode* node);
 		void GenerateGUID(char* guid);
 		dv::DvNode* GetParentNode(dv::DvNode* node);
+		dv::Resource* GetResourceByFileNode(dv::DvNode* node);
 
 		Context(csl::fnd::IAllocator* allocator);
 	};

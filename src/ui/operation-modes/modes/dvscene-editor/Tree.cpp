@@ -79,6 +79,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				}
 				ImGui::TreePop();
 			}
+			if(selection.fileNode != ctx.parsedScene->dvCommon->node)
+				if (ImGui::Selectable("Delete Node"))
+					selection.DeleteNode();
 			ImGui::EndPopup();
 		}
 

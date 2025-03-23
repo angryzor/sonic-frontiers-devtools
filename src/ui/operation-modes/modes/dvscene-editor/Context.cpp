@@ -568,5 +568,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
         return result;
     }
 
+    dv::Resource* Context::GetResourceByFileNode(dv::DvNode* node)
+    {
+        for(auto& res : parsedScene->dvResource)
+            if(memcmp(&node->guid, &res.guid, 16) == 0)
+                return &res;
+        return nullptr;
+    }
+
     Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator } {}
 }

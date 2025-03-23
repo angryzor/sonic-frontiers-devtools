@@ -28,5 +28,5 @@ bool Editor(const char* label, app::dv::DvElementDOF::Data::DOFParam& param);
 #endif
 bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::VignetteParam& param);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::MinMaxParam& param);
+bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::DepthParam& param);
 #endif

@@ -292,12 +292,19 @@ bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::VignettePa
         changed |= Editor("Position", param.position);
         changed |= Editor("Size", param.size);
         changed |= Editor("Scale", param.scale);
+        changed |= Editor("Direction", param.lineDirection);
+        float opacity = static_cast<float>(param.opacity) / 255.0f;
+        if (changed |= Editor("Opacity", opacity))
+            param.opacity = static_cast<unsigned int>(opacity * 255);
+        float color[3] = { static_cast<float>(param.color[0]) / 255, static_cast<float>(param.color[1]) / 255, static_cast<float>(param.color[2]) / 255 };
+        if (changed |= ImGui::ColorEdit3("Color", color)) {
+            param.color[0] = static_cast<unsigned int>(color[0] * 255);
+            param.color[1] = static_cast<unsigned int>(color[1] * 255);
+            param.color[2] = static_cast<unsigned int>(color[2] * 255);
+        }
+        changed |= Editor("Penumbra Scale", param.penumbraScale);
+        changed |= Editor("Intensity", param.intensity);
         changed |= Editor("Rotation", param.rotation);
-        changed |= Editor("Unk0", param.unk0);
-        changed |= Editor("Alpha", param.alpha);
-        changed |= Editor("Unk1", param.unk1);
-        changed |= Editor("Unk2", param.unk2);
-        changed |= Editor("Unk3", param.unk3);
 #elif DEVTOOLS_TARGET_SDK_miller
         changed |= Editor("Image Circle Parameters", param.imgCrclParam);
         changed |= Editor("Direction", param.direction);
@@ -318,9 +325,9 @@ bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::VignettePa
 }
 
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::MinMaxParam& param) {
+bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::DepthParam& param) {
     bool changed = false;
-    if(ImGui::TreeNode(label)){
+    if (ImGui::TreeNode(label)) {
         changed |= Editor("Min Penumbra Scale", param.minMaxPenumbraScale[0]);
         changed |= Editor("Max Penumbra Scale", param.minMaxPenumbraScale[1]);
         changed |= Editor("Bokeh Scale", param.bokehScale);
