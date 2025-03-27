@@ -38,10 +38,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				y->childrenPath.remove(y->childrenPath.find(node));
 				y->childrenCamera.remove(y->childrenCamera.find(node));
 				y->childrenMotion.remove(y->childrenMotion.find(node));
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 				if (node->nodeType == hh::dv::DvNodeBase::NodeType::CHARACTER || node->nodeType == hh::dv::DvNodeBase::NodeType::MODEL)
 					hh::game::GameObjectSystem::GetInstance()->GetGameObjectByHandle(reinterpret_cast<hh::dv::DvNodeBaseAnimationModel*>(node)->nodeCharacterObj->dvStandardChar)->Kill();
-#endif
 				if(node->childrenElements0.begin())
 					for(auto x = 0; x < node->childrenElements0.size(); x++)
 						Delete(node->childrenElements0[x]);
