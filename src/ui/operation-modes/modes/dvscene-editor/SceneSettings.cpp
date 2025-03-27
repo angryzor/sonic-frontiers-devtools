@@ -54,8 +54,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 								context.evtScene = evtScn;
 						context.parsedScene = new dv::DvScene;
 						context.parsedScene->read(static_cast<char*>(dvsc->resource->binaryData), dvsc->resource->size);
-						for (auto* page : context.goDVSC->timeline->pages)
-							context.dvPages.push_back(new DvPage( page, context ));
+						context.CreateWrapperPages();
 					}
 					if (context.goDVSC == obj)
 						ImGui::SetItemDefaultFocus();

@@ -85,7 +85,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 	Eigen::Affine3f DvNode::GetTransform() const 
 	{
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if(CanTransform())
 		{
 			Eigen::Affine3f transform = Eigen::Affine3f::Identity();
@@ -112,9 +111,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT:
 					transform.translation() = reinterpret_cast<hh::dv::DvElementSpotlight::Data*>(element)->position;
 					break;
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT_MODEL:
 					transform.translation() = reinterpret_cast<hh::dv::DvElementSpotlightModel::Data*>(element)->position;
 					break;
+#endif
 				case hh::dv::DvNodeElement::ElementID::VARIABLE_POINT_LIGHT:
 					transform.translation() = reinterpret_cast<app::dv::DvElementVariablePointLight::Data*>(element)->position;
 					break;
@@ -127,13 +128,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			return transform;
 		}
 		else
-#endif
 			return Eigen::Affine3f{};
 	}
 	
     void DvNode::SetTransform(const Eigen::Affine3f &transform)
     {
-#ifdef DEVTOOLS_TARGET_SDK_rangers
 		if(CanTransform())
 		{
 			auto trans = transform;
@@ -162,9 +161,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT:
 					reinterpret_cast<hh::dv::DvElementSpotlight::Data*>(element)->position = trans.translation();
 					break;
+#ifdef DEVTOOLS_TARGET_SDK_rangers
 				case hh::dv::DvNodeElement::ElementID::SPOTLIGHT_MODEL:
 					reinterpret_cast<hh::dv::DvElementSpotlightModel::Data*>(element)->position = trans.translation();
 					break;
+#endif
 				case hh::dv::DvNodeElement::ElementID::VARIABLE_POINT_LIGHT:
 					reinterpret_cast<app::dv::DvElementVariablePointLight::Data*>(element)->position = trans.translation();
 					break;
@@ -174,7 +175,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 			UpdateRuntimeNode();
 		}
-#endif
     }
 
 	DvNode DvNode::GetParent() {

@@ -588,5 +588,36 @@ namespace ui::operation_modes::modes::dvscene_editor {
         return nullptr;
     }
 
+    dv::DvPage Context::CreatePage(const char* pageName, unsigned int idx)
+    {
+        dv::DvPage page{};
+        page.frameEnd = 100;
+        page.index = idx;
+        page.skipFrame = 150;
+        memset(page.name, 0, 32);
+        strcpy(page.name, pageName);
+        return page;
+    }
+
+    hh::dv::DvPage* Context::CreatePage(const char* pageName, unsigned int idx, hh::dv::DvSceneControl* dvsc)
+    {
+        auto* allocator = dvsc->GetAllocator();
+        auto* rawMem = allocator->Alloc(sizeof(hh::dv::DvPage), alignof(hh::dv::DvPage));
+        hh::dv::DvPage* page = new (rawMem) hh::dv::DvPage(allocator);
+        page->dvSceneControl = dvsc;
+        page->binaryData.end = 100;
+        page->binaryData.pageIndex = idx;
+        page->binaryData.skipFrame = 150;
+        strcpy(page->binaryData.pageName, pageName);
+        return page;
+    }
+
+    void Context::CreateWrapperPages()
+    {
+        dvPages.clear();
+        for (auto* page : goDVSC->timeline->pages)
+            dvPages.push_back(new DvPage(page, *this));
+    }
+
     Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator } {}
 }

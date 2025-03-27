@@ -46,7 +46,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		}
 		if (ImGui::Selectable("Auto Layout"))
 			nodeEditor.RunAutoLayout();
-        nodeEditor.Begin();
+
+		nodeEditor.Begin();
+
 		for (auto* page : context.dvPages)
 			if(RenderPage(page->filePage->index))
 				page->UpdateRuntimePage();
@@ -65,7 +67,56 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		for (auto* page : context.dvPages)
 			for (int trans = 0; trans < page->filePage->transition.size(); trans++)
 				RenderTransition(page->filePage->index, trans);
-        nodeEditor.End();
+
+		/*if (ax::NodeEditor::ShowBackgroundContextMenu()) {
+			ax::NodeEditor::Suspend();
+			ImGui::OpenPopup("Page Context Options");
+			ax::NodeEditor::Resume();
+		}
+
+		ax::NodeEditor::Suspend();
+		if (ImGui::BeginPopup("Page Context Options")) {
+			if (ImGui::MenuItem("Create Page")) {
+				char pageName[32] = "";
+				srand(time(nullptr));
+				sprintf(pageName, "Page%d", static_cast<unsigned int>(rand()));
+				dv::DvPage filePage = context.CreatePage(pageName, context.dvPages.size());
+				hh::dv::DvPage* runtimePage = context.CreatePage(pageName, context.dvPages.size(), context.goDVSC);
+				context.parsedScene->dvCommon->pages.push_back(filePage);
+				context.goDVSC->timeline->pages.push_back(runtimePage);
+				context.CreateWrapperPages();
+			}
+			ImGui::EndPopup();
+		}
+		ax::NodeEditor::Resume();
+
+		if (ax::NodeEditor::BeginCreate()) {
+			OutputPinId inPin;
+			InputPinId outPin;
+
+			if (QueryNewLink(inPin, outPin)) {
+				if (inPin.nodeId.type == NodeType::PAGE && outPin.nodeId.type == NodeType::CONDITION) {
+					DvPage* page = context.dvPages[inPin.nodeId.idx];
+				}
+				else if ((static_cast<unsigned int>(inPin.nodeId.type) & static_cast<unsigned int>(NodeType::CONDITION)) != 0 && outPin.nodeId.type == NodeType::PAGE)
+					for (auto* page : context.dvPages) {
+						for (int x = 0; x < page->filePage->transition.size(); x++) {
+							auto& trans = page->filePage->transition[x];
+							for (int i = 0; i < trans.conditions.size(); i++)
+							{
+								if (inPin.nodeId.idx == static_cast<int>(name_hash(page->filePage->name) | page->filePage->index | static_cast<int>(page->filePage->skipFrame) | x)) {
+									trans.destinationPageID = outPin.nodeId.idx;
+									context.CreateWrapperPages();
+									break;
+								}
+							}
+						}
+					}
+			}
+		}
+
+		ax::NodeEditor::EndCreate();*/
+		nodeEditor.End();
     }
 
     bool PageEditor::RenderPage(int pageIdx) {
@@ -122,7 +173,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto* page = context.dvPages[pageIdx]->filePage;
 		auto& condition = page->transition[transitionIdx].conditions[conditionIdx];
 		ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, { 0.5f, 0.5f, 0.5f, 1.0f });
-		NodeId nodeId{ NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | reinterpret_cast<int>(&page->transition[transitionIdx]) | conditionIdx) };
+		NodeId nodeId{ NodeType::CONDITION, static_cast<int>(name_hash(page->name) | page->index | static_cast<int>(page->skipFrame) | transitionIdx) };
 
 		nodeEditor.BeginNode(nodeId, ImGui::CalcTextSize("Condition").x);
 
@@ -165,9 +216,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto& trans = page->transition[transitionIdx];
 		for (int cond = 0; cond < trans.conditions.size(); cond++) {
 			auto x = OutputPinId{ { NodeType::PAGE, pageIdx }, PinType::TRANSITION, 0 };
-			auto y = InputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | reinterpret_cast<int>(&trans) | cond) }, PinType::TRANSITION, 0 };
+			auto y = InputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | page->index | static_cast<int>(page->skipFrame) | transitionIdx) }, PinType::TRANSITION, 0 };
 			Link(x, y);
-			x = OutputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | reinterpret_cast<int>(&trans) | cond) }, PinType::TRANSITION, 0 };
+			x = OutputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | page->index | static_cast<int>(page->skipFrame) | transitionIdx) }, PinType::TRANSITION, 0 };
 			y = InputPinId{ { NodeType::PAGE, trans.destinationPageID }, PinType::TRANSITION, 0 };
 			Link(x, y);
 		}
@@ -248,5 +299,26 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	void PageEditor::Link(const OutputPinId& fromPin, const InputPinId& toPin)
 	{
 		nodeEditor.Link(GetLinkId(fromPin, toPin), fromPin, toPin, fromPin.type);
+	}
+
+	bool PageEditor::QueryNewLink(OutputPinId& startPinId, InputPinId& endPinId)
+	{
+		ax::NodeEditor::PinId startPin, endPin;
+
+		bool result = ax::NodeEditor::QueryNewLink(&startPin, &endPin);
+
+		if (!result || !startPin || !endPin)
+			return false;
+
+		PinId iStartPin = startPin;
+		PinId iEndPin = endPin;
+
+		if (iStartPin.kind == iEndPin.kind)
+			return false;
+
+		startPinId = iStartPin.kind == ax::NodeEditor::PinKind::Output ? OutputPinId{ static_cast<unsigned long long>(iStartPin) } : OutputPinId{ static_cast<unsigned long long>(iEndPin) };
+		endPinId = iStartPin.kind == ax::NodeEditor::PinKind::Input ? InputPinId{ static_cast<unsigned long long>(iStartPin) } : InputPinId{ static_cast<unsigned long long>(iEndPin) };
+
+		return true;
 	}
 }

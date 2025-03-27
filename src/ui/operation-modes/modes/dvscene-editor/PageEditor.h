@@ -79,5 +79,6 @@ namespace ui::operation_modes::modes::dvscene_editor
 
 		ax::NodeEditor::LinkId GetLinkId(ax::NodeEditor::PinId fromPinId, ax::NodeEditor::PinId toPinId);
 		void Link(const OutputPinId& fromPin, const InputPinId& toPin);
+		bool QueryNewLink(OutputPinId& startPinId, InputPinId& endPinId);
     };
 }

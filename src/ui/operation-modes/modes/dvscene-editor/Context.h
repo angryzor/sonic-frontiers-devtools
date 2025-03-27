@@ -236,6 +236,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		void GenerateGUID(char* guid);
 		dv::DvNode* GetParentNode(dv::DvNode* node);
 		dv::Resource* GetResourceByFileNode(dv::DvNode* node);
+		dv::DvPage CreatePage(const char* pageName, unsigned int idx);
+		hh::dv::DvPage* CreatePage(const char* pageName, unsigned int idx, hh::dv::DvSceneControl* dvsc);
+		void CreateWrapperPages();
 
 		Context(csl::fnd::IAllocator* allocator);
 	};
