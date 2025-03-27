@@ -26,7 +26,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		if (auto* evtPlayer = hh::game::GameManager::GetInstance()->GetService<app::evt::EventPlayer>()) {
 			
 			Editor("Cutscene Name", context.cutsceneName);
-			ImGui::SameLine();
 			if (ImGui::Button("Play Cutscene")) {
 				app::evt::EventSetupData setupData{};
 				setupData.Setup(context.cutsceneName.c_str());
