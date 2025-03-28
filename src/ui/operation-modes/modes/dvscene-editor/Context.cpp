@@ -215,7 +215,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
     void Context::GetFilePage(dv::DvPage& curPage, hh::dv::DvPage* page, dv::DvPage*& result)
     {
-        if (strcmp(curPage.name, page->binaryData.pageName) == 0 && curPage.index == page->binaryData.pageIndex)
+        if (memcmp(curPage.name, page->binaryData.pageName, 32) == 0 && curPage.index == page->binaryData.pageIndex)
             result = &curPage;
     }
 

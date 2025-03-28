@@ -49,24 +49,32 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		nodeEditor.Begin();
 
-		for (auto* page : context.dvPages)
-			if(RenderPage(page->filePage->index))
+		int pageIdx = 0;
+		for (auto* page : context.dvPages) {
+			if (RenderPage(pageIdx))
 				page->UpdateRuntimePage();
+			pageIdx++;
+		}
+		pageIdx = 0;
 		for (auto* page : context.dvPages) {
 			int transIdx = 0;
 			for (auto& trans : page->filePage->transition) {
 				int condIdx = 0;
 				for (auto& cond : trans.conditions) {
-					if(RenderCondition(page->filePage->index, transIdx, condIdx))
+					if(RenderCondition(pageIdx, transIdx, condIdx))
 						page->UpdateRuntimePage();
 					condIdx++;
 				}
 				transIdx++;
 			}
+			pageIdx++;
 		}
-		for (auto* page : context.dvPages)
+		pageIdx = 0;
+		for (auto* page : context.dvPages) {
 			for (int trans = 0; trans < page->filePage->transition.size(); trans++)
-				RenderTransition(page->filePage->index, trans);
+				RenderTransition(pageIdx, trans);
+			pageIdx++;
+		}
 
 		/*if (ax::NodeEditor::ShowBackgroundContextMenu()) {
 			ax::NodeEditor::Suspend();
@@ -173,7 +181,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto* page = context.dvPages[pageIdx]->filePage;
 		auto& condition = page->transition[transitionIdx].conditions[conditionIdx];
 		ax::NodeEditor::PushStyleColor(ax::NodeEditor::StyleColor_NodeBorder, { 0.5f, 0.5f, 0.5f, 1.0f });
-		NodeId nodeId{ NodeType::CONDITION, static_cast<int>(name_hash(page->name) | page->index | static_cast<int>(page->skipFrame) | transitionIdx) };
+		NodeId nodeId{ NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | static_cast<int>(page->skipFrame) | transitionIdx) };
 
 		nodeEditor.BeginNode(nodeId, ImGui::CalcTextSize("Condition").x);
 
@@ -216,9 +224,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		auto& trans = page->transition[transitionIdx];
 		for (int cond = 0; cond < trans.conditions.size(); cond++) {
 			auto x = OutputPinId{ { NodeType::PAGE, pageIdx }, PinType::TRANSITION, 0 };
-			auto y = InputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | page->index | static_cast<int>(page->skipFrame) | transitionIdx) }, PinType::TRANSITION, 0 };
+			auto y = InputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | static_cast<int>(page->skipFrame) | transitionIdx) }, PinType::TRANSITION, 0 };
 			Link(x, y);
-			x = OutputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | page->index | static_cast<int>(page->skipFrame) | transitionIdx) }, PinType::TRANSITION, 0 };
+			x = OutputPinId{ { NodeType::CONDITION, static_cast<int>(name_hash(page->name) | pageIdx | static_cast<int>(page->skipFrame) | transitionIdx) }, PinType::TRANSITION, 0 };
 			y = InputPinId{ { NodeType::PAGE, trans.destinationPageID }, PinType::TRANSITION, 0 };
 			Link(x, y);
 		}
