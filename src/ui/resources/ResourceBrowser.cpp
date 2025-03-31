@@ -79,12 +79,14 @@ void ResourceBrowser::RenderContents() {
 		//	//ResourceLoader::Unk1 unk{ 1, "" };
 		//	//Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo(), 0, 1, unk);
 		//}
+#ifndef DEVTOOLS_TARGET_SDK_wars
 		if (ImGui::MenuItem("Load resource...")) {
 			IGFD::FileDialogConfig cfg{};
 			cfg.path = GlobalSettings::defaultFileDialogDirectory;
 			cfg.flags = ImGuiFileDialogFlags_Modal;
 			loadNewDialog.OpenDialog("ResourceLoadNewDialog", "Choose File", ".*", cfg);
 		}
+#endif
 
 		if (ImGui::MenuItem("Watch directory...")) {
 			IGFD::FileDialogConfig cfg{};
@@ -255,6 +257,7 @@ void ResourceBrowser::GetProps(hh::fnd::ManagedResource* resource, PropSet& prop
 
 void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
 {
+#ifndef DEVTOOLS_TARGET_SDK_wars
 	char extbuf[20];
 	const char* ext = GetExtensionByTypeInfo(&resource->GetClass());
 
@@ -268,6 +271,7 @@ void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
 	cfg.flags = ImGuiFileDialogFlags_Modal;
 	cfg.userDatas = resource;
 	ImGuiFileDialog::Instance()->OpenDialog("ResourceLoadFromFileDialog", "Choose File", extbuf, cfg);
+#endif
 }
 
 void ResourceBrowser::RenderDialogs()
@@ -295,6 +299,7 @@ void ResourceBrowser::ShowExportResourceDialog(hh::fnd::ManagedResource* resourc
 }
 
 void ResourceBrowser::RenderLoadNewResourceDialog() {
+#ifndef DEVTOOLS_TARGET_SDK_wars
 	if (loadNewDialog.Display("ResourceLoadNewDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
 		if (loadNewDialog.IsOk()) {
 			ManagedResource* resource = static_cast<ManagedResource*>(loadNewDialog.GetUserDatas());
@@ -310,11 +315,16 @@ void ResourceBrowser::RenderLoadNewResourceDialog() {
 				std::string ext = filePathWithExt.substr(dotPos + 1);
 				hh::fnd::ResourceLoader::Locale locale{};
 
-				resourceLoader->LoadResource(fileUri, GetTypeInfoByExtension(ext.c_str()), 0, 1, locale);
+#ifdef DEVTOOLS_TARGET_SDK_miller
+				resourceLoader->LoadResource(fileUri, GetTypeInfoByExtension(ext.c_str()), {}, locale);
+#else
+				resourceLoader->LoadResource(fileUri, GetTypeInfoByExtension(ext.c_str()), {}, 1, locale);
+#endif
 			}
 		}
 		loadNewDialog.Close();
 	}
+#endif
 }
 
 void ResourceBrowser::RenderLoadDialog() {

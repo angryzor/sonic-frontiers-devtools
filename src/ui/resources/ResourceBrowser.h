@@ -10,8 +10,10 @@ class ResourceBrowser : public StandaloneWindow
     hh::fnd::Reference<hh::fnd::ManagedResource> selectedResource{};
     ImBrowser::ImBrowserContext* browser{};
     ImBrowser::ViewType currentView{};
+#ifndef DEVTOOLS_TARGET_SDK_wars
     IGFD::FileDialog loadNewDialog{ new FileSystemHE2{} };
     hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader{ new (GetAllocator()) hh::fnd::ResourceLoader{ GetAllocator() } };
+#endif
 
 public:
     class PropSet {

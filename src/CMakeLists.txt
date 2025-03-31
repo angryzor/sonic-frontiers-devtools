@@ -50,7 +50,6 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Action.cpp
         ui/Component.cpp
         ui/Desktop.cpp
-        ui/FileSystemBrowser.cpp
         ui/GlobalSettings.cpp
         ui/game-services/GameServiceInspector.cpp
         ui/operation-modes/OperationModeBehavior.cpp
@@ -125,7 +124,6 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Action.h
         ui/Component.h
         ui/Desktop.h
-        ui/FileSystemBrowser.h
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
         ui/game-services/GameServiceInspector.h

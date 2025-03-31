@@ -171,7 +171,7 @@ public:
         return fs::is_directory(stringToPath(vFilePathName));
     }
 };
-
+#ifndef DEVTOOLS_TARGET_SDK_wars
 class FileSystemHE2 : public IGFD::IFileSystem {
 public:
     const char* GetRootPrefix() const override { return "\\"; }
@@ -311,3 +311,6 @@ class FileSystemCombined : public IGFD::IFileSystem {
         return hh::fnd::FileSystem::GetInstance()->GetFileSystem(hh::fnd::InplaceTempUri<>{ vFilePathName.c_str(), vFilePathName.size() }) ? he2FS.IsDirectory(vFilePathName) : stdFS.IsDirectory(vFilePathName);
     }
 };
+#else
+using FileSystemCombined = FileSystemStd;
+#endif
