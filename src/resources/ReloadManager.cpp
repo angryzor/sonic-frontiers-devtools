@@ -202,7 +202,7 @@ void ReloadManager::ReloadByLoad(void* buffer, size_t fileSize, hh::fnd::Managed
 		resource->size = fileSize;
 	}
 
-	resource->Load(buffer, fileSize);
+	resource->Load(resource->unpackedBinaryData, resource->size);
 	resource->Resolve(resolver);
 }
 
@@ -210,11 +210,7 @@ void ReloadManager::ReloadSelf(hh::fnd::ManagedResource* resource)
 {
 	hh::fnd::ResourceManagerResolver resolver{};
 	resource->Unload();
-#ifdef DEVTOOLS_TARGET_SDK_miller
 	resource->Load(resource->unpackedBinaryData, resource->size);
-#else
-	resource->Load(resource->resourceTypeInfo->isInBinaContainer ? resource->originalBinaryData : resource->unpackedBinaryData, resource->size);
-#endif
 	resource->Resolve(resolver);
 }
 
@@ -252,7 +248,7 @@ void ReloadManager::ReloadObjectWorld(void* buffer, size_t fileSize, hh::game::R
 							if (auto* objInfoName = static_cast<const char*>(hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(objData->gameObjectClass)->GetAttributeValue("objinfo"))) {
 								auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
 								auto* objInfoClass = RESOLVE_STATIC_VARIABLE(ObjInfoRegistry::instance)->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
-								auto* objInfo = objInfoClass->Create(GetAllocator());
+								auto* objInfo = objInfoClass->instantiator(GetAllocator());
 
 								objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
 							}

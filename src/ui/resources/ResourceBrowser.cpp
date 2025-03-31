@@ -79,6 +79,13 @@ void ResourceBrowser::RenderContents() {
 		//	//ResourceLoader::Unk1 unk{ 1, "" };
 		//	//Desktop::instance->resourceLoader->LoadResource(uri, hh::gfnd::ResTexture::GetTypeInfo(), 0, 1, unk);
 		//}
+		if (ImGui::MenuItem("Load resource...")) {
+			IGFD::FileDialogConfig cfg{};
+			cfg.path = GlobalSettings::defaultFileDialogDirectory;
+			cfg.flags = ImGuiFileDialogFlags_Modal;
+			loadNewDialog.OpenDialog("ResourceLoadNewDialog", "Choose File", ".*", cfg);
+		}
+
 		if (ImGui::MenuItem("Watch directory...")) {
 			IGFD::FileDialogConfig cfg{};
 			cfg.path = GlobalSettings::defaultFileDialogDirectory;
@@ -121,6 +128,8 @@ void ResourceBrowser::RenderContents() {
 	if (ImGui::BeginChild("Main area", {}, ImGuiChildFlags_None, ImGuiWindowFlags_HorizontalScrollbar))
 		RenderMainArea();
 	ImGui::EndChild();
+
+	RenderDialogs();
 }
 
 const char* rank1Props[] = { "Type", "Size" };
@@ -263,6 +272,7 @@ void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
 
 void ResourceBrowser::RenderDialogs()
 {
+	RenderLoadNewResourceDialog();
 	RenderLoadDialog();
 	RenderExportDialog();
 }
@@ -282,6 +292,29 @@ void ResourceBrowser::ShowExportResourceDialog(hh::fnd::ManagedResource* resourc
 	cfg.flags = ImGuiFileDialogFlags_Modal | ImGuiFileDialogFlags_ConfirmOverwrite;
 	cfg.userDatas = resource;
 	ImGuiFileDialog::Instance()->OpenDialog("ResourceExportDialog", "Choose File", extbuf, cfg);
+}
+
+void ResourceBrowser::RenderLoadNewResourceDialog() {
+	if (loadNewDialog.Display("ResourceLoadNewDialog", ImGuiWindowFlags_NoCollapse, ImVec2(800, 500))) {
+		if (loadNewDialog.IsOk()) {
+			ManagedResource* resource = static_cast<ManagedResource*>(loadNewDialog.GetUserDatas());
+			std::string filePathWithExt = loadNewDialog.GetFilePathName();
+			auto dotPos = filePathWithExt.rfind('.');
+
+			if (dotPos != std::string::npos) {
+				std::string filePath = filePathWithExt.substr(0, dotPos);
+				hh::fnd::InplaceTempUri fileUri{ filePath.c_str(), filePath.size() };
+				csl::ut::String filePathFrag{ hh::fnd::MemoryRouter::GetTempAllocator() };
+				fileUri.GetPath(filePathFrag);
+				fileUri.SetPath(filePathFrag.c_str() + 1);
+				std::string ext = filePathWithExt.substr(dotPos + 1);
+				hh::fnd::ResourceLoader::Locale locale{};
+
+				resourceLoader->LoadResource(fileUri, GetTypeInfoByExtension(ext.c_str()), 0, 1, locale);
+			}
+		}
+		loadNewDialog.Close();
+	}
 }
 
 void ResourceBrowser::RenderLoadDialog() {

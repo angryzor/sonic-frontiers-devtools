@@ -1,6 +1,7 @@
 #pragma once
 #include <ui/common/StandaloneWindow.h>
 #include <imbrowser.h>
+#include <ImGuiFileDialogFileSystemOverride.h>
 
 class ResourceBrowser : public StandaloneWindow
 {
@@ -9,6 +10,8 @@ class ResourceBrowser : public StandaloneWindow
     hh::fnd::Reference<hh::fnd::ManagedResource> selectedResource{};
     ImBrowser::ImBrowserContext* browser{};
     ImBrowser::ViewType currentView{};
+    IGFD::FileDialog loadNewDialog{ new FileSystemHE2{} };
+    hh::fnd::Reference<hh::fnd::ResourceLoader> resourceLoader{ new (GetAllocator()) hh::fnd::ResourceLoader{ GetAllocator() } };
 
 public:
     class PropSet {
@@ -44,7 +47,8 @@ public:
     static void ExportResource(const wchar_t* filePath, hh::fnd::ManagedResource* resource);
     static void ShowLoadResourceDialog(hh::fnd::ManagedResource* resource);
     static void ShowExportResourceDialog(hh::fnd::ManagedResource* resource);
+    void RenderLoadNewResourceDialog();
     static void RenderLoadDialog();
     static void RenderExportDialog();
-    static void RenderDialogs();
+    void RenderDialogs();
 };

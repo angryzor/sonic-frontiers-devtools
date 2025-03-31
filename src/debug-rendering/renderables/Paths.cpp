@@ -1,4 +1,5 @@
 #include "Paths.h"
+#include <ui/common/overlays/Tag.h>
 
 namespace devtools::debug_rendering::renderables {
 	constexpr unsigned int maxStepCount = 256;
@@ -79,18 +80,12 @@ namespace devtools::debug_rendering::renderables {
 					if (!maybePos.has_value())
 						continue;
 
-					auto pos = maybePos.value();
+					OverlayTag(pathGoc->GetName(), false, maybePos.value(), ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
 
-					auto textSize = ImGui::CalcTextSize(pathGoc->GetName());
-					auto& style = ImGui::GetStyle();
-					auto* dl = ImGui::GetWindowDrawList();
-
-					dl->AddRectFilled(pos - textSize / 2 - style.FramePadding, pos + textSize / 2 + style.FramePadding, 0x60000000);
-
-					ImGui::SetCursorPos(pos - textSize / 2);
-					ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(0.0f, 1.0f, 0.0f, 1.0f));
-					ImGui::Text("%s", pathGoc->GetName());
-					ImGui::PopStyleColor();
+					if (ImGui::BeginDragDropSource()) {
+						ImGui::SetDragDropPayload("Path", &pathGoc, sizeof(pathGoc));
+						ImGui::EndDragDropSource();
+					}
 				}
 			}
 		}

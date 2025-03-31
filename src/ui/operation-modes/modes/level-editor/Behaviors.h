@@ -139,7 +139,10 @@ namespace ui::operation_modes::modes::level_editor {
 
 template<> struct ObjectLocationVisual3DBehaviorTraits<ui::operation_modes::modes::level_editor::Context> : BehaviorTraitsImpl<ui::operation_modes::modes::level_editor::Context> {
 	using BehaviorTraitsImpl::BehaviorTraitsImpl;
+	static constexpr const char* dragDropCategory = "ObjectData";
 	Eigen::Affine3f GetWorldTransform(hh::game::ObjectData* object) const { return ObjectTransformDataToAffine3f(object->transform); }
+	const char* GetPrimaryTag(hh::game::ObjectData* object) const { return GetObjectName(object); }
+	const char* GetSecondaryTag(hh::game::ObjectData* object) const { return object->gameObjectClass; }
 	template<typename F> void ForInvisibleObjects(F f) const {
 		auto* focusedChunk = context.GetFocusedChunk();
 
@@ -152,6 +155,15 @@ template<> struct ObjectLocationVisual3DBehaviorTraits<ui::operation_modes::mode
 			if (gameObject && ((!gameObject->GetComponent<hh::gfx::GOCVisual>() || gameObject->GetComponent<hh::gfx::GOCVisual>() == gameObject->GetComponent<hh::gfx::GOCVisualDebugDraw>()) && !gameObject->GetComponent<app::gfx::GOCVisualGeometryInstance>()))
 				f(status.objectData);
 		}
+	}
+	template<typename F> void ForAllObjects(F f) const {
+		auto* focusedChunk = context.GetFocusedChunk();
+
+		if (!focusedChunk)
+			return;
+
+		for (auto& status : focusedChunk->GetObjectStatuses())
+			f(status.objectData);
 	}
 };
 

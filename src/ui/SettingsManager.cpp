@@ -36,6 +36,8 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
 		&& debugRenderingLevelEditorDebugBoxRenderDistance == other.debugRenderingLevelEditorDebugBoxRenderDistance
+		&& debugRenderingLevelEditorDebugBoxRenderPrimaryTags == other.debugRenderingLevelEditorDebugBoxRenderPrimaryTags
+		&& debugRenderingLevelEditorDebugBoxRenderSecondaryTags == other.debugRenderingLevelEditorDebugBoxRenderSecondaryTags
 		&& enablePhotoMode == other.enablePhotoMode
 		&& enableApi == other.enableApi
 		&& !strcmp(apiHost, other.apiHost)
@@ -233,6 +235,10 @@ void SettingsManager::Render() {
 							ImGui::SetItemTooltip("Max amount of debug boxes that can be rendered.");
 							ImGui::DragFloat("Level editor debug box render distance", &tempSettings.debugRenderingLevelEditorDebugBoxRenderDistance, 0.05f);
 							ImGui::SetItemTooltip("Culls any debug boxes beyond this distance.");
+							ImGui::Checkbox("Render primary tags", &tempSettings.debugRenderingLevelEditorDebugBoxRenderPrimaryTags);
+							ImGui::SetItemTooltip("Whether the primary text tag should be rendered (usually object name).");
+							ImGui::Checkbox("Render secondary tags", &tempSettings.debugRenderingLevelEditorDebugBoxRenderSecondaryTags);
+							ImGui::SetItemTooltip("Whether the secondary text tag should be rendered (usually object type).");
 							ImGui::EndTabItem();
 						}
 						if (ImGui::BeginTabItem("Collider rendering filters")) {
@@ -369,7 +375,13 @@ void SettingsManager::ApplySettings() {
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.enabled = settings.debugRenderingRenderPaths;
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.normalsEnabled = settings.debugRenderingRenderPathNormals;
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.tangentsEnabled = settings.debugRenderingRenderPathTangents;
-	ObjectLocationVisual3DBehaviorBase::ApplySettings(settings.debugRenderingLevelEditorDebugBoxScale, settings.debugRenderingLevelEditorDebugBoxRenderLimit, settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	ObjectLocationVisual3DBehaviorBase::ApplySettings(
+		settings.debugRenderingLevelEditorDebugBoxScale,
+		settings.debugRenderingLevelEditorDebugBoxRenderLimit,
+		settings.debugRenderingLevelEditorDebugBoxRenderDistance,
+		settings.debugRenderingLevelEditorDebugBoxRenderPrimaryTags,
+		settings.debugRenderingLevelEditorDebugBoxRenderSecondaryTags
+	);
 	PhotoMode::enabled = settings.enablePhotoMode;
 	strcpy_s(GlobalSettings::defaultFileDialogDirectory, settings.defaultFileDialogDir);
 
@@ -443,6 +455,8 @@ void SettingsManager::ReadLineFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxScale=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxScale = f; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderLimit=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderLimit = u; return; }
 	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderDistance=%f", &f) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderDistance = f; return; }
+	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderPrimaryTags=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderPrimaryTags = static_cast<bool>(u); return; }
+	if (sscanf_s(line, "DebugRenderingLevelEditorDebugBoxRenderSecondaryTags=%u", &u) == 1) { settings.debugRenderingLevelEditorDebugBoxRenderSecondaryTags = static_cast<bool>(u); return; }
 	if (sscanf_s(line, "EnableAPI=%u", &u) == 1) { settings.enableApi = static_cast<bool>(u); return; }
 	if (sscanf_s(line, "APIHost=%127[^\r\n]", s, 128) == 1) { strcpy_s(settings.apiHost, s); return; }
 	if (sscanf_s(line, "APIPort=%u", &u) == 1) { settings.apiPort = static_cast<unsigned short>(u); return; }
@@ -507,6 +521,8 @@ void SettingsManager::WriteAllFn(ImGuiContext* ctx, ImGuiSettingsHandler* handle
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxScale=%f\n", settings.debugRenderingLevelEditorDebugBoxScale);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderLimit=%u\n", settings.debugRenderingLevelEditorDebugBoxRenderLimit);
 	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderDistance=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderDistance);
+	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderPrimaryTags=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderPrimaryTags);
+	out_buf->appendf("DebugRenderingLevelEditorDebugBoxRenderSecondaryTags=%f\n", settings.debugRenderingLevelEditorDebugBoxRenderSecondaryTags);
 	out_buf->appendf("EnableAPI=%u\n", settings.enableApi);
 	out_buf->appendf("APIHost=%s\n", settings.apiHost);
 	out_buf->appendf("APIPort=%u\n", settings.apiPort);

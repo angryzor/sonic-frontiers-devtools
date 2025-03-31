@@ -24,7 +24,7 @@ bool Editor(const char* label, hh::game::ObjectTransformData& obj)
 	ImGui::PushID(label);
 	ImGui::BeginGroup();
 	edited |= Editor("Position", obj.position);
-	edited |= DragScalar("Rotation", obj.rotation, 0.005f);
+	edited |= EulerEditor("Rotation", obj.rotation);
 	ImGui::EndGroup();
 	ImGui::PopID();
 	return edited;
@@ -58,7 +58,6 @@ bool Editor(const char* label, hh::game::ObjectData& obj)
 
 	ImGui::SeparatorText("Components");
 #ifdef DEVTOOLS_TARGET_SDK_wars
-	ImGui::SeparatorText("Component configuration");
 	for (auto* componentConfig : obj.componentData) {
 		if (ImGui::CollapsingHeader(componentConfig->type)) {
 			ImGui::Text("Configuration:");

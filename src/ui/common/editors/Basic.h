@@ -85,9 +85,20 @@ bool Editor(const char* label, ucsl::colors::Color8<order>& color) {
 }
 
 template<int Options>
+bool EulerEditor(const char* label, Eigen::Matrix<float, 3, 1, Options, 3, 1>& euler) {
+	Eigen::Vector3f deg{ euler * 180.0f / EIGEN_PI };
+	bool edited = DragScalar(label, deg);
+
+	if (edited)
+		euler = deg * EIGEN_PI / 180.0f;
+
+	return edited;
+}
+
+template<int Options>
 bool Editor(const char* label, Eigen::Quaternion<float, Options>& quat) {
 	auto euler = MatrixToEuler(quat.toRotationMatrix());
-	bool edited = DragScalar(label, euler, 0.005f);
+	bool edited = EulerEditor(label, euler);
 
 	if (edited)
 		quat = EulerToQuat(euler);
@@ -112,8 +123,8 @@ static bool Editor(const char* label, hh::fnd::Handle<T>& hGameObject) {
 	return edited;
 }
 
-template<typename T, typename S>
-static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
+template<typename T>
+static bool Editor(const char* label, csl::ut::MoveArray<T>& arr) {
 	bool edited{};
 
 	if (ImGui::TreeNode(label, "%s[0..]", label)) {
@@ -134,6 +145,8 @@ static bool Editor(const char* label, csl::ut::Array<T, S>& arr) {
 		}
 
 		if (ImGui::Button("Add item")) {
+			if (arr.size() == arr.capacity() && arr.get_allocator() == nullptr)
+				arr.change_allocator(hh::fnd::MemoryRouter::GetModuleAllocator());
 			arr.emplace_back();
 			edited = true;
 		}

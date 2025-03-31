@@ -7,6 +7,7 @@ target_sources(${DEVTOOLS_TARGET}
         devtools.rc
         DllMain.cpp
         Mod.cpp
+        ImGuiFileDialog.cpp
         debug-rendering/DebugRenderable.cpp
         debug-rendering/DebugRenderer.cpp
         debug-rendering/DebugRenderingSystem.cpp
@@ -36,6 +37,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/viewers/Basic.cpp
         ui/common/viewers/RflDiff.cpp
         ui/common/inputs/Basic.cpp
+        ui/common/overlays/Tag.cpp
         ui/common/icons.cpp
         ui/common/StandaloneWindow.cpp
         ui/common/stb_image.cpp
@@ -48,6 +50,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Action.cpp
         ui/Component.cpp
         ui/Desktop.cpp
+        ui/FileSystemBrowser.cpp
         ui/GlobalSettings.cpp
         ui/game-services/GameServiceInspector.cpp
         ui/operation-modes/OperationModeBehavior.cpp
@@ -70,6 +73,8 @@ target_sources(${DEVTOOLS_TARGET}
         utilities/SurfRideBugFix.cpp
     PRIVATE FILE_SET HEADERS FILES
         Pch.h
+        ImGuiFileDialog.h
+        ImGuiFileDialogConfig.h
         debug-rendering/DebugRenderable.h
         debug-rendering/DebugRenderer.h
         debug-rendering/DebugRenderingSystem.h
@@ -106,6 +111,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/viewers/RflDiff.h
         ui/common/inputs/Basic.h
         ui/common/inputs/Needle.h
+        ui/common/overlays/Tag.h
         ui/common/icons.h
         ui/common/NodeEditor.h
         ui/common/StandaloneWindow.h
@@ -119,6 +125,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/Action.h
         ui/Component.h
         ui/Desktop.h
+        ui/FileSystemBrowser.h
         ui/fonts/FiraCode.h
         ui/fonts/Inter.h
         ui/game-services/GameServiceInspector.h
@@ -163,6 +170,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_PCMODEL_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
@@ -205,6 +213,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_PCMODEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
@@ -272,6 +281,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         TimeService
         RespawnTimeManager
         MonologueService
+        LevelManager
     )
 endif()
 
@@ -280,6 +290,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_LEVEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_PCMODEL_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
@@ -462,6 +473,23 @@ if(${DEVTOOLS_FEATURE_SVCOL_EDITOR})
             ui/operation-modes/modes/svcol-editor/SvColEditor.h
             ui/operation-modes/modes/svcol-editor/ShapeInspector.h
             ui/operation-modes/modes/svcol-editor/ShapeList.h
+    )
+endif()
+
+if(${DEVTOOLS_FEATURE_PCMODEL_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/operation-modes/modes/pcmodel-editor/Math.cpp
+            ui/operation-modes/modes/pcmodel-editor/Context.cpp
+            ui/operation-modes/modes/pcmodel-editor/PointCloudModelEditor.cpp
+            ui/operation-modes/modes/pcmodel-editor/InstanceInspector.cpp
+            ui/operation-modes/modes/pcmodel-editor/InstanceList.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/operation-modes/modes/pcmodel-editor/Math.h
+            ui/operation-modes/modes/pcmodel-editor/Context.h
+            ui/operation-modes/modes/pcmodel-editor/PointCloudModelEditor.h
+            ui/operation-modes/modes/pcmodel-editor/InstanceInspector.h
+            ui/operation-modes/modes/pcmodel-editor/InstanceList.h
     )
 endif()
 

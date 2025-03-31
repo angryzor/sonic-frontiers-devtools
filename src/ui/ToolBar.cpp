@@ -8,6 +8,7 @@
 #include "common/Theme.h"
 #include "common/inputs/Basic.h"
 #include "resources/ResourceBrowser.h"
+#include "FileSystemBrowser.h"
 #include "game-services/GameServiceInspector.h"
 #include "core-services/MemoryInspector.h"
 #include "tools/RflComparer.h"
@@ -37,6 +38,7 @@
 #include "operation-modes/modes/level-editor/LevelEditor.h"
 #include "operation-modes/modes/fxcol-editor/FxColEditor.h"
 #include "operation-modes/modes/svcol-editor/SvColEditor.h"
+#include "operation-modes/modes/pcmodel-editor/PointcloudModelEditor.h"
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
 
 using namespace hh::game;
@@ -54,6 +56,9 @@ void ToolBar::Render() {
 	if (ImGui::BeginMenuBar()) {
 		if (ImGui::MenuItem("Resource Browser"))
 			new (Desktop::instance->GetAllocator()) ResourceBrowser(Desktop::instance->GetAllocator());
+
+		if (ImGui::MenuItem("File System Browser"))
+			new (Desktop::instance->GetAllocator()) FileSystemBrowser(Desktop::instance->GetAllocator());
 
 		if (ImGui::BeginMenu("Inspectors")) {
 			if (ImGui::MenuItem("GameService"))
@@ -118,6 +123,8 @@ void ToolBar::Render() {
 			if (ImGui::MenuItem("FxCol Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::fxcol_editor::FxColEditor>();
 #endif
+			if (ImGui::MenuItem("PointcloudModel Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::pcmodel_editor::PointcloudModelEditor>();
 			if (ImGui::MenuItem("SurfRide Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
 			ImGui::EndMenu();

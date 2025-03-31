@@ -88,7 +88,7 @@ public:
 	static bool visit_primitive(ucsl::math::Vector4& obj, const PrimitiveInfo<ucsl::math::Vector4>& info) { return InputRflScalar<ucsl::math::Vector4, false>(obj, info); }
 	static bool visit_primitive(const char*& obj, const PrimitiveInfo<const char*>& info) { ImGui::Text("%s: %s", currentMemberName, *obj); return false; }
 
-	template<typename F, typename A, typename C, typename D>
+	template<bool change_allocator, typename F, typename A, typename C, typename D>
 	static bool _visit_array(A& arr, C c, D d, F f) {
 		bool edited{};
 		if (ImGui::TreeNode(currentMemberName, "%s[0..]", currentMemberName)) {
@@ -106,16 +106,20 @@ public:
 				ImGui::PopID();
 			}
 
-			if (ImGui::Button("Add item"))
+			if (ImGui::Button("Add item")) {
+				if constexpr (change_allocator)
+					if (arr.size() == arr.capacity() && arr.get_allocator() == nullptr)
+						arr.change_allocator(hh::fnd::MemoryRouter::GetModuleAllocator());
 				arr.emplace_back();
+			}
 
 			ImGui::TreePop();
 		}
 		return edited;
 	}
 
-	template<typename F, typename A, typename C, typename D> static bool visit_array(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array(arr, c, d, f); }
-	template<typename F, typename A, typename C, typename D> static bool visit_tarray(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array(arr, c, d, f); }
+	template<typename F, typename A, typename C, typename D> static bool visit_array(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array<true>(arr, c, d, f); }
+	template<typename F, typename A, typename C, typename D> static bool visit_tarray(A& arr, const ArrayInfo& info, C c, D d, F f) { return _visit_array<false>(arr, c, d, f); }
 
 	template<typename T, typename O>
 	static bool visit_enum(T& obj, const EnumInfo<O>& info) {
@@ -268,12 +272,12 @@ public:
 	template<typename T>
 	static bool visit_primitive(T& obj, T& orig, const PrimitiveInfo<T>& info) { return RenderStaticReflectionEditor::visit_primitive(obj, info); }
 
-	template<typename F, typename A, typename C, typename D>
+	template<bool change_allocator, typename F, typename A, typename C, typename D>
 	static bool _visit_array(A& arr, A& orig, C c, D d, F f) {
 		size_t idx{};
 		opaque_obj* emptyElement{};
 
-		bool edited = RenderStaticReflectionEditor::_visit_array(arr, c, d, [&](opaque_obj& obj) {
+		bool edited = RenderStaticReflectionEditor::_visit_array<change_allocator>(arr, c, d, [&](opaque_obj& obj) {
 			if (idx >= orig.size() && emptyElement == nullptr)
 				emptyElement = c();
 
@@ -292,12 +296,12 @@ public:
 
 	template<typename F, typename A, typename C, typename D>
 	static bool visit_array(A& arr, A& orig, const ArrayInfo& info, const ArrayInfo& infoOrig, C c, D d, F f) {
-		return _visit_array(arr, orig, c, d, f);
+		return _visit_array<true>(arr, orig, c, d, f);
 	}
 
 	template<typename F, typename A, typename C, typename D>
 	static bool visit_tarray(A & arr, A & orig, const ArrayInfo & info, const ArrayInfo & infoOrig, C c, D d, F f) {
-		return _visit_array(arr, orig, c, d, f);
+		return _visit_array<false>(arr, orig, c, d, f);
 	}
 
 	template<typename T, typename O>

@@ -1,4 +1,5 @@
 #pragma once
+#include <ui/common/editors/Basic.h>
 #include <ui/operation-modes/OperationModeBehavior.h>
 #include "ForwardDeclarations.h"
 #include "Selection.h"
@@ -39,7 +40,14 @@ private:
 	Traits traits;
 
 protected:
+	enum class PivotType {
+		AABB_CENTER,
+		LOCAL,
+	};
+	inline static const char* pivotTypeNames[]{ "AABB Center", "Local" };
+
 	csl::ut::MoveArray<ObjectType> transformableSelection{ SelectionTransformationBehavior::GetAllocator() };
+	PivotType pivotType{};
 
 	/*
 	 * Takes the original selection and returns a subset of objects that should be affected by a transform operation.
@@ -70,6 +78,13 @@ protected:
 		return HasParentInSelection(parent, selection);
 	}
 
+	typename SelectionTransformationBehavior::TransformType GetPivotTransform(const typename SelectionTransformationBehavior::TransformType& selectionTransform, const typename SelectionTransformationBehavior::TransformType& objectTransform) {
+		switch (pivotType) {
+		case PivotType::AABB_CENTER: return SelectionTransformationBehavior::TransformType::Identity();
+		case PivotType::LOCAL: return objectTransform * selectionTransform.inverse();
+		}
+	}
+
 public:
 	SelectionTransformationBehavior(csl::fnd::IAllocator* allocator, OperationMode<OpModeContext>& operationMode) : SelectionTransformationBehaviorBase<Traits::Projective>{ allocator, operationMode }, traits{ operationMode.GetContext() } {}
 
@@ -82,14 +97,27 @@ public:
 			CalculateTransformableSelection();
 			break;
 		case SelectionTransformationBehavior::SetSelectionTransformAction::id:
-			typename SelectionTransformationBehavior::TransformType deltaTransform{ static_cast<const SelectionTransformationBehavior::SetSelectionTransformAction&>(action).payload * GetSelectionTransform().inverse() };
+			auto selectionTransform = GetSelectionTransform();
+			typename SelectionTransformationBehavior::TransformType deltaTransform{ static_cast<const SelectionTransformationBehavior::SetSelectionTransformAction&>(action).payload * selectionTransform.inverse() };
 
-			for (auto& object : transformableSelection)
-				traits.SetSelectionSpaceTransform(object, deltaTransform * traits.GetSelectionSpaceTransform(object));
+			for (auto& object : transformableSelection) {
+				auto objectTransform = traits.GetSelectionSpaceTransform(object);
+				typename SelectionTransformationBehavior::TransformType pivotTransform{ GetPivotTransform(selectionTransform, objectTransform) };
+
+				traits.SetSelectionSpaceTransform(object, pivotTransform * deltaTransform * pivotTransform.inverse() * objectTransform);
+			}
 
 			this->Dispatch(typename SelectionTransformationBehavior::SelectionTransformChangedAction{});
 			break;
 		}
+	}
+
+	virtual void Render() override {
+		if (ImGui::Begin("Main menu")) {
+			ImGui::SameLine();
+			ComboEnum("Pivot", pivotType, pivotTypeNames);
+		}
+		ImGui::End();
 	}
 
 	csl::ut::MoveArray<ObjectType>& GetTransformableSelection() const {

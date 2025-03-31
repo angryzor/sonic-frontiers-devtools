@@ -1,4 +1,7 @@
 #include <ui/game-services/game-service-inspectors/LevelInfo.h>
+
+bool Editor(const char* label, app::player::CharacterIdU8& charId);
+
 #include <ui/common/editors/Basic.h>
 #include <ui/common/inputs/Basic.h>
 
@@ -119,25 +122,6 @@ bool Editor(const char* label, app::level::StageData& data) {
 
 bool Editor(const char* label, app::player::CharacterIdU8& charId) {
 	return Editor(label, reinterpret_cast<uint8_t&>(charId));
-}
-
-template<typename T>
-bool Editor(const char* label, app::level::PlayerInformation::Unk1<T>& data) {
-	bool edited{};
-	ImGui::PushID(label);
-
-	char checkboxLabel[100];
-	snprintf(checkboxLabel, sizeof(checkboxLabel), "%s###%s", data.isSet ? "" : label, "Is Set");
-
-	edited |= Editor(checkboxLabel, data.isSet);
-		
-	if (data.isSet) {
-		ImGui::SameLine();
-		edited |= Editor(label, data.value);
-	}
-
-	ImGui::PopID();
-	return edited;
 }
 
 bool Editor(const char* label, app::level::PlayerInformation& playerInfo)

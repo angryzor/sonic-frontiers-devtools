@@ -107,6 +107,14 @@ bool InputText(const char* label, csl::ut::VariableString& str, ImGuiInputTextFl
 			else
 				str.Set(resource->GetName());
 		}
+		if (const ImGuiPayload* path = ImGui::AcceptDragDropPayload("Path")) {
+			auto* hPathGoc = *static_cast<hh::path::PathComponent**>(path->Data);
+
+			if (!str.GetAllocator())
+				str.Set(hPathGoc->GetName(), -1, hh::fnd::MemoryRouter::GetModuleAllocator());
+			else
+				str.Set(hPathGoc->GetName());
+		}
 		ImGui::EndDragDropTarget();
 	}
 

@@ -101,8 +101,8 @@ void Viewer(const char* label, hh::game::GameObject* const& gameObject)
 void Viewer(const char* label, const hh::fnd::HFrame& frame)
 {
 	if (ImGui::TreeNode(label)) {
-		Viewer("Transform position", frame.flags.test(hh::fnd::HFrame::Flag::TRANSFORM_POSITION));
-		Viewer("Transform rotation", frame.flags.test(hh::fnd::HFrame::Flag::TRANSFORM_ROTATION));
+		Viewer("Transform position", (frame.flags & hh::fnd::HFrame::Flag::TRANSFORM_POSITION) != 0);
+		Viewer("Transform rotation", (frame.flags & hh::fnd::HFrame::Flag::TRANSFORM_ROTATION) != 0);
 		ImGui::SeparatorText("HFrame local transform");
 		Viewer("HFrameTransformLocal", frame.localTransform);
 		ImGui::SeparatorText("HFrame full transform");

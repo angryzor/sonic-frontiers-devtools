@@ -63,7 +63,6 @@ void Desktop::Render() {
 
 	devtools::debug_rendering::DebugRenderer::instance->RenderImGuiVisuals();
 	operationMode->Render();
-	ResourceBrowser::RenderDialogs();
 
 	csl::ut::MoveArray<StandaloneWindow*> windowsThatWantToClose{ hh::fnd::MemoryRouter::GetTempAllocator() };
 
