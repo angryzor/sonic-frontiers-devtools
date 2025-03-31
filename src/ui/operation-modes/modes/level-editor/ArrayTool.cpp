@@ -25,13 +25,20 @@ namespace ui::operation_modes::modes::level_editor {
 		switch (action.id) {
 		case OpenArrayToolAction::id:
 			isOpen = true;
-			break;
+			RebuildTempObjects();
+			return;
+		}
+
+		if (!isOpen)
+			return;
+
+		switch (action.id) {
 		case ObjectClassToPlaceChangedAction::id:
 			RebuildTempObjects();
-			break;
+			return;
 		case PathsUpdatedAction::id:
 			UpdateTempObjects();
-			break;
+			return;
 		}
 	}
 
@@ -353,6 +360,8 @@ namespace ui::operation_modes::modes::level_editor {
 			DeleteComplex(complex);
 
 		tempObjects.clear();
+
+		Dispatch(SceneChangedAction{});
 	}
 
 	void ArrayTool::RebuildTempObjects() {

@@ -1,3 +1,22 @@
+# v0.1.71
+* Added experimental pcmodel editor.
+* Added "load resource" option in resource browser.
+* Added support for ingame filesystems in the file dialog.
+* Added generic name tag overlay framework for operation modes, and made it work with the level editor.
+* Added transform tool pivot setting (AABB center / local origin).
+* Angles are now edited in degrees instead of radians.
+* Fixed a bug in resource reloading.
+* Fixed array tool preview objects being visible while the array tool is closed.
+* Fixed a crash when adding items to arrays loaded from disk (regression).
+* Fixed a crash when closing the array tool while the preview objects are visible in the tree view.
+
+## Sonic Frontiers & Shadow Generations
+* Added LevelManager inspector (allows viewing/loading/unloading levels).
+
+## Sonic Forces
+* Removed duplicate "Component Configuration" header in object properties.
+
+
 # v0.1.70
 * Added array tool.
 * Added live update of set paths that are not grind rails.
