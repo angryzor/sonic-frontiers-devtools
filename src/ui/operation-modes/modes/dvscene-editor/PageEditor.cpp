@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	{
 		switch (type) {
 		case PinType::TRANSITION: return { 0.0f, 0.5f, 0.8f, 1.0f };
-		default: assert(false); return { 0.0f, 0.0f, 0.0f, 0.0f }; break;
+		default: assert(false); return { 0.0f, 0.0f, 0.0f, 0.0f };
 		}
 	}
 
@@ -49,32 +49,19 @@ namespace ui::operation_modes::modes::dvscene_editor {
 
 		nodeEditor.Begin();
 
-		int pageIdx = 0;
-		for (auto* page : context.dvPages) {
+		for (int pageIdx = 0; pageIdx < context.dvPages.size(); pageIdx++)
 			if (RenderPage(pageIdx))
-				page->UpdateRuntimePage();
-			pageIdx++;
-		}
-		pageIdx = 0;
-		for (auto* page : context.dvPages) {
-			int transIdx = 0;
-			for (auto& trans : page->filePage->transition) {
-				int condIdx = 0;
-				for (auto& cond : trans.conditions) {
+				context.dvPages[pageIdx]->UpdateRuntimePage();
+		for (int pageIdx = 0; pageIdx < context.dvPages.size(); pageIdx++) {
+			auto* page = context.dvPages[pageIdx];
+			for (int transIdx = 0; transIdx < page->filePage->transition.size(); transIdx++)
+				for (int condIdx = 0; condIdx < page->filePage->transition[transIdx].conditions.size(); condIdx++)
 					if(RenderCondition(pageIdx, transIdx, condIdx))
 						page->UpdateRuntimePage();
-					condIdx++;
-				}
-				transIdx++;
-			}
-			pageIdx++;
 		}
-		pageIdx = 0;
-		for (auto* page : context.dvPages) {
-			for (int trans = 0; trans < page->filePage->transition.size(); trans++)
+		for (int pageIdx = 0; pageIdx < context.dvPages.size(); pageIdx++)
+			for (int trans = 0; trans < context.dvPages[pageIdx]->filePage->transition.size(); trans++)
 				RenderTransition(pageIdx, trans);
-			pageIdx++;
-		}
 
 		/*if (ax::NodeEditor::ShowBackgroundContextMenu()) {
 			ax::NodeEditor::Suspend();

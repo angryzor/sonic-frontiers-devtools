@@ -12,11 +12,15 @@ void RenderGameServiceInspector(app::evt::EventPlayer& service)
                 ImGui::Text(x.c_str());
             ImGui::TreePop();
         }
-        if (service.evtSceneMgr->evtScenes.size() > 0) {
-            if (auto* x = service.evtSceneMgr->evtScenes[0]) {
-                Editor("unk2", x->unk2);
-                Editor("unk3", x->unk3);
+        if (ImGui::TreeNode("Event Scenes")) {
+            for (auto* x : service.evtSceneMgr->evtScenes) {
+                if (ImGui::TreeNode(x->setupData.cutsceneName)) {
+                    Editor("unk2", x->unk2);
+                    Editor("unk3", x->unk3);
+                    ImGui::TreePop();
+                }
             }
+            ImGui::TreePop();
         }
         ImGui::TreePop();
     }

@@ -289,25 +289,24 @@ namespace ui::operation_modes::modes::dvscene_editor {
     {
         hh::dv::DvNodeBase* node;
         auto* allocator = parent->dvsceneNodeTree->GetAllocator();
-        void* rawMem = allocator->Alloc(NodeDataSize[nodeType].first, 16);
         size_t setupSize = NodeDataSize[nodeType].second;
         void* setup = allocator->Alloc(setupSize, 8);
         memset(setup, 0x00, setupSize);
         switch (static_cast<hh::dv::DvNodeBase::NodeType>(nodeType)) {
         case hh::dv::DvNodeBase::NodeType::PATH:
-            node = new (rawMem) hh::dv::DvNodePath(allocator);
-            reinterpret_cast<hh::dv::DvNodePath::Data*>(setup)->matrix = csl::math::Matrix44::Identity();
+            node = new (allocator) hh::dv::DvNodePath(allocator);
+            static_cast<hh::dv::DvNodePath::Data*>(setup)->matrix = csl::math::Matrix44::Identity();
             break;
         case hh::dv::DvNodeBase::NodeType::CAMERA:
-            node = new (rawMem) hh::dv::DvNodeCamera(allocator);
+            node = new (allocator) hh::dv::DvNodeCamera(allocator);
             break;
         case hh::dv::DvNodeBase::NodeType::CAMERA_MOTION:
-            node = new (rawMem) hh::dv::DvNodeCameraMotion(allocator);
-            reinterpret_cast<hh::dv::DvNodeCameraMotion::Data*>(setup)->end = 100;
+            node = new (allocator) hh::dv::DvNodeCameraMotion(allocator);
+            static_cast<hh::dv::DvNodeCameraMotion::Data*>(setup)->end = 100;
             break;
         case hh::dv::DvNodeBase::NodeType::CHARACTER: {
-            node = new (rawMem) hh::dv::DvNodeCharacter(allocator);
-            auto* setupData = reinterpret_cast<hh::dv::DvNodeCharacter::Data*>(setup);
+            node = new (allocator) hh::dv::DvNodeCharacter(allocator);
+            auto* setupData = static_cast<hh::dv::DvNodeCharacter::Data*>(setup);
             strcpy(setupData->modelName, "chr_sonic");
             strcpy(setupData->skeletonName, "chr_sonic");
             strcpy(setupData->name3, "sn");
@@ -315,16 +314,16 @@ namespace ui::operation_modes::modes::dvscene_editor {
             break;
         }
         case hh::dv::DvNodeBase::NodeType::CHARACTER_MOTION: {
-            node = new (rawMem) hh::dv::DvNodeCharacterMotion(allocator);
-            auto* setupData = reinterpret_cast<hh::dv::DvNodeCharacterMotion::Data*>(setup);
+            node = new (allocator) hh::dv::DvNodeCharacterMotion(allocator);
+            auto* setupData = static_cast<hh::dv::DvNodeCharacterMotion::Data*>(setup);
             setupData->end = 100;
             strcpy(setupData->asmState, "Dst0000");
             setupData->speed = 1.0f;
             break;
         }
         case hh::dv::DvNodeBase::NodeType::MODEL: {
-            node = new (rawMem) hh::dv::DvNodeModel(allocator);
-            auto* setupData = reinterpret_cast<hh::dv::DvNodeModel::Data*>(setup);
+            node = new (allocator) hh::dv::DvNodeModel(allocator);
+            auto* setupData = static_cast<hh::dv::DvNodeModel::Data*>(setup);
             strcpy(setupData->modelName, "chr_sonic");
             strcpy(setupData->skeletonName, "chr_sonic");
             strcpy(setupData->name3, "sn");
@@ -332,7 +331,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             break;
         }
         case hh::dv::DvNodeBase::NodeType::MODEL_MOTION: {
-            node = new (rawMem) hh::dv::DvNodeModelMotion(allocator);
+            node = new (allocator) hh::dv::DvNodeModelMotion(allocator);
             auto* setupData = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(setup);
             setupData->end = 100;
             strcpy(setupData->asmState, "Dst0000");
@@ -340,10 +339,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
             break;
         }
         case hh::dv::DvNodeBase::NodeType::MODEL_NODE:
-            node = new (rawMem) hh::dv::DvNodeModelNode(allocator);
+            node = new (allocator) hh::dv::DvNodeModelNode(allocator);
             break;
         case hh::dv::DvNodeBase::NodeType::ELEMENT: {
-            node = new (rawMem) hh::dv::DvNodeElement(allocator);
+            node = new (allocator) hh::dv::DvNodeElement(allocator);
             size_t elementDataSize = 0;
             if (elementId >= 1000)
                 elementDataSize = ElementDataSize[elementId + 27 - 1000];
@@ -351,7 +350,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
                 elementDataSize = ElementDataSize[elementId];
             setup = allocator->Alloc(setupSize + elementDataSize, 8);
             memset(setup, 0x00, setupSize + elementDataSize);
-            auto* setupData = reinterpret_cast<hh::dv::DvNodeElement::Data*>(setup);
+            auto* setupData = static_cast<hh::dv::DvNodeElement::Data*>(setup);
             setupData->end = 100.0f;
             setupData->playType = hh::dv::DvNodeElement::PlayType::NORMAL;
             setupData->updateTiming = hh::dv::DvNodeElement::UpdateTiming::ON_EXEC_PATH;
@@ -392,9 +391,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
                 break;
             }
             }
-            auto curveDataInfo = GetElementTimelineRender(elementId);
+            auto curveDataInfo = GetElementTimelineRender(static_cast<hh::dv::DvNodeElement::ElementID>(elementId));
             if (curveDataInfo != std::pair<size_t, size_t>{})
-                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second, 0, false);
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second/sizeof(float), 0, false);
             break;
         }
         }
@@ -411,7 +410,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
     dv::DvNode Context::CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId)
     {
         dv::DvNode node{};
-        char* rawMem = new char[NodeDataSize[nodeType].first];
         size_t setupSize = NodeDataSize[nodeType].second;       
         if (static_cast<hh::dv::DvNodeBase::NodeType>(nodeType) == hh::dv::DvNodeBase::NodeType::ELEMENT) {
             if (elementId >= 1000)
@@ -419,7 +417,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             else
                 setupSize += ElementDataSize[elementId];
         }
-        node.data = new char[setupSize];
+        node.data = static_cast<char*>(hh::fnd::MemoryRouter::GetModuleAllocator()->Alloc(setupSize, 4));
         node.dataSize = setupSize;
         char*& setup = node.data;
         memset(setup, 0x00, setupSize);
@@ -503,9 +501,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
                 break;
             }
             }
-            auto curveDataInfo = GetElementTimelineRender(elementId);
+            auto curveDataInfo = GetElementTimelineRender(static_cast<hh::dv::DvNodeElement::ElementID>(elementId));
             if (curveDataInfo != std::pair<size_t, size_t>{})
-                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second, 0, false);
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second/sizeof(float), 0, false);
             break;
         }
         }

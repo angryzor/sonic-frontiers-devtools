@@ -27,33 +27,6 @@ bool Editor(const char* label, char* guid, hh::dv::DvSceneNodeTree* nodeTree)
     return changed;
 }
 
-bool SearchableCombo(const char* label, int* current_item, const char*const* items, int item_count, int searchBufSize) 
-{
-    static char search_buf[128] = "";
-    bool value_changed = false;
-
-    ImGui::PushID(label);
-
-    ImGui::SetNextItemWidth(ImGui::CalcTextSize("e").x * searchBufSize);
-    ImGui::InputText("##search", search_buf, searchBufSize);
-    ImGui::SameLine();
-    ImGui::SetNextItemWidth(ImGui::CalcTextSize("e").x * searchBufSize);
-    if (ImGui::BeginCombo("##combo", items[*current_item])) {
-        for (int i = 0; i < item_count; ++i) 
-            if (strstr(items[i], search_buf)) 
-                if (ImGui::Selectable(items[i], *current_item == i)) {
-                    *current_item = i;
-                    value_changed = true;
-                }
-        ImGui::EndCombo();
-    }
-    ImGui::SameLine();
-    ImGui::Text(label);
-
-    ImGui::PopID();
-    return value_changed;
-}
-
 bool Editor(const char* label, hh::dv::DvElementCameraHedgehog::Data::Camera& cam) {
     bool changed = false;
     if (ImGui::TreeNode(label)) {
@@ -162,13 +135,8 @@ bool Editor(const char* label, app::dv::DvElementLookAtIK::Data::Object& obj) {
 bool Editor(const char* label, app::dv::DvElementAura::Data::AuraNode& node) {
     bool changed = false;
     if(ImGui::TreeNode(label)){
-        float color[4] = {static_cast<float>(node.color[1])/255.0f,static_cast<float>(node.color[2])/255.0f,static_cast<float>(node.color[3])/255.0f,static_cast<float>(node.color[0])/255.0f};
-        if(changed |= ImGui::ColorEdit4("Color", color)){
-            node.color[0] = static_cast<unsigned int>(color[3]*255.0f);
-            node.color[1] = static_cast<unsigned int>(color[0]*255.0f);
-            node.color[2] = static_cast<unsigned int>(color[1]*255.0f);
-            node.color[3] = static_cast<unsigned int>(color[2]*255.0f);
-        }
+        unsigned int color[4] = { node.color[1], node.color[2], node.color[3], node.color[0] };
+        changed |= ColorEditor("Color", color);
         changed |= Editor("Distance", node.distance);
         changed |= Editor("Noise Texture Scroll Speed", node.noiseTextureScrollSpeed);
         changed |= Editor("Blur Scale", node.blurScale);
@@ -296,12 +264,7 @@ bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::VignettePa
         float opacity = static_cast<float>(param.opacity) / 255.0f;
         if (changed |= Editor("Opacity", opacity))
             param.opacity = static_cast<unsigned int>(opacity * 255);
-        float color[3] = { static_cast<float>(param.color[0]) / 255, static_cast<float>(param.color[1]) / 255, static_cast<float>(param.color[2]) / 255 };
-        if (changed |= ImGui::ColorEdit3("Color", color)) {
-            param.color[0] = static_cast<unsigned int>(color[0] * 255);
-            param.color[1] = static_cast<unsigned int>(color[1] * 255);
-            param.color[2] = static_cast<unsigned int>(color[2] * 255);
-        }
+        changed |= ColorEditor("Color", param.color);
         changed |= Editor("Penumbra Scale", param.penumbraScale);
         changed |= Editor("Intensity", param.intensity);
         changed |= Editor("Rotation", param.rotation);
@@ -309,12 +272,7 @@ bool Editor(const char* label, app::dv::DvElementVignetteParam::Data::VignettePa
         changed |= Editor("Image Circle Parameters", param.imgCrclParam);
         changed |= Editor("Direction", param.direction);
         changed |= Editor("Opacity", param.opacity);
-        float color[3] = { static_cast<float>(param.color[0]) / 255, static_cast<float>(param.color[1]) / 255, static_cast<float>(param.color[2]) / 255 };
-        if(changed |= ImGui::ColorEdit3("Color", color)){
-            param.color[0] = static_cast<unsigned int>(color[0] * 255);
-            param.color[1] = static_cast<unsigned int>(color[1] * 255);
-            param.color[2] = static_cast<unsigned int>(color[2] * 255);
-        }
+        changed |= ColorEditor("Color", param.color);
         changed |= Editor("Penumbra Scale", param.penumbraScale);
         changed |= Editor("Intensity", param.intensity);
         changed |= Editor("Rotation", param.rotation);

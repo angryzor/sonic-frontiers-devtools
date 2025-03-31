@@ -31,9 +31,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             changed |= Editor("Parameters", data->params);
             if(data->flags.test(app::dv::DvElementCameraBlurParam::Data::Flags::CURVE_ENABLED))
                 changed |= Editor("Finish Parameters", data->finishParams);
-            int curBlurType = static_cast<int>(data->blurType);
-            if (changed |= ImGui::Combo("Blur Type", &curBlurType, camBlurTypeNames, 3))
-                data->blurType = static_cast<app::dv::DvElementCameraBlurParam::Data::BlurType>(curBlurType);
+            changed |= ComboEnum("Blur Type", data->blurType, camBlurTypeNames);
 #endif
         }
         return changed;

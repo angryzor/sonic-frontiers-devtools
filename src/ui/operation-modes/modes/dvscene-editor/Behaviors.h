@@ -1,7 +1,7 @@
 #pragma once
 #include <ui/operation-modes/OperationMode.h>
 #include "Context.h"
-#include <ui\operation-modes\behaviors\Selection.h>
+#include <ui/operation-modes/behaviors/Selection.h>
 #include <ui/operation-modes/behaviors/SelectionTransformation.h>
 #include <ui/operation-modes/behaviors/Gizmo.h>
 #include <ui/operation-modes/behaviors/Delete.h>

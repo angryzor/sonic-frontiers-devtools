@@ -29,13 +29,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementBossName::Data*>(element);
-		int curBossId = static_cast<int>(data->bossId);
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-        if (changed |= ImGui::Combo("Boss Name", &curBossId, bossNames, 6))
-#elif DEVTOOLS_TARGET_SDK_miller
-        if (changed |= ImGui::Combo("Boss Name", &curBossId, bossNames, 5))
-#endif
-            data->bossId = static_cast<app::dv::DvElementBossName::Data::BossID>(curBossId);
-        return changed;
+        return ComboEnum("Boss Name", data->bossId, bossNames);
     }
 }

@@ -18,11 +18,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementFacialAnimation::Data*>(element);
 		if(ImGui::TreeNode("Animations")) {
-            char z = 0;
             for(auto i = 0; i < data->activeAnimationsCount; i++){
                 auto& x = data->animations[i];
                 char buffer[68];
-                snprintf(buffer, sizeof(buffer), "%s##%s", x.fileName, z);
+                snprintf(buffer, sizeof(buffer), "%s##%s", x.fileName, i);
                 if(ImGui::TreeNode(buffer)){
                     int curAnmType = static_cast<int>(x.animType)-1;
                     if (changed |= ImGui::Combo("Animation Type", &curAnmType, fanimationTypeNames, 4))
@@ -30,7 +29,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
                     changed |= Editor("Filename", x.fileName);
                     ImGui::TreePop();
                 }
-                z++;
             }
             ImGui::TreePop();
         }

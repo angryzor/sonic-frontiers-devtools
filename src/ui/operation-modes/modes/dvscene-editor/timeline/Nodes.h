@@ -49,12 +49,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
         bool changed = false;
 		auto* data = reinterpret_cast<hh::dv::DvNodeElement::Data*>(node);
         int type = static_cast<int>(data->elementId);
-        const std::pair<size_t, size_t> render = GetElementTimelineRender(type);
+        const std::pair<size_t, size_t> render = GetElementTimelineRender(data->elementId);
         
         if (render != std::pair<size_t, size_t>{})
         {
-            float* curveData = &reinterpret_cast<float*>(&node[sizeof(hh::dv::DvNodeElement::Data)])[render.first / 4];
-            changed |= timeline->RenderTimeline(data->start, data->end, curveData, render.second);
+            float* curveData = &reinterpret_cast<float*>(&node[sizeof(hh::dv::DvNodeElement::Data)])[render.first / sizeof(float)];
+            changed |= timeline->RenderTimeline(data->start, data->end, curveData, render.second/sizeof(float));
         }
         else
             changed |= timeline->RenderTimeline(data->start, data->end);

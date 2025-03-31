@@ -90,17 +90,17 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			Eigen::Affine3f transform = Eigen::Affine3f::Identity();
 			switch (node->nodeType) {
 			case hh::dv::DvNodeBase::NodeType::PATH:
-				transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix.matrix());
+				transform = Eigen::Affine3f{ reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix.matrix() };
 				break;
 			case hh::dv::DvNodeBase::NodeType::ELEMENT:
 			{
 				auto* element = &fileNode->data[sizeof(hh::dv::DvNodeElement::Data)];
 				switch (reinterpret_cast<hh::dv::DvNodeElement::Data*>(fileNode->data)->elementId) {
 				case hh::dv::DvNodeElement::ElementID::PATH_OFFSET:
-					transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element)->offsetMatrix.matrix());
+					transform = Eigen::Affine3f{ reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element)->offsetMatrix.matrix() };
 					break;
 				case hh::dv::DvNodeElement::ElementID::EFFECT:
-					transform = Eigen::Affine3f(reinterpret_cast<hh::dv::DvElementEffect::Data*>(element)->effectMatrix.matrix());
+					transform = Eigen::Affine3f{ reinterpret_cast<hh::dv::DvElementEffect::Data*>(element)->effectMatrix.matrix() };
 					break;
 				case hh::dv::DvNodeElement::ElementID::CAMERA_OFFSET:
 					transform.translation() = reinterpret_cast<hh::dv::DvElementCameraOffset::Data*>(element)->offsetPosition;
@@ -140,17 +140,17 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				trans = TransformToAffine3f(x->transform).inverse() * transform;
 			switch (node->nodeType) {
 			case hh::dv::DvNodeBase::NodeType::PATH:
-				reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix = Eigen::Projective3f(trans.matrix());
+				reinterpret_cast<hh::dv::DvNodePath::Data*>(fileNode->data)->matrix = Eigen::Projective3f{ trans.matrix() };
 				break;
 			case hh::dv::DvNodeBase::NodeType::ELEMENT:
 			{
 				auto* element = &fileNode->data[sizeof(hh::dv::DvNodeElement::Data)];
 				switch (reinterpret_cast<hh::dv::DvNodeElement::Data*>(fileNode->data)->elementId) {
 				case hh::dv::DvNodeElement::ElementID::PATH_OFFSET:
-					reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element)->offsetMatrix = Eigen::Projective3f(trans.matrix());
+					reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element)->offsetMatrix = Eigen::Projective3f{ trans.matrix() };
 					break;
 				case hh::dv::DvNodeElement::ElementID::EFFECT:
-					reinterpret_cast<hh::dv::DvElementEffect::Data*>(element)->effectMatrix = Eigen::Projective3f(trans.matrix());
+					reinterpret_cast<hh::dv::DvElementEffect::Data*>(element)->effectMatrix = Eigen::Projective3f{ trans.matrix() };
 					break;
 				case hh::dv::DvNodeElement::ElementID::CAMERA_OFFSET:
 					reinterpret_cast<hh::dv::DvElementCameraOffset::Data*>(element)->offsetPosition = trans.translation();

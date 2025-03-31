@@ -63,14 +63,12 @@ namespace ui::operation_modes::modes::dvscene_editor {
 					}
 					res.flags0 = 0;
 					res.flags1 = 1;
-					memset(res.filename, 0, 192);
 					strcpy(curRes, res.filename);
-					memset(res.unkData, 0, 596);
 					ctx.parsedScene->dvResource.push_back(res);
 					resource = &res;
 				}
 				if (resource) {
-					memset(resource->filename, 0, 192);
+					memset(resource->filename, 0, sizeof(resource->filename));
 					strcpy(resource->filename, curRes);
 				}
 			}

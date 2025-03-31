@@ -52,21 +52,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementShadowMapParam::Data*>(element);
-		int curShadowFilter = static_cast<int>(data->shadowFilter);
-        if (changed |= ImGui::Combo("Shadow Filter", &curShadowFilter, shadowFilterNames, 14))
-            data->shadowFilter = static_cast<app::dv::DvElementShadowMapParam::Data::ShadowFilter>(curShadowFilter);
-        int curShadowRangeType = static_cast<int>(data->shadowRangeType);
-        if (changed |= ImGui::Combo("Shadow Range Type", &curShadowRangeType, shadowRangeTypeNames, 5))
-            data->shadowRangeType = static_cast<app::dv::DvElementShadowMapParam::Data::ShadowRangeType>(curShadowRangeType);
-        int curFitProjection = static_cast<int>(data->fitProjection);
-        if (changed |= ImGui::Combo("Fit Projection", &curFitProjection, fitProjectionNames, 5))
-            data->fitProjection = static_cast<app::dv::DvElementShadowMapParam::Data::FitProjection>(curFitProjection);
-        int curFitNearFar = static_cast<int>(data->fitNearFar);
-        if (changed |= ImGui::Combo("Fit Near Far", &curFitNearFar, fitNearFarNames, 3))
-            data->fitNearFar = static_cast<app::dv::DvElementShadowMapParam::Data::FitNearFar>(curFitNearFar);
-        int curPartitionType = static_cast<int>(data->partitionType);
-        if (changed |= ImGui::Combo("Partition Type", &curPartitionType, partitionTypeNames, 3))
-            data->partitionType = static_cast<app::dv::DvElementShadowMapParam::Data::PartitionType>(curPartitionType);
+        changed |= ComboEnum("Shadow Filter", data->shadowFilter, shadowFilterNames);
+        changed |= ComboEnum("Shadow Range Type", data->shadowRangeType, shadowRangeTypeNames);
+        changed |= ComboEnum("Fit Projection", data->fitProjection, fitProjectionNames);
+        changed |= ComboEnum("Fit Near Far", data->fitNearFar, fitNearFarNames);
+        changed |= ComboEnum("Partition Type", data->partitionType, partitionTypeNames);
         changed |= Editor("Scene Range", data->sceneRange);
         changed |= Editor("Scene Center", data->sceneCenter);
         changed |= Editor("Manual Light Position", data->manualLightPos);

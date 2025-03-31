@@ -2,62 +2,49 @@
 #include "Timeline.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
-    constexpr std::pair<int, std::pair<size_t, size_t>> RenderTimelineElements[] = {
-        {1, {offsetof(hh::dv::DvElementCameraParams::Data, curveData), 256}},
-        {7, {offsetof(hh::dv::DvElementCameraShakeLoop::Data, curveData), 64}},
-        {8, {offsetof(hh::dv::DvElementEffect::Data, curveData), 128}},
-        {10, {offsetof(hh::dv::DvElementPathInterpolation::Data, curveData), 128}},
-        {17, {offsetof(hh::dv::DvElementCameraOffset::Data, curveData), 256}},
-        {18, {offsetof(hh::dv::DvElementModelFade::Data, curveData), 128}},
-        {20, {offsetof(hh::dv::DvElementCameraHedgehog::Data, curveData), 32}},
-        {24, {offsetof(hh::dv::DvElementSpotlight::Data, curveData), 64}},
+    constexpr std::pair<hh::dv::DvNodeElement::ElementID, std::pair<size_t, size_t>> RenderTimelineElements[] = {
+        {hh::dv::DvNodeElement::ElementID::CAMERA_PARAMS, {offsetof(hh::dv::DvElementCameraParams::Data, curveData), sizeof(hh::dv::DvElementCameraParams::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CAMERA_SHAKE_LOOP, {offsetof(hh::dv::DvElementCameraShakeLoop::Data, curveData), sizeof(hh::dv::DvElementCameraShakeLoop::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::EFFECT, {offsetof(hh::dv::DvElementEffect::Data, curveData), sizeof(hh::dv::DvElementEffect::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::PATH_INTERPOLATION, {offsetof(hh::dv::DvElementPathInterpolation::Data, curveData), sizeof(hh::dv::DvElementPathInterpolation::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CAMERA_OFFSET, {offsetof(hh::dv::DvElementCameraOffset::Data, curveData), sizeof(hh::dv::DvElementCameraOffset::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::MODEL_FADE, {offsetof(hh::dv::DvElementModelFade::Data, curveData), sizeof(hh::dv::DvElementModelFade::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CAMERA_HEDGEHOG, {offsetof(hh::dv::DvElementCameraHedgehog::Data, curveData), sizeof(hh::dv::DvElementCameraHedgehog::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::SPOTLIGHT, {offsetof(hh::dv::DvElementSpotlight::Data, curveData), sizeof(hh::dv::DvElementSpotlight::Data::curveData)}},
 #ifdef DEVTOOLS_TARGET_SDK_miller
-        {22, {offsetof(hh::dv::DvElementPointLight::Data, curveData), 128}},
-        {27, {offsetof(hh::dv::DvElementMaterialParam::Data, curveData), 32}},
+        {hh::dv::DvNodeElement::ElementID::POINT_LIGHT, {offsetof(hh::dv::DvElementPointLight::Data, curveData), sizeof(hh::dv::DvElementPointLight::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::MATERIAL_PARAM, {offsetof(hh::dv::DvElementMaterialParam::Data, curveData), sizeof(hh::dv::DvElementMaterialParam::Data::curveData)}},
 #endif
-        {1000, {offsetof(app::dv::DvElementBloomParam::Data, curveData), 32}},
-        {1001, {offsetof(app::dv::DvElementDOFParam::Data, curveData), 32}},
-        {1002, {offsetof(app::dv::DvElementColorContrast::Data, curveData), 32}},
-        {1003, {offsetof(app::dv::DvElementCameraControlParam::Data, curveData), 32}},
+        {hh::dv::DvNodeElement::ElementID::BLOOM_PARAM, {offsetof(app::dv::DvElementBloomParam::Data, curveData), sizeof(app::dv::DvElementBloomParam::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::DOF_PARAM, {offsetof(app::dv::DvElementDOFParam::Data, curveData), sizeof(app::dv::DvElementDOFParam::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::COLOR_CONTRAST, {offsetof(app::dv::DvElementColorContrast::Data, curveData), sizeof(app::dv::DvElementColorContrast::Data::curveData)}},
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        {1005, {offsetof(app::dv::DvElementGodrayParam::Data, curveData), 32}},
-        {1008, {offsetof(app::dv::DvElementChromaticAberrationFilterParam::Data, curveData), 32}},
-        {1009, {offsetof(app::dv::DvElementVignetteParam::Data, curveData), 32}},
-        {1010, {offsetof(app::dv::DvElementFade::Data, curveData), 32}},
-        {1011, {offsetof(app::dv::DvElementLetterBox::Data, curveData), 32}},
-        {1017, {offsetof(app::dv::DvElementTime::Data, curveData), 32}},
-        {1018, {offsetof(app::dv::DvElementSun::Data, curveData), 32}},
-        {1019, {offsetof(app::dv::DvElementLookAtIK::Data, curveData), 64}},
-        {1020, {offsetof(app::dv::DvElementCameraBlurParam::Data, curveData), 32}},
-        {1025, {offsetof(app::dv::DvElementFacialAnimation::Data, curveData), 32}},
-        {1027, {offsetof(app::dv::DvElementAura::Data, curveData), 32}},
-        {1029, {offsetof(app::dv::DvElementCyberSpaceNoise::Data, curveData), 32}},
-        {1033, {offsetof(app::dv::DvElementCrossFade::Data, curveData), 32}},
-        {1034, {offsetof(app::dv::DvElementWeather::Data, curveData), 32}},
-        {1036, {offsetof(app::dv::DvElementVariablePointLight::Data, curveData), 128}},
-        {1042, {offsetof(app::dv::DvElementTheEndCableObject::Data, curveData), 1024}}
+        {hh::dv::DvNodeElement::ElementID::CAMERA_CONTROL_PARAM, {offsetof(app::dv::DvElementCameraControlParam::Data, curveData), sizeof(app::dv::DvElementCameraControlParam::Data::curveData)}},
+#endif
+        {hh::dv::DvNodeElement::ElementID::GODRAY_PARAM, {offsetof(app::dv::DvElementGodrayParam::Data, curveData), sizeof(app::dv::DvElementGodrayParam::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CHROMATIC_ABERRATION_FILTER_PARAM, {offsetof(app::dv::DvElementChromaticAberrationFilterParam::Data, curveData), sizeof(app::dv::DvElementChromaticAberrationFilterParam::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::VIGNETTE_PARAM, {offsetof(app::dv::DvElementVignetteParam::Data, curveData), sizeof(app::dv::DvElementVignetteParam::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::FADE, {offsetof(app::dv::DvElementFade::Data, curveData), sizeof(app::dv::DvElementFade::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::LETTER_BOX, {offsetof(app::dv::DvElementLetterBox::Data, curveData), sizeof(app::dv::DvElementLetterBox::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::TIME, {offsetof(app::dv::DvElementTime::Data, curveData), sizeof(app::dv::DvElementTime::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::SUN, {offsetof(app::dv::DvElementSun::Data, curveData), sizeof(app::dv::DvElementSun::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::LOOK_AT_IK, {offsetof(app::dv::DvElementLookAtIK::Data, curveData), sizeof(app::dv::DvElementLookAtIK::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CAMERA_BLUR_PARAM, {offsetof(app::dv::DvElementCameraBlurParam::Data, curveData), sizeof(app::dv::DvElementCameraBlurParam::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::FACIAL_ANIMATION, {offsetof(app::dv::DvElementFacialAnimation::Data, curveData), sizeof(app::dv::DvElementFacialAnimation::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::AURA, {offsetof(app::dv::DvElementAura::Data, curveData), sizeof(app::dv::DvElementAura::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CYBER_SPACE_NOISE, {offsetof(app::dv::DvElementCyberSpaceNoise::Data, curveData), sizeof(app::dv::DvElementCyberSpaceNoise::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::CROSS_FADE, {offsetof(app::dv::DvElementCrossFade::Data, curveData), sizeof(app::dv::DvElementCrossFade::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::WEATHER, {offsetof(app::dv::DvElementWeather::Data, curveData), sizeof(app::dv::DvElementWeather::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::VARIABLE_POINT_LIGHT, {offsetof(app::dv::DvElementVariablePointLight::Data, curveData), sizeof(app::dv::DvElementVariablePointLight::Data::curveData)}},
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+        {hh::dv::DvNodeElement::ElementID::THE_END_CABLE_OBJECT, {offsetof(app::dv::DvElementTheEndCableObject::Data, curveData), sizeof(app::dv::DvElementTheEndCableObject::Data::curveData)}},
 #elif DEVTOOLS_TARGET_SDK_miller
-        {1007, {offsetof(app::dv::DvElementGodrayParam::Data, curveData), 32}},
-        {1010, {offsetof(app::dv::DvElementChromaticAberrationFilterParam::Data, curveData), 32}},
-        {1011, {offsetof(app::dv::DvElementVignetteParam::Data, curveData), 32}},
-        {1012, {offsetof(app::dv::DvElementFade::Data, curveData), 32}},
-        {1013, {offsetof(app::dv::DvElementLetterBox::Data, curveData), 32}},
-        {1019, {offsetof(app::dv::DvElementTime::Data, curveData), 32}},
-        {1020, {offsetof(app::dv::DvElementSun::Data, curveData), 32}},
-        {1021, {offsetof(app::dv::DvElementLookAtIK::Data, curveData), 64}},
-        {1022, {offsetof(app::dv::DvElementCameraBlurParam::Data, curveData), 32}},
-        {1027, {offsetof(app::dv::DvElementFacialAnimation::Data, curveData), 32}},
-        {1029, {offsetof(app::dv::DvElementAura::Data, curveData), 32}},
-        {1031, {offsetof(app::dv::DvElementCyberSpaceNoise::Data, curveData), 32}},
-        {1035, {offsetof(app::dv::DvElementCrossFade::Data, curveData), 32}},
-        {1036, {offsetof(app::dv::DvElementWeather::Data, curveData), 32}},
-        {1038, {offsetof(app::dv::DvElementVariablePointLight::Data, curveData), 128}},
-        {1046, {offsetof(app::dv::DvElementFog::Data, curveData), 32}},
-        {1047, {offsetof(app::dv::DvElementDOF::Data, curveData), 32}},
+        {hh::dv::DvNodeElement::ElementID::FOG, {offsetof(app::dv::DvElementFog::Data, curveData), sizeof(app::dv::DvElementFog::Data::curveData)}},
+        {hh::dv::DvNodeElement::ElementID::DOF, {offsetof(app::dv::DvElementDOF::Data, curveData), sizeof(app::dv::DvElementDOF::Data::curveData)}},
 #endif
     };
 
-    constexpr std::pair<size_t, size_t> GetElementTimelineRender(int type) {
+    constexpr std::pair<size_t, size_t> GetElementTimelineRender(hh::dv::DvNodeElement::ElementID type) {
         for (const auto& [key, func] : RenderTimelineElements) {
             if (key == type) return func;
         }

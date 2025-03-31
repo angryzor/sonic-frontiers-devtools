@@ -135,11 +135,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 						if(axisLimit)
 							ImPlot::SetupAxisLimits(ImAxis_Y1, 0, maxValue, ImPlotCond_Always);
 
-						float* time = new float[size];
+						float* time = static_cast<float*>(hh::fnd::MemoryRouter::GetTempAllocator()->Alloc(size*sizeof(float), alignof(float)));
 						std::iota(time, time + size, 0.0f);
 						ImPlot::SetNextFillStyle(color, 0.3f);
 						ImPlot::PlotLine<float>("X", time, curve, size, ImPlotLineFlags_Shaded);
-						delete[] time;
+						hh::fnd::MemoryRouter::GetTempAllocator()->Free(time);
 						for (auto x = 0; x < size; x++) {
 							double frame = x;
 							double value = curve[x];

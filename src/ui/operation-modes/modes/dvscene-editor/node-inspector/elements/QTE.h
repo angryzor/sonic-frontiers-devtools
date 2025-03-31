@@ -38,12 +38,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementQTE::Data*>(element);
-		int curQteType = static_cast<int>(data->qteType);
-        if (changed |= ImGui::Combo("QTE Type", &curQteType, qteTypeNames, 5))
-			data->qteType = static_cast<app::dv::DvElementQTE::Data::QTEType>(curQteType);
-        int curQteBtn = static_cast<int>(data->qteButton);
-        if (changed |= ImGui::Combo("QTE Button", &curQteBtn, qteButtonNames, 17))
-            data->qteButton = static_cast<app::dv::DvElementQTE::Data::QTEButton>(curQteBtn);
+        changed |= ComboEnum("QTE Type", data->qteType, qteTypeNames);
+        changed |= ComboEnum("QTE Button", data->qteButton, qteButtonNames);
         if(ImGui::TreeNode("Red Circle")){
             changed |= Editor("Size", data->redCircleSize);
             changed |= Editor("Thickness", data->redCircleThickness);

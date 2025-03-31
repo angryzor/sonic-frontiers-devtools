@@ -41,23 +41,23 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				if (node->nodeType == hh::dv::DvNodeBase::NodeType::CHARACTER || node->nodeType == hh::dv::DvNodeBase::NodeType::MODEL)
 					hh::game::GameObjectSystem::GetInstance()->GetGameObjectByHandle(reinterpret_cast<hh::dv::DvNodeBaseAnimationModel*>(node)->nodeCharacterObj->dvStandardChar)->Kill();
 				if(node->childrenElements0.begin())
-					for(auto x = 0; x < node->childrenElements0.size(); x++)
-						Delete(node->childrenElements0[x]);
+					for(auto* x : node->childrenElements0)
+						Delete(x);
 				if (node->childrenElements1.begin())
-					for (auto x = 0; x < node->childrenElements1.size(); x++)
-						Delete(node->childrenElements1[x]);
+					for (auto* x : node->childrenElements1)
+						Delete(x);
 				if (node->childrenElements2.begin())
-					for (auto x = 0; x < node->childrenElements2.size(); x++)
-						Delete(node->childrenElements2[x]);
+					for (auto* x : node->childrenElements2)
+						Delete(x);
 				if (node->childrenPath.begin())
-					for (auto x = 0; x < node->childrenPath.size(); x++)
-						Delete(node->childrenPath[x]);
+					for (auto* x : node->childrenPath)
+						Delete(x);
 				if (node->childrenCamera.begin())
-					for (auto x = 0; x < node->childrenCamera.size(); x++)
-						Delete(node->childrenCamera[x]);
+					for (auto* x : node->childrenCamera)
+						Delete(x);
 				if (node->childrenMotion.begin())
-					for (auto x = 0; x < node->childrenMotion.size(); x++)
-						Delete(node->childrenMotion[x]);
+					for (auto* x : node->childrenMotion)
+						Delete(x);
 				node->Free();
 			}
 		}

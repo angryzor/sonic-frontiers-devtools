@@ -17,11 +17,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		changed |= Editor("ASM State Name", data->stateName);
 		changed |= Editor("Unk1", data->unk1);
 		if(ImGui::TreeNode("Animations")){
-            char z = 0;
             for(auto i = 0; i < data->activeAnimationsCount; i++){
                 auto& x = data->animations[i];
                 char buffer[68];
-                snprintf(buffer, sizeof(buffer), "%s##%s", x.fileName, z);
+                snprintf(buffer, sizeof(buffer), "%s##%s", x.fileName, i);
                 if(ImGui::TreeNode(buffer)){
                     int curAnmType = static_cast<int>(x.animType)-1;
                     if (changed |= ImGui::Combo("Animation Type", &curAnmType, animationTypeNames, 4))
@@ -29,7 +28,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
                     changed |= Editor("Filename", x.fileName);
                     ImGui::TreePop();
                 }
-                z++;
             }
             ImGui::TreePop();
         }

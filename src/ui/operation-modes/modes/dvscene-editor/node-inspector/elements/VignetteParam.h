@@ -27,12 +27,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
         changed |= CheckboxFlags("Depth Enabled", data->flags, app::dv::DvElementVignetteParam::Data::Flags::DEPTH_ENABLED);
 #endif
         changed |= CheckboxFlags("Curve Enabled", data->flags, app::dv::DvElementVignetteParam::Data::Flags::CURVE_ENABLED);
-        int curGradType = static_cast<int>(data->gradationType);
-        if (changed |= ImGui::Combo("Gradation Type", &curGradType, gradationTypeNames, 2))
-            data->gradationType = static_cast<app::dv::DvElementVignetteParam::Data::GradationType>(curGradType);
-        int curBlendMode = static_cast<int>(data->blendMode);
-        if (changed |= ImGui::Combo("Blend Mode", &curBlendMode, blendModeNames, 5))
-            data->blendMode = static_cast<app::dv::DvElementVignetteParam::Data::BlendMode>(curBlendMode);
+        changed |= ComboEnum("Gradation Type", data->gradationType, gradationTypeNames);
+        changed |= ComboEnum("Blend Mode", data->blendMode, blendModeNames);
         changed |= Editor("Vignette Parameters", data->vignetteParams);
 #ifdef DEVTOOLS_TARGET_SDK_rangers
         if(data->flags.test(app::dv::DvElementVignetteParam::Data::Flags::DEPTH_ENABLED))
