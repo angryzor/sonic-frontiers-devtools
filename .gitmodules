@@ -13,9 +13,6 @@
 [submodule "vendor/imguizmo/ImGuizmo"]
 	path = vendor/imguizmo/ImGuizmo
 	url = https://github.com/CedricGuillemet/ImGuizmo.git
-[submodule "vendor/imgui-file-dialog/ImGuiFileDialog"]
-	path = vendor/imgui-file-dialog/ImGuiFileDialog
-	url = https://github.com/aiekick/ImGuiFileDialog.git
 [submodule "vendor/implot/implot"]
 	path = vendor/implot/implot
 	url = https://github.com/epezent/implot.git
