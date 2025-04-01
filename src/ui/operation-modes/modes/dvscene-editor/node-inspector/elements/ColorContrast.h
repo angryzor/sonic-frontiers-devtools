@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1002>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::COLOR_CONTRAST>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementColorContrast::Data*>(element);
         changed |= CheckboxFlags("Enabled", data->flags, app::dv::DvElementColorContrast::Data::Flags::ENABLED);

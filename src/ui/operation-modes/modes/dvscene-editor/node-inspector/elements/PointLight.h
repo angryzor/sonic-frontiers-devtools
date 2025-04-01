@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<22>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::POINT_LIGHT>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementPointLight::Data*>(element);
         changed |= Editor("Position", data->position);

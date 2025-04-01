@@ -4,11 +4,13 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     using NodeTimelineFuncType = bool(*)(Timeline*, char*);
+    using namespace hh::dv;
+    using NodeType = DvNodeBase::NodeType;
 
     template<>
-	bool RenderNodeTimeline<4>(Timeline* timeline, char* node) {
+	bool RenderNodeTimeline<NodeType::CAMERA_MOTION>(Timeline* timeline, char* node) {
         bool changed = false;
-		auto* data = reinterpret_cast<hh::dv::DvNodeCameraMotion::Data*>(node);
+		auto* data = reinterpret_cast<DvNodeCameraMotion::Data*>(node);
         int start = data->start / 100;
         int end = data->end / 100;
         if (changed |= timeline->RenderTimeline(start, end)) {
@@ -19,9 +21,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	}
 
 	template<>
-	bool RenderNodeTimeline<6>(Timeline* timeline, char* node) {
+	bool RenderNodeTimeline<NodeType::CHARACTER_MOTION>(Timeline* timeline, char* node) {
         bool changed = false;
-        auto* data = reinterpret_cast<hh::dv::DvNodeCharacterMotion::Data*>(node);
+        auto* data = reinterpret_cast<DvNodeCharacterMotion::Data*>(node);
         int start = data->start / 100;
         int end = data->end / 100;
         if (changed |= timeline->RenderTimeline(start, end)) {
@@ -32,9 +34,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	}
 
 	template<>
-	bool RenderNodeTimeline<10>(Timeline* timeline, char* node) {
+	bool RenderNodeTimeline<NodeType::MODEL_MOTION>(Timeline* timeline, char* node) {
         bool changed = false;
-		auto* data = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(node);
+		auto* data = reinterpret_cast<DvNodeModelMotion::Data*>(node);
         int start = data->start / 100;
         int end = data->end / 100;
         if (changed |= timeline->RenderTimeline(start, end)) {
@@ -45,15 +47,15 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	}
 
 	template<>
-	bool RenderNodeTimeline<12>(Timeline* timeline, char* node) {
+	bool RenderNodeTimeline<NodeType::ELEMENT>(Timeline* timeline, char* node) {
         bool changed = false;
-		auto* data = reinterpret_cast<hh::dv::DvNodeElement::Data*>(node);
+		auto* data = reinterpret_cast<DvNodeElement::Data*>(node);
         int type = static_cast<int>(data->elementId);
         const std::pair<size_t, size_t> render = GetElementTimelineRender(data->elementId);
         
         if (render != std::pair<size_t, size_t>{})
         {
-            float* curveData = &reinterpret_cast<float*>(&node[sizeof(hh::dv::DvNodeElement::Data)])[render.first / sizeof(float)];
+            float* curveData = &reinterpret_cast<float*>(&node[sizeof(DvNodeElement::Data)])[render.first / sizeof(float)];
             changed |= timeline->RenderTimeline(data->start, data->end, curveData, render.second/sizeof(float));
         }
         else
@@ -62,14 +64,14 @@ namespace ui::operation_modes::modes::dvscene_editor {
         return changed;
 	}
 
-    constexpr std::pair<int, NodeTimelineFuncType> RenderTimelineNodes[] = {
-        {4, RenderNodeTimeline<4>},
-        {6, RenderNodeTimeline<6>},
-        {10, RenderNodeTimeline<10>},
-        {12, RenderNodeTimeline<12>}
+    constexpr std::pair<NodeType, NodeTimelineFuncType> RenderTimelineNodes[] = {
+        {NodeType::CAMERA_MOTION,       RenderNodeTimeline<NodeType::CAMERA_MOTION>},
+        {NodeType::CHARACTER_MOTION,    RenderNodeTimeline<NodeType::CHARACTER_MOTION>},
+        {NodeType::MODEL_MOTION,        RenderNodeTimeline<NodeType::MODEL_MOTION>},
+        {NodeType::ELEMENT,             RenderNodeTimeline<NodeType::ELEMENT>}
     };
 
-    constexpr NodeTimelineFuncType GetNodeTimelineRender(int type) {
+    constexpr NodeTimelineFuncType GetNodeTimelineRender(NodeType type) {
         for (const auto& [key, func] : RenderTimelineNodes) {
             if (key == type) return func;
         }

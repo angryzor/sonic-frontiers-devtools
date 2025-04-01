@@ -10,11 +10,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1025>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1027>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::FACIAL_ANIMATION>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementFacialAnimation::Data*>(element);
 		if(ImGui::TreeNode("Animations")) {

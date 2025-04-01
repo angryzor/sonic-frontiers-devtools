@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<12>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CAMERA_NEAR_FAR>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementCameraNearFar::Data*>(element);
         changed |= CheckboxFlags("Disable Near Clip", data->flags, hh::dv::DvElementCameraNearFar::Data::Flags::DISABLED_NEAR_CLIP);

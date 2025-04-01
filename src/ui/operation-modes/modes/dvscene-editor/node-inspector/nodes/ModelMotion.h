@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderNodeInspector<10>(char* node) {
+    bool RenderNodeInspector<hh::dv::DvNodeBase::NodeType::MODEL_MOTION>(char* node) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvNodeModelMotion::Data*>(node);
         changed |= CheckboxFlags("Unk0", data->flags, hh::dv::DvNodeModelMotion::Data::Flags::UNK0);

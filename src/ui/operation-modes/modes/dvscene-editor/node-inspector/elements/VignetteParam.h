@@ -16,11 +16,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1009>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1011>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::VIGNETTE_PARAM>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementVignetteParam::Data*>(element);
 #ifdef DEVTOOLS_TARGET_SDK_rangers

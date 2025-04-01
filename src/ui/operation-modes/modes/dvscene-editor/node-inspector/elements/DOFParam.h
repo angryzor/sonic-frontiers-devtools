@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1001>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::DOF_PARAM>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementDOFParam::Data*>(element);
 		changed |= CheckboxFlags("Use Focus Look At", data->flags, app::dv::DvElementDOFParam::Data::Flags::USE_FOCUS_LOOK_AT);

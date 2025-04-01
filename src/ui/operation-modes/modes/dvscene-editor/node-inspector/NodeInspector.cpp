@@ -73,7 +73,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				}
 			}
 		}
-		NodeFuncType render = GetNodeInspectorRender(node->category);
+		NodeFuncType render = GetNodeInspectorRender(static_cast<hh::dv::DvNodeBase::NodeType>(node->category));
 		if(render){
 			ImGui::SeparatorText("Properties");
 			changed |= render(node->data);

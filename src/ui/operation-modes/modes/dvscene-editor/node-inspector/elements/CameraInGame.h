@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<21>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CAMERA_IN_GAME>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementCameraInGame::Data*>(element);
 		changed |= Editor("Unk0", data->unk0);

@@ -11,11 +11,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
 
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1020>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1022>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CAMERA_BLUR_PARAM>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementCameraBlurParam::Data*>(element);
 		changed |= CheckboxFlags("Enabled", data->flags, app::dv::DvElementCameraBlurParam::Data::Flags::ENABLED);

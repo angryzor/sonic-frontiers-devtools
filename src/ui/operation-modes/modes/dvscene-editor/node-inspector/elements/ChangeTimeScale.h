@@ -3,11 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1028>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1030>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CHANGE_TIME_SCALE>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementChangeTimeScale::Data*>(element);
         changed |= Editor("Unk Enabled", data->unkEnabled);
