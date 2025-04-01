@@ -1,6 +1,7 @@
 #include "SoundDirector.h"
 #include <ui/Desktop.h>
 #include <ui/common/editors/Basic.h>
+#include <ui/common/viewers/Basic.h>
 #include <ui/resources/editors/ResReflectionEditor.h>
 
 void RenderUnk3Editor(const char* name, app::snd::SoundDirector::Unk3& unk3) {

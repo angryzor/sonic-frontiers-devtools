@@ -20,7 +20,8 @@ set(OGDF_DEBUG_MODE NONE)
 include(FetchContent)
 FetchContent_Declare(OGDF GIT_REPOSITORY https://github.com/ogdf/ogdf.git GIT_TAG 8a7b22712929f1cd48c4ed701c52b0c0a69c01c8 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS)
 FetchContent_Declare(rip GIT_REPOSITORY https://github.com/angryzor/rip.git GIT_TAG v1.0.32 EXCLUDE_FROM_ALL FIND_PACKAGE_ARGS 1.0.32)
-FetchContent_MakeAvailable(ogdf rip)
+FetchContent_Declare(dieventlib GIT_REPOSITORY https://github.com/Ashrindy/DiEventLibCPP.git)
+FetchContent_MakeAvailable(ogdf rip dieventlib)
 add_subdirectory(vendor EXCLUDE_FROM_ALL)
 
 # Settings for target sdks
@@ -84,7 +85,7 @@ foreach(DEVTOOLS_TARGET_SDK miller rangers wars)
     add_subdirectory(${SDK_PATH} ${DEVTOOLS_TARGET_SDK}-sdk EXCLUDE_FROM_ALL)
 
     add_library(${DEVTOOLS_TARGET} SHARED)
-    target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${DEVTOOLS_TARGET_SDK}-sdk filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imgui-memory-editor imguizmo implot imtimeline imbrowser yyjson reflectcpp OGDF rip-hl uwebsockets)
+    target_link_libraries(${DEVTOOLS_TARGET} PRIVATE ${DEVTOOLS_TARGET_SDK}-sdk filewatch detours imgui imgui-backend-win32 imgui-backend-dx11 imgui-file-dialog imgui-node-editor imgui-memory-editor imguizmo implot imtimeline imbrowser yyjson reflectcpp OGDF rip-hl uwebsockets DiEventLib)
     target_compile_features(${DEVTOOLS_TARGET} PRIVATE cxx_std_20)
     target_compile_options(${DEVTOOLS_TARGET} PRIVATE /permissive- /W4 /wd4100 /wd4458 /wd4324)
     target_compile_definitions(${DEVTOOLS_TARGET}

@@ -405,4 +405,3 @@ void Context::update()
 		ImGui::RenderPlatformWindowsDefault();
 	}
 }
-

@@ -249,7 +249,7 @@ namespace ui::operation_modes::modes::level_editor {
 		if (auto* objInfoName = static_cast<const char*>(hh::game::GameObjectSystem::GetInstance()->gameObjectRegistry->GetGameObjectClassByName(objData->gameObjectClass)->GetAttributeValue("objinfo"))) {
 			auto* objInfoContainer = GameManager::GetInstance()->GetService<ObjInfoContainer>();
 			auto* objInfoClass = RESOLVE_STATIC_VARIABLE(ObjInfoRegistry::instance)->objInfosByName.GetValueOrFallback(objInfoName, nullptr);
-			auto* objInfo = objInfoClass->Create(GetAllocator());
+			auto* objInfo = objInfoClass->instantiator(GetAllocator());
 
 			objInfoContainer->Register(objInfo->GetInfoName(), objInfo);
 		}
