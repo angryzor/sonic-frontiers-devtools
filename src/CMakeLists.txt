@@ -23,6 +23,7 @@ target_sources(${DEVTOOLS_TARGET}
         api/DebugCamera.cpp
         api/ObjectWorld.cpp
         api/GameManager.cpp
+        api/RenderManager.cpp
         modules/PhotoMode.cpp
         resources/ManagedMemoryRegistry.cpp
         resources/ReloadManager.cpp
@@ -91,6 +92,7 @@ target_sources(${DEVTOOLS_TARGET}
         api/DebugCamera.h
         api/ObjectWorld.h
         api/GameManager.h
+        api/RenderManager.h
         modules/PhotoMode.h
         resources/managed-memory/ManagedCArray.h
         resources/ManagedMemoryRegistry.h
@@ -171,6 +173,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_PCMODEL_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_DVSCENE_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
@@ -214,6 +217,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_PCMODEL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
+    set(DEVTOOLS_FEATURE_DVSCENE_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS ON)
@@ -280,6 +284,10 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         RespawnTimeManager
         MonologueService
         LevelManager
+        DiEventManager
+        EventPlayer
+        MovieManager
+        SoundManagerCri
     )
 endif()
 
@@ -291,6 +299,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_PCMODEL_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
+    set(DEVTOOLS_FEATURE_DVSCENE_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
@@ -542,4 +551,101 @@ if(${DEVTOOLS_FEATURE_ASM_EDITOR})
             ui/operation-modes/modes/asm-editor/ASMEditor.h
             ui/operation-modes/modes/object-inspection/component-inspectors/GOCAnimator.h
     )
+endif()
+
+if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/common/editors/DvScene.cpp
+            ui/operation-modes/modes/dvscene-editor/Context.cpp
+            ui/operation-modes/modes/dvscene-editor/DvSceneEditor.cpp
+            ui/operation-modes/modes/dvscene-editor/Tree.cpp
+            ui/operation-modes/modes/dvscene-editor/PageEditor.cpp
+            ui/operation-modes/modes/dvscene-editor/DvNode.cpp
+            ui/operation-modes/modes/dvscene-editor/SceneSettings.cpp
+            ui/operation-modes/modes/dvscene-editor/node-inspector/NodeInspector.cpp
+            ui/operation-modes/modes/dvscene-editor/timeline/Timeline.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/common/editors/DvScene.h
+            ui/operation-modes/modes/dvscene-editor/Context.h
+            ui/operation-modes/modes/dvscene-editor/DvSceneEditor.h
+            ui/operation-modes/modes/dvscene-editor/Tree.h
+            ui/operation-modes/modes/dvscene-editor/PageEditor.h
+            ui/operation-modes/modes/dvscene-editor/Behaviors.h
+            ui/operation-modes/modes/dvscene-editor/DvNode.h
+            ui/operation-modes/modes/dvscene-editor/SceneSettings.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/NodeInspector.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/Nodes.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/Elements.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/Path.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/Character.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/CharacterMotion.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/Model.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/ModelMotion.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/ModelNode.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/nodes/Element.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraParams.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DrawOff.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/PathOffset.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraShake.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraShakeLoop.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Effect.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/PathInterpolation.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraNearFar.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/UVAnim.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VisibilityAnim.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/MaterialAnim.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/MultipleAnim.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraOffset.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraHedgehog.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraInGame.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Spotlight.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ControllerVibration.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VertexAnimationTexture.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/TexturePatternAnim.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/MaterialParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/BloomParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DOFParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ColorContrast.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraControlParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ShadowResolution.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/SSAOParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/OcclusionCapsuleParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/GodrayParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/AtmosphereGodrayParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ChromaticAberrationFilterParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VignetteParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Fade.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/BossName.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Sound.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Time.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Sun.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CameraBlurParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/GeneralTrigger.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DitherParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/QTE.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/FacialAnimation.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/OverrideASM.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Aura.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ChangeTimeScale.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/LipAnimation.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/CrossFade.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Weather.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ShadowMapParam.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VariablePointLight.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DensitySectorPoint.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/VAT.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/QTEAccel.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/TheEndCableObject.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/BulletTime.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/TimeStop.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ObjectTimeStop.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/ShadowShape.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Falloff.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/Fog.h
+            ui/operation-modes/modes/dvscene-editor/node-inspector/elements/DOF.h
+            ui/operation-modes/modes/dvscene-editor/timeline/Timeline.h
+            ui/operation-modes/modes/dvscene-editor/timeline/Nodes.h
+            ui/operation-modes/modes/dvscene-editor/timeline/Elements.h
+        )
 endif()

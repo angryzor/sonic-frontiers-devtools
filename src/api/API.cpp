@@ -2,6 +2,7 @@
 #include "DebugCamera.h"
 #include "GameManager.h"
 #include "ObjectWorld.h"
+#include "RenderManager.h"
 
 namespace devtools::api {
 	API::API(csl::fnd::IAllocator* allocator, const char* host, unsigned short port) : Module{ allocator }, httpThread{ [this, host, port]() {
@@ -13,6 +14,9 @@ namespace devtools::api {
 		debug_camera::RegisterRoutes(context);
 		game_manager::RegisterRoutes(context);
 		object_world::RegisterRoutes(context);
+#ifndef DEVTOOLS_TARGET_SDK_wars
+		render_manager::RegisterRoutes(context);
+#endif
 
 		app.listen(host, port, [&running](auto* socket) {
 			running = socket != nullptr;

@@ -2,3 +2,4 @@
 /out
 /CMakeUserPresets.json
 
+src/.vscode/settings.json

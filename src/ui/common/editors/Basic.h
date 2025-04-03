@@ -263,3 +263,68 @@ static bool Editor(const char* label, hh::fnd::ManagedResource* resource, resour
 
 	return edited;
 }
+
+template<typename T>
+static bool ColorEditor(const char* label, T(&values)[3]) {
+	bool changed = false;
+	float color[3] = {
+		static_cast<float>(values[0]) / 255.0f,
+		static_cast<float>(values[1]) / 255.0f,
+		static_cast<float>(values[2]) / 255.0f
+	};
+
+	changed |= ImGui::ColorEdit4(label, color);
+
+	values[0] = static_cast<T>(color[0] * 255.0f);
+	values[1] = static_cast<T>(color[1] * 255.0f);
+	values[2] = static_cast<T>(color[2] * 255.0f);
+
+	return changed;
+}
+
+template<typename T>
+static bool ColorEditor(const char* label, T(&values)[4]) {
+	bool changed = false;
+	float color[4] = {
+		static_cast<float>(values[0]) / 255.0f,
+		static_cast<float>(values[1]) / 255.0f,
+		static_cast<float>(values[2]) / 255.0f,
+		static_cast<float>(values[3]) / 255.0f
+	};
+
+	changed |= ImGui::ColorEdit4(label, color);
+
+	values[0] = static_cast<T>(color[0] * 255.0f);
+	values[1] = static_cast<T>(color[1] * 255.0f);
+	values[2] = static_cast<T>(color[2] * 255.0f);
+	values[3] = static_cast<T>(color[3] * 255.0f);
+
+	return changed;
+}
+
+/*static bool SearchableCombo(const char* label, int* current_item, const char* const* items, int item_count, int searchBufSize)
+{
+	static char search_buf[128] = "";
+	bool value_changed = false;
+
+	ImGui::PushID(label);
+
+	ImGui::SetNextItemWidth(ImGui::CalcTextSize("e").x * searchBufSize);
+	ImGui::InputText("##search", search_buf, searchBufSize);
+	ImGui::SameLine();
+	ImGui::SetNextItemWidth(ImGui::CalcTextSize("e").x * searchBufSize);
+	if (ImGui::BeginCombo("##combo", items[*current_item])) {
+		for (int i = 0; i < item_count; ++i)
+			if (strstr(items[i], search_buf))
+				if (ImGui::Selectable(items[i], *current_item == i)) {
+					*current_item = i;
+					value_changed = true;
+				}
+		ImGui::EndCombo();
+	}
+	ImGui::SameLine();
+	ImGui::Text(label);
+
+	ImGui::PopID();
+	return value_changed;
+}*/

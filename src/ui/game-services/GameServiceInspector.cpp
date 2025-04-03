@@ -33,6 +33,10 @@ typedef std::tuple<
 #include "game-service-inspectors/RespawnTimeManager.h"
 #include "game-service-inspectors/MonologueService.h"
 #include "game-service-inspectors/LevelManager.h"
+#include "game-service-inspectors/DiEventManager.h"
+#include "game-service-inspectors/EventPlayer.h"
+#include "game-service-inspectors/MovieManager.h"
+#include "game-service-inspectors/SoundManagerCri.h"
 
 typedef std::tuple<
 	app::gfx::FxParamManager,
@@ -49,7 +53,11 @@ typedef std::tuple<
 	app::game::RespawnTimeManager,
 	app::gfx::FxColManager,
 	app::game::MonologueService,
-	hh::game::LevelManager
+	hh::game::LevelManager,
+	hh::dv::DiEventManager,
+	app::evt::EventPlayer,
+	hh::fmv::MovieManager,
+	hh::snd::SoundManagerCri
 > InspectableServices;
 
 #endif

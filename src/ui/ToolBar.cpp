@@ -11,6 +11,7 @@
 #include "game-services/GameServiceInspector.h"
 #include "core-services/MemoryInspector.h"
 #include "tools/RflComparer.h"
+#include <ui/common/viewers/Basic.h>
 
 #ifdef DEVTOOLS_TARGET_SDK_wars
 #include "tools/wars/NeedleFxSceneDataTesterV2.h"
@@ -41,6 +42,9 @@
 #include "operation-modes/modes/pcmodel-editor/PointcloudModelEditor.h"
 #endif
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
+#ifndef DEVTOOLS_TARGET_SDK_wars
+#include "operation-modes/modes/dvscene-editor/DvSceneEditor.h"
+#endif
 
 using namespace hh::game;
 
@@ -127,6 +131,10 @@ void ToolBar::Render() {
 #endif
 			if (ImGui::MenuItem("SurfRide Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();
+#ifndef DEVTOOLS_TARGET_SDK_wars
+			if (ImGui::MenuItem("DvScene Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::dvscene_editor::DvSceneEditor>();
+#endif
 			ImGui::EndMenu();
 		}
 
