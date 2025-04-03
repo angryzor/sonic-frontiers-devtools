@@ -277,6 +277,10 @@ void ResourceBrowser::ShowLoadResourceDialog(hh::fnd::ManagedResource* resource)
 void ResourceBrowser::RenderDialogs()
 {
 	RenderLoadNewResourceDialog();
+}
+
+void ResourceBrowser::RenderGlobalDialogs()
+{
 	RenderLoadDialog();
 	RenderExportDialog();
 }

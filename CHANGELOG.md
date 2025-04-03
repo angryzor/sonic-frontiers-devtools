@@ -1,3 +1,7 @@
+# v0.2.1
+* Fix resource export dialog not showing if resource browser is closed.
+
+
 # v0.2.0
 * Added DvScene editor, contributed by the amazing Ashrindy! Huge thanks for this incredible contribution!
 * Added 2 new themes, "Contrast ImGui" and "Modern Contrast ImGui", also contributed by Ashrindy.

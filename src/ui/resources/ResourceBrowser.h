@@ -53,4 +53,5 @@ public:
     static void RenderLoadDialog();
     static void RenderExportDialog();
     void RenderDialogs();
+    static void RenderGlobalDialogs();
 };
