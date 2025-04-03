@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1041>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::BULLET_TIME>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementBulletTime::Data*>(element);
 		changed |= Editor("Unk0", data->unk0);

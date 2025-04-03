@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CAMERA_PARAMS>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementCameraParams::Data*>(element);
         changed |= CheckboxFlags("Enabled Position", data->flags, hh::dv::DvElementCameraParams::Data::Flags::POSITION);

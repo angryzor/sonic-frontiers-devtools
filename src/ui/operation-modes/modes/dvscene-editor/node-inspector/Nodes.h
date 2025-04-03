@@ -13,18 +13,19 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     using NodeFuncType = bool(*)(char*);
+    using NodeType = hh::dv::DvNodeBase::NodeType;
 
-    constexpr std::pair<int, NodeFuncType> RenderNodeInspectors[] = {
-        {1, RenderNodeInspector<1>},
-        {5, RenderNodeInspector<5>},
-        {6, RenderNodeInspector<6>},
-        {8, RenderNodeInspector<8>},
-        {10, RenderNodeInspector<10>},
-        {11, RenderNodeInspector<11>},
-        {12, RenderNodeInspector<12>}
+    constexpr std::pair<NodeType, NodeFuncType> RenderNodeInspectors[] = {
+        {NodeType::PATH,                RenderNodeInspector<NodeType::PATH>},
+        {NodeType::CHARACTER,           RenderNodeInspector<NodeType::CHARACTER>},
+        {NodeType::CHARACTER_MOTION,    RenderNodeInspector<NodeType::CHARACTER_MOTION>},
+        {NodeType::MODEL,               RenderNodeInspector<NodeType::MODEL>},
+        {NodeType::MODEL_MOTION,        RenderNodeInspector<NodeType::MODEL_MOTION>},
+        {NodeType::MODEL_NODE,          RenderNodeInspector<NodeType::MODEL_NODE>},
+        {NodeType::ELEMENT,             RenderNodeInspector<NodeType::ELEMENT>}
     };
 
-    constexpr NodeFuncType GetNodeInspectorRender(int type) {
+    constexpr NodeFuncType GetNodeInspectorRender(NodeType type) {
         for (const auto& [key, func] : RenderNodeInspectors) {
             if (key == type) return func;
         }

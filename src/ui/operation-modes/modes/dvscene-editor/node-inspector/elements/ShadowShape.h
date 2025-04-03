@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1044>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::SHADOW_SHAPE>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementShadowShape::Data*>(element);
 		changed |= CheckboxFlags("Unk0 Flag", data->flags, app::dv::DvElementShadowShape::Data::Flags::UNK0);

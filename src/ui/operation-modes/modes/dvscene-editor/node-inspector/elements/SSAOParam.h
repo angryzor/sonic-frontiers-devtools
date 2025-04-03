@@ -30,7 +30,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-    bool RenderElementInspector<1005>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::SSAO_PARAM>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementSSAOParam::Data*>(element);
         changed |= CheckboxFlags("Enabled", data->flags, app::dv::DvElementSSAOParam::Data::Flags::ENABLED);

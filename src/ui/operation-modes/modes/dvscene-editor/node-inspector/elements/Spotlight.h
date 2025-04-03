@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<24>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::SPOTLIGHT>(char* element) {
 		bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementSpotlight::Data*>(element);
 		changed |= Editor("Curve Enabled", data->curveEnabled);

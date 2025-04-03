@@ -9,11 +9,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1016>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1018>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::SOUND>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementSound::Data*>(element);
 		changed |= Editor("Cue Name", data->cueName);

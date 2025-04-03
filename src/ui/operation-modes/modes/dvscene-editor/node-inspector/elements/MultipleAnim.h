@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-    bool RenderElementInspector<16>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::MULTIPLE_ANIM>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementMultipleAnim::Data*>(element);
 		changed |= Editor("Unk0", data->unk0);

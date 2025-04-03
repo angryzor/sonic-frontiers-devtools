@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1040>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::VAT>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementVAT::Data*>(element);
 		changed |= Editor("VAT Anim Name", data->vatAnimName);

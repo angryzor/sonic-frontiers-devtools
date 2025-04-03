@@ -22,11 +22,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
 
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1014>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1016>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::BOSS_NAME>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementBossName::Data*>(element);
         return ComboEnum("Boss Name", data->bossId, bossNames);

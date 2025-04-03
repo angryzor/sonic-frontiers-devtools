@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<20>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CAMERA_HEDGEHOG>(char* element) {
 		bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementCameraHedgehog::Data*>(element);
         changed |= Editor("Flags", data->flags);

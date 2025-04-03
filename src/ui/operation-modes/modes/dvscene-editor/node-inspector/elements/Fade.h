@@ -3,11 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1010>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1012>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::FADE>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementFade::Data*>(element);
         changed |= Editor("Enabled", data->enabled);
