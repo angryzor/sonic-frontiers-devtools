@@ -10,7 +10,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-    bool RenderElementInspector<1041>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::QTE_ACCEL>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementQTEAccel::Data*>(element);
         changed |= ComboEnum("Button", data->button, QTEAccelButtonNames);

@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderNodeInspector<1>(char* node) {
+    bool RenderNodeInspector<hh::dv::DvNodeBase::NodeType::PATH>(char* node) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvNodePath::Data*>(node);
         csl::math::Transform transform = Affine3fToTransform(Eigen::Affine3f{ data->matrix.matrix() });

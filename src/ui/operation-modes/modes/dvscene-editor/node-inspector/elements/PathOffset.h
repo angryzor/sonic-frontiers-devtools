@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<5>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::PATH_OFFSET>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementPathOffset::Data*>(element);
         csl::math::Transform transform = Affine3fToTransform(Eigen::Affine3f{ data->offsetMatrix.matrix() });

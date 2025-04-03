@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1046>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::FOG>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementFog::Data*>(element);
 		changed |= CheckboxFlags("Distance Fog Enabled", data->flags, app::dv::DvElementFog::Data::Flags::DISTANCE_FOG_ENABLED);

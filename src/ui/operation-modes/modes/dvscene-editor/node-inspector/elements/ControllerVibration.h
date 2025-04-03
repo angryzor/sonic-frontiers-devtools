@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<25>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CONTROLLER_VIBRATION>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementControllerVibration::Data*>(element);
         changed |= CheckboxFlags("Ignore End", data->flags, hh::dv::DvElementControllerVibration::Data::Flags::IGNORE_END);

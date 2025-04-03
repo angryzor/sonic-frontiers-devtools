@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1047>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::DOF>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementDOF::Data*>(element);
 		changed |= CheckboxFlags("Enabled", data->flags, app::dv::DvElementDOF::Data::Flags::ENABLED);

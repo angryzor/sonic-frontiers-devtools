@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<10>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::PATH_INTERPOLATION>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementPathInterpolation::Data*>(element);
 		changed |= Editor("Use Absolute Position", data->useAbsolutePosition);

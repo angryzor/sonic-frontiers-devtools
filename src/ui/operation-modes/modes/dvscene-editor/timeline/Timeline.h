@@ -37,6 +37,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		int curveType = 0;
 	};
 
-	template<int type>
+	template<hh::dv::DvNodeBase::NodeType type>
 	bool RenderNodeTimeline(Timeline* timeline, char* node) {}
 }

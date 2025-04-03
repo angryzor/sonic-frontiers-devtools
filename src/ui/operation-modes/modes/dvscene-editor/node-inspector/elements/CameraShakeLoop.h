@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<7>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CAMERA_SHAKE_LOOP>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvElementCameraShakeLoop::Data*>(element);
 		changed |= Editor("Pattern", data->pattern);

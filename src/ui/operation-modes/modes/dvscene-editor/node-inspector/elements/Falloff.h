@@ -3,7 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-    bool RenderElementInspector<1045>(char* element) {
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::FALLOFF>(char* element) {
         auto* data = reinterpret_cast<app::dv::DvElementFalloff::Data*>(element);
 		return Editor("Value", data->value);
     }

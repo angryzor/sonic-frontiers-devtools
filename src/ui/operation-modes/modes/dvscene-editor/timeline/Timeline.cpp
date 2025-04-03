@@ -51,7 +51,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				if (selected.size() > 0) {
 					DvNode focusedNode = selected[0];
 					dv::DvNode* node = focusedNode.fileNode;
-					NodeTimelineFuncType render = GetNodeTimelineRender(node->category);
+					NodeTimelineFuncType render = GetNodeTimelineRender(static_cast<hh::dv::DvNodeBase::NodeType>(node->category));
 					if(render)
 						if(render(this, node->data))
 							focusedNode.UpdateRuntimeNode();

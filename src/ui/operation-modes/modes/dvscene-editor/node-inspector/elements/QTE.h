@@ -31,11 +31,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     };
 
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1024>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1026>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::QTE>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementQTE::Data*>(element);
         changed |= ComboEnum("QTE Type", data->qteType, qteTypeNames);

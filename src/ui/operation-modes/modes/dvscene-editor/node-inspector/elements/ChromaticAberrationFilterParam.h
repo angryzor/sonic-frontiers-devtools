@@ -3,11 +3,7 @@
 
 namespace ui::operation_modes::modes::dvscene_editor {
     template<>
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-    bool RenderElementInspector<1008>(char* element) {
-#elif DEVTOOLS_TARGET_SDK_miller
-    bool RenderElementInspector<1010>(char* element) {
-#endif
+    bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::CHROMATIC_ABERRATION_FILTER_PARAM>(char* element) {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementChromaticAberrationFilterParam::Data*>(element);
         changed |= Editor("Curve Enabled", data->curveEnabled);

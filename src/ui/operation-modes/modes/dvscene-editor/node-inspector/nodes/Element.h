@@ -24,7 +24,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	};
 
     template<>
-    bool RenderNodeInspector<12>(char* node) {
+    bool RenderNodeInspector<hh::dv::DvNodeBase::NodeType::ELEMENT>(char* node) {
 		bool changed = false;
         auto* data = reinterpret_cast<hh::dv::DvNodeElement::Data*>(node);
         int type = static_cast<int>(data->elementId);
@@ -32,13 +32,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			Viewer("Element ID", elementIDStrings[type - 1000 + hhElementCount]);
 		else
 			Viewer("Element ID", elementIDStrings[type]);
-		int curPlayType = static_cast<int>(data->playType);
-		if (changed |= ImGui::Combo("Play Type", &curPlayType, elemPlayTypes, 3))
-			data->playType = static_cast<hh::dv::DvNodeElement::PlayType>(curPlayType);
-		int curUpdateTiming = static_cast<int>(data->updateTiming);
-		if (changed |= ImGui::Combo("Update Timing", &curUpdateTiming, elemUpdateTimings, 11))
-			data->updateTiming = static_cast<hh::dv::DvNodeElement::UpdateTiming>(curUpdateTiming);
-        ElementFuncType render = GetElementInspectorRender(type);
+		changed |= ComboEnum("Play Type", data->playType, elemPlayTypes);
+		changed |= ComboEnum("Update Timing", data->updateTiming, elemUpdateTimings);
+        ElementFuncType render = GetElementInspectorRender(data->elementId);
 		if(render){
 			ImGui::SeparatorText("Element Properties");
 			changed |= render(&node[sizeof(hh::dv::DvNodeElement::Data)]);
