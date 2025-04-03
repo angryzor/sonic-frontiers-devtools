@@ -115,6 +115,7 @@ public:
 	virtual void Render() override {
 		if (ImGui::Begin("Main menu")) {
 			ImGui::SameLine();
+			ImGui::SetNextItemWidth(100.0f);
 			ComboEnum("Pivot", pivotType, pivotTypeNames);
 		}
 		ImGui::End();

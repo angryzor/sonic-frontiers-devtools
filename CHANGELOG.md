@@ -1,5 +1,10 @@
-# v0.1.71
+# v0.2.0
+* Added DvScene editor, contributed by the amazing Ashrindy! Huge thanks for this incredible contribution!
+* Added 2 new themes, "Contrast ImGui" and "Modern Contrast ImGui", also contributed by Ashrindy.
 * Added experimental pcmodel editor.
+* Added DiEventManager inspector, contributed by Ashrindy.
+* Added EventPlayer inspector, contributed by Ashrindy.
+* Added MovieManager inspector, contributed by Ashrindy.
 * Added "load resource" option in resource browser.
 * Added support for ingame filesystems in the file dialog.
 * Added generic name tag overlay framework for operation modes, and made it work with the level editor.
