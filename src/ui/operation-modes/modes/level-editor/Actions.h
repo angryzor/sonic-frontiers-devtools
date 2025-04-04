@@ -2,6 +2,11 @@
 #include <ui/Action.h>
 
 namespace ui::operation_modes::modes::level_editor {
+	struct SetLayerEnabledPayload {
+		const char* layerName{};
+		bool enabled{};
+	};
+
 	using ChangingParametersAction = Action<ActionId::LEVEL_EDITOR_CHANGING_PARAMETERS>;
 	using StopChangingParametersAction = Action<ActionId::LEVEL_EDITOR_STOP_CHANGING_PARAMETERS>;
 	using ObjectTransformChangedAction = Action<ActionId::LEVEL_EDITOR_OBJECT_TRANSFORM_CHANGED>;
@@ -11,4 +16,5 @@ namespace ui::operation_modes::modes::level_editor {
 	using OpenArrayToolAction = Action<ActionId::LEVEL_EDITOR_OPEN_ARRAY_TOOL>;
 	using SetObjectClassToPlaceAction = Action<ActionId::LEVEL_EDITOR_SET_OBJECT_CLASS_TO_PLACE, const hh::game::GameObjectClass*>;
 	using ObjectClassToPlaceChangedAction = Action<ActionId::LEVEL_EDITOR_OBJECT_CLASS_TO_PLACE_CHANGED>;
+	using SetLayerEnabledAction = Action<ActionId::LEVEL_EDITOR_SET_LAYER_ENABLED, SetLayerEnabledPayload>;
 }
