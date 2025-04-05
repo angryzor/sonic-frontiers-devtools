@@ -24,7 +24,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		char nodeName[150];
 		const char* type = nodeTypeNames[node->category];
 		if (static_cast<hh::dv::DvNodeBase::NodeType>(node->category) == hh::dv::DvNodeBase::NodeType::ELEMENT) {
-			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement::Data*>(node->data)->elementId);
+			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement::Description<hh::dv::DvElementBase>*>(node->data)->elementId);
 			if (elemId >= 1000)
 				type = elementIDStrings[elemId - 1000 + hhElementCount];
 			else

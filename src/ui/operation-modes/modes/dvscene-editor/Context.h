@@ -226,6 +226,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		bool ContainsElement(const unsigned int& elementId);
 		static void GetChildren(hh::dv::DvNodeBase* node, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool& includeElements);
 		static void GetNodes(hh::dv::DvSceneNodeTree* nodeTree, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool includeElements);
+		template<typename T>
+		static void SetupElement(hh::dv::DvNodeElement* node, unsigned int elementId);
+		template<typename T>
+		static hh::dv::DvNodeElement::Description<T> CreateElementDesc(unsigned int elementId);
+		void SetNodeBasicProps(hh::dv::DvNodeBase* node, const char* nodeName, unsigned int nodeType, hh::dv::DvNodeBase* parent);
 		hh::dv::DvNodeBase* CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId, hh::dv::DvNodeBase* parent);
 		dv::DvNode CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId);
 		void ParentNode(hh::dv::DvNodeBase* parent, hh::dv::DvNodeBase* child);
@@ -276,4 +281,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			}
 		}
 	};
+
+	/*template<typename T>
+	inline void Context::SetupElement(hh::dv::DvNodeElement* node, unsigned int elementId)
+	{
+		typename hh::dv::DvNodeElement<T::Description> data = CreateElementDesc<T::Description>(node, elementId);
+		node->Setup(data);
+	}*/
 }
