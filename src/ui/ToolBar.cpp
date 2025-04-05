@@ -199,7 +199,7 @@ void ToolBar::Render() {
 	);
 	ImGui::SameLine();
 
-	if (ImGui::IsKeyPressed(ImGuiKey_F6))
+	if (ImGui::IsKeyPressed(ImGuiKey_F6, false))
 		debugCameraActive = !debugCameraActive;
 
 	if (debugCameraMgr->isActive != debugCameraActive) {

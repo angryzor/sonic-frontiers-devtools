@@ -5,7 +5,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     template<>
     bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::POINT_LIGHT>(char* element) {
         bool changed = false;
-        auto* data = reinterpret_cast<hh::dv::DvElementPointLight::Data*>(element);
+        auto* data = reinterpret_cast<hh::dv::DvElementPointLight::Description*>(element);
         changed |= Editor("Position", data->position);
         changed |= Editor("Finish Position", data->finishPosition);
         float color[3] = { static_cast<float>(data->color[0]) / 255, static_cast<float>(data->color[1]) / 255, static_cast<float>(data->color[2]) / 255 };

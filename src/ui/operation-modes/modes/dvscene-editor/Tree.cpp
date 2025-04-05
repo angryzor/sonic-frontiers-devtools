@@ -24,7 +24,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		char nodeName[150];
 		const char* type = nodeTypeNames[node->category];
 		if (static_cast<hh::dv::DvNodeBase::NodeType>(node->category) == hh::dv::DvNodeBase::NodeType::ELEMENT) {
-			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement::Data*>(node->data)->elementId);
+			unsigned int elemId = static_cast<unsigned int>(reinterpret_cast<hh::dv::DvNodeElement::Description<hh::dv::DvElementBase>*>(node->data)->elementId);
 			if (elemId >= 1000)
 				type = elementIDStrings[elemId - 1000 + hhElementCount];
 			else
@@ -63,9 +63,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 									char* name = static_cast<char*>(hh::fnd::MemoryRouter::GetTempAllocator()->Alloc(strlen(nodeName) + 6, 1));
 									strcpy(name, nodeName);
 									srand(time(nullptr));
+									int nodeNameLength = strlen(nodeName);
 									for (int i = 0; i < 5; ++i)
-										name[strlen(nodeName) + i] = '0' + (rand() % 10);
-									name[strlen(nodeName) + 5] = '\0';
+										name[nodeNameLength + i] = '0' + (rand() % 10);
+									name[nodeNameLength + 5] = '\0';
 									auto newFileNode = ctx.CreateNode(name, nodeType, elementId);
 									ctx.ParentNode(*node, newFileNode);
 									auto* runtimeParent = ctx.GetRuntimeNode(node);
