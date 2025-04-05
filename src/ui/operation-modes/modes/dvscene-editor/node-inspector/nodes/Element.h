@@ -26,7 +26,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
     template<>
     bool RenderNodeInspector<hh::dv::DvNodeBase::NodeType::ELEMENT>(char* node) {
 		bool changed = false;
-        auto* data = reinterpret_cast<hh::dv::DvNodeElement::Description<hh::dv::DvElementBase::Description>*>(node);
+        auto* data = reinterpret_cast<hh::dv::DvNodeElement::DescriptionBase*>(node);
         int type = static_cast<int>(data->elementId);
 		if(type >= 1000)
 			Viewer("Element ID", elementIDStrings[type - 1000 + hhElementCount]);
@@ -37,7 +37,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         ElementFuncType render = GetElementInspectorRender(data->elementId);
 		if(render){
 			ImGui::SeparatorText("Element Properties");
-			changed |= render(reinterpret_cast<char*>(&data->elementDescription));
+			changed |= render(reinterpret_cast<char*>(&data[1]));
 		}
 		return changed;
     }

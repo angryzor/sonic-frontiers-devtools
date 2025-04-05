@@ -26,8 +26,8 @@ namespace devtools::api::game_manager {
 	GOCTransformProperties buildGOCTransformProperties(hh::game::GOCTransform* component) {
 		return GOCTransformProperties {
 			.transform = fromTransform(component->GetTransform()),
-			.transformPosition = (component->GetFrame().flags & hh::fnd::HFrame::Flag::TRANSFORM_POSITION) != 0,
-			.transformRotation = (component->GetFrame().flags & hh::fnd::HFrame::Flag::TRANSFORM_ROTATION) != 0,
+			/*.transformPosition = (component->GetFrame().flags & hh::fnd::HFrame::Flag::TRANSFORM_POSITION) != 0,
+			.transformRotation = (component->GetFrame().flags & hh::fnd::HFrame::Flag::TRANSFORM_ROTATION) != 0,*/
 		};
 	}
 

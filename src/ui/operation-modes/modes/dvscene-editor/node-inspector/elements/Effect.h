@@ -24,7 +24,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
         changed |= CheckboxFlags("Unk0 flags2", data->flags2, hh::dv::DvElementEffect::Description::Flags2::UNK0);
         changed |= CheckboxFlags("Persistent", data->flags2, hh::dv::DvElementEffect::Description::Flags2::PERSISTENT);
         unsigned char color[4] = { data->r, data->g, data->b, data->a };
-        changed |= ColorEditor("Effect Color", color);
+        if (changed |= ColorEditor("Effect Color", color))
+        {
+            data->r = color[0];
+            data->g = color[1];
+            data->b = color[2];
+            data->a = color[3];
+        }
         changed |= Editor("Eff Create Info Unk5a", data->effCreateInfoUnk5A);
         changed |= Editor("Eff Create Info Unk5", data->effCreateInfoUnk5);
         changed |= ComboEnum("Eff Trans Type", data->effTransType, transTypeNames);

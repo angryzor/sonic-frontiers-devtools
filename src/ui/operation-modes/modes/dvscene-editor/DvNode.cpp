@@ -17,7 +17,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		{},
 		{sizeof(hh::dv::DvNodeModelMotion::Description), offsetof(hh::dv::DvNodeModelMotion, binaryData)},
 		{sizeof(hh::dv::DvNodeModelNode::Description), offsetof(hh::dv::DvNodeModelNode, binaryData)},
-		{sizeof(hh::dv::DvNodeElement::Description<hh::dv::DvElementBase::Description>), offsetof(hh::dv::DvNodeElement, binaryData)}
+		{sizeof(hh::dv::DvNodeElement::DescriptionBase), offsetof(hh::dv::DvNodeElement, binaryData)}
 	};
 	constexpr std::pair<size_t, size_t> ElementDataInfo[] = {
 		{},

@@ -217,6 +217,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		app::evt::EventScene* evtScene;
 		std::mt19937 mt{ std::random_device{}() };
 		csl::ut::MoveArray32<DvPage*> dvPages;
+		csl::ut::MoveArray32<hh::dv::DvNodeBase*> addedNodes;
 
 		csl::ut::VariableString cutsceneName;
 		csl::ut::VariableString nodeName;
@@ -227,9 +228,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		static void GetChildren(hh::dv::DvNodeBase* node, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool& includeElements);
 		static void GetNodes(hh::dv::DvSceneNodeTree* nodeTree, csl::ut::MoveArray32<hh::dv::DvNodeBase*>& value, bool includeElements);
 		template<typename T>
-		static void SetupElement(hh::dv::DvNodeElement* node, unsigned int elementId);
+		static void SetupElement(hh::dv::DvNodeElement* node, hh::dv::DvNodeElement::ElementID elementId);
 		template<typename T>
-		static hh::dv::DvNodeElement::Description<T> CreateElementDesc(unsigned int elementId);
+		static hh::dv::DvNodeElement::Description<T>* CreateElementDesc(unsigned int elementId);
+		static void DispatchSetupElement(hh::dv::DvNodeElement* node, hh::dv::DvNodeElement::ElementID elementId);
 		void SetNodeBasicProps(hh::dv::DvNodeBase* node, const char* nodeName, unsigned int nodeType, hh::dv::DvNodeBase* parent);
 		hh::dv::DvNodeBase* CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId, hh::dv::DvNodeBase* parent);
 		dv::DvNode CreateNode(const char* nodeName, unsigned int nodeType, unsigned int elementId);
@@ -244,6 +246,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 		dv::DvPage CreatePage(const char* pageName, unsigned int idx);
 		hh::dv::DvPage* CreatePage(const char* pageName, unsigned int idx, hh::dv::DvSceneControl* dvsc);
 		void CreateWrapperPages();
+		void DeallocateNode(hh::dv::DvNodeBase* node);
 
 		Context(csl::fnd::IAllocator* allocator);
 	};

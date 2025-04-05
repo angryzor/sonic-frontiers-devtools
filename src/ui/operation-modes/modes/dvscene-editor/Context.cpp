@@ -51,52 +51,52 @@ namespace ui::operation_modes::modes::dvscene_editor {
         sizeof(DvElementControllerVibration::Description), // CONTROLLER_VIBRATION
         sizeof(DvElementSpotlightModel::Description), // SPOTLIGHT_MODEL
 
-        sizeof(app::dv::DvElementBloomParam::Description), // BLOOM_PARAM
-        sizeof(app::dv::DvElementDOFParam::Description), // DOF_PARAM
-        sizeof(app::dv::DvElementColorContrast::Description), // COLOR_CONTRAST
-        sizeof(app::dv::DvElementCameraControlParam::Description), // CAMERA_CONTROL_PARAM
-        sizeof(app::dv::DvElementShadowResolution::Description), // SHADOW_RESOLUTION
-        sizeof(app::dv::DvElementGodrayParam::Description), // GODRAY_PARAM
-        sizeof(app::dv::DvElementAtmosphereGodrayParam::Description), // ATMOSPHERE_GODRAY_PARAM
-        sizeof(app::dv::DvElementAtmosphereHeightFogParam::Description), // ATMOSPHERE_HEIGHT_FOG_PARAM
-        sizeof(app::dv::DvElementChromaticAberrationFilterParam::Description), // CHROMATIC_ABERRATION_FILTER_PARAM
-        sizeof(app::dv::DvElementVignetteParam::Description), // VIGNETTE_PARAM
-        sizeof(app::dv::DvElementFade::Description), // FADE
-        sizeof(app::dv::DvElementLetterBox::Description), // LETTER_BOX
-        sizeof(app::dv::DvElementModelClipping::Description), // MODEL_CLIPPING
-        sizeof(app::dv::DvElementPbaReset::Description), // PBA_RESET
-        sizeof(app::dv::DvElementBossName::Description), // BOSS_NAME
-        sizeof(app::dv::DvElementCaption::Description), // CAPTION
-        sizeof(app::dv::DvElementSound::Description), // SOUND
-        sizeof(app::dv::DvElementTime::Description), // TIME
-        sizeof(app::dv::DvElementSun::Description), // SUN
-        sizeof(app::dv::DvElementLookAtIK::Description), // LOOK_AT_IK
-        sizeof(app::dv::DvElementCameraBlurParam::Description), // CAMERA_BLUR_PARAM
-        sizeof(app::dv::DvElementGeneralTrigger::Description), // GENERAL_TRIGGER
-        sizeof(app::dv::DvElementFootIk::Description), // FOOT_IK
-        sizeof(app::dv::DvElementDitherParam::Description), // DITHER_PARAM
-        sizeof(app::dv::DvElementQTE::Description), // QTE
-        sizeof(app::dv::DvElementFacialAnimation::Description), // FACIAL_ANIMATION
-        sizeof(app::dv::DvElementOverrideASM::Description), // OVERRIDE_ASM
-        sizeof(app::dv::DvElementAura::Description), // AURA
-        sizeof(app::dv::DvElementChangeTimeScale::Description), // CHANGE_TIME_SCALE
-        sizeof(app::dv::DvElementCyberSpaceNoise::Description), // CYBER_SPACE_NOISE
-        sizeof(app::dv::DvElementLipAnimation::Description), // LIP_ANIMATION
-        sizeof(app::dv::DvElementAuraRoad::Description), // AURA_ROAD
+        sizeof(DvElementBloomParam::Description), // BLOOM_PARAM
+        sizeof(DvElementDOFParam::Description), // DOF_PARAM
+        sizeof(DvElementColorContrast::Description), // COLOR_CONTRAST
+        sizeof(DvElementCameraControlParam::Description), // CAMERA_CONTROL_PARAM
+        sizeof(DvElementShadowResolution::Description), // SHADOW_RESOLUTION
+        sizeof(DvElementGodrayParam::Description), // GODRAY_PARAM
+        sizeof(DvElementAtmosphereGodrayParam::Description), // ATMOSPHERE_GODRAY_PARAM
+        sizeof(DvElementAtmosphereHeightFogParam::Description), // ATMOSPHERE_HEIGHT_FOG_PARAM
+        sizeof(DvElementChromaticAberrationFilterParam::Description), // CHROMATIC_ABERRATION_FILTER_PARAM
+        sizeof(DvElementVignetteParam::Description), // VIGNETTE_PARAM
+        sizeof(DvElementFade::Description), // FADE
+        sizeof(DvElementLetterBox::Description), // LETTER_BOX
+        sizeof(DvElementModelClipping::Description), // MODEL_CLIPPING
+        sizeof(DvElementPbaReset::Description), // PBA_RESET
+        sizeof(DvElementBossName::Description), // BOSS_NAME
+        sizeof(DvElementCaption::Description), // CAPTION
+        sizeof(DvElementSound::Description), // SOUND
+        sizeof(DvElementTime::Description), // TIME
+        sizeof(DvElementSun::Description), // SUN
+        sizeof(DvElementLookAtIK::Description), // LOOK_AT_IK
+        sizeof(DvElementCameraBlurParam::Description), // CAMERA_BLUR_PARAM
+        sizeof(DvElementGeneralTrigger::Description), // GENERAL_TRIGGER
+        sizeof(DvElementFootIk::Description), // FOOT_IK
+        sizeof(DvElementDitherParam::Description), // DITHER_PARAM
+        sizeof(DvElementQTE::Description), // QTE
+        sizeof(DvElementFacialAnimation::Description), // FACIAL_ANIMATION
+        sizeof(DvElementOverrideASM::Description), // OVERRIDE_ASM
+        sizeof(DvElementAura::Description), // AURA
+        sizeof(DvElementChangeTimeScale::Description), // CHANGE_TIME_SCALE
+        sizeof(DvElementCyberSpaceNoise::Description), // CYBER_SPACE_NOISE
+        sizeof(DvElementLipAnimation::Description), // LIP_ANIMATION
+        sizeof(DvElementAuraRoad::Description), // AURA_ROAD
         0, // MOVIE_VIEW
-        sizeof(app::dv::DvElementCrossFade::Description), // CROSS_FADE
-        sizeof(app::dv::DvElementWeather::Description), // WEATHER
-        sizeof(app::dv::DvElementShadowMapParam::Description), // SHADOW_MAP_PARAM
-        sizeof(app::dv::DvElementVariablePointLight::Description), // VARIABLE_POINT_LIGHT
+        sizeof(DvElementCrossFade::Description), // CROSS_FADE
+        sizeof(DvElementWeather::Description), // WEATHER
+        sizeof(DvElementShadowMapParam::Description), // SHADOW_MAP_PARAM
+        sizeof(DvElementVariablePointLight::Description), // VARIABLE_POINT_LIGHT
         0, // OPENING_LOGO
-        sizeof(app::dv::DvElementDensitySectorPoint::Description), // DENSITY_SECTOR_POINT
+        sizeof(DvElementDensitySectorPoint::Description), // DENSITY_SECTOR_POINT
         0, // FX_COL_UPDATE
-        sizeof(app::dv::DvElementQTEAccel::Description), // QTE_ACCEL
-        sizeof(app::dv::DvElementTheEndCableObject::Description), // THE_END_CABLE_OBJECT
-        sizeof(app::dv::DvElementRifleBeastLighting::Description), // RIFLE_BEAST_LIGHTING
+        sizeof(DvElementQTEAccel::Description), // QTE_ACCEL
+        sizeof(DvElementTheEndCableObject::Description), // THE_END_CABLE_OBJECT
+        sizeof(DvElementRifleBeastLighting::Description), // RIFLE_BEAST_LIGHTING
     };
 #elif DEVTOOLS_TARGET_SDK_miller
-    constexpr size_t ElementDescriptionSize[] = {
+    constexpr size_t ElementDataSize[] = {
         0, // 0 (Unused)
         sizeof(DvElementCameraParams::Description), // CAMERA_PARAMS
         0, // 2 (Empty)
@@ -126,55 +126,55 @@ namespace ui::operation_modes::modes::dvscene_editor {
         sizeof(DvElementTexturePatternAnim::Description), // TEXTURE_PATTERN_ANIM
         sizeof(DvElementMaterialParam::Description), // MATERIAL_PARAM
 
-        sizeof(app::dv::DvElementBloomParam::Description), // BLOOM_PARAM
-        sizeof(app::dv::DvElementDOFParam::Description), // DOF_PARAM
-        sizeof(app::dv::DvElementColorContrast::Description), // COLOR_CONTRAST
-        sizeof(app::dv::DvElementCameraControlParam::Description), // CAMERA_CONTROL
-        sizeof(app::dv::DvElementShadowResolution::Description), // SHADOW_RESOLUTION
-        sizeof(app::dv::DvElementSSAOParam::Description), // SSAO_PARAM
-        sizeof(app::dv::DvElementOcclusionCapsuleParam::Description), // OCCLUSION_CAPSULE_PARAM
-        sizeof(app::dv::DvElementGodrayParam::Description), // GODRAY_PARAM
-        sizeof(app::dv::DvElementAtmosphereGodrayParam::Description), // ATMOSPHERE_GODRAY_PARAM
-        sizeof(app::dv::DvElementAtmosphereHeightFogParam::Description), // ATMOSPHERE_HEIGHT_FOG_PARAM
-        sizeof(app::dv::DvElementChromaticAberrationFilterParam::Description), // CHROMATIC_ABERRATION_FILTER_PARAM
-        sizeof(app::dv::DvElementVignetteParam::Description), // VIGNETTE_PARAM
-        sizeof(app::dv::DvElementFade::Description), // FADE
-        sizeof(app::dv::DvElementLetterBox::Description), // LETTER_BOX
-        sizeof(app::dv::DvElementModelClipping::Description), // MODEL_CLIPPING
-        sizeof(app::dv::DvElementPbaReset::Description), // PBA_RESET
-        sizeof(app::dv::DvElementBossName::Description), // BOSS_NAME
-        sizeof(app::dv::DvElementCaption::Description), // CAPTION
-        sizeof(app::dv::DvElementSound::Description), // SOUND
-        sizeof(app::dv::DvElementTime::Description), // TIME
-        sizeof(app::dv::DvElementSun::Description), // SUN
-        sizeof(app::dv::DvElementLookAtIK::Description), // LOOK_AT_IK
-        sizeof(app::dv::DvElementCameraBlurParam::Description), // CAMERA_BLUR_PARAM
-        sizeof(app::dv::DvElementGeneralTrigger::Description), // GENERAL_TRIGGER
-        sizeof(app::dv::DvElementFootIk::Description), // FOOT_IK
-        sizeof(app::dv::DvElementDitherParam::Description), // DITHER_PARAM
-        sizeof(app::dv::DvElementQTE::Description), // QTE
-        sizeof(app::dv::DvElementFacialAnimation::Description), // FACIAL_ANIMATION
-        sizeof(app::dv::DvElementOverrideASM::Description), // OVERRIDE_ASM
-        sizeof(app::dv::DvElementAura::Description), // AURA
-        sizeof(app::dv::DvElementChangeTimeScale::Description), // CHANGE_TIME_SCALE
-        sizeof(app::dv::DvElementCyberSpaceNoise::Description), // CYBER_SPACE_NOISE
-        sizeof(app::dv::DvElementLipAnimation::Description), // LIP_ANIMATION
-        sizeof(app::dv::DvElementAuraRoad::Description), // AURA_ROAD
-        sizeof(app::dv::DvElementMovieView::Description), // MOVIE_VIEW
-        sizeof(app::dv::DvElementCrossFade::Description), // CROSS_FADE
-        sizeof(app::dv::DvElementWeather::Description), // WEATHER
-        sizeof(app::dv::DvElementShadowMapParam::Description), // SHADOW_MAP_PARAM
-        sizeof(app::dv::DvElementVariablePointLight::Description), // VARIABLE_POINT_LIGHT
-        sizeof(app::dv::DvElementOpeningLogo::Description), // OPENING_LOGO
-        sizeof(app::dv::DvElementDensitySectorPoint::Description), // DENSITY_SECTOR_POINT
-        sizeof(app::dv::DvElementBulletTime::Description), // BULLET_TIME
-        sizeof(app::dv::DvElementTimeStop::Description), // TIME_STOP
-        sizeof(app::dv::DvElementObjectTimeStop::Description), // OBJECT_TIME_STOP
-        sizeof(app::dv::DvElementShadowShape::Description), // SHADOW_SHAPE
-        sizeof(app::dv::DvElementFalloff::Description), // FALLOFF
-        sizeof(app::dv::DvElementFog::Description), // FOG
-        sizeof(app::dv::DvElementDOF::Description), // DOF
-        sizeof(app::dv::DvElementFxColUpdate::Description), // FX_COL_UPDATE
+        sizeof(DvElementBloomParam::Description), // BLOOM_PARAM
+        sizeof(DvElementDOFParam::Description), // DOF_PARAM
+        sizeof(DvElementColorContrast::Description), // COLOR_CONTRAST
+        sizeof(DvElementCameraControlParam::Description), // CAMERA_CONTROL
+        sizeof(DvElementShadowResolution::Description), // SHADOW_RESOLUTION
+        sizeof(DvElementSSAOParam::Description), // SSAO_PARAM
+        sizeof(DvElementOcclusionCapsuleParam::Description), // OCCLUSION_CAPSULE_PARAM
+        sizeof(DvElementGodrayParam::Description), // GODRAY_PARAM
+        sizeof(DvElementAtmosphereGodrayParam::Description), // ATMOSPHERE_GODRAY_PARAM
+        sizeof(DvElementAtmosphereHeightFogParam::Description), // ATMOSPHERE_HEIGHT_FOG_PARAM
+        sizeof(DvElementChromaticAberrationFilterParam::Description), // CHROMATIC_ABERRATION_FILTER_PARAM
+        sizeof(DvElementVignetteParam::Description), // VIGNETTE_PARAM
+        sizeof(DvElementFade::Description), // FADE
+        sizeof(DvElementLetterBox::Description), // LETTER_BOX
+        sizeof(DvElementModelClipping::Description), // MODEL_CLIPPING
+        sizeof(DvElementPbaReset::Description), // PBA_RESET
+        sizeof(DvElementBossName::Description), // BOSS_NAME
+        sizeof(DvElementCaption::Description), // CAPTION
+        sizeof(DvElementSound::Description), // SOUND
+        sizeof(DvElementTime::Description), // TIME
+        sizeof(DvElementSun::Description), // SUN
+        sizeof(DvElementLookAtIK::Description), // LOOK_AT_IK
+        sizeof(DvElementCameraBlurParam::Description), // CAMERA_BLUR_PARAM
+        sizeof(DvElementGeneralTrigger::Description), // GENERAL_TRIGGER
+        sizeof(DvElementFootIk::Description), // FOOT_IK
+        sizeof(DvElementDitherParam::Description), // DITHER_PARAM
+        sizeof(DvElementQTE::Description), // QTE
+        sizeof(DvElementFacialAnimation::Description), // FACIAL_ANIMATION
+        sizeof(DvElementOverrideASM::Description), // OVERRIDE_ASM
+        sizeof(DvElementAura::Description), // AURA
+        sizeof(DvElementChangeTimeScale::Description), // CHANGE_TIME_SCALE
+        sizeof(DvElementCyberSpaceNoise::Description), // CYBER_SPACE_NOISE
+        sizeof(DvElementLipAnimation::Description), // LIP_ANIMATION
+        sizeof(DvElementAuraRoad::Description), // AURA_ROAD
+        sizeof(DvElementMovieView::Description), // MOVIE_VIEW
+        sizeof(DvElementCrossFade::Description), // CROSS_FADE
+        sizeof(DvElementWeather::Description), // WEATHER
+        sizeof(DvElementShadowMapParam::Description), // SHADOW_MAP_PARAM
+        sizeof(DvElementVariablePointLight::Description), // VARIABLE_POINT_LIGHT
+        sizeof(DvElementOpeningLogo::Description), // OPENING_LOGO
+        sizeof(DvElementDensitySectorPoint::Description), // DENSITY_SECTOR_POINT
+        sizeof(DvElementBulletTime::Description), // BULLET_TIME
+        sizeof(DvElementTimeStop::Description), // TIME_STOP
+        sizeof(DvElementObjectTimeStop::Description), // OBJECT_TIME_STOP
+        sizeof(DvElementShadowShape::Description), // SHADOW_SHAPE
+        sizeof(DvElementFalloff::Description), // FALLOFF
+        sizeof(DvElementFog::Description), // FOG
+        sizeof(DvElementDOF::Description), // DOF
+        sizeof(DvElementFxColUpdate::Description), // FX_COL_UPDATE
     };
 #endif
 
@@ -288,7 +288,154 @@ namespace ui::operation_modes::modes::dvscene_editor {
         GetChildren(nodeTree->mainNode, value, includeElements);
     }
 
+    void Context::DispatchSetupElement(DvNodeElement* node, DvNodeElement::ElementID elementId)
+    {
+        using ElementID = DvNodeElement::ElementID;
 
+        switch (elementId) {
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+        case ElementID::CAMERA_PARAMS:               SetupElement<DvElementCameraParams>(node, elementId); break;
+        case ElementID::DRAW_OFF:                    SetupElement<DvElementDrawOff>(node, elementId); break;
+        case ElementID::PATH_OFFSET:                 SetupElement<DvElementPathOffset>(node, elementId); break;
+        case ElementID::CAMERA_SHAKE:                SetupElement<DvElementCameraShake>(node, elementId); break;
+        case ElementID::CAMERA_SHAKE_LOOP:           SetupElement<DvElementCameraShakeLoop>(node, elementId); break;
+        case ElementID::EFFECT:                      SetupElement<DvElementEffect>(node, elementId); break;
+        case ElementID::DIRECTIONAL_LIGHT:           SetupElement<DvElementDirectionalLight>(node, elementId); break;
+        case ElementID::PATH_INTERPOLATION:          SetupElement<DvElementPathInterpolation>(node, elementId); break;
+        case ElementID::CAMERA_NEAR_FAR:             SetupElement<DvElementCameraNearFar>(node, elementId); break;
+        case ElementID::UV_ANIM:                     SetupElement<DvElementUVAnim>(node, elementId); break;
+        case ElementID::VISIBILITY_ANIM:             SetupElement<DvElementVisibilityAnim>(node, elementId); break;
+        case ElementID::MATERIAL_ANIM:               SetupElement<DvElementMaterialAnim>(node, elementId); break;
+        case ElementID::MULTIPLE_ANIM:               SetupElement<DvElementMultipleAnim>(node, elementId); break;
+        case ElementID::CAMERA_OFFSET:               SetupElement<DvElementCameraOffset>(node, elementId); break;
+        case ElementID::MODEL_FADE:                  SetupElement<DvElementModelFade>(node, elementId); break;
+        case ElementID::DEBUG_MOTION:                SetupElement<DvElementDebugMotion>(node, elementId); break;
+        case ElementID::CAMERA_HEDGEHOG:             SetupElement<DvElementCameraHedgehog>(node, elementId); break;
+        case ElementID::CAMERA_IN_GAME:              SetupElement<DvElementCameraInGame>(node, elementId); break;
+        case ElementID::POINT_LIGHT:                 SetupElement<DvElementPointLight>(node, elementId); break;
+        case ElementID::VERTEX_ANIMATION_TEXTURE:    SetupElement<DvElementVertexAnimationTexture>(node, elementId); break;
+        case ElementID::SPOTLIGHT:                   SetupElement<DvElementSpotlight>(node, elementId); break;
+        case ElementID::CONTROLLER_VIBRATION:        SetupElement<DvElementControllerVibration>(node, elementId); break;
+        case ElementID::SPOTLIGHT_MODEL:             SetupElement<DvElementSpotlightModel>(node, elementId); break;
+
+        case ElementID::BLOOM_PARAM:                 SetupElement<DvElementBloomParam>(node, elementId); break;
+        case ElementID::DOF_PARAM:                   SetupElement<DvElementDOFParam>(node, elementId); break;
+        case ElementID::COLOR_CONTRAST:              SetupElement<DvElementColorContrast>(node, elementId); break;
+        case ElementID::CAMERA_CONTROL_PARAM:        SetupElement<DvElementCameraControlParam>(node, elementId); break;
+        case ElementID::SHADOW_RESOLUTION:           SetupElement<DvElementShadowResolution>(node, elementId); break;
+        case ElementID::GODRAY_PARAM:                SetupElement<DvElementGodrayParam>(node, elementId); break;
+        case ElementID::ATMOSPHERE_GODRAY_PARAM:     SetupElement<DvElementAtmosphereGodrayParam>(node, elementId); break;
+        case ElementID::ATMOSPHERE_HEIGHT_FOG_PARAM: SetupElement<DvElementAtmosphereHeightFogParam>(node, elementId); break;
+        case ElementID::CHROMATIC_ABERRATION_FILTER_PARAM: SetupElement<DvElementChromaticAberrationFilterParam>(node, elementId); break;
+        case ElementID::VIGNETTE_PARAM:              SetupElement<DvElementVignetteParam>(node, elementId); break;
+        case ElementID::FADE:                        SetupElement<DvElementFade>(node, elementId); break;
+        case ElementID::LETTER_BOX:                  SetupElement<DvElementLetterBox>(node, elementId); break;
+        case ElementID::MODEL_CLIPPING:              SetupElement<DvElementModelClipping>(node, elementId); break;
+        case ElementID::PBA_RESET:                   SetupElement<DvElementPbaReset>(node, elementId); break;
+        case ElementID::BOSS_NAME:                   SetupElement<DvElementBossName>(node, elementId); break;
+        case ElementID::CAPTION:                     SetupElement<DvElementCaption>(node, elementId); break;
+        case ElementID::SOUND:                       SetupElement<DvElementSound>(node, elementId); break;
+        case ElementID::TIME:                        SetupElement<DvElementTime>(node, elementId); break;
+        case ElementID::SUN:                         SetupElement<DvElementSun>(node, elementId); break;
+        case ElementID::LOOK_AT_IK:                  SetupElement<DvElementLookAtIK>(node, elementId); break;
+        case ElementID::CAMERA_BLUR_PARAM:           SetupElement<DvElementCameraBlurParam>(node, elementId); break;
+        case ElementID::GENERAL_TRIGGER:             SetupElement<DvElementGeneralTrigger>(node, elementId); break;
+        case ElementID::FOOT_IK:                     SetupElement<DvElementFootIk>(node, elementId); break;
+        case ElementID::DITHER_PARAM:                SetupElement<DvElementDitherParam>(node, elementId); break;
+        case ElementID::QTE:                         SetupElement<DvElementQTE>(node, elementId); break;
+        case ElementID::FACIAL_ANIMATION:            SetupElement<DvElementFacialAnimation>(node, elementId); break;
+        case ElementID::OVERRIDE_ASM:                SetupElement<DvElementOverrideASM>(node, elementId); break;
+        case ElementID::AURA:                        SetupElement<DvElementAura>(node, elementId); break;
+        case ElementID::CHANGE_TIME_SCALE:           SetupElement<DvElementChangeTimeScale>(node, elementId); break;
+        case ElementID::CYBER_SPACE_NOISE:           SetupElement<DvElementCyberSpaceNoise>(node, elementId); break;
+        case ElementID::LIP_ANIMATION:               SetupElement<DvElementLipAnimation>(node, elementId); break;
+        case ElementID::AURA_ROAD:                   SetupElement<DvElementAuraRoad>(node, elementId); break;
+        case ElementID::CROSS_FADE:                  SetupElement<DvElementCrossFade>(node, elementId); break;
+        case ElementID::WEATHER:                     SetupElement<DvElementWeather>(node, elementId); break;
+        case ElementID::SHADOW_MAP_PARAM:            SetupElement<DvElementShadowMapParam>(node, elementId); break;
+        case ElementID::VARIABLE_POINT_LIGHT:        SetupElement<DvElementVariablePointLight>(node, elementId); break;
+        case ElementID::DENSITY_SECTOR_POINT:        SetupElement<DvElementDensitySectorPoint>(node, elementId); break;
+        case ElementID::QTE_ACCEL:                   SetupElement<DvElementQTEAccel>(node, elementId); break;
+        case ElementID::THE_END_CABLE_OBJECT:        SetupElement<DvElementTheEndCableObject>(node, elementId); break;
+        case ElementID::RIFLE_BEAST_LIGHTING:        SetupElement<DvElementRifleBeastLighting>(node, elementId); break;
+#elif DEVTOOLS_TARGET_SDK_miller
+        case ElementID::CAMERA_PARAMS:               SetupElement<DvElementCameraParams>(node, elementId); break;
+        case ElementID::DRAW_OFF:                    SetupElement<DvElementDrawOff>(node, elementId); break;
+        case ElementID::PATH_OFFSET:                 SetupElement<DvElementPathOffset>(node, elementId); break;
+        case ElementID::CAMERA_SHAKE:                SetupElement<DvElementCameraShake>(node, elementId); break;
+        case ElementID::CAMERA_SHAKE_LOOP:           SetupElement<DvElementCameraShakeLoop>(node, elementId); break;
+        case ElementID::EFFECT:                      SetupElement<DvElementEffect>(node, elementId); break;
+        case ElementID::DIRECTIONAL_LIGHT:           SetupElement<DvElementDirectionalLight>(node, elementId); break;
+        case ElementID::PATH_INTERPOLATION:          SetupElement<DvElementPathInterpolation>(node, elementId); break;
+        case ElementID::CAMERA_NEAR_FAR:             SetupElement<DvElementCameraNearFar>(node, elementId); break;
+        case ElementID::UV_ANIM:                     SetupElement<DvElementUVAnim>(node, elementId); break;
+        case ElementID::VISIBILITY_ANIM:             SetupElement<DvElementVisibilityAnim>(node, elementId); break;
+        case ElementID::MATERIAL_ANIM:               SetupElement<DvElementMaterialAnim>(node, elementId); break;
+        case ElementID::MULTIPLE_ANIM:               SetupElement<DvElementMultipleAnim>(node, elementId); break;
+        case ElementID::CAMERA_OFFSET:               SetupElement<DvElementCameraOffset>(node, elementId); break;
+        case ElementID::MODEL_FADE:                  SetupElement<DvElementModelFade>(node, elementId); break;
+        case ElementID::DEBUG_MOTION:                SetupElement<DvElementDebugMotion>(node, elementId); break;
+        case ElementID::CAMERA_HEDGEHOG:             SetupElement<DvElementCameraHedgehog>(node, elementId); break;
+        case ElementID::CAMERA_IN_GAME:              SetupElement<DvElementCameraInGame>(node, elementId); break;
+        case ElementID::POINT_LIGHT:                 SetupElement<DvElementPointLight>(node, elementId); break;
+        case ElementID::VERTEX_ANIMATION_TEXTURE:    SetupElement<DvElementVertexAnimationTexture>(node, elementId); break;
+        case ElementID::SPOTLIGHT:                   SetupElement<DvElementSpotlight>(node, elementId); break;
+        case ElementID::CONTROLLER_VIBRATION:        SetupElement<DvElementControllerVibration>(node, elementId); break;
+        case ElementID::TEXTURE_PATTERN_ANIM:        SetupElement<DvElementTexturePatternAnim>(node, elementId); break;
+        case ElementID::MATERIAL_PARAM:              SetupElement<DvElementMaterialParam>(node, elementId); break;
+
+        case ElementID::BLOOM_PARAM:                 SetupElement<DvElementBloomParam>(node, elementId); break;
+        case ElementID::DOF_PARAM:                   SetupElement<DvElementDOFParam>(node, elementId); break;
+        case ElementID::COLOR_CONTRAST:              SetupElement<DvElementColorContrast>(node, elementId); break;
+        case ElementID::CAMERA_CONTROL:              SetupElement<DvElementCameraControlParam>(node, elementId); break;
+        case ElementID::SHADOW_RESOLUTION:           SetupElement<DvElementShadowResolution>(node, elementId); break;
+        case ElementID::SSAO_PARAM:                  SetupElement<DvElementSSAOParam>(node, elementId); break;
+        case ElementID::OCCLUSION_CAPSULE_PARAM:     SetupElement<DvElementOcclusionCapsuleParam>(node, elementId); break;
+        case ElementID::GODRAY_PARAM:                SetupElement<DvElementGodrayParam>(node, elementId); break;
+        case ElementID::ATMOSPHERE_GODRAY_PARAM:     SetupElement<DvElementAtmosphereGodrayParam>(node, elementId); break;
+        case ElementID::ATMOSPHERE_HEIGHT_FOG_PARAM: SetupElement<DvElementAtmosphereHeightFogParam>(node, elementId); break;
+        case ElementID::CHROMATIC_ABERRATION_FILTER_PARAM: SetupElement<DvElementChromaticAberrationFilterParam>(node, elementId); break;
+        case ElementID::VIGNETTE_PARAM:              SetupElement<DvElementVignetteParam>(node, elementId); break;
+        case ElementID::FADE:                        SetupElement<DvElementFade>(node, elementId); break;
+        case ElementID::LETTER_BOX:                  SetupElement<DvElementLetterBox>(node, elementId); break;
+        case ElementID::MODEL_CLIPPING:              SetupElement<DvElementModelClipping>(node, elementId); break;
+        case ElementID::PBA_RESET:                   SetupElement<DvElementPbaReset>(node, elementId); break;
+        case ElementID::BOSS_NAME:                   SetupElement<DvElementBossName>(node, elementId); break;
+        case ElementID::CAPTION:                     SetupElement<DvElementCaption>(node, elementId); break;
+        case ElementID::SOUND:                       SetupElement<DvElementSound>(node, elementId); break;
+        case ElementID::TIME:                        SetupElement<DvElementTime>(node, elementId); break;
+        case ElementID::SUN:                         SetupElement<DvElementSun>(node, elementId); break;
+        case ElementID::LOOK_AT_IK:                  SetupElement<DvElementLookAtIK>(node, elementId); break;
+        case ElementID::CAMERA_BLUR_PARAM:           SetupElement<DvElementCameraBlurParam>(node, elementId); break;
+        case ElementID::GENERAL_TRIGGER:             SetupElement<DvElementGeneralTrigger>(node, elementId); break;
+        case ElementID::FOOT_IK:                     SetupElement<DvElementFootIk>(node, elementId); break;
+        case ElementID::DITHER_PARAM:                SetupElement<DvElementDitherParam>(node, elementId); break;
+        case ElementID::QTE:                         SetupElement<DvElementQTE>(node, elementId); break;
+        case ElementID::FACIAL_ANIMATION:            SetupElement<DvElementFacialAnimation>(node, elementId); break;
+        case ElementID::OVERRIDE_ASM:                SetupElement<DvElementOverrideASM>(node, elementId); break;
+        case ElementID::AURA:                        SetupElement<DvElementAura>(node, elementId); break;
+        case ElementID::CHANGE_TIME_SCALE:           SetupElement<DvElementChangeTimeScale>(node, elementId); break;
+        case ElementID::CYBER_SPACE_NOISE:           SetupElement<DvElementCyberSpaceNoise>(node, elementId); break;
+        case ElementID::LIP_ANIMATION:               SetupElement<DvElementLipAnimation>(node, elementId); break;
+        case ElementID::AURA_ROAD:                   SetupElement<DvElementAuraRoad>(node, elementId); break;
+        case ElementID::MOVIE_VIEW:                  SetupElement<DvElementMovieView>(node, elementId); break;
+        case ElementID::CROSS_FADE:                  SetupElement<DvElementCrossFade>(node, elementId); break;
+        case ElementID::WEATHER:                     SetupElement<DvElementWeather>(node, elementId); break;
+        case ElementID::SHADOW_MAP_PARAM:            SetupElement<DvElementShadowMapParam>(node, elementId); break;
+        case ElementID::VARIABLE_POINT_LIGHT:        SetupElement<DvElementVariablePointLight>(node, elementId); break;
+        case ElementID::OPENING_LOGO:                SetupElement<DvElementOpeningLogo>(node, elementId); break;
+        case ElementID::DENSITY_SECTOR_POINT:        SetupElement<DvElementDensitySectorPoint>(node, elementId); break;
+        case ElementID::BULLET_TIME:                 SetupElement<DvElementBulletTime>(node, elementId); break;
+        case ElementID::TIME_STOP:                   SetupElement<DvElementTimeStop>(node, elementId); break;
+        case ElementID::OBJECT_TIME_STOP:            SetupElement<DvElementObjectTimeStop>(node, elementId); break;
+        case ElementID::SHADOW_SHAPE:                SetupElement<DvElementShadowShape>(node, elementId); break;
+        case ElementID::FALLOFF:                     SetupElement<DvElementFalloff>(node, elementId); break;
+        case ElementID::FOG:                         SetupElement<DvElementFog>(node, elementId); break;
+        case ElementID::DOF:                         SetupElement<DvElementDOF>(node, elementId); break;
+        case ElementID::FX_COL_UPDATE:               SetupElement<DvElementFxColUpdate>(node, elementId); break;
+#endif
+        }
+    }
 
     void Context::SetNodeBasicProps(DvNodeBase* node, const char* nodeName, unsigned int nodeType, DvNodeBase* parent)
     {
@@ -382,32 +529,32 @@ namespace ui::operation_modes::modes::dvscene_editor {
             SetNodeBasicProps(node, nodeName, nodeType, parent);
             switch (static_cast<DvNodeElement::ElementID>(elementId)) {
             case DvNodeElement::ElementID::PATH_OFFSET: {
-                DvNodeElement::Description<DvElementPathOffset::Description> setup = CreateElementDesc<DvElementPathOffset::Description>(elementId);
-                setup.elementDescription.offsetMatrix = csl::math::Matrix44::Identity();
-                node->Setup(setup);
+                DvNodeElement::Description<DvElementPathOffset::Description>* setup = CreateElementDesc<DvElementPathOffset::Description>(elementId);
+                setup->elementDescription.offsetMatrix = csl::math::Matrix44::Identity();
+                node->Setup(*setup);
                 break;
             }
             case DvNodeElement::ElementID::PATH_INTERPOLATION: {
-                DvNodeElement::Description<DvElementPathInterpolation::Description> setup = CreateElementDesc<DvElementPathInterpolation::Description>(elementId);
-                setup.elementDescription.interpolation.scale = { 1,1,1 };
-                setup.elementDescription.finishInterpolation.scale = { 1,1,1 };
-                node->Setup(setup);
+                DvNodeElement::Description<DvElementPathInterpolation::Description>* setup = CreateElementDesc<DvElementPathInterpolation::Description>(elementId);
+                setup->elementDescription.interpolation.scale = { 1,1,1 };
+                setup->elementDescription.finishInterpolation.scale = { 1,1,1 };
+                node->Setup(*setup);
                 break;
             }
             case DvNodeElement::ElementID::EFFECT: {
-                DvNodeElement::Description<DvElementEffect::Description> setup = CreateElementDesc<DvElementEffect::Description>(elementId);
-                setup.elementDescription.r = 255;
-                setup.elementDescription.g = 255;
-                setup.elementDescription.b = 255;
-                setup.elementDescription.a = 255;
-                setup.elementDescription.effectMatrix = csl::math::Matrix44::Identity();
-                node->Setup(setup);
+                DvNodeElement::Description<DvElementEffect::Description>* setup = CreateElementDesc<DvElementEffect::Description>(elementId);
+                setup->elementDescription.r = 255;
+                setup->elementDescription.g = 255;
+                setup->elementDescription.b = 255;
+                setup->elementDescription.a = 255;
+                setup->elementDescription.effectMatrix = csl::math::Matrix44::Identity();
+                node->Setup(*setup);
                 break;
             }
             case DvNodeElement::ElementID::FADE: {
-                DvNodeElement::Description<DvElementFade::Description> setup = CreateElementDesc<DvElementFade::Description>(elementId);
-                setup.elementDescription.enabled = true;
-                node->Setup(setup);
+                DvNodeElement::Description<DvElementFade::Description>* setup = CreateElementDesc<DvElementFade::Description>(elementId);
+                setup->elementDescription.enabled = true;
+                node->Setup(*setup);
                 break;
             }
             case DvNodeElement::ElementID::UV_ANIM: 
@@ -415,13 +562,13 @@ namespace ui::operation_modes::modes::dvscene_editor {
             case DvNodeElement::ElementID::MATERIAL_ANIM: 
             case DvNodeElement::ElementID::VERTEX_ANIMATION_TEXTURE: 
             {
-                DvNodeElement::Description<DvElementUVAnim::Description> setup = CreateElementDesc<DvElementUVAnim::Description>(elementId);
-                setup.elementDescription.speed = 1.0f;
-                node->Setup(setup);
+                DvNodeElement::Description<DvElementUVAnim::Description>* setup = CreateElementDesc<DvElementUVAnim::Description>(elementId);
+                setup->elementDescription.speed = 1.0f;
+                node->Setup(*setup);
                 break;
             }
             default: {
-
+                DispatchSetupElement(reinterpret_cast<DvNodeElement*>(node), static_cast<DvNodeElement::ElementID>(elementId));
                 break;
             }
             }
@@ -441,9 +588,9 @@ namespace ui::operation_modes::modes::dvscene_editor {
             else
                 setupSize += ElementDataSize[elementId];
         }
-        node.data = static_cast<char*>(hh::fnd::MemoryRouter::GetModuleAllocator()->Alloc(setupSize, 4));
+        node.data = new char[setupSize];
         node.dataSize = setupSize;
-        char*& setup = node.data;
+        char* setup = node.data;
         memset(setup, 0x00, setupSize);
         switch (static_cast<DvNodeBase::NodeType>(nodeType)) {
         case DvNodeBase::NodeType::PATH:
@@ -484,25 +631,26 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         case DvNodeBase::NodeType::ELEMENT: {
             
-            auto* setupData = reinterpret_cast<DvNodeElement::Description<DvElementBase::Description>*>(setup);
+            auto* setupData = reinterpret_cast<DvNodeElement::DescriptionBase*>(setup);
             setupData->end = 100.0f;
             setupData->playType = DvNodeElement::PlayType::NORMAL;
             setupData->updateTiming = DvNodeElement::UpdateTiming::ON_EXEC_PATH;
             setupData->elementId = static_cast<DvNodeElement::ElementID>(elementId);
+            size_t sizeofElement = sizeof(DvNodeElement::DescriptionBase);
             switch (setupData->elementId) {
             case DvNodeElement::ElementID::PATH_OFFSET: {
-                auto* elementData = reinterpret_cast<DvElementPathOffset::Description*>(reinterpret_cast<size_t>(setup) + setupSize);
+                auto* elementData = reinterpret_cast<DvElementPathOffset::Description*>(reinterpret_cast<size_t>(setup) + sizeofElement);
                 elementData->offsetMatrix = csl::math::Matrix44::Identity();
                 break;
             }
             case DvNodeElement::ElementID::PATH_INTERPOLATION: {
-                auto* elementData = reinterpret_cast<DvElementPathInterpolation::Description*>(reinterpret_cast<size_t>(setup) + setupSize);
+                auto* elementData = reinterpret_cast<DvElementPathInterpolation::Description*>(reinterpret_cast<size_t>(setup) + sizeofElement);
                 elementData->interpolation.scale = { 1,1,1 };
                 elementData->finishInterpolation.scale = { 1,1,1 };
                 break;
             }
             case DvNodeElement::ElementID::EFFECT: {
-                auto* elementData = reinterpret_cast<DvElementEffect::Description*>(reinterpret_cast<size_t>(setup) + setupSize);
+                auto* elementData = reinterpret_cast<DvElementEffect::Description*>(reinterpret_cast<size_t>(setup) + sizeofElement);
                 elementData->r = 255;
                 elementData->g = 255;
                 elementData->b = 255;
@@ -511,7 +659,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
                 break;
             }
             case DvNodeElement::ElementID::FADE: {
-                auto* elementData = reinterpret_cast<app::dv::DvElementFade::Description*>(reinterpret_cast<size_t>(setup) + setupSize);
+                auto* elementData = reinterpret_cast<DvElementFade::Description*>(reinterpret_cast<size_t>(setup) + sizeofElement);
                 elementData->enabled = true;
                 break;
             }
@@ -520,14 +668,14 @@ namespace ui::operation_modes::modes::dvscene_editor {
             case DvNodeElement::ElementID::MATERIAL_ANIM:
             case DvNodeElement::ElementID::VERTEX_ANIMATION_TEXTURE:
             {
-                auto* elementData = reinterpret_cast<DvElementUVAnim::Description*>(reinterpret_cast<size_t>(setup) + setupSize);
+                auto* elementData = reinterpret_cast<DvElementUVAnim::Description*>(reinterpret_cast<size_t>(setup) + sizeofElement);
                 elementData->speed = 1.0f;
                 break;
             }
             }
             auto curveDataInfo = GetElementTimelineRender(static_cast<DvNodeElement::ElementID>(elementId));
             if (curveDataInfo != std::pair<size_t, size_t>{})
-                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + setupSize + curveDataInfo.first), curveDataInfo.second/sizeof(float), 0, false);
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(setup) + sizeofElement + curveDataInfo.first), curveDataInfo.second / sizeof(float), 0, false);
             break;
         }
         }
@@ -641,20 +789,72 @@ namespace ui::operation_modes::modes::dvscene_editor {
             dvPages.push_back(new DvPage(page, *this));
     }
 
-    Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator } {}
+    void Context::DeallocateNode(hh::dv::DvNodeBase* node)
+    {
+        if (node) {
+            if (addedNodes.size() > 0) {
+                if (addedNodes.find(node) != -1) {
+                    if (node->nodeType == DvNodeBase::NodeType::ELEMENT) {
+                        auto* nodeElement = static_cast<DvNodeElement*>(node);
+                        if (static_cast<unsigned int>(nodeElement->binaryData.elementId) >= 1000) {
+                            auto* appElement = static_cast<AppDvElementBase*>(nodeElement->element);
+                            void* appElementData = appElement->elementBinaryData;
+                            appElement->DeleteData();
+                            hh::fnd::MemoryRouter::GetModuleAllocator()->Free(appElementData);
+                        }
+                    }
+                }
+                for (auto* x : node->childrenCamera)
+                    DeallocateNode(node);
+                for (auto* x : node->childrenPath)
+                    DeallocateNode(node);
+                for (auto* x : node->childrenMotion)
+                    DeallocateNode(node);
+                for (auto* x : node->childrenElements0)
+                    DeallocateNode(node);
+                for (auto* x : node->childrenElements1)
+                    DeallocateNode(node);
+                for (auto* x : node->childrenElements2)
+                    DeallocateNode(node);
+            }
+        }
+    }
+
+    Context::Context(csl::fnd::IAllocator* allocator) : CompatibleObject{ allocator }, cutsceneName{ allocator }, nodeName{ allocator }, dvPages{ allocator }, addedNodes{ allocator } {}
 
     template<typename T>
-    hh::dv::DvNodeElement::Description<T> Context::CreateElementDesc(unsigned int elementId)
+    void Context::SetupElement(DvNodeElement* node, hh::dv::DvNodeElement::ElementID elementId)
     {
-        hh::dv::DvNodeElement::Description<T> desc{};
-        desc.end = 100.0f;
-        desc.playType = hh::dv::DvNodeElement::PlayType::NORMAL;
-        desc.updateTiming = hh::dv::DvNodeElement::UpdateTiming::ON_EXEC_PATH;
-        desc.elementId = static_cast<hh::dv::DvNodeElement::ElementID>(elementId);
-        desc.elementDescription = {};
-        auto curveDataInfo = GetElementTimelineRender(static_cast<hh::dv::DvNodeElement::ElementID>(elementId));
-        if (curveDataInfo != std::pair<size_t, size_t>{})
-            Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(&desc) + sizeof(hh::dv::DvNodeElement::Description<hh::dv::DvElementBase>) + curveDataInfo.first), curveDataInfo.second / sizeof(float), 0, false);
-        return desc;
+        DvNodeElement::Description<typename T::Description>* desc = CreateElementDesc<typename T::Description>(static_cast<unsigned int>(elementId));
+        node->Setup(*desc);
+    }
+
+    template<typename T>
+    DvNodeElement::Description<T>* Context::CreateElementDesc(unsigned int elementId)
+    {
+        if (elementId < 1000) {
+            DvNodeElement::Description<T> desc{};
+            desc.end = 100.0f;
+            desc.playType = DvNodeElement::PlayType::NORMAL;
+            desc.updateTiming = DvNodeElement::UpdateTiming::ON_EXEC_PATH;
+            desc.elementId = static_cast<DvNodeElement::ElementID>(elementId);
+            desc.elementDescription = T{};
+            auto curveDataInfo = GetElementTimelineRender(static_cast<DvNodeElement::ElementID>(elementId));
+            if (curveDataInfo != std::pair<size_t, size_t>{})
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(&desc.elementDescription) + curveDataInfo.first), curveDataInfo.second / sizeof(float), 0, false);
+            return &desc;
+        }
+        else {
+            DvNodeElement::Description<T>* desc = static_cast<DvNodeElement::Description<T>*>(hh::fnd::MemoryRouter::GetModuleAllocator()->Alloc(sizeof(DvNodeElement::Description<T>), alignof(DvNodeElement::Description<T>)));
+            desc->end = 100.0f;
+            desc->playType = DvNodeElement::PlayType::NORMAL;
+            desc->updateTiming = DvNodeElement::UpdateTiming::ON_EXEC_PATH;
+            desc->elementId = static_cast<DvNodeElement::ElementID>(elementId);
+            desc->elementDescription = T{};
+            auto curveDataInfo = GetElementTimelineRender(static_cast<DvNodeElement::ElementID>(elementId));
+            if (curveDataInfo != std::pair<size_t, size_t>{})
+                Timeline::GenerateCurve(reinterpret_cast<float*>(reinterpret_cast<size_t>(&desc->elementDescription) + curveDataInfo.first), curveDataInfo.second / sizeof(float), 0, false);
+            return desc;
+        }
     }
 }

@@ -63,9 +63,10 @@ namespace ui::operation_modes::modes::dvscene_editor {
 									char* name = static_cast<char*>(hh::fnd::MemoryRouter::GetTempAllocator()->Alloc(strlen(nodeName) + 6, 1));
 									strcpy(name, nodeName);
 									srand(time(nullptr));
+									int nodeNameLength = strlen(nodeName);
 									for (int i = 0; i < 5; ++i)
-										name[strlen(nodeName) + i] = '0' + (rand() % 10);
-									name[strlen(nodeName) + 5] = '\0';
+										name[nodeNameLength + i] = '0' + (rand() % 10);
+									name[nodeNameLength + 5] = '\0';
 									auto newFileNode = ctx.CreateNode(name, nodeType, elementId);
 									ctx.ParentNode(*node, newFileNode);
 									auto* runtimeParent = ctx.GetRuntimeNode(node);

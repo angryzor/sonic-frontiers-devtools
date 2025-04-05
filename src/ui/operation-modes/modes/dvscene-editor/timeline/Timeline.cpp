@@ -93,95 +93,91 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	bool Timeline::RenderTimeline(int& start, int& end, float* curve, int size, bool axisLimit, float maxValue) {
 		bool changed = false;
 		if (ImTimeline::BeginTrack("")) {
-			auto length = end - start;
+			float startTime = static_cast<float>(start);
+			float endTime = static_cast<float>(end);
+			bool startTimeChanged{};
+			bool endTimeChanged{};
+			bool moved{};
 
-			if (length == 0) {
-				float time{ 0.0f };
-				ImTimeline::Event("", &time);
-			}
-			else {
-				float startTime = static_cast<float>(start);
-				float endTime = static_cast<float>(end);
-				bool startTimeChanged{};
-				bool endTimeChanged{};
-				bool moved{};
+			ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f);
+			ImPlotPoint clickpos{};
 
-				ImVec4 color = ImVec4(0.31f, 0.69f, 0.776f, 1.0f);
-				ImPlotPoint clickpos{};
-
-				if (ImTimeline::BeginClip("", &startTime, &endTime, 80.0f, &startTimeChanged, &endTimeChanged, &moved)) {
-					if (ImGui::BeginPopupContextItem("Properties")) {
-						changed |= Editor("Start", startTime);
-						changed |= Editor("End", endTime);
+			if (ImTimeline::BeginClip("", &startTime, &endTime, 80.0f, &startTimeChanged, &endTimeChanged, &moved)) {
+				if (ImGui::BeginPopupContextItem("Properties")) {
+					if (changed |= Editor("Start", start))
+						if (start < 0)
+							start = 0;
+					if (changed |= Editor("End", end))
+						if (end <= start)
+							end = start + 1;
+					ImGui::EndPopup();
+				}
+				if (curve && ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
+					if (ImGui::BeginPopupContextItem("Controls")) {
+					ImGui::SeparatorText("Curve Editing Settings");
+						Editor("Falloff", timelineFalloff);
+						ImGui::SeparatorText("Custom Curve");
+						Editor("Decreasing", decreasing);
+						ImGui::SameLine();
+						ImGui::Combo("Curve Type", &curveType, curveTypeNames, 7);
+						if (ImGui::Selectable("Generate Curve"))
+							GenerateCurve(curve, size, curveType, decreasing);
 						ImGui::EndPopup();
 					}
-					if (curve && ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
-						if (ImGui::BeginPopupContextItem("Controls")) {
-							ImGui::SeparatorText("Curve Editing Settings");
-							Editor("Falloff", timelineFalloff);
-							ImGui::SeparatorText("Custom Curve");
-							Editor("Decreasing", decreasing);
-							ImGui::SameLine();
-							ImGui::Combo("Curve Type", &curveType, curveTypeNames, 7);
-							if (ImGui::Selectable("Generate Curve")) {
-								GenerateCurve(curve, size, curveType, decreasing);
-							}
-							ImGui::EndPopup();
-						}
 
-						ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_Lock | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
-						ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
-						ImPlot::SetupAxisLimits(ImAxis_X1, 0, size, ImPlotCond_Always);
-						if(axisLimit)
-							ImPlot::SetupAxisLimits(ImAxis_Y1, 0, maxValue, ImPlotCond_Always);
+					ImPlot::SetupAxis(ImAxis_X1, "Time", ImPlotAxisFlags_NoDecorations | ImPlotAxisFlags_Lock | ImPlotAxisFlags_LockMin | ImPlotAxisFlags_LockMax);
+					ImPlot::SetupAxis(ImAxis_Y1, "Value", ImPlotAxisFlags_AutoFit | ImPlotAxisFlags_NoDecorations);
+					ImPlot::SetupAxisLimits(ImAxis_X1, 0, size, ImPlotCond_Always);
+					if(axisLimit)
+						ImPlot::SetupAxisLimits(ImAxis_Y1, 0, maxValue, ImPlotCond_Always);
 
-						float* time = static_cast<float*>(hh::fnd::MemoryRouter::GetTempAllocator()->Alloc(size*sizeof(float), alignof(float)));
-						std::iota(time, time + size, 0.0f);
-						ImPlot::SetNextFillStyle(color, 0.3f);
-						ImPlot::PlotLine<float>("X", time, curve, size, ImPlotLineFlags_Shaded);
-						hh::fnd::MemoryRouter::GetTempAllocator()->Free(time);
-						for (auto x = 0; x < size; x++) {
-							double frame = x;
-							double value = curve[x];
-							bool clicked;
-							bool hovered;
-							bool held;
+					auto* tempAllocator = hh::fnd::MemoryRouter::GetTempAllocator();
+					float* time = static_cast<float*>(tempAllocator->Alloc(size*sizeof(float), alignof(float)));
+					std::iota(time, time + size, 0.0f);
+					ImPlot::SetNextFillStyle(color, 0.3f);
+					ImPlot::PlotLine<float>("X", time, curve, size, ImPlotLineFlags_Shaded);
+					tempAllocator->Free(time);
+					for (auto x = 0; x < size; x++) {
+						double frame = x;
+						double value = curve[x];
+						bool clicked;
+						bool hovered;
+						bool held;
 
-							if (changed |= ImPlot::DragPoint(x, &frame, &value, color, 4.0f, 0, &clicked, &hovered, &held)) {
+						if (changed |= ImPlot::DragPoint(x, &frame, &value, color, 4.0f, 0, &clicked, &hovered, &held)) {
+							if (axisLimit)
+								value = std::clamp(value, 0.0, static_cast<double>(maxValue));
+
+							double sigma = timelineFalloff;
+							double delta = value - curve[x];
+
+							for (int i = 0; i < size; i++) {
+								double dist = i - x;
+								double weight = std::exp(-(dist * dist) / (sigma * sigma));
+								curve[i] += weight*delta;
 								if (axisLimit)
-									value = std::clamp(value, 0.0, static_cast<double>(maxValue));
-
-								double sigma = timelineFalloff;
-								double delta = value - curve[x];
-
-								for (int i = 0; i < size; i++) {
-									double dist = i - x;
-									double weight = std::exp(-(dist * dist) / (sigma * sigma));
-									curve[i] += weight*delta;
-									if (axisLimit)
-										curve[i] = std::clamp(static_cast<double>(curve[i]), 0.0, static_cast<double>(maxValue));
-								}
+									curve[i] = std::clamp(static_cast<double>(curve[i]), 0.0, static_cast<double>(maxValue));
 							}
-
-							if (hovered || held)
-								ImGui::SetTooltip("Frame: %d\nValue: %f", x, value);
 						}
 
-						clickpos = ImPlot::GetPlotMousePos(ImAxis_X1, ImAxis_Y1);
-
-						ImPlot::EndPlot();
+						if (hovered || held)
+							ImGui::SetTooltip("Frame: %d\nValue: %f", x, value);
 					}
-					ImTimeline::EndClip();
+
+					clickpos = ImPlot::GetPlotMousePos(ImAxis_X1, ImAxis_Y1);
+
+					ImPlot::EndPlot();
 				}
-
-				if (startTimeChanged)
-					start = static_cast<int>(startTime);
-
-				if (endTimeChanged)
-					end = static_cast<int>(endTime);
-
-				changed |= startTimeChanged | endTimeChanged;
+				ImTimeline::EndClip();
 			}
+
+			if (startTimeChanged)
+				start = static_cast<int>(startTime);
+
+			if (endTimeChanged)
+				end = static_cast<int>(endTime);
+
+			changed |= startTimeChanged | endTimeChanged;
 			ImTimeline::EndTrack();
 		}
 		return changed;
