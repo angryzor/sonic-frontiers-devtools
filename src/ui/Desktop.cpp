@@ -1,6 +1,7 @@
 #include "common/Icons.h"
 #include "Desktop.h"
 #include "ToolBar.h"
+#include "Viewport.h"
 #include "SettingsManager.h"
 #include "resources/ResourceBrowser.h"
 #include "operation-modes/modes/object-inspection/ObjectInspection.h"
@@ -60,6 +61,7 @@ void Desktop::Render() {
 	ImGuizmo::BeginFrame();
 	RenderOverlayWindow();
 	RenderSceneWindow();
+	//Viewport::Render();
 
 	devtools::debug_rendering::DebugRenderer::instance->RenderImGuiVisuals();
 	operationMode->Render();

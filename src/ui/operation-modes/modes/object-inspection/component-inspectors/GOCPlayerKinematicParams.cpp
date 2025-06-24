@@ -36,7 +36,7 @@ void RenderComponentInspector(app::player::GOCPlayerKinematicParams& component)
 	Editor("Unk16.unk1", component.unk16.unk1);
 	Editor("Unk16.unk2", component.unk16.unk2);
 
-	if (ImGui::TreeNode("Movement flags")) {
+	/*if (ImGui::TreeNode("Movement flags")) {
 		for (size_t i = 0; i < 16; i++) {
 			char idxName[10];
 			snprintf(idxName, sizeof(idxName), "%zd", i);
@@ -54,5 +54,5 @@ void RenderComponentInspector(app::player::GOCPlayerKinematicParams& component)
 			CheckboxFlags(idxName, component.unk10.unk7, static_cast<uint16_t>(1 << i));
 		}
 		ImGui::TreePop();
-	}
+	}*/
 }

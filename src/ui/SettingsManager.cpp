@@ -32,6 +32,7 @@ bool SettingsManager::Settings::operator==(const SettingsManager::Settings& othe
 		&& debugRenderingRenderPaths == other.debugRenderingRenderPaths
 		&& debugRenderingRenderPathNormals == other.debugRenderingRenderPathNormals
 		&& debugRenderingRenderPathTangents == other.debugRenderingRenderPathTangents
+		&& debugRenderingRenderPhysicalAnimation == other.debugRenderingRenderPhysicalAnimation
 		&& debugRenderingGOCVisualDebugDrawOpacity == other.debugRenderingGOCVisualDebugDrawOpacity
 		&& debugRenderingLevelEditorDebugBoxScale == other.debugRenderingLevelEditorDebugBoxScale
 		&& debugRenderingLevelEditorDebugBoxRenderLimit == other.debugRenderingLevelEditorDebugBoxRenderLimit
@@ -226,6 +227,7 @@ void SettingsManager::Render() {
 							ImGui::Checkbox("Render path normals", &tempSettings.debugRenderingRenderPathNormals);
 							ImGui::Checkbox("Render path tangents", &tempSettings.debugRenderingRenderPathTangents);
 							ImGui::Unindent();
+							ImGui::Checkbox("Render physical animation", &tempSettings.debugRenderingRenderPhysicalAnimation);
 							ImGui::SliderScalar("GOCVisualDebugDraw opacity (requires stage restart)", ImGuiDataType_U8, &tempSettings.debugRenderingGOCVisualDebugDrawOpacity, &minAlpha, &maxAlpha);
 							ImGui::SeparatorText("Debug boxes");
 							ImGui::SetItemTooltip("Options for debug boxes (the purple boxes showing the position of invisible objects).");
@@ -375,6 +377,9 @@ void SettingsManager::ApplySettings() {
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.enabled = settings.debugRenderingRenderPaths;
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.normalsEnabled = settings.debugRenderingRenderPathNormals;
 	devtools::debug_rendering::DebugRenderingSystem::instance->pathsRenderable.tangentsEnabled = settings.debugRenderingRenderPathTangents;
+#ifndef DEVTOOLS_TARGET_SDK_wars
+	devtools::debug_rendering::DebugRenderingSystem::instance->physicalAnimationRenderable.enabled = settings.debugRenderingRenderPhysicalAnimation;
+#endif
 	ObjectLocationVisual3DBehaviorBase::ApplySettings(
 		settings.debugRenderingLevelEditorDebugBoxScale,
 		settings.debugRenderingLevelEditorDebugBoxRenderLimit,

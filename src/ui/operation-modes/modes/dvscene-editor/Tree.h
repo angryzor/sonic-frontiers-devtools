@@ -40,7 +40,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }},
         Category{"Miscellaneous", {
             {8u, true}, {25u, true}, { 1021u, true }, {1024u, true}, 
-            {1026u, true}, {1028u, true}, {1041u, true}, {1042u, true}
+            {1026u, true}, {1028u, true}, {1041u, true}, {1042u, true}, 
+            {1016u, true}
         }}
     };
 #elif DEVTOOLS_TARGET_SDK_miller
@@ -78,7 +79,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }},
         Category{"Miscellaneous", {
             {8u, true}, {1023u, true}, {1026u, true}, {1028u, true},
-            {1030u, true}, {1043u, true}
+            {1030u, true}, {1043u, true}, {1018u, true}
         }}
     };
 #endif

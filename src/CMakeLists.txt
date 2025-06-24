@@ -15,6 +15,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/renderables/GOCVisualDebugDraws.cpp
         debug-rendering/renderables/OcclusionCapsules.cpp
         debug-rendering/renderables/Paths.cpp
+        debug-rendering/renderables/PhysicalAnimation.cpp
         debug-rendering/visuals/AabbTree.cpp
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
@@ -60,6 +61,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
+        ui/Viewport.cpp
         ui/tools/RflComparer.cpp
         ui/tools/MemoryViewer.cpp
         utilities/BoundingBoxes.cpp
@@ -82,6 +84,7 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/renderables/GOCVisualDebugDraws.h
         debug-rendering/renderables/OcclusionCapsules.h
         debug-rendering/renderables/Paths.h
+        debug-rendering/renderables/PhysicalAnimation.h
         debug-rendering/visuals/AabbTree.h
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
@@ -148,6 +151,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
+        ui/Viewport.h
         ui/tools/RflComparer.h
         ui/tools/MemoryViewer.h
         utilities/BoundingBoxes.h
@@ -174,6 +178,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR OFF)
     set(DEVTOOLS_FEATURE_DVSCENE_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_SCENE_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
@@ -218,6 +223,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_DVSCENE_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SCENE_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS ON)
@@ -235,6 +241,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_GAME_OBJECT_INSPECTORS
         CameraFrame
         ObjCameraVolume
+        ObjGismo
+        BossGiant
     )
     set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
         GOCTransform
@@ -252,6 +260,9 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         GOCPlayerKinematicParams
         GOCColliderQuery
         GOCPlayerCollider
+        GOCPhysicalAnimationBullet
+        GOCPointLight
+        GOCVibration
     )
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
         ResObjectWorldEditor
@@ -259,6 +270,9 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         ResMaterialEditor
         ResFxColFile2Editor
         ResEffectEditor
+        ResPhysicalSkeletonEditor
+        ResGismoConfigDesignEditor
+        ResGismoConfigPlanEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         MemoryInspector
@@ -300,6 +314,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_DVSCENE_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SCENE_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
@@ -322,11 +337,13 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
         GOCPlayerHsm
         GOCAnimator
         GOCPlayerKinematicParams
+        GOCPhysicalAnimationBullet
     )
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
         ResObjectWorldEditor
         ResReflectionEditor
         ResMaterialEditor
+        ResPhysicalSkeletonEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         GraphicsContextInspector
@@ -647,5 +664,20 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/timeline/Timeline.h
             ui/operation-modes/modes/dvscene-editor/timeline/Nodes.h
             ui/operation-modes/modes/dvscene-editor/timeline/Elements.h
+        )
+endif()
+
+if(${DEVTOOLS_FEATURE_SCENE_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/operation-modes/modes/scene-editor/Context.cpp
+            ui/operation-modes/modes/scene-editor/SceneEditor.cpp
+            ui/operation-modes/modes/scene-editor/SceneSettings.cpp
+            ui/operation-modes/modes/scene-editor/Timeline.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/operation-modes/modes/scene-editor/Context.h
+            ui/operation-modes/modes/scene-editor/SceneEditor.h
+            ui/operation-modes/modes/scene-editor/SceneSettings.h
+            ui/operation-modes/modes/scene-editor/Timeline.h
         )
 endif()
