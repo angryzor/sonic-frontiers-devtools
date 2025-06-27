@@ -39,7 +39,7 @@
 #include "operation-modes/modes/fxcol-editor/FxColEditor.h"
 #include "operation-modes/modes/svcol-editor/SvColEditor.h"
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-#include "operation-modes/modes/pcmodel-editor/PointcloudModelEditor.h"
+#include "operation-modes/modes/pointcloud-editor/PointcloudEditor.h"
 #endif
 #include "operation-modes/modes/surfride-editor/SurfRideEditor.h"
 #ifndef DEVTOOLS_TARGET_SDK_wars
@@ -129,7 +129,9 @@ void ToolBar::Render() {
 #endif
 #ifdef DEVTOOLS_TARGET_SDK_rangers
 			if (ImGui::MenuItem("PointcloudModel Editor"))
-				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::pcmodel_editor::PointcloudModelEditor>();
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::pointcloud_editor::PointcloudEditor>(app::gfx::ResPointcloudModel::GetTypeInfo());
+			if (ImGui::MenuItem("PointcloudLight Editor"))
+				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::pointcloud_editor::PointcloudEditor>(app::gfx::ResPointcloudLight::GetTypeInfo());
 #endif
 			if (ImGui::MenuItem("SurfRide Editor"))
 				Desktop::instance->SwitchToOperationMode<ui::operation_modes::modes::surfride_editor::SurfRideEditor>();

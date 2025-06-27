@@ -23,17 +23,17 @@ void RenderComponentInspector(hh::gfx::GOCPointLight& component) {
 					ImGui::TreePop();
 				}
 				switch (light.type) {
-				case hh::gfx::GOCPointLight::Light::LightType::POINT: {
+				case ucsl::resources::light::v2::LightType::POINT: {
 					Editor("Radius", light.pointProps.radius);
 					Editor("Attenuation Radius", light.pointProps.attenuationRadius);
 					Editor("Shadow Enabled", light.pointProps.shadowEnabled);
 					break;
 				}
-				case hh::gfx::GOCPointLight::Light::LightType::DIRECTIONAL: {
+				case ucsl::resources::light::v2::LightType::SPOT: {
 					Editor("Inner Cone Angle", light.directionalProps.innerConeAngle);
 					Editor("Outer Cone Angle", light.directionalProps.outerConeAngle);
-					Editor("Attenuation Radius", light.pointProps.attenuationRadius);
-					Editor("Shadow Enabled", light.pointProps.shadowEnabled);
+					Editor("Attenuation Radius", light.directionalProps.attenuationRadius);
+					Editor("Shadow Enabled", light.directionalProps.shadowEnabled);
 					break;
 				}
 				}

@@ -5,6 +5,7 @@
 #include "editors/ResEffectEditor.h"
 #include "editors/ResGismoConfigDesignEditor.h"
 #include "editors/ResGismoConfigPlanEditor.h"
+#include "editors/ResMirageLightEditor.h"
 #endif
 //#include "editors/ResObjectWorldEditor.h"
 #include "editors/ResMaterialEditor.h"
@@ -234,6 +235,8 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			ResGismoConfigDesignEditor::Create(Desktop::instance->GetAllocator(), static_cast<app::ResGismoConfigDesign*>(resource));
 		else if (typeInfo == app::ResGismoConfigPlan::GetTypeInfo())
 			ResGismoConfigPlanEditor::Create(Desktop::instance->GetAllocator(), static_cast<app::ResGismoConfigPlan*>(resource));
+		else if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo())
+			ResMirageLightEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMirageLight*>(resource));
 #endif
 	}
 
