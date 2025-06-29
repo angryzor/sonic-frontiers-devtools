@@ -13,6 +13,7 @@
 #include "common/editors/Basic.h"
 #include "common/inputs/Basic.h"
 #include <imtimeline.h>
+#include <ui/common/editors/Needle.h>
 
 using namespace hh::fnd;
 using namespace hh::game;
@@ -84,6 +85,74 @@ void Desktop::Render() {
 	SettingsManager::Render();
 
 	HandleShortcuts();
+
+#ifdef DEVTOOLS_TARGET_SDK_rangers
+	ImGui::Begin("Testing");
+
+	if (ImGui::Button("Epic deload")) {
+		if(auto* gameMgr = hh::game::GameManager::GetInstance())
+			if(auto* trrMgr = gameMgr->GetService<app::trr::TerrainManager>())
+				if (auto& trrWrld = trrMgr->terrains[0])
+				{
+					for (auto* ext : trrWrld->extensions) {
+						if (ext->GetNameHash() == 0x3DC09D67) {
+							ext->Deinitialize();
+						}
+					}
+				}
+	}
+	if (ImGui::Button("Epic load")) {
+		if (auto* gameMgr = hh::game::GameManager::GetInstance())
+			if (auto* trrMgr = gameMgr->GetService<app::trr::TerrainManager>())
+				if (auto& trrWrld = trrMgr->terrains[0])
+				{
+					for (auto* ext : trrWrld->extensions) {
+						if (ext->GetNameHash() == 0x3DC09D67) {
+							/*if (auto* resMgr = hh::fnd::ResourceManager::GetInstance()) {
+								if(auto* height = resMgr->GetResource<hh::gfnd::ResTexture>("w2r01_heightmap_005"))
+									height->name.Set("w1r04_heightmap_004");
+							}*/
+							ext->Initialize();
+						}
+					}
+				}
+	}
+
+	if(auto* renderMgr = static_cast<hh::gfx::RenderManager*>(hh::gfx::RenderManager::GetInstance()))
+		if(auto* renderingEngine = renderMgr->GetNeedleResourceDevice())
+			if(auto* supportFx = renderingEngine->GetSupportFX())
+				if(auto* sceneCtxMgr = supportFx->GetSceneContextManager(reinterpret_cast<const char*>(0)))
+					if (auto* scTerrain = reinterpret_cast<hh::needle::SCTerrain*>(sceneCtxMgr->GetSceneContext(*reinterpret_cast<int*>(0x1440C8CD8))))
+					{
+						auto& impl = scTerrain->implementation;
+						if(impl->unkTexture0)
+							Editor("UnkTexture0", impl->unkTexture0);
+						if (impl->unkTexture1)
+							Editor("UnkTexture1", impl->unkTexture1);
+						if (impl->unkTexture2)
+							Editor("UnkTexture2", impl->unkTexture2);
+						if (impl->unkTexture3)
+							Editor("UnkTexture3", impl->unkTexture3);
+						if (impl->unkTexture4)
+							Editor("UnkTexture4", impl->unkTexture4);
+						for(char x = 0; x < 6; x++)
+							if (impl->qword130[x]) {
+								char buffer[50];
+								snprintf(buffer, sizeof(buffer), "%d", x);
+								Editor(buffer, impl->qword130[x]);
+							}
+
+						if (ImGui::Button("do shenanigans"))
+							if (auto* resMgr = hh::fnd::ResourceManager::GetInstance()) {
+								auto& height0 = impl->unkTexture0;
+								auto* height1 = resMgr->GetResource<hh::gfnd::ResTexture>("w2r01_heightmap_005")->GetTexture();
+								auto* view0 = height0->QueryResource<hh::needle::ImplDX11::SViewTexture2D>(NEEDLE_RESOURCE_DX11_VIEW_TEXTURE_2D)->view;
+								auto* view1 = height1->QueryResource<hh::needle::ImplDX11::SViewTexture2D>(NEEDLE_RESOURCE_DX11_VIEW_TEXTURE_2D)->view;
+							}
+					}
+
+	ImGui::End();
+#endif
 
 //#ifdef DEVTOOLS_TARGET_SDK_miller
 //	auto* gameManager = hh::game::GameManager::GetInstance();

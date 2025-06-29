@@ -26,8 +26,8 @@ namespace devtools::debug_rendering::renderables {
 							ctx.DrawSphere(csl::math::Matrix34AffineTransformation(worldPos.m_Position, {}), light.pointProps.attenuationRadius, lightColor);
 						}
 						else if (light.type == ucsl::resources::light::v2::LightType::SPOT) {
-							RenderSpotlight(ctx, worldPos, light.directionalProps.attenuationRadius, light.directionalProps.outerConeAngle, { 128, 255, 255, 255 });
 							RenderSpotlight(ctx, worldPos, light.directionalProps.attenuationRadius, light.directionalProps.innerConeAngle, { 0, 0, 255, 255 });
+							RenderSpotlight(ctx, worldPos, light.directionalProps.attenuationRadius, light.directionalProps.outerConeAngle, { 128, 255, 255, 255 });
 						}
 					}
 				}

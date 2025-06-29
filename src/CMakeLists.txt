@@ -280,6 +280,7 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         ResGismoConfigDesignEditor
         ResGismoConfigPlanEditor
         ResMirageLightEditor
+        ResVibrationEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         MemoryInspector

@@ -114,7 +114,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 				}
 				if (curve && ImPlot::BeginPlot("##Track", ImTimeline::GetClipSize(), ImPlotFlags_CanvasOnly | ImPlotFlags_NoInputs)) {
 					if (ImGui::BeginPopupContextItem("Controls")) {
-					ImGui::SeparatorText("Curve Editing Settings");
+						ImGui::SeparatorText("Curve Editing Settings");
 						Editor("Falloff", timelineFalloff);
 						ImGui::SeparatorText("Custom Curve");
 						Editor("Decreasing", decreasing);

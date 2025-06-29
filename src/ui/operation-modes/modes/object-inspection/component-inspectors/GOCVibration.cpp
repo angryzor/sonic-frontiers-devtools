@@ -14,17 +14,16 @@ void RenderComponentInspector(hh::game::GOCVibration& component) {
 				if (ImGui::TreeNode("Data Containers")) {
 					for (auto* container : obj.container->dataContainers) {
 						ImGui::PushID(container);
-						if (ImGui::TreeNode(container->vibrationData->name)) {
+						if (ImGui::TreeNode(container->vibData->name)) {
 							Editor("Unk2", container->unk2);
 							Editor("Max Position X", container->maxPositionX);
 							Editor("Unk4", container->unk4);
 							Editor("Unk6", container->unk6);
 							Editor("Unk7", container->unk7);
-							Editor("Flags", container->flags);
+							Editor("Flags", container->flags.bits);
 							Editor("Unk9", container->unk9);
 							Editor("Unk10", container->unk10);
 							Editor("Unk11", container->unk11);
-							Editor("Unk12", container->unk12);
 							ImGui::TreePop();
 						}
 						ImGui::PopID();

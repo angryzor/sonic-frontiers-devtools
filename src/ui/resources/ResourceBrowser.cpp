@@ -6,6 +6,7 @@
 #include "editors/ResGismoConfigDesignEditor.h"
 #include "editors/ResGismoConfigPlanEditor.h"
 #include "editors/ResMirageLightEditor.h"
+#include "editors/ResVibrationEditor.h"
 #endif
 //#include "editors/ResObjectWorldEditor.h"
 #include "editors/ResMaterialEditor.h"
@@ -178,6 +179,8 @@ void ResourceBrowser::RenderContainerContents(const ResourceContainer* container
 }
 
 void ResourceBrowser::RenderResource(ManagedResource* resource) {
+	if (!resource)
+		return;
 	const ResourceTypeInfo* typeInfo = &resource->GetClass();
 	bool isSelected{};
 	bool isOpened{};
@@ -237,6 +240,8 @@ void ResourceBrowser::RenderResource(ManagedResource* resource) {
 			ResGismoConfigPlanEditor::Create(Desktop::instance->GetAllocator(), static_cast<app::ResGismoConfigPlan*>(resource));
 		else if (typeInfo == hh::gfx::ResMirageLight::GetTypeInfo())
 			ResMirageLightEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::gfx::ResMirageLight*>(resource));
+		else if (typeInfo == hh::hid::ResVibration::GetTypeInfo())
+			ResVibrationEditor::Create(Desktop::instance->GetAllocator(), static_cast<hh::hid::ResVibration*>(resource));
 #endif
 	}
 
