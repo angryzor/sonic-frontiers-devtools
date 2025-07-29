@@ -36,18 +36,17 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImGui::Checkbox("Looping", &dvTimeline->looping);
 			auto playHeadFrame = std::fminf(dvTimeline->postCurrentFrame/100, static_cast<float>(dvTimeline->frameEnd/100));
 			bool currentTimeChanged{};
-			bool* play = &context.goDVSC->play;
-			if (context.evtScene)
-				if ((context.evtScene->flags.bits & 0x80) != 0)
-					play = &context.evtScene->play;
+			bool play = context.goDVSC->play;
+			if ((context.evtScene->flags.bits & 0x80) != 0)
+				play = context.evtScene->flags.test(app::evt::EventScene::Flags::MOVIE_PLAYING);
 
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotPadding, ImVec2(0, 0));
 			ImPlot::PushStyleVar(ImPlotStyleVar_PlotBorderSize, 0);
 			ImTimeline::Begin(timelineCtx);
 			ImGui::SameLine();
-			bool beforePlay = *play;
+			bool beforePlay = play;
 			float beforeTime = playHeadFrame;
-			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(dvTimeline->frameEnd/100), 60.0, play, &currentTimeChanged)) {
+			if (ImTimeline::BeginTimeline("Timeline", &playHeadFrame, static_cast<float>(dvTimeline->frameEnd/100), 60.0, &play, &currentTimeChanged)) {
 				if (selected.size() > 0) {
 					DvNode focusedNode = selected[0];
 					dv::DvNode* node = focusedNode.fileNode;
@@ -62,15 +61,19 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			ImTimeline::End();
 			ImPlot::PopStyleVar(2);
 
-			changed |= beforePlay != *play;
+			changed |= beforePlay != play;
 
 			if(currentTimeChanged)
 				SetFrame(playHeadFrame * 100);
 
 			if (auto* movieSrv = hh::game::GameManager::GetInstance()->GetService<hh::fmv::MovieManager>())
 				for (auto x : movieSrv->movies)
-					if (changed)
-						x->moviePlayer->SetPause(!*play);
+					if (changed) {
+						if ((context.evtScene->flags.bits & 0x80) != 0)
+							context.evtScene->SetMovie(play);
+						x->moviePlayer->SetPause(!play);
+						context.goDVSC->play = play;
+					}
 		}
 		ImGui::EndChild();
 	}

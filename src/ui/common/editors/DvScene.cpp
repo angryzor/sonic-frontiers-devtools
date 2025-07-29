@@ -126,9 +126,16 @@ bool Editor(const char* label, app::dv::DvElementChromaticAberrationFilterParam:
 }
 
 bool Editor(const char* label, app::dv::DvElementLookAtIK::Description::Object& obj) {
+    static const char* typeNames[]{
+        "OFFSET",
+        "OFFSET_GUID_TARGET",
+        "CAMERA",
+        "OFFSET_GUID_POSITION"
+    };
+
     bool changed = false;
     if(ImGui::TreeNode(label)){
-        changed |= Editor("Unk0", obj.unk1);
+        changed |= ComboEnum("Type", obj.type, typeNames);
         changed |= Editor("GUID", obj.guid);
         changed |= Editor("Offset", obj.offset);
         ImGui::TreePop();

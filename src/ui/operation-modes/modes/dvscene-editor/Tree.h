@@ -18,7 +18,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
             {5u, false}, {6u, false}, {8u, false}, {10u, false},
             {11u, false}, {3u, true}, {11u, true}, {13u, true},
             {14u, true}, {15u, true}, {16u, true}, {18u, true},
-            {1012u, true}, {1019u, true}, {1025u, true}, {1030u, true}
+            {1012u, true}, {1019u, true}, {1022u, true}, {1025u, true}, 
+            {1030u, true}
         }},
         Category{"Positioning", {
             {1u, false}, {5u, true}, {10u, true}
@@ -55,8 +56,8 @@ namespace ui::operation_modes::modes::dvscene_editor {
             {11u, false}, {3u, true}, {11u, true}, {13u, true},
             {14u, true}, {15u, true}, {16u, true}, {18u, true},
             {23u, true}, {26u, true}, {27u, true}, {1014u, true},
-            {1021u, true}, {1027u, true}, {1028u, true}, {1032u, true},
-            {1044u, true}, {1045u, true}
+            {1021u, true}, {1024u, true}, {1027u, true}, {1028u, true}, 
+            {1032u, true}, {1044u, true}, {1045u, true}
         }},
         Category{"Positioning", {
             {1u, false}, {5u, true}, {10u, true}
