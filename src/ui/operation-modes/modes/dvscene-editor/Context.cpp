@@ -92,7 +92,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         sizeof(DvElementDensitySectorPoint::Description), // DENSITY_SECTOR_POINT
         0, // FX_COL_UPDATE
         sizeof(DvElementQTEAccel::Description), // QTE_ACCEL
-        sizeof(DvElementTheEndCableObject::Description), // THE_END_CABLE_OBJECT
+        sizeof(DvElementTheEndCable::Description), // THE_END_CABLE_OBJECT
         sizeof(DvElementRifleBeastLighting::Description), // RIFLE_BEAST_LIGHTING
     };
 #elif DEVTOOLS_TARGET_SDK_miller
@@ -154,7 +154,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         sizeof(DvElementDitherParam::Description), // DITHER_PARAM
         sizeof(DvElementQTE::Description), // QTE
         sizeof(DvElementFacialAnimation::Description), // FACIAL_ANIMATION
-        sizeof(DvElementOverrideASM::Description), // OVERRIDE_ASM
+        sizeof(DvElementOverrideAsm::Description), // OVERRIDE_ASM
         sizeof(DvElementAura::Description), // AURA
         sizeof(DvElementChangeTimeScale::Description), // CHANGE_TIME_SCALE
         sizeof(DvElementCyberSpaceNoise::Description), // CYBER_SPACE_NOISE
@@ -356,7 +356,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         case ElementID::VARIABLE_POINT_LIGHT:        SetupElement<DvElementVariablePointLight>(node, elementId); break;
         case ElementID::DENSITY_SECTOR_POINT:        SetupElement<DvElementDensitySectorPoint>(node, elementId); break;
         case ElementID::QTE_ACCEL:                   SetupElement<DvElementQTEAccel>(node, elementId); break;
-        case ElementID::THE_END_CABLE_OBJECT:        SetupElement<DvElementTheEndCableObject>(node, elementId); break;
+        case ElementID::THE_END_CABLE_OBJECT:        SetupElement<DvElementTheEndCable>(node, elementId); break;
         case ElementID::RIFLE_BEAST_LIGHTING:        SetupElement<DvElementRifleBeastLighting>(node, elementId); break;
 #elif DEVTOOLS_TARGET_SDK_miller
         case ElementID::CAMERA_PARAMS:               SetupElement<DvElementCameraParams>(node, elementId); break;
@@ -412,7 +412,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         case ElementID::DITHER_PARAM:                SetupElement<DvElementDitherParam>(node, elementId); break;
         case ElementID::QTE:                         SetupElement<DvElementQTE>(node, elementId); break;
         case ElementID::FACIAL_ANIMATION:            SetupElement<DvElementFacialAnimation>(node, elementId); break;
-        case ElementID::OVERRIDE_ASM:                SetupElement<DvElementOverrideASM>(node, elementId); break;
+        case ElementID::OVERRIDE_ASM:                SetupElement<DvElementOverrideAsm>(node, elementId); break;
         case ElementID::AURA:                        SetupElement<DvElementAura>(node, elementId); break;
         case ElementID::CHANGE_TIME_SCALE:           SetupElement<DvElementChangeTimeScale>(node, elementId); break;
         case ElementID::CYBER_SPACE_NOISE:           SetupElement<DvElementCyberSpaceNoise>(node, elementId); break;
@@ -597,7 +597,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             reinterpret_cast<DvNodePath::Description*>(setup)->matrix = csl::math::Matrix44::Identity();
             break;
         case DvNodeBase::NodeType::CAMERA_MOTION:
-            reinterpret_cast<DvNodeCameraMotion::Description*>(setup)->end = 100;
+            reinterpret_cast<DvNodeCameraMotion::Description*>(setup)->end = 10000;
             break;
         case DvNodeBase::NodeType::CHARACTER: {
             auto* setupData = reinterpret_cast<DvNodeCharacter::Description*>(setup);
@@ -609,7 +609,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         case DvNodeBase::NodeType::CHARACTER_MOTION: {
             auto* setupData = reinterpret_cast<DvNodeCharacterMotion::Description*>(setup);
-            setupData->end = 100;
+            setupData->end = 10000;
             strcpy(setupData->asmState, "Dst0000");
             setupData->speed = 1.0f;
             break;
@@ -624,7 +624,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         case DvNodeBase::NodeType::MODEL_MOTION: {
             auto* setupData = reinterpret_cast<DvNodeModelMotion::Description*>(setup);
-            setupData->end = 100;
+            setupData->end = 10000;
             strcpy(setupData->asmState, "Dst0000");
             setupData->speed = 1.0f;
             break;
@@ -797,7 +797,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
                     if (node->nodeType == DvNodeBase::NodeType::ELEMENT) {
                         auto* nodeElement = static_cast<DvNodeElement*>(node);
                         if (static_cast<unsigned int>(nodeElement->binaryData.elementId) >= 1000) {
-                            auto* appElement = static_cast<AppDvElementBase*>(nodeElement->element);
+                            auto& appElement = *reinterpret_cast<hh::fnd::Reference<AppDvElementBase>*>(&nodeElement->element);
                             void* appElementData = appElement->elementBinaryData;
                             appElement->DeleteData();
                             hh::fnd::MemoryRouter::GetModuleAllocator()->Free(appElementData);

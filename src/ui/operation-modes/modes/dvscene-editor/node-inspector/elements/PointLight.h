@@ -22,7 +22,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         }
         changed |= Editor("Parameters", data->params);
         changed |= Editor("Finish Parameters", data->finishParams);
-        changed |= Editor("UnkBool0", data->unkBool0);
+        changed |= Editor("Curve Enabled", data->curveEnabled);
         changed |= Editor("Unk14", data->unk14);
         return changed;
     }

@@ -2,6 +2,12 @@
 #include "../Elements.h"
 
 namespace ui::operation_modes::modes::dvscene_editor {
+    const char* rtScaleNames[] = {
+        "FULL_SCALE",
+        "HALF_SCALE",
+        "QUARTER_SCALE"
+    };
+
     template<>
     bool RenderElementInspector<hh::dv::DvNodeElement::ElementID::DOF_PARAM>(char* element) {
         bool changed = false;
@@ -14,11 +20,11 @@ namespace ui::operation_modes::modes::dvscene_editor {
         if(data->flags.test(app::dv::DvElementDOFParam::Description::Flags::CURVE_ENABLED))
             changed |= Editor("Finish Parameters", data->finishParam);
         changed |= Editor("COC Max Radius", data->cocMaxRadius);
-        changed |= Editor("Focal Transition", data->focalTransition);
+        changed |= Editor("Bokeh Radius Scale", data->bokehRadiusScale);
         changed |= Editor("Bokeh Sample Count", data->bokehSampleCount);
-        changed |= Editor("Bokeh Quality", data->bokehQuality);
-        changed |= Editor("Bokeh Intensity", data->bokehIntensity);
-        changed |= Editor("Render Target Scale", data->rtScale);
+        changed |= Editor("Sky Focus Distance", data->skyFocusDistance);
+        changed |= Editor("Bokeh Bias", data->bokehBias);
+        changed |= ComboEnum("RenderTarget Scale", data->rtScale, rtScaleNames);
         return changed;
     }
 }

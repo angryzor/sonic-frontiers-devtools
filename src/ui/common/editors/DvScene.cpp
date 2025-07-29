@@ -86,10 +86,10 @@ bool Editor(const char* label, hh::dv::DvElementPathInterpolation::Description::
 bool Editor(const char* label, hh::dv::DvElementPointLight::Description::Parameters& data) {
     bool changed = false;
     if (ImGui::TreeNode(label)) {
-        changed |= Editor("Range", data.range);
+        changed |= Editor("Attenuation Range", data.attenuationRadius);
         changed |= Editor("Intensity", data.intensity);
-        changed |= Editor("Falloff", data.falloff);
-        changed |= Editor("Angle", data.angle);
+        changed |= Editor("Radius", data.radius);
+        changed |= Editor("Rotation Multiplier", data.rotationMultiplier);
         ImGui::TreePop();
     }
     return changed;
@@ -100,10 +100,14 @@ bool Editor(const char* label, hh::dv::DvElementPointLight::Description::Paramet
 bool Editor(const char* label, app::dv::DvElementDOFParam::Description::DOFParam& param) {
     bool changed = false;
     if(ImGui::TreeNode(label)) {
-        changed |= Editor("Focus", param.focus);
-        changed |= Editor("Focus Range", param.focusRange);
-        changed |= Editor("Near Distance", param.nearDist);
-        changed |= Editor("Far Distance", param.farDist);
+        if(ImGui::TreeNode("Foreground")) {
+            changed |= Editor("Bokeh Start Depth", param.foregroundBokehStartDepth);
+            changed |= Editor("Bokeh Max Depth", param.foregroundBokehMaxDepth);
+        }
+        if (ImGui::TreeNode("Background")) {
+            changed |= Editor("Bokeh Start Depth", param.backgroundBokehStartDepth);
+            changed |= Editor("Bokeh Max Depth", param.backgroundBokehMaxDepth);
+        }
         ImGui::TreePop();
     }
     return changed;
@@ -150,10 +154,10 @@ bool Editor(const char* label, app::dv::DvElementAura::Description::AuraNode& no
 bool Editor(const char* label, app::dv::DvElementVariablePointLight::Description::Parameters& data) {
     bool changed = false;
     if (ImGui::TreeNode(label)) {
-        changed |= Editor("Range", data.range);
+        changed |= Editor("Attenuation Range", data.attenuationRadius);
         changed |= Editor("Intensity", data.intensity);
-        changed |= Editor("Falloff", data.falloff);
-        changed |= Editor("Angle", data.angle);
+        changed |= Editor("Radius", data.radius);
+        changed |= Editor("Rotation Multiplier", data.rotationMultiplier);
         ImGui::TreePop();
     }
     return changed;

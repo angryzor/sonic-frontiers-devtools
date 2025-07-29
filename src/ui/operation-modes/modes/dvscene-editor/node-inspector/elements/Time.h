@@ -10,12 +10,6 @@ namespace ui::operation_modes::modes::dvscene_editor {
         changed |= Editor("Time", data->time);
         if(data->curveEnabled)
             changed |= Editor("Finish Time", data->finishTime);
-#ifdef DEVTOOLS_TARGET_SDK_rangers
-        changed |= Editor("Unk5", data->unk5);
-        changed |= Editor("Unk6", data->unk6);
-        changed |= Editor("Unk7", data->unk7);
-        changed |= Editor("Unk8", data->unk8);
-#endif
         return changed;
     }
 }

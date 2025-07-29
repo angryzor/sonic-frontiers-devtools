@@ -208,7 +208,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 			char* elementData;
 			size_t elementSize = 0;
 			if (static_cast<unsigned int>(nodeElement->binaryData.elementId) >= 1000) {
-				auto* appElement = reinterpret_cast<app::dv::AppDvElementBase*>(nodeElement->element);
+				auto& appElement = *reinterpret_cast<hh::fnd::Reference<app::dv::AppDvElementBase>*>(&nodeElement->element);
 				elementData = static_cast<char*>(appElement->elementBinaryData);
 				elementSize = appElement->elementBinaryDataSize;
 #ifdef DEVTOOLS_TARGET_SDK_miller
@@ -217,7 +217,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
 #endif
 			}
 			else {
-				auto* element = reinterpret_cast<hh::dv::DvElementBase*>(nodeElement->element);
+				auto* element = &*nodeElement->element;
 				elementData = &reinterpret_cast<char*>(element)[ElementDataInfo[static_cast<unsigned int>(nodeElement->binaryData.elementId)].second];
 				elementSize = ElementDataInfo[static_cast<unsigned int>(nodeElement->binaryData.elementId)].first;
 			}

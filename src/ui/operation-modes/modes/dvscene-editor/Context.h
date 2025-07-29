@@ -201,6 +201,39 @@ namespace ui::operation_modes::modes::dvscene_editor {
 	constexpr unsigned int hhElementCount = 28;
 #endif
 
+	static bool IsUnknownNode(unsigned int nodeId) {
+		return nodeId > sizeof(nodeTypeNames) / sizeof(const char*);
+	}
+
+	static const char* GetNodeName(unsigned int nodeId) {
+		const char* name = "Unknown";
+
+		if (!IsUnknownNode(nodeId))
+			name = nodeTypeNames[nodeId];
+
+		return name;
+	}
+
+	static bool IsUnknownElement(unsigned int elementId) {
+		if (elementId >= 1000)
+			elementId = elementId - 1000 + hhElementCount;
+
+		return elementId > sizeof(elementIDStrings) / sizeof(const char*);
+	}
+
+	static const char* GetElementName(unsigned int elementId) {
+		const char* name = "Unknown";
+		unsigned int stringIdx = elementId;
+
+		if (stringIdx >= 1000)
+			stringIdx = stringIdx - 1000 + hhElementCount;
+
+		if (!IsUnknownElement(elementId))
+			name = elementIDStrings[stringIdx];
+
+		return name;
+	}
+
 	struct DvPage;
 
 	class Context : public CompatibleObject {

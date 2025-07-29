@@ -41,7 +41,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         {ElementID::WEATHER,                            {offsetof(DvElementWeather::Description, curveData),                           sizeof(DvElementWeather::Description::curveData)}},
         {ElementID::VARIABLE_POINT_LIGHT,               {offsetof(DvElementVariablePointLight::Description, curveData),                sizeof(DvElementVariablePointLight::Description::curveData)}},
 #ifdef DEVTOOLS_TARGET_SDK_rangers
-        {ElementID::THE_END_CABLE_OBJECT,               {offsetof(DvElementTheEndCableObject::Description, curveData),                 sizeof(DvElementTheEndCableObject::Description::curveData)}},
+        {ElementID::THE_END_CABLE_OBJECT,               {offsetof(DvElementTheEndCable::Description, curveData),                       sizeof(DvElementTheEndCable::Description::curveData)}},
 #elif DEVTOOLS_TARGET_SDK_miller
         {ElementID::FOG,                                {offsetof(DvElementFog::Description, curveData),                               sizeof(DvElementFog::Description::curveData)}},
         {ElementID::DOF,                                {offsetof(DvElementDOF::Description, curveData),                               sizeof(DvElementDOF::Description::curveData)}},

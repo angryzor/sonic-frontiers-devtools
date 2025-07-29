@@ -32,7 +32,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
             {1043u, true}
         }},
         Category{"Lighting", {
-            {9u, true}, {24u, true}, {1036u, true}
+            {9u, true}, {24u, true}, {26u, true}, {1036u, true}
         }},
         Category{"Screen Effects", {
             {1010u, true}, {1011u, true}, {1014u, true}, {1015u, true},

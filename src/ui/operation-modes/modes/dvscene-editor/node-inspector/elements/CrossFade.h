@@ -7,7 +7,7 @@ namespace ui::operation_modes::modes::dvscene_editor {
         bool changed = false;
         auto* data = reinterpret_cast<app::dv::DvElementCrossFade::Description*>(element);
         changed |= Editor("Curve Enabled", data->curveEnabled);
-        changed |= Editor("Unk1", data->unk1);
+        changed |= Editor("Length", data->length);
         return changed;
     }
 }
