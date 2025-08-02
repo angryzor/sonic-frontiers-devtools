@@ -55,6 +55,12 @@ namespace ui::operation_modes::modes::level_editor {
 	{
 		if (type == SetObjectListTreeViewNode::Type::OBJECT && !object.object->id.IsNonNull())
 			ImGui::PushStyleColor(ImGuiCol_Text, { 1.0f, 0.0f, 0.0f, 1.0f });
+
+		if (type == SetObjectListTreeViewNode::Type::LAYER && !layer.layer->IsEnable()) {
+			auto textCol = ImGui::GetStyleColorVec4(ImGuiCol_Text);
+			textCol.w = 0.5;
+			ImGui::PushStyleColor(ImGuiCol_Text, textCol);
+		}
 	}
 
 	void SetObjectListTreeViewNode::PostRender() const
@@ -65,6 +71,9 @@ namespace ui::operation_modes::modes::level_editor {
 			ImGui::PopStyleColor();
 			ImGui::SetItemTooltip("Invalid object ID: this object's ID is NULL, which is a reserved value!");
 		}
+
+		if (type == SetObjectListTreeViewNode::Type::LAYER && !layer.layer->IsEnable())
+			ImGui::PopStyleColor();
 
 		if (type == SetObjectListTreeViewNode::Type::OBJECT) {
 			if (ImGui::IsMouseReleased(ImGuiMouseButton_Left) && !ImGui::IsMouseDragging(ImGuiMouseButton_Left) && ImGui::IsItemHovered())
@@ -91,6 +100,13 @@ namespace ui::operation_modes::modes::level_editor {
 		if (type == SetObjectListTreeViewNode::Type::LAYER) {
 			ImGui::PushID(GetID());
 			if (ImGui::BeginPopupContextItem("Layer context menu")) {
+				bool enabled{ layer.layer->IsEnable() };
+
+				if (ImGui::MenuItem("Enabled", nullptr, &enabled))
+					list.Dispatch(SetLayerEnabledAction{ { layer.layer->GetName(), enabled } });
+
+				ImGui::Separator();
+
 				if (ImGui::MenuItem("Load from file..."))
 					ResourceBrowser::ShowLoadResourceDialog(layer.layer->GetResource());
 

@@ -98,6 +98,12 @@ namespace ui::operation_modes::modes::level_editor {
 			GetContext().SetObjectClassToPlace(static_cast<const SetObjectClassToPlaceAction&>(action).payload);
 			Dispatch(ObjectClassToPlaceChangedAction{});
 			break;
+		case SetLayerEnabledAction::id: {
+			auto& payload = static_cast<const SetLayerEnabledAction&>(action).payload;
+
+			GetContext().SetLayerEnabled(payload.layerName, payload.enabled);
+			break;
+		}
 		}
 	}
 

@@ -1,3 +1,7 @@
+# v0.2.2
+* Level Editor: Added context menu item to enable/disable layers.
+
+
 # v0.2.1
 * Fix resource export dialog not showing if resource browser is closed.
 

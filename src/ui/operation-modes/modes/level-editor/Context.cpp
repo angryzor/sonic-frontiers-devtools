@@ -292,6 +292,14 @@ namespace ui::operation_modes::modes::level_editor {
 		ResetPlacementState();
 	}
 
+	void Context::SetLayerEnabled(const char* layerName, bool enabled)
+	{
+		focusedChunk->SetLayerEnabled(layerName, enabled);
+		focusedChunk->ShutdownPendingObjects();
+		focusedChunk->Restart(true);
+		focusedChunk->SpawnByAttribute(GetStatusEternal);
+	}
+
 	void Context::ResetPlacementState()
 	{
 		placementTargetLayer = nullptr;
