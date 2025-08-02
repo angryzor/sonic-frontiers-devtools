@@ -15,6 +15,8 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/renderables/GOCVisualDebugDraws.cpp
         debug-rendering/renderables/OcclusionCapsules.cpp
         debug-rendering/renderables/Paths.cpp
+        debug-rendering/renderables/PhysicalAnimation.cpp
+        debug-rendering/renderables/Light.cpp
         debug-rendering/visuals/AabbTree.cpp
         debug-rendering/visuals/Geometry.cpp
         debug-rendering/visuals/KdTree.cpp
@@ -33,6 +35,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/Reflection.cpp
         ui/common/editors/GraphicsContext.cpp
         ui/common/editors/${DEVTOOLS_TARGET_SDK}/LevelInfo.cpp
+        ui/common/editors/Pointcloud.cpp
         ui/common/editors/Resources.cpp
         ui/common/editors/HsmBase.cpp
         ui/common/viewers/Basic.cpp
@@ -60,6 +63,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.cpp
         ui/Shortcuts.cpp
         ui/ToolBar.cpp
+        ui/Viewport.cpp
         ui/tools/RflComparer.cpp
         ui/tools/MemoryViewer.cpp
         utilities/BoundingBoxes.cpp
@@ -82,6 +86,8 @@ target_sources(${DEVTOOLS_TARGET}
         debug-rendering/renderables/GOCVisualDebugDraws.h
         debug-rendering/renderables/OcclusionCapsules.h
         debug-rendering/renderables/Paths.h
+        debug-rendering/renderables/PhysicalAnimation.h
+        debug-rendering/renderables/Light.h
         debug-rendering/visuals/AabbTree.h
         debug-rendering/visuals/Geometry.h
         debug-rendering/visuals/KdTree.h
@@ -106,6 +112,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/common/editors/GraphicsContext.h
         ui/common/editors/LevelInfo.h
         ui/common/editors/Needle.h
+        ui/common/editors/Pointcloud.h
         ui/common/editors/Resources.h
         ui/common/editors/HsmBase.h
         ui/common/viewers/Basic.h
@@ -148,6 +155,7 @@ target_sources(${DEVTOOLS_TARGET}
         ui/SettingsManager.h
         ui/Shortcuts.h
         ui/ToolBar.h
+        ui/Viewport.h
         ui/tools/RflComparer.h
         ui/tools/MemoryViewer.h
         utilities/BoundingBoxes.h
@@ -171,9 +179,11 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "wars")
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_PCMODEL_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_PCRT_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR OFF)
     set(DEVTOOLS_FEATURE_DVSCENE_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_SCENE_EDITOR ON)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
@@ -215,9 +225,11 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_PCMODEL_EDITOR ON)
+    set(DEVTOOLS_FEATURE_PCRT_EDITOR ON)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_DVSCENE_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SCENE_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS ON)
@@ -235,6 +247,8 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
     set(DEVTOOLS_FEATURE_GAME_OBJECT_INSPECTORS
         CameraFrame
         ObjCameraVolume
+        ObjGismo
+        BossGiant
     )
     set(DEVTOOLS_FEATURE_COMPONENT_INSPECTORS
         GOCTransform
@@ -252,6 +266,9 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         GOCPlayerKinematicParams
         GOCColliderQuery
         GOCPlayerCollider
+        GOCPhysicalAnimationBullet
+        GOCPointLight
+        GOCVibration
     )
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
         ResObjectWorldEditor
@@ -259,6 +276,11 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "rangers")
         ResMaterialEditor
         ResFxColFile2Editor
         ResEffectEditor
+        ResPhysicalSkeletonEditor
+        ResGismoConfigDesignEditor
+        ResGismoConfigPlanEditor
+        ResMirageLightEditor
+        ResVibrationEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         MemoryInspector
@@ -297,9 +319,11 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
     set(DEVTOOLS_FEATURE_FXCOL_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SVCOL_EDITOR ON)
     set(DEVTOOLS_FEATURE_PCMODEL_EDITOR OFF)
+    set(DEVTOOLS_FEATURE_PCRT_EDITOR OFF)
     set(DEVTOOLS_FEATURE_SURFRIDE_EDITOR ON)
     set(DEVTOOLS_FEATURE_ASM_EDITOR ON)
     set(DEVTOOLS_FEATURE_DVSCENE_EDITOR ON)
+    set(DEVTOOLS_FEATURE_SCENE_EDITOR OFF)
     set(DEVTOOLS_FEATURE_LEGACY_NEEDLEFX_TESTER OFF)
     set(DEVTOOLS_FEATURE_NEEDLEFX_TESTER ON)
     set(DEVTOOLS_FEATURE_RENDERING_ENGINE_INSPECTORS OFF)
@@ -322,11 +346,13 @@ if(${DEVTOOLS_TARGET_SDK} STREQUAL "miller")
         GOCPlayerHsm
         GOCAnimator
         GOCPlayerKinematicParams
+        GOCPhysicalAnimationBullet
     )
     set(DEVTOOLS_FEATURE_RESOURCE_INSPECTORS
         ResObjectWorldEditor
         ResReflectionEditor
         ResMaterialEditor
+        ResPhysicalSkeletonEditor
     )
     set(DEVTOOLS_FEATURE_CORE_SERVICE_INSPECTORS
         GraphicsContextInspector
@@ -483,20 +509,20 @@ if(${DEVTOOLS_FEATURE_SVCOL_EDITOR})
     )
 endif()
 
-if(${DEVTOOLS_FEATURE_PCMODEL_EDITOR})
+if(${DEVTOOLS_FEATURE_PCMODEL_EDITOR} OR ${DEVTOOLS_FEATURE_PCRT_EDITOR})
     target_sources(${DEVTOOLS_TARGET}
         PRIVATE
-            ui/operation-modes/modes/pcmodel-editor/Math.cpp
-            ui/operation-modes/modes/pcmodel-editor/Context.cpp
-            ui/operation-modes/modes/pcmodel-editor/PointCloudModelEditor.cpp
-            ui/operation-modes/modes/pcmodel-editor/InstanceInspector.cpp
-            ui/operation-modes/modes/pcmodel-editor/InstanceList.cpp
+            ui/operation-modes/modes/pointcloud-editor/Math.cpp
+            ui/operation-modes/modes/pointcloud-editor/Context.cpp
+            ui/operation-modes/modes/pointcloud-editor/PointCloudEditor.cpp
+            ui/operation-modes/modes/pointcloud-editor/InstanceInspector.cpp
+            ui/operation-modes/modes/pointcloud-editor/InstanceList.cpp
         PRIVATE FILE_SET HEADERS FILES
-            ui/operation-modes/modes/pcmodel-editor/Math.h
-            ui/operation-modes/modes/pcmodel-editor/Context.h
-            ui/operation-modes/modes/pcmodel-editor/PointCloudModelEditor.h
-            ui/operation-modes/modes/pcmodel-editor/InstanceInspector.h
-            ui/operation-modes/modes/pcmodel-editor/InstanceList.h
+            ui/operation-modes/modes/pointcloud-editor/Math.h
+            ui/operation-modes/modes/pointcloud-editor/Context.h
+            ui/operation-modes/modes/pointcloud-editor/PointCloudEditor.h
+            ui/operation-modes/modes/pointcloud-editor/InstanceInspector.h
+            ui/operation-modes/modes/pointcloud-editor/InstanceList.h
     )
 endif()
 
@@ -647,5 +673,20 @@ if(${DEVTOOLS_FEATURE_DVSCENE_EDITOR})
             ui/operation-modes/modes/dvscene-editor/timeline/Timeline.h
             ui/operation-modes/modes/dvscene-editor/timeline/Nodes.h
             ui/operation-modes/modes/dvscene-editor/timeline/Elements.h
+        )
+endif()
+
+if(${DEVTOOLS_FEATURE_SCENE_EDITOR})
+    target_sources(${DEVTOOLS_TARGET}
+        PRIVATE
+            ui/operation-modes/modes/scene-editor/Context.cpp
+            ui/operation-modes/modes/scene-editor/SceneEditor.cpp
+            ui/operation-modes/modes/scene-editor/SceneSettings.cpp
+            ui/operation-modes/modes/scene-editor/Timeline.cpp
+        PRIVATE FILE_SET HEADERS FILES
+            ui/operation-modes/modes/scene-editor/Context.h
+            ui/operation-modes/modes/scene-editor/SceneEditor.h
+            ui/operation-modes/modes/scene-editor/SceneSettings.h
+            ui/operation-modes/modes/scene-editor/Timeline.h
         )
 endif()

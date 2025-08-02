@@ -7,7 +7,7 @@
 void RenderUnk3Editor(const char* name, app::snd::SoundDirector::Unk3& unk3) {
     if (ImGui::TreeNode(&unk3, "%s", name)) {
         Editor("name", unk3.name);
-        if (ImGui::TreeNode("unk101a")) {
+        /*if (ImGui::TreeNode("unk101a")) {
             Editor("dword0", unk3.unk101a.dword0);
             Editor("dword4", unk3.unk101a.dword4);
             Editor("dword8", unk3.unk101a.dword8);
@@ -15,7 +15,7 @@ void RenderUnk3Editor(const char* name, app::snd::SoundDirector::Unk3& unk3) {
             Editor("dword10", unk3.unk101a.dword10);
             Editor("dword14", unk3.unk101a.dword14);
             ImGui::TreePop();
-        }
+        }*/
         Editor("unk102", unk3.unk102);
         Editor("unk103", unk3.unk103);
         Editor("unk104", unk3.unk104);
